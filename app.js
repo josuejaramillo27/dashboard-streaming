@@ -24,7 +24,9 @@ let currentUser = null; let currentUserData = null; let clients = []; let editin
 let currentManageUserId = null; 
 let tempAccountData = { email: '', password: '', profile: '', pin: '', units: 1 };
 let globalCurrency = "S/";
-let lastVisibleDoc = null; 
+let lastVisibleDoc = null;
+let editingNewsId = null;
+let editingNewsOldImg = null;
 
 const macPalette = ['#FF2D55', '#5856D6', '#FF9500', '#34C759', '#007AFF', '#AF52DE', '#FF3B30', '#FFCC00', '#5AC8FA'];
 const getCurrencyForCountry = (country) => { const dict = { "Perú": "S/", "España": "€", "México": "$" }; return dict[country] || "$"; };
@@ -434,37 +436,117 @@ q.forEach((d) => {
     arrN.forEach(n => {
         const dateStr = new Date(n.fechaIso).toLocaleDateString('es-ES');
         const imgHtml = n.img ? `<a href="${n.img}" target="_blank" style="color:var(--mac-blue); font-size:12px;">Ver Foto</a>` : '<span style="font-size:12px; color:var(--mac-text-secondary);">Sin foto</span>';
-        const tr = document.createElement('tr'); tr.innerHTML = `<td>${dateStr}</td><td><strong>${n.titulo}</strong></td><td>${imgHtml}</td><td class="actions-cell"><button class="action-btn btn-del" onclick="window.deleteNews('${n.id}')">🗑️ Borrar</button></td>`; nBody.appendChild(tr);
+        
+        // Sanitizamos los textos para enviarlos al botón de editar sin que rompan el código
+        const titleSafe = n.titulo ? n.titulo.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
+        const descSafe = n.desc ? n.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : '';
+
+        const tr = document.createElement('tr'); 
+        tr.innerHTML = `
+            <td>${dateStr}</td>
+            <td><strong>${n.titulo}</strong></td>
+            <td>${imgHtml}</td>
+            <td class="actions-cell" style="display: flex; gap: 5px;">
+                <button class="action-btn" style="border: 1px solid var(--mac-blue); color: var(--mac-blue); background: transparent;" onclick="window.startEditNews('${n.id}', '${titleSafe}', '${descSafe}', '${n.img || ''}')"><i class='bx bx-edit-alt'></i></button>
+                <button class="action-btn btn-del" onclick="window.deleteNews('${n.id}')"><i class='bx bx-trash'></i></button>
+            </td>`; 
+        nBody.appendChild(tr);
     });
 }
 
 /* --- FUNCIONES DE ADMINISTRAR NOTICIAS --- */
+window.startEditNews = (id, title, desc, img) => {
+    editingNewsId = id;
+    editingNewsOldImg = img;
+    
+    document.getElementById('newsInputTitle').value = title;
+    document.getElementById('newsInputDesc').value = desc;
+    
+    const btnSubmit = document.getElementById('btnSubmitNews');
+    if(btnSubmit) btnSubmit.innerHTML = "<i class='bx bx-save'></i> Guardar Cambios";
+    
+    const btnCancel = document.getElementById('btnCancelEditNews');
+    if(btnCancel) btnCancel.style.display = 'block';
+    
+    document.getElementById('newsInputTitle').scrollIntoView({ behavior: 'smooth' });
+};
+
+window.cancelEditNews = () => {
+    editingNewsId = null;
+    editingNewsOldImg = null;
+    
+    document.getElementById('newsInputTitle').value = ''; 
+    document.getElementById('newsInputDesc').value = ''; 
+    document.getElementById('newsInputImg').value = '';
+    
+    const btnSubmit = document.getElementById('btnSubmitNews');
+    if(btnSubmit) btnSubmit.innerHTML = "<i class='bx bx-send'></i> Publicar Noticia a Todos";
+    
+    const btnCancel = document.getElementById('btnCancelEditNews');
+    if(btnCancel) btnCancel.style.display = 'none';
+};
+
 window.saveNews = async () => {
     const title = document.getElementById('newsInputTitle').value;
     const desc = document.getElementById('newsInputDesc').value;
     const fileInput = document.getElementById('newsInputImg');
+    
     if (!title || !desc) return window.showNotification("Falta título o descripción");
     
-    const btn = document.querySelector('#adminView .btn-primary');
-    const origText = btn.innerText; btn.innerText = "Subiendo... ⏳"; btn.disabled = true;
+    const btn = document.getElementById('btnSubmitNews') || document.querySelector('#adminView .btn-primary');
+    const origText = btn.innerHTML; 
+    btn.innerText = "Procesando... ⏳"; 
+    btn.disabled = true;
 
     try {
-        let imgUrl = "";
+        let imgUrl = editingNewsOldImg || ""; // Si editamos, usamos la antigua por defecto
+        
+        // Si el admin sube una nueva imagen, la reemplazamos
         if (fileInput.files.length > 0) {
             const file = fileInput.files[0];
             const storageRef = ref(storage, `news/${Date.now()}_${file.name}`);
             await uploadBytes(storageRef, file);
             imgUrl = await getDownloadURL(storageRef);
         }
-        await addDoc(collection(db, "news"), { titulo: title, desc: desc, img: imgUrl, fechaIso: new Date().toISOString() });
-        window.showNotification("Noticia publicada con éxito");
-        document.getElementById('newsInputTitle').value = ''; document.getElementById('newsInputDesc').value = ''; fileInput.value = '';
+        
+        if (editingNewsId) {
+            // MODO EDICIÓN
+            await updateDoc(doc(db, "news", editingNewsId), { 
+                titulo: title, 
+                desc: desc, 
+                img: imgUrl 
+                // No tocamos la fecha original para que no se altere el orden
+            });
+            window.showNotification("Noticia actualizada con éxito ✏️");
+            window.cancelEditNews(); // Resetea formulario y variables
+        } else {
+            // MODO CREACIÓN
+            await addDoc(collection(db, "news"), { 
+                titulo: title, 
+                desc: desc, 
+                img: imgUrl, 
+                fechaIso: new Date().toISOString() 
+            });
+            window.showNotification("Noticia publicada con éxito 📢");
+            document.getElementById('newsInputTitle').value = ''; 
+            document.getElementById('newsInputDesc').value = ''; 
+            fileInput.value = '';
+        }
+        
         loadAdminData(); // Recarga la tabla
-    } catch(e) { window.showNotification("Error: " + e.message); } 
-    finally { btn.innerText = origText; btn.disabled = false; }
+    } catch(e) { 
+        window.showNotification("Error: " + e.message); 
+    } finally { 
+        // Restaurar estado del botón si hubo error o si fue creación
+        if (!editingNewsId) {
+            btn.innerHTML = "<i class='bx bx-send'></i> Publicar Noticia a Todos"; 
+        }
+        btn.disabled = false; 
+    }
 };
 
 window.deleteNews = async (id) => {
+    // ... tu código de deleteNews se queda igual ...
     if(confirm("¿Seguro que deseas eliminar esta noticia de todos los paneles?")) {
         await deleteDoc(doc(db, "news", id));
         window.showNotification("Noticia eliminada");
