@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="icon" href="agcf.png" type="image/png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>A.G.C. - Área de Gestión y Control</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1d1d1f">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        /* Ajuste fino para que los íconos se alineen perfecto con el texto */
+        .bx { vertical-align: middle; margin-right: 4px; font-size: 1.15em; }
+        .action-btn .bx { margin-right: 0; } /* Para botones que solo tienen el ícono */
+        /* --- DISEÑO DEL PANEL DE NOVEDADES (PANTALLA DIVIDIDA) --- */
+.modal-large {
+    width: 90%;
+    max-width: 850px; /* Ventana más ancha para que entren las dos columnas */
+    height: 80vh;
+    max-height: 600px;
+    display: flex;
+    flex-direction: column;
+}
+
+.news-layout {
+    display: flex;
+    flex-direction: row; /* Divide en izquierda y derecha */
+    flex: 1;
+    overflow: hidden;
+    border-top: 1px solid var(--mac-border);
+    margin-top: 10px;
+    padding-top: 15px;
+    gap: 20px;
+}
+
+.news-sidebar {
+    flex: 0 0 35%; /* La lista toma el 35% del ancho */
+    overflow-y: auto;
+    border-right: 1px solid var(--mac-border);
+    padding-right: 10px;
+}
+
+.news-content-area {
+    flex: 1; /* El contenido toma el resto del espacio */
+    overflow-y: auto;
+    padding-left: 10px;
+}
+
+/* El diseño de cada botoncito de la lista */
+.news-item-title {
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    border-radius: 8px;
+    background: var(--mac-surface);
+    transition: all 0.2s ease;
+}
+
+.news-item-title:hover {
+    border-color: var(--mac-border);
+}
+
+.news-item-title.active {
+    background: rgba(0, 122, 255, 0.1);
+    border: 1px solid var(--mac-blue);
+    border-left: 4px solid var(--mac-blue);
+}
+
+/* EL FIX PARA LA IMAGEN GIGANTE */
+.news-content-img {
+    width: 100%;
+    max-height: 300px; /* Nunca será más alta que esto */
+    object-fit: contain; /* Ajusta la imagen sin deformarla ni recortarla */
+    border-radius: 12px;
+    margin-bottom: 20px;
+    background: rgba(0,0,0,0.2); /* Fondo oscuro por si la imagen es pequeña */
+}
+
+/* Diseño para Celulares (Se pone uno encima del otro para que no se apriete) */
+@media (max-width: 768px) {
+    .news-layout {
+        flex-direction: column; /* Apila los elementos en móviles */
+    }
+    .news-sidebar {
+        flex: 0 0 auto;
+        max-height: 160px; /* Una lista pequeña arriba */
+        border-right: none;
+        border-bottom: 1px solid var(--mac-border);
+        padding-right: 0;
+        padding-bottom: 10px;
+    }
+    .news-content-area {
+        padding-left: 0;
+        padding-top: 10px;
+    }
+}
+    </style>
+</head>
+<body>
+
+<div id="toast">Acción completada</div>
+
+<div class="container login-container" id="authView" style="display: block;">
+    <div class="header-top" style="justify-content: flex-end;">
+        <button class="theme-toggle" onclick="window.toggleTheme()"><i class='bx bx-moon'></i> Modo oscuro</button>
+    </div>
+    
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img src="AGC.png" alt="A.G.C. Logo" style="height: 120px; width: 120px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 15px; object-fit: contain;">
+        
+        <h1 style="margin: 0;">A.G.C.</h1>
+        <h3 id="authSubtitle" style="margin: 5px 0 0 0;">Área de Gestión y Control</h3>
+    </div>
+
+    <div id="loginForm" class="auth-form">
+        <button type="button" class="btn-google" onclick="window.loginWithGoogle()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="18px" height="18px" style="vertical-align: middle; margin-right: 5px;">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+            Continuar con Google
+        </button>
+        <div class="divider"><span>O ingresa con tu correo</span></div>
+
+        <input type="email" id="loginEmail" placeholder="Correo Electrónico" required>
+        <div class="pwd-wrapper">
+            <input type="password" id="loginPassword" placeholder="Contraseña" required>
+            <button type="button" class="pwd-toggle" onclick="window.togglePassword('loginPassword', this)"><i class='bx bx-show'></i></button>
+        </div>
+        <button class="btn-primary" onclick="window.doLogin()">Ingresar</button>
+        <span class="auth-link" onclick="window.showRegister()">¿No tienes cuenta? Regístrate</span>
+        <span class="auth-link" onclick="window.showReset()">¿Olvidaste tu contraseña?</span>
+    </div>
+
+    <div id="registerForm" class="auth-form" style="display: none;">
+        <input type="text" id="regName" placeholder="Nombre Completo" required>
+        <select id="regCountry" required>
+            <option value="">Selecciona tu país...</option>
+            <option value="Argentina">Argentina</option>
+            <option value="Bolivia">Bolivia</option>
+            <option value="Chile">Chile</option>
+            <option value="Colombia">Colombia</option>
+            <option value="Costa Rica">Costa Rica</option>
+            <option value="Cuba">Cuba</option>
+            <option value="Ecuador">Ecuador</option>
+            <option value="El Salvador">El Salvador</option>
+            <option value="España">España</option>
+            <option value="Guatemala">Guatemala</option>
+            <option value="Honduras">Honduras</option>
+            <option value="México">México</option>
+            <option value="Nicaragua">Nicaragua</option>
+            <option value="Panamá">Panamá</option>
+            <option value="Paraguay">Paraguay</option>
+            <option value="Perú">Perú</option>
+            <option value="República Dominicana">República Dominicana</option>
+            <option value="Uruguay">Uruguay</option>
+            <option value="Venezuela">Venezuela</option>
+            <option value="Otro País">Otro País</option>
+        </select>
+        <input type="tel" id="regPhone" placeholder="WhatsApp (Ej: +51...)" required>
+        <input type="email" id="regEmail" placeholder="Correo Electrónico" required>
+        <div class="pwd-wrapper">
+            <input type="password" id="regPassword" placeholder="Contraseña (mín 6 carácteres)" required>
+            <button type="button" class="pwd-toggle" onclick="window.togglePassword('regPassword', this)"><i class='bx bx-show'></i></button>
+        </div>
+        <button class="btn-primary" onclick="window.doRegister()">Crear Cuenta</button>
+        <span class="auth-link" onclick="window.showLogin()">Ya tengo cuenta. Iniciar sesión</span>
+    </div>
+
+    <div id="resetForm" class="auth-form" style="display: none;">
+        <input type="email" id="resetEmail" placeholder="Correo Electrónico" required>
+        <button class="btn-primary" onclick="window.doResetPassword()">Enviar Link</button>
+        <span class="auth-link" onclick="window.showLogin()">Volver</span>
+    </div>
+</div>
+
+<div class="container" id="appView" style="display: none;">
+    
+    <nav class="bottom-nav">
+        <a href="#" id="navClientes" class="nav-item active" onclick="window.closeModals()">
+            <i class='bx bx-group'></i>
+            <span>Clientes</span>
+        </a>
+        <a href="#" class="nav-item" onclick="window.openStoreModal(); document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active')); this.classList.add('active');">
+            <i class='bx bx-store-alt'></i>
+            <span>Tiendita</span>
+        </a>
+        <a href="#" class="nav-item" onclick="window.showWrapped(); document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active')); this.classList.add('active');">
+            <i class='bx bx-bar-chart-alt-2'></i>
+            <span>Resumen</span>
+        </a>
+    </nav>
+    <div class="header-top">
+        <div class="mac-controls">
+            <div class="mac-dot close" onclick="window.openWaModal()" title="Editar Mensaje WhatsApp"></div>
+            <div class="mac-dot minimize" onclick="window.toggleStats()" title="Mostrar Resumen"></div>
+            <div class="mac-dot maximize" onclick="window.openProfileModal()" title="Editar Perfil"></div>
+            <div class="mac-dot" style="background-color: #0000FF;" onclick="window.openSuggestionModal()" title="Buzón de Sugerencias"></div>
+        </div>
+        
+<div style="display: flex; gap: 10px; align-items: center; position: relative;">
+    <button id="btnInstallApp" class="action-btn" style="display: none; background: rgba(52, 199, 89, 0.15); color: var(--mac-green); font-weight: bold;" onclick="window.installApp()"><i class='bx bx-mobile-alt'></i> Instalar</button>
+    
+    <button class="btn-desktop-only" style="background: linear-gradient(45deg, #AF52DE, #FF2D55); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 10px rgba(175, 82, 222, 0.3);" onclick="window.showWrapped()"><i class='bx bxs-trophy' style="color: white;"></i> Mi Resumen</button>
+    <button class="btn-desktop-only" style="background: linear-gradient(45deg, #007AFF, #34C759); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);" onclick="window.openStoreModal()">
+        <i class='bx bx-store-alt' style="color: white;"></i> Mi Tiendita
+    </button>
+    <button class="btn-news-shiny" onclick="window.openNewsModal()" style="position: relative;">
+    <i class='bx bxs-envelope'></i> Novedades
+    <span id="newsBadge" style="display: none; position: absolute; top: -2px; right: -2px; background: #FF2D55; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--mac-surface); box-shadow: 0 0 5px rgba(255,45,85,0.5);"></span>
+</button>
+            
+            <div style="position: relative;">
+<button class="action-btn" style="flex: 0 0 38px; width: 38px; height: 38px; min-width: 38px; max-width: 38px; display: flex; align-items: center; justify-content: center; font-size: 20px; border-radius: 50%; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); padding: 0;" onclick="window.toggleSettingsMenu(event)"><i class='bx bx-cog'></i></button>
+                
+                <div id="settingsDropdown" class="settings-dropdown">
+                    <button class="dropdown-item theme-toggle" onclick="window.toggleTheme(); window.toggleSettingsMenu(event);"><i class='bx bx-moon'></i> Modo oscuro</button>
+                    <div style="height: 1px; background: var(--mac-border); margin: 4px 0;"></div>
+                    <button class="dropdown-item text-danger" onclick="window.doLogout()"><i class='bx bx-log-out'></i> Salir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="user-profile-compact">
+        <img id="brandLogo" src="data:image/svg+xml;charset=UTF-8,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='g2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23AF52DE' /%3E%3Cstop offset='100%25' stop-color='%235856D6' /%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 90 C 20 75 15 40 15 20 L 50 10 L 85 20 C 85 40 80 75 50 90 Z' fill='url(%23g2)'/%3E%3Crect x='28' y='45' width='10' height='25' rx='5' fill='%23ffffff'/%3E%3Crect x='45' y='30' width='10' height='40' rx='5' fill='%23ffffff'/%3E%3Crect x='62' y='50' width='10' height='20' rx='5' fill='%2334C759'/%3E%3C/svg%3E" alt="Mi Marca">
+        
+        <div class="profile-info-compact">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <h1 id="brandName" style="margin: 0;">Mi Panel</h1>
+                <span id="userPlanBadge" style="display: none; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; text-transform: uppercase; border: 1px solid currentColor;"></span>
+            </div>
+            <h3 id="userGreeting" style="margin-top: 5px;">Cargando...</h3>
+        </div>
+    </div>
+
+    <div class="stats-panel" id="statsPanel">
+        <div class="stat-card stat-active"><h4>Activos</h4><p id="statActive">0</p></div>
+        <div class="stat-card stat-warning"><h4>Por vencer</h4><p id="statWarning">0</p></div>
+        <div class="stat-card stat-expired"><h4>Vencidos</h4><p id="statExpired">0</p></div>
+        <div class="stat-card profit-card">
+            <h4>Utilidad Neta</h4><p style="color: var(--mac-blue);" id="statProfit">0.00</p>
+            <div class="profit-breakdown">
+                <div style="color: var(--mac-text-main); margin-bottom: 5px;"><strong>Ingresos:</strong> <span id="bdIncome">0.00</span></div>
+                <div style="color: var(--mac-red); margin-bottom: 5px;"><strong>Inversión:</strong> <span id="bdCost">0.00</span></div>
+                <hr style="border: 0; border-top: 1px solid var(--mac-border); margin: 5px 0;">
+                <div style="color: var(--mac-blue);"><strong>Ganancia:</strong> <span id="bdProfit">0.00</span></div>
+            </div>
+        </div>
+    </div>
+
+    <form id="clientForm" class="form-grid">
+        <input type="text" id="clientName" placeholder="Nombre del Cliente" required>
+        <div class="custom-select" id="customSelect">
+            <div class="select-box" id="selectBox" onclick="window.togglePlatformDropdown(event)">
+                <span id="selectText">Plataforma(s)...</span><span>▼</span>
+            </div>
+            <div class="checkbox-dropdown" id="checkboxDropdown">
+                <label><input type="checkbox" value="Netflix"> Netflix</label>
+                <label><input type="checkbox" value="Spotify Premium"> Spotify Premium</label>
+                <label><input type="checkbox" value="YouTube Premium"> YouTube Premium</label>
+                <label><input type="checkbox" value="Crunchyroll"> Crunchyroll</label>
+                <label><input type="checkbox" value="Disney+"> Disney+</label>
+                <label><input type="checkbox" value="Amazon Prime"> Amazon Prime</label>
+                <label><input type="checkbox" value="Max"> Max</label>
+                <label><input type="checkbox" value="Apple TV"> Apple TV</label>
+                <label><input type="checkbox" value="Directv GO"> Directv GO</label>
+                <label><input type="checkbox" value="Movistar"> Movistar</label>
+                <label><input type="checkbox" value="IPTV"> IPTV</label>
+                <label><input type="checkbox" value="Vix"> Vix</label>
+                <label><input type="checkbox" value="Paramount"> Paramount</label>
+                <label><input type="checkbox" value="Gemini Pro"> Gemini Pro</label>
+                <label><input type="checkbox" value="ChatGPT"> ChatGPT</label>
+                <label><input type="checkbox" value="Canva Pro"> Canva Pro</label>
+                <label><input type="checkbox" value="Capcut Pro"> Capcut Pro</label>
+            </div>
+        </div>
+        <button type="button" id="btnAccountData" class="btn-secondary" onclick="window.openAccountModal()"><i class='bx bx-key'></i> Datos de Cuenta</button>
+        <input type="text" id="phone" placeholder="WhatsApp (Ej: +51...)" required>
+        <input type="number" id="clientCost" placeholder="Costo" step="0.1" required>
+        <input type="number" id="clientPrice" placeholder="Precio" step="0.1" required>
+        <input type="date" id="expirationDate" required>
+        <div id="actionButtonsContainer" style="grid-column: 1 / -1;">
+            <button type="button" class="btn-primary" onclick="window.saveClientData()">Guardar Cliente</button>
+        </div>
+    </form>
+
+    <div class="toolbar">
+        <input type="text" id="searchInput" class="search-bar" placeholder="Buscar..." oninput="window.renderTable()">
+        <select id="filterSelect" class="filter-select" onchange="window.renderTable()">
+            <option value="all">Todos los estados</option>
+            <option value="active">Activos</option>
+            <option value="warning">Por vencer (≤ 3 días)</option>
+            <option value="expired">Vencidos</option>
+        </select>
+    </div>
+
+    <div style="width: 100%; position: relative;">
+        <div id="tableLoader"><i class='bx bx-loader-alt bx-spin'></i> Cargando datos...</div>
+        <table id="mainTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Cliente</th><th>Plataformas</th><th>Cuenta</th><th>WhatsApp</th>
+                    <th>Utilidad</th><th>Vencimiento</th><th>Estado</th><th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+        
+        <div style="text-align: center; margin-top: 20px; display: none;" id="loadMoreContainer">
+            <button class="btn-secondary" style="width: auto; padding: 10px 30px;" onclick="window.loadMoreClients()"><i class='bx bx-chevron-down'></i> Cargar más clientes</button>
+        </div>
+    </div>
+</div>
+
+<div class="container" id="adminView" style="display: none;">
+    <div class="header-top">
+        <h2>Panel Global A.G.C.</h2>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-logout" onclick="window.doLogout()"><i class='bx bx-log-out'></i> Salir</button>
+            <button class="theme-toggle" onclick="window.toggleTheme()"><i class='bx bx-moon'></i></button>
+        </div>
+    </div>
+    
+    <h3><i class='bx bx-group'></i> Gestión de Distribuidores</h3>
+    <div style="overflow-x:auto; margin-bottom: 40px;">
+        <table>
+            <thead><tr><th>Nombre</th><th>País</th><th>Correo</th><th>Teléfono</th><th>Plan</th><th>Estado</th><th>Acción</th></tr></thead>
+            <tbody id="adminTableBody"></tbody>
+        </table>
+    </div>
+
+    <h3><i class='bx bxs-megaphone'></i> Gestión de Noticias / Novedades</h3>
+    <div class="form-grid" style="margin-bottom: 20px; background: var(--mac-gray); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border);">
+        <input type="text" id="newsInputTitle" placeholder="Título de la noticia" style="background: var(--mac-surface);" required>
+        <textarea id="newsInputDesc" placeholder="Descripción de la noticia, oferta o sorteo..." rows="3" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-family: inherit; grid-column: 1 / -1; resize: none;" required></textarea>
+        <div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 5px;">
+            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Subir Imagen (Opcional):</label>
+            <input type="file" id="newsInputImg" accept="image/*" style="background: var(--mac-surface); padding: 5px; font-size: 12px;">
+        </div>
+        <button class="btn-primary" onclick="window.saveNews()" style="grid-column: 1 / -1;"><i class='bx bx-send'></i> Publicar Noticia a Todos</button>
+    </div>
+
+    <div style="overflow-x:auto; margin-bottom: 40px;">
+        <table>
+            <thead><tr><th>Fecha</th><th>Título</th><th>Imagen</th><th>Acciones</th></tr></thead>
+            <tbody id="adminNewsBody"></tbody>
+        </table>
+    </div>
+    
+    <h3><i class='bx bx-bulb'></i> Buzón de Sugerencias</h3>
+    <div style="overflow-x:auto;">
+        <table>
+            <thead><tr><th>Fecha</th><th>Distribuidor</th><th>Sugerencia / Idea</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="adminSuggestionsBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="waModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <h3 style="margin-bottom: 5px;"><i class='bx bxl-whatsapp'></i> Mensaje y Métodos de Pago</h3>
+        <p style="font-size: 12px; color: var(--mac-text-secondary); margin-bottom: 15px; margin-top: 0;">
+            Variables: <strong style="color: var(--mac-blue);">{nombre}</strong> | <strong style="color: var(--mac-blue);">{plataforma}</strong> | <strong style="color: var(--mac-blue);">{fecha}</strong> | <strong style="color: var(--mac-green);">{pago}</strong>
+        </p>
+        
+        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Tus datos de pago (Yape, Plin, Binance):</label>
+        <input type="text" id="editWaPayment" placeholder="Ej: Yape: 999... / Binance Pay: 123..." style="margin-bottom: 15px; background: var(--mac-bg);">
+        
+        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Mensaje Automático:</label>
+        <textarea id="editWaMessage" rows="5" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none;"></textarea>
+        
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button class="btn-primary" onclick="window.saveWaMessage()">Guardar Configuración</button>
+            <button class="btn-secondary" onclick="window.closeModals()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div id="profileModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <h3 style="margin-bottom: 15px;"><i class='bx bx-user-circle'></i> Mi Perfil y Marca Blanca</h3>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            
+            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Logo de tu empresa (Recomendado: Cuadrado 500x500px, PNG):</label>
+            <input type="file" id="editLogoUpload" accept="image/*" style="padding: 5px; font-size: 12px;">
+            
+            <input type="text" id="editProfileName" placeholder="Nombre Comercial / Marca">
+            <label style="font-size: 11px; font-weight: bold; color: var(--mac-blue); margin-top: 5px;">Link personalizado de tu tienda:</label>
+<input type="text" id="editProfileAlias" placeholder="Ej: mariano-store (Sin espacios)">
+            <select id="editProfileCountry">
+                <option value="Argentina">Argentina</option>
+                <option value="Bolivia">Bolivia</option>
+                <option value="Chile">Chile</option>
+                <option value="Colombia">Colombia</option>
+                <option value="Costa Rica">Costa Rica</option>
+                <option value="Cuba">Cuba</option>
+                <option value="Ecuador">Ecuador</option>
+                <option value="El Salvador">El Salvador</option>
+                <option value="España">España</option>
+                <option value="Guatemala">Guatemala</option>
+                <option value="Honduras">Honduras</option>
+                <option value="México">México</option>
+                <option value="Nicaragua">Nicaragua</option>
+                <option value="Panamá">Panamá</option>
+                <option value="Paraguay">Paraguay</option>
+                <option value="Perú">Perú</option>
+                <option value="República Dominicana">República Dominicana</option>
+                <option value="Uruguay">Uruguay</option>
+                <option value="Venezuela">Venezuela</option>
+                <option value="Otro País">Otro País</option>
+            </select>
+            <input type="tel" id="editProfilePhone" placeholder="Teléfono (+51...)">
+            <input type="email" id="editProfileEmail" placeholder="Correo" disabled style="opacity: 0.6; margin-top: 10px;">
+        </div>
+        <div style="margin-top: 15px; border-top: 1px dashed var(--mac-border); padding-top: 15px;">
+            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Automatización de WhatsApp (Bot):</label>
+            <button class="btn-secondary" style="width: 100%; margin-top: 5px; background: rgba(52, 199, 89, 0.1); color: var(--mac-green); border: 1px solid var(--mac-green);" onclick="window.vincularBot()">🤖 Activar Mensajes Automáticos</button>
+            
+            <div id="qrContainer" style="text-align: center; margin-top: 10px; display: none;">
+                <img id="botQrImage" src="" style="width: 180px; height: 180px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                <p id="botStatus" style="font-size: 12px; color: var(--mac-text-secondary); margin-top: 8px; font-weight: bold;">Cargando...</p>
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button class="btn-primary" onclick="window.saveProfile()">Guardar y Actualizar</button>
+            <button class="btn-secondary" onclick="window.closeModals()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div id="suggestionModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <h3 style="margin-bottom: 5px;"><i class='bx bx-bulb'></i> Buzón de Sugerencias</h3>
+        <p style="font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 15px; margin-top: 0;">
+            ¿Qué nueva plataforma te gustaría ver o qué mejora le harías al panel? ¡Te leemos!
+        </p>
+        <textarea id="suggestionText" rows="4" placeholder="Escribe tu idea aquí..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none;"></textarea>
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button class="btn-primary" onclick="window.sendSuggestion()"><i class='bx bx-send'></i> Enviar Idea</button>
+            <button class="btn-secondary" onclick="window.closeModals()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<div id="accountModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <h3 style="margin-bottom: 15px;"><i class='bx bx-key'></i> Datos de la Cuenta</h3>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <input type="email" id="accEmail" placeholder="Correo de la cuenta">
+            <div class="pwd-wrapper">
+                <input type="password" id="accPassword" placeholder="Contraseña">
+                <button type="button" class="pwd-toggle" onclick="window.togglePassword('accPassword', this)"><i class='bx bx-show'></i></button>
+            </div>
+            <input type="text" id="accProfile" placeholder="Nombre del Perfil (Ej: Perfil 1)">
+            <input type="text" id="accPin" placeholder="PIN del Perfil (Ej: 1234)">
+            
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 12px; font-weight: 600; color: var(--mac-text-secondary);">Unidades / Pantallas vendidas:</label>
+                <input type="number" id="accUnits" value="1" min="1" placeholder="Cantidad de unidades" required>
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button class="btn-primary" onclick="window.confirmAccountData()">Confirmar Datos</button>
+            <button class="btn-secondary" onclick="window.closeModals()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<div id="viewAccountModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <h3 style="margin-bottom: 15px;"><i class='bx bx-key'></i> Detalles de la Cuenta</h3>
+        <p style="margin: 5px 0;"><strong>Correo:</strong> <span id="viewAccEmail" style="color: var(--mac-text-secondary);"></span></p>
+        <p style="margin: 5px 0;"><strong>Contraseña:</strong> <span id="viewAccPassword" style="color: var(--mac-text-secondary);"></span></p>
+        <p style="margin: 5px 0;"><strong>Perfil:</strong> <span id="viewAccProfile" style="color: var(--mac-text-secondary);"></span></p>
+        <p style="margin: 5px 0;"><strong>PIN:</strong> <span id="viewAccPin" style="color: var(--mac-text-secondary);"></span></p>
+        <p style="margin: 5px 0;"><strong>Unidades Totales:</strong> <span id="viewAccUnits" style="color: var(--mac-blue); font-weight: bold;"></span></p>
+        <div style="margin-top: 20px;">
+            <button class="btn-secondary" style="width: 100%;" onclick="window.closeModals()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div id="adminManageModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <h3 style="margin-bottom: 5px;"><i class='bx bx-cog'></i> Gestionar Acceso</h3>
+        <p style="margin-top:0; margin-bottom: 15px; font-size: 14px; color: var(--mac-text-secondary);">Usuario: <strong id="manageUserName" style="color:var(--mac-blue);"></strong></p>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div>
+                <label style="font-size:12px; font-weight:bold; color:var(--mac-text-secondary);">Acción a realizar:</label>
+                <select id="manageAction" style="margin-top: 5px;">
+                    <option value="true">🟢 Activar / Mantener Activa</option>
+                    <option value="false">🔴 Suspender Cuenta</option>
+                </select>
+            </div>
+            <div>
+                <label style="font-size:12px; font-weight:bold; color:var(--mac-text-secondary);">Duración de la acción:</label>
+                <select id="manageDuration" style="margin-top: 5px;" onchange="window.toggleDurationFields()">
+                    <option value="permanent">Permanentemente</option>
+                    <option value="temporary">Temporalmente</option>
+                </select>
+            </div>
+            <div id="temporaryFields" style="display:none; flex-direction: column; gap: 10px;">
+                <label style="font-size:12px; font-weight:bold; color:var(--mac-text-secondary);">Tiempo de aplicación:</label>
+                <select id="manageTempType" onchange="window.toggleTempType()">
+                    <option value="hours">3 Horas (Demo rápido)</option>
+                    <option value="days">Ingresar cantidad de Días</option>
+                </select>
+                <input type="number" id="manageDays" placeholder="Ejemplo: 30" style="display:none;" min="1">
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button class="btn-primary" onclick="window.saveManageStatus()">Guardar y Aplicar</button>
+            <button class="btn-secondary" onclick="window.closeModals()">Cancelar</button>
+        </div>
+    </div>
+</div>
+<div id="planModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <h3 style="margin-bottom: 5px;"><i class='bx bx-diamond'></i> Gestionar Plan</h3>
+        <p style="margin-top:0; margin-bottom: 15px; font-size: 14px; color: var(--mac-text-secondary);">
+            Distribuidor: <strong id="planUserName" style="color:var(--mac-blue);"></strong>
+        </p>
+        
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div>
+                <label style="font-size:12px; font-weight:bold; color:var(--mac-text-secondary);">Seleccionar Nuevo Plan:</label>
+                <select id="newPlanSelect" style="margin-top: 5px;">
+                    <option value="demo">Prueba Gratuita (3 Días - 20 Clientes)</option>
+                    <option value="basico">Plan Básico (30 Días - 100 Clientes)</option>
+                    <option value="pro">Plan Pro / Bot Propio (30 Días - Ilimitado)</option>
+                </select>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button class="btn-primary" onclick="window.savePlan()">Guardar y Aplicar</button>
+            <button class="btn-secondary" onclick="window.closeModals()">Cancelar</button>
+        </div>
+    </div>
+</div>
+<div id="newsModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card modal-large">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin: 0;"><i class='bx bxs-envelope'></i> Novedades y Ofertas</h3>
+            <button class="btn-secondary" style="width: auto; padding: 5px 12px; font-weight: bold;" onclick="window.closeModals()"><i class='bx bx-x'></i> Cerrar</button>
+        </div>
+        <div class="news-layout">
+            <div class="news-sidebar" id="newsSidebar">
+            </div>
+            <div class="news-content-area" id="newsContentArea">
+                <div style="display:flex; height:100%; align-items:center; justify-content:center;">
+                    <p style="color: var(--mac-text-secondary); text-align: center;"><i class='bx bx-left-arrow-alt'></i> Selecciona una noticia de la izquierda para ver los detalles.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="mobileClientModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin: 0; font-size: 18px;" id="mcName">Cargando...</h3>
+            <span id="mcStatus" class="status">...</span>
+        </div>
+        
+        <div style="background: var(--mac-bg); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+            <p style="margin: 5px 0; font-size: 14px;"><strong><i class='bx bxl-whatsapp'></i> WhatsApp:</strong> <span id="mcPhone"></span></p>
+            <p style="margin: 5px 0; font-size: 14px;"><strong><i class='bx bx-wallet'></i> Pagó:</strong> <span id="mcPrice" style="color: var(--mac-green); font-weight: bold;"></span></p>
+            <p style="margin: 5px 0; font-size: 14px;"><strong><i class='bx bx-calendar-x'></i> Vence:</strong> <span id="mcDate"></span></p>
+        </div>
+        
+        <p style="font-size: 11px; color: var(--mac-text-secondary); margin-bottom: 10px; font-weight: bold; text-align: center; letter-spacing: 1px;">ACCIONES RÁPIDAS</p>
+        
+        <div id="mcActions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        </div>
+        
+        <div style="margin-top: 15px;">
+            <button class="btn-secondary" style="width: 100%; padding: 12px;" onclick="window.closeModals()">Cerrar Detalles</button>
+        </div>
+    </div>
+</div>
+
+<div id="ticketTemplate" style="position: fixed; left: -9999px; top: -9999px; background: #1c1c1e; color: #ffffff; width: 380px; padding: 30px; border-radius: 16px; font-family: -apple-system, sans-serif; box-sizing: border-box; border: 1px solid #38383a; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: -9999;">
+    <div style="text-align: center; border-bottom: 1px dashed #38383a; padding-bottom: 20px; margin-bottom: 20px;">
+        
+        <!-- NUEVO: Contenedor del Logo del Distribuidor -->
+        <img id="ticketLogo" src="" style="width: 70px; height: 70px; border-radius: 12px; object-fit: cover; margin-bottom: 10px; display: none;">
+        
+        <h2 id="ticketBrand" style="margin: 0; font-size: 24px; color: #ffffff; font-weight: 800;">A.G.C.</h2>
+        <p style="margin: 5px 0 0 0; color: #86868b; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Comprobante de Suscripción</p>
+    </div>
+    
+    <div style="margin-bottom: 20px;">
+        <p style="margin: 5px 0; font-size: 13px; color: #86868b; text-transform: uppercase;">A nombre de:</p>
+        <p id="ticketClient" style="margin: 0; font-size: 18px; font-weight: bold;"></p>
+    </div>
+    
+    <div style="margin-bottom: 20px;">
+        <p style="margin: 5px 0; font-size: 13px; color: #86868b; text-transform: uppercase;">Servicio Contratado:</p>
+        <p id="ticketPlatform" style="margin: 0; font-size: 18px; font-weight: bold; color: #0a84ff;"></p>
+    </div>
+    
+    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #38383a; padding-bottom: 20px; margin-bottom: 20px;">
+        <div>
+            <p style="margin: 5px 0; font-size: 13px; color: #86868b; text-transform: uppercase;">Válido hasta:</p>
+            <p id="ticketDate" style="margin: 0; font-size: 16px; font-weight: bold;"></p>
+        </div>
+        <div style="text-align: right;">
+            <p style="margin: 5px 0; font-size: 13px; color: #86868b; text-transform: uppercase;">Total Abonado:</p>
+            <p id="ticketPrice" style="margin: 0; font-size: 22px; font-weight: bold; color: #30d158;"></p>
+        </div>
+    </div>
+    
+    <div style="text-align: center;">
+        <p style="margin: 0; font-size: 13px; color: #86868b;">¡Gracias por tu preferencia y confianza!</p>
+        <p style="margin: 8px 0 0 0; font-size: 10px; color: #38383a; text-transform: uppercase;">Generado automáticamente por Panel A.G.C.</p>
+    </div>
+</div>  
+
+<div id="wrapupTemplate" style="position: fixed; left: -9999px; top: -9999px; background: linear-gradient(160deg, #000000 0%, #2b0005 50%, #590011 100%); color: #ffffff; width: 450px; height: 800px; padding: 50px 30px; border-radius: 30px; font-family: -apple-system, sans-serif; box-sizing: border-box; text-align: center; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 20px 50px rgba(0,0,0,0.8); z-index: -9999; overflow: hidden; border: 4px solid #ff2d55;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div style="font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 800; letter-spacing: 3px;">A.G.C. WRAPPED</div>
+        <div style="font-size: 13px; color: #ff2d55; font-weight: 800; text-transform: uppercase;" id="wrapupMonth">MES</div>
+    </div>
+
+    <div style="margin-top: 10px;">
+        <h2 id="wrapupBrand" style="margin: 0 0 5px 0; font-size: 34px; font-weight: 900; text-transform: uppercase; color: #ffffff; letter-spacing: 1px;">Mi Marca</h2>
+        <p id="wrapupPhrase" style="margin: 0; font-size: 15px; color: #ff9500; font-style: italic; font-weight: bold; padding: 0 10px;">"¡Demostraste tu verdadero poder!"</p>
+    </div>
+    
+    <div style="display: flex; flex-direction: column; gap: 14px; margin: 20px 0; flex-grow: 1; justify-content: center;">
+        
+        <div style="background: rgba(255,255,255,0.04); backdrop-filter: blur(15px); padding: 14px 20px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.08); text-align: left;">
+            <p style="margin: 0 0 2px 0; font-size: 11px; color: #ebebf599; text-transform: uppercase; letter-spacing: 1px;">Cuentas Registradas</p>
+            <p id="wrapupAccounts" style="margin: 0; font-size: 24px; font-weight: 900; color: #30d158;">0</p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.04); backdrop-filter: blur(15px); padding: 14px 20px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.08); text-align: left;">
+            <p style="margin: 0 0 2px 0; font-size: 11px; color: #ebebf599; text-transform: uppercase; letter-spacing: 1px;">Plataforma Más Vendida</p>
+            <p id="wrapupTopPlatform" style="margin: 0; font-size: 24px; font-weight: 900; color: #0a84ff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</p>
+        </div>
+        
+        <div style="background: rgba(255,255,255,0.04); backdrop-filter: blur(15px); padding: 14px 20px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.08); text-align: left;">
+            <p style="margin: 0 0 2px 0; font-size: 11px; color: #ebebf599; text-transform: uppercase; letter-spacing: 1px;">Día Con Más Ventas</p>
+            <p id="wrapupTopDay" style="margin: 0; font-size: 24px; font-weight: 900; color: #ff9f0a;">-</p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.04); backdrop-filter: blur(15px); padding: 14px 20px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.08); text-align: left;">
+            <p style="margin: 0 0 2px 0; font-size: 11px; color: #ebebf599; text-transform: uppercase; letter-spacing: 1px;">Distribuidor / Cliente Más Fiel</p>
+            <p id="wrapupTopClient" style="margin: 0; font-size: 24px; font-weight: 900; color: #bf5af2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</p>
+            <p id="wrapupClientAccounts" style="margin: 3px 0 0 0; font-size: 13px; color: #ebebf599; font-weight: 500;">0 cuentas registradas en el mes</p>
+        </div>
+
+    </div>
+    
+    <div style="margin-top: auto;">
+        <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.3); letter-spacing: 1px;">POTENCIADO POR PANEL A.G.C.</p>
+    </div>
+</div>
+    <!-- MODAL A.G.C. WRAPPED (EXCLUSIVO) -->
+<div id="wrappedModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card" style="max-width: 450px; padding: 25px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px; margin-bottom: 20px;">
+            <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;"><i class='bx bx-bar-chart-alt-2'></i> Mi Resumen</h3>
+            <button class="action-btn" style="background: var(--mac-surface); border: 1px solid var(--mac-border);" onclick="window.closeModals()"><i class='bx bx-x'></i> Cerrar</button>
+        </div>
+        
+        <!-- Aquí se inyectarán los datos del Wrapped -->
+        <div id="wrappedContentArea"></div>
+    </div>
+</div>
+<div id="storeModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <h3 style="margin-bottom: 5px;"><i class='bx bx-store-alt'></i> Mi Tiendita Web</h3>
+        <p style="font-size: 13px; color: var(--mac-text-secondary); margin-top: 0;">Configura tu catálogo público. Tus clientes verán esto y comprarán directo a tu WhatsApp.</p>
+        
+        <div style="background: var(--mac-bg); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Añadir un producto:</label>
+            <div style="display: flex; gap: 10px; margin-top: 5px;">
+                <input type="text" id="storePlatform" placeholder="Ej: Netflix 1 Pantalla" style="flex: 2;">
+                <input type="number" id="storePrice" placeholder="Precio" style="flex: 1;">
+                <button class="btn-primary" style="width: auto;" onclick="window.addStoreItem()"><i class='bx bx-plus'></i></button>
+            </div>
+        </div>
+
+        <div id="storeItemsList" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; margin-bottom: 15px;">
+            </div>
+
+        <div style="border-top: 1px dashed var(--mac-border); padding-top: 15px;">
+            <label style="font-size: 12px; font-weight: bold; color: var(--mac-blue);">Tu Link Público:</label>
+            <input type="text" id="storeLinkInput" readonly style="color: var(--mac-text-secondary); background: var(--mac-surface);">
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button class="btn-primary" onclick="window.copyStoreLink()"><i class='bx bx-copy'></i> Copiar Link</button>
+            <button class="btn-secondary" onclick="window.closeModals()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div class="container" id="publicStoreView" style="display: none; max-width: 500px; margin: 40px auto; padding: 30px 20px;">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <img id="publicStoreLogo" src="" style="width: 100px; height: 100px; border-radius: 20px; object-fit: cover; box-shadow: 0 10px 20px rgba(0,0,0,0.3); display: none; margin: 0 auto 15px auto;">
+        <h1 id="publicStoreName" style="margin: 0; font-size: 28px; color: var(--mac-text-main);">Cargando...</h1>
+        <p style="color: var(--mac-text-secondary); margin-top: 5px;">Catálogo Oficial de Streaming</p>
+    </div>
+    
+    <div id="publicStoreCatalog" style="display: flex; flex-direction: column; gap: 15px;">
+        </div>
+
+    <div style="text-align: center; margin-top: 40px;">
+        <p style="font-size: 11px; color: var(--mac-text-secondary); opacity: 0.6;">POTENCIADO POR PANEL A.G.C.</p>
+    </div>
+</div>
+<script type="module" src="app.js"></script>
+    <a href="#" id="navClientes" class="nav-item active" onclick="window.closeModals()">
+        <i class='bx bx-group'></i>
+        <span>Clientes</span>
+    </a>
+    <a href="#" class="nav-item" onclick="window.openStoreModal(); document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active')); this.classList.add('active');">
+        <i class='bx bx-store-alt'></i>
+        <span>Tiendita</span>
+    </a>
+    <a href="#" class="nav-item" onclick="window.showWrapped(); document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active')); this.classList.add('active');">
+        <i class='bx bx-bar-chart-alt-2'></i>
+        <span>Resumen</span>
+    </a>
+</nav>
+</body>
+</html>
