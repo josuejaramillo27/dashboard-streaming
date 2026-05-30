@@ -432,21 +432,33 @@ q.forEach((d) => {
     arrS.forEach(s => { const tr = document.createElement('tr'); tr.innerHTML = `<td>${new Date(s.date).toLocaleDateString('es-ES')}</td><td><strong>${s.userName}</strong></td><td style="color:var(--mac-text-secondary);">${s.text}</td><td>${s.approved ? '<span style="color:var(--mac-green);font-weight:bold;">✅ Aprobada</span>' : '<span style="color:var(--mac-orange);font-weight:bold;">⏳ Pendiente</span>'}</td><td class="actions-cell">${s.approved ? '' : `<button class="action-btn btn-wa" onclick="window.approveSuggestion('${s.id}')">✔️ Aprobar</button>`} <button class="action-btn btn-del" onclick="window.deleteSuggestion('${s.id}')">🗑️</button></td>`; sBody.appendChild(tr); });
 
     // 3. Cargar Noticias (NUEVO)
-    const qN = await getDocs(collection(db, "news")); const nBody = document.getElementById('adminNewsBody'); nBody.innerHTML = ''; let arrN = []; qN.forEach(d => arrN.push({ id: d.id, ...d.data() })); arrN.sort((a,b) => new Date(b.fechaIso) - new Date(a.fechaIso));
+    const qN = await getDocs(collection(db, "news")); const nBody = document.getElementById('adminNewsBody'); nBody.innerHTML = ''; let arrN = []; qN.forEach(d => arrN.push({ id: d.id, ...d.data() })); 
+    
+    // ORDEN INTELIGENTE: 1ro los Fijados, 2do por fecha
+    arrN.sort((a,b) => {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        return new Date(b.fechaIso) - new Date(a.fechaIso);
+    });
+
     arrN.forEach(n => {
         const dateStr = new Date(n.fechaIso).toLocaleDateString('es-ES');
         const imgHtml = n.img ? `<a href="${n.img}" target="_blank" style="color:var(--mac-blue); font-size:12px;">Ver Foto</a>` : '<span style="font-size:12px; color:var(--mac-text-secondary);">Sin foto</span>';
         
-        // Sanitizamos los textos para enviarlos al botón de editar sin que rompan el código
         const titleSafe = n.titulo ? n.titulo.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
         const descSafe = n.desc ? n.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : '';
+
+        // UI de fijado
+        const pinnedIcon = n.isPinned ? '<i class="bx bxs-pin" style="color: var(--mac-orange); margin-right: 5px;" title="Noticia Fijada"></i>' : '';
+        const pinBtnColor = n.isPinned ? 'var(--mac-orange)' : 'var(--mac-text-secondary)';
 
         const tr = document.createElement('tr'); 
         tr.innerHTML = `
             <td>${dateStr}</td>
-            <td><strong>${n.titulo}</strong></td>
+            <td>${pinnedIcon}<strong>${n.titulo}</strong></td>
             <td>${imgHtml}</td>
             <td class="actions-cell" style="display: flex; gap: 5px;">
+                <button class="action-btn" style="border: 1px solid ${pinBtnColor}; color: ${pinBtnColor}; background: transparent;" onclick="window.togglePinNews('${n.id}', ${!!n.isPinned})" title="Fijar / Desfijar"><i class='bx bx-pin'></i></button>
                 <button class="action-btn" style="border: 1px solid var(--mac-blue); color: var(--mac-blue); background: transparent;" onclick="window.startEditNews('${n.id}', '${titleSafe}', '${descSafe}', '${n.img || ''}')"><i class='bx bx-edit-alt'></i></button>
                 <button class="action-btn btn-del" onclick="window.deleteNews('${n.id}')"><i class='bx bx-trash'></i></button>
             </td>`; 
@@ -525,7 +537,8 @@ window.saveNews = async () => {
                 titulo: title, 
                 desc: desc, 
                 img: imgUrl, 
-                fechaIso: new Date().toISOString() 
+                fechaIso: new Date().toISOString()
+                isPinned: false
             });
             window.showNotification("Noticia publicada con éxito 📢");
             document.getElementById('newsInputTitle').value = ''; 
@@ -551,6 +564,17 @@ window.deleteNews = async (id) => {
         await deleteDoc(doc(db, "news", id));
         window.showNotification("Noticia eliminada");
         loadAdminData();
+    }
+};
+window.togglePinNews = async (id, currentStatus) => {
+    try {
+        await updateDoc(doc(db, "news", id), { 
+            isPinned: !currentStatus 
+        });
+        window.showNotification(currentStatus ? "Noticia desfijada" : "Noticia fijada 📌");
+        loadAdminData(); // Recarga la tabla
+    } catch(e) { 
+        window.showNotification("Error: " + e.message); 
     }
 };
 window.approveSuggestion = async (id) => { await updateDoc(doc(db, "suggestions", id), { approved: true }); window.showNotification("Idea aprobada."); loadAdminData(); };
@@ -911,11 +935,17 @@ window.openNewsModal = async () => {
     sidebar.innerHTML = '<div style="padding:20px; text-align:center; color: var(--mac-text-secondary);">⏳ Buscando novedades...</div>';
     content.innerHTML = '<div style="display:flex; height:100%; align-items:center; justify-content:center;"><p style="color: var(--mac-text-secondary); text-align: center;">⏳ Cargando información...</p></div>';
     
-    try {
+try {
         const qNews = await getDocs(collection(db, "news"));
         let noticias = [];
         qNews.forEach(d => noticias.push({ id: d.id, ...d.data() }));
-        noticias.sort((a,b) => new Date(b.fechaIso) - new Date(a.fechaIso));
+        
+        // ORDEN INTELIGENTE PARA EL CLIENTE: 1ro Fijados, 2do por fecha
+        noticias.sort((a,b) => {
+            if (a.isPinned && !b.isPinned) return -1;
+            if (!a.isPinned && b.isPinned) return 1;
+            return new Date(b.fechaIso) - new Date(a.fechaIso);
+        });
 
         sidebar.innerHTML = '';
         content.innerHTML = '<div style="display:flex; height:100%; align-items:center; justify-content:center;"><p style="color: var(--mac-text-secondary); text-align: center;">👈 Selecciona una noticia de la izquierda para ver los detalles.</p></div>';
@@ -927,9 +957,13 @@ window.openNewsModal = async () => {
 
         noticias.forEach((noticia) => {
             const dateStr = new Date(noticia.fechaIso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+            
+            // Etiqueta visual de anclado
+            const pinnedLabel = noticia.isPinned ? `<span style="background:var(--mac-orange); color:white; font-size:9px; padding:2px 6px; border-radius:10px; margin-right:5px; font-weight: bold;">FIJADO <i class='bx bxs-pin'></i></span>` : '';
+
             const div = document.createElement('div');
             div.className = 'news-item-title';
-            div.innerHTML = `<strong>${noticia.titulo}</strong><br><span style="font-size:11px; font-weight:normal; opacity: 0.8;">${dateStr}</span>`;
+            div.innerHTML = `<strong>${noticia.titulo}</strong><br><span style="font-size:11px; font-weight:normal; opacity: 0.8; display:flex; align-items:center; margin-top: 4px;">${pinnedLabel}${dateStr}</span>`;
             div.onclick = () => window.viewNewsDetail({...noticia, fecha: dateStr}, div);
             sidebar.appendChild(div);
         });
