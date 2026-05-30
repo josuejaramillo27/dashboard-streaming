@@ -5,12 +5,12 @@
   "display": "standalone",
   "icons": [
     {
-      "src": "/AGC.png", 
+      "src": "AGC.png", 
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/AGC.png",
+      "src": "AGC.png",
       "sizes": "512x512",
       "type": "image/png"
     }
