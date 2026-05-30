@@ -42,8 +42,8 @@ function showView(viewId) {
     } else {
         document.body.classList.remove('logged-in');
     }
-
-    // CANDADO DE SEGURIDAD PARA LA BARRA INFERIOR (Ahora está dentro de la función)
+    
+    // CANDADO DE SEGURIDAD PARA LA BARRA INFERIOR
     const bottomNav = document.querySelector('.bottom-nav');
     if (bottomNav) {
         // Solo se muestra si estamos en el panel de clientes Y es un celular
@@ -1483,3 +1483,4 @@ window.showReset = showReset;
 window.doResetPassword = doResetPassword;
 window.togglePassword = togglePassword;
 // Asegúrate de agregar cualquier otra función que uses en los onclick de tu HTML
+"Arreglo de showView"
