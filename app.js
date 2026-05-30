@@ -1508,13 +1508,66 @@ const checkPublicStore = async () => {
 
 // Ejecutamos el detector apenas se lee el archivo
 checkPublicStore();
-// Al final de app.js, exporta las funciones necesarias a window
+// --- EXPORTACIÓN DE FUNCIONES AL OBJETO WINDOW ---
 window.doLogin = doLogin;
 window.doRegister = doRegister;
 window.showLogin = showLogin;
 window.showRegister = showRegister;
 window.showReset = showReset;
 window.doResetPassword = doResetPassword;
+window.doLogout = doLogout;
 window.togglePassword = togglePassword;
-// Asegúrate de agregar cualquier otra función que uses en los onclick de tu HTML
+window.loginWithGoogle = loginWithGoogle;
+window.toggleSettingsMenu = toggleSettingsMenu;
+window.togglePlatformDropdown = togglePlatformDropdown;
+window.toggleStats = toggleStats;
+window.showView = showView;
+window.closeModals = closeModals;
 
+// Funciones de Menús y Perfil
+window.openWaModal = openWaModal;
+window.saveWaMessage = saveWaMessage;
+window.openProfileModal = openProfileModal;
+window.saveProfile = saveProfile;
+window.openSuggestionModal = openSuggestionModal;
+window.sendSuggestion = sendSuggestion;
+
+// Funciones de Clientes
+window.saveClientData = saveClientData;
+window.deleteClient = deleteClient;
+window.renewClient = renewClient;
+window.startEdit = startEdit;
+window.cancelEdit = cancelEdit;
+window.viewAccountData = viewAccountData;
+window.openAccountModal = openAccountModal;
+window.confirmAccountData = confirmAccountData;
+window.sendWA = sendWA;
+window.downloadTicket = downloadTicket;
+
+// Funciones de Admin y Tienda
+window.openManageModal = openManageModal;
+window.toggleDurationFields = toggleDurationFields;
+window.toggleTempType = toggleTempType;
+window.saveManageStatus = saveManageStatus;
+window.openPlanModal = openPlanModal;
+window.savePlan = savePlan;
+window.openNewsModal = openNewsModal;
+window.viewNewsDetail = viewNewsDetail;
+window.editNews = editNews;
+window.cancelEditNews = cancelEditNews;
+window.saveNews = saveNews;
+window.deleteNews = deleteNews;
+window.openStoreModal = openStoreModal;
+window.addStoreItem = addStoreItem;
+window.renderStoreItems = renderStoreItems;
+window.deleteStoreItem = deleteStoreItem;
+window.copyStoreLink = copyStoreLink;
+window.approveSuggestion = approveSuggestion;
+window.deleteSuggestion = deleteSuggestion;
+window.vincularBot = vincularBot;
+window.mostrarPlanesSuscripcion = mostrarPlanesSuscripcion;
+window.installApp = installApp;
+window.toggleTheme = toggleTheme;
+window.exportToExcel = exportToExcel;
+window.copyExpiredList = copyExpiredList;
+window.loadMoreClients = loadMoreClients;
