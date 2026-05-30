@@ -537,7 +537,7 @@ window.saveNews = async () => {
                 titulo: title, 
                 desc: desc, 
                 img: imgUrl, 
-                fechaIso: new Date().toISOString()
+                fechaIso: new Date().toISOString(),
                 isPinned: false
             });
             window.showNotification("Noticia publicada con éxito 📢");
@@ -1576,12 +1576,3 @@ const checkPublicStore = async () => {
 
 // Ejecutamos el detector apenas se lee el archivo
 checkPublicStore();
-// Al final de app.js, exporta las funciones necesarias a window
-window.doLogin = doLogin;
-window.doRegister = doRegister;
-window.showLogin = showLogin;
-window.showRegister = showRegister;
-window.showReset = showReset;
-window.doResetPassword = doResetPassword;
-window.togglePassword = togglePassword;
-// Asegúrate de agregar cualquier otra función que uses en los onclick de tu HTML
