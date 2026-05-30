@@ -42,6 +42,17 @@ function showView(viewId) {
     } else {
         document.body.classList.remove('logged-in');
     }
+
+    // CANDADO DE SEGURIDAD PARA LA BARRA INFERIOR (Ahora está dentro de la función)
+    const bottomNav = document.querySelector('.bottom-nav');
+    if (bottomNav) {
+        // Solo se muestra si estamos en el panel de clientes Y es un celular
+        if (viewId === 'appView' && window.innerWidth <= 768) {
+            bottomNav.style.display = 'flex';
+        } else {
+            bottomNav.style.display = 'none'; // Se oculta en Login y Panel Admin
+        }
+    }
 }
     
     // CANDADO DE SEGURIDAD PARA LA BARRA INFERIOR
