@@ -363,9 +363,14 @@ body.dark-mode .btn-news-shiny:hover { background: linear-gradient(45deg, #FFCA0
 
 /* 📱 MAGIA PARA CELULARES (MÓVIL) */
 @media (max-width: 768px) {
-    /* 🔒 CANDADO 2: Solo se muestra si el usuario INICIÓ SESIÓN (.logged-in) */
+    /* 🔒 CANDADO: Solo se muestra si el body tiene la clase 'logged-in' */
     body.logged-in .bottom-nav {
         display: flex !important; 
+    }
+    
+    /* Ocultar en el login siempre */
+    #authView ~ .bottom-nav {
+        display: none !important;
     }
     
     body.logged-in {
