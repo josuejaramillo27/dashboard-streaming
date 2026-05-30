@@ -36,35 +36,21 @@ function showView(viewId) {
     document.getElementById('adminView').style.display = 'none'; 
     document.getElementById(viewId).style.display = 'block'; 
     
-    // 🔒 CANDADO: Le avisa al sistema si ya entramos al panel
     if (viewId === 'appView') {
         document.body.classList.add('logged-in');
     } else {
         document.body.classList.remove('logged-in');
     }
     
-    // CANDADO DE SEGURIDAD PARA LA BARRA INFERIOR
     const bottomNav = document.querySelector('.bottom-nav');
     if (bottomNav) {
-        // Solo se muestra si estamos en el panel de clientes Y es un celular
         if (viewId === 'appView' && window.innerWidth <= 768) {
             bottomNav.style.display = 'flex';
         } else {
-            bottomNav.style.display = 'none'; // Se oculta en Login y Panel Admin
+            bottomNav.style.display = 'none';
         }
     }
 }
-    
-    // CANDADO DE SEGURIDAD PARA LA BARRA INFERIOR
-    const bottomNav = document.querySelector('.bottom-nav');
-    if (bottomNav) {
-        // Solo se muestra si estamos en el panel de clientes Y es un celular
-        if (viewId === 'appView' && window.innerWidth <= 768) {
-            bottomNav.style.display = 'flex';
-        } else {
-            bottomNav.style.display = 'none'; // Se oculta en Login y Panel Admin
-        }
-    }
 window.showLogin = () => { document.getElementById('loginForm').style.display='flex'; document.getElementById('registerForm').style.display='none'; document.getElementById('resetForm').style.display='none'; document.getElementById('authSubtitle').innerText='Iniciar Sesión'; }
 window.showRegister = () => { document.getElementById('loginForm').style.display='none'; document.getElementById('registerForm').style.display='flex'; document.getElementById('resetForm').style.display='none'; document.getElementById('authSubtitle').innerText='Crear Cuenta'; }
 window.showReset = () => { document.getElementById('loginForm').style.display='none'; document.getElementById('registerForm').style.display='none'; document.getElementById('resetForm').style.display='flex'; document.getElementById('authSubtitle').innerText='Recuperar Contraseña'; }
