@@ -338,7 +338,7 @@
         </table>
     </div>
 
-    <h3><i class='bx bxs-megaphone'></i> Gestión de Noticias / Novedades</h3>
+ <h3><i class='bx bxs-megaphone'></i> Gestión de Noticias / Novedades</h3>
     <div class="form-grid" style="margin-bottom: 20px; background: var(--mac-gray); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border);">
         <input type="text" id="newsInputTitle" placeholder="Título de la noticia" style="background: var(--mac-surface);" required>
         <textarea id="newsInputDesc" placeholder="Descripción de la noticia, oferta o sorteo..." rows="3" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-family: inherit; grid-column: 1 / -1; resize: none;" required></textarea>
@@ -346,7 +346,8 @@
             <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Subir Imagen (Opcional):</label>
             <input type="file" id="newsInputImg" accept="image/*" style="background: var(--mac-surface); padding: 5px; font-size: 12px;">
         </div>
-        <button class="btn-primary" onclick="window.saveNews()" style="grid-column: 1 / -1;"><i class='bx bx-send'></i> Publicar Noticia a Todos</button>
+        <button id="btnSubmitNews" class="btn-primary" onclick="window.saveNews()" style="grid-column: 1 / -1;"><i class='bx bx-send'></i> Publicar Noticia a Todos</button>
+        <button id="btnCancelEditNews" class="btn-secondary" onclick="window.cancelEditNews()" style="grid-column: 1 / -1; display: none;">Cancelar Edición</button>
     </div>
 
     <div style="overflow-x:auto; margin-bottom: 40px;">
