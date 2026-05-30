@@ -867,7 +867,7 @@ window.viewNewsDetail = (noticia, element) => {
     content.innerHTML = `
         ${imgHtml}
         <h2 style="margin-top: 0; margin-bottom: 10px; font-size: 20px;">${noticia.titulo}</h2>
-        <p style="font-size: 14px; line-height: 1.6; color: var(--mac-text-main); margin-bottom: 20px;">${noticia.desc}</p>
+        <p style="font-size: 14px; line-height: 1.6; color: var(--mac-text-main); margin-bottom: 20px; white-space: pre-wrap;">${noticia.desc}</p>
     `;
 };
 
