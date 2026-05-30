@@ -1215,15 +1215,15 @@ window.requestNotificationPermission = async () => {
         
         if (permission === 'granted') {
             console.log("Permiso concedido. Obteniendo token...");
-            // AQUÍ PONDREMOS TU LLAVE PÚBLICA DE FIREBASE (VAPID KEY)
             const currentToken = await getToken(messaging, { vapidKey: 'BKBlbQcgMzLg-oCuFXjhn_2ekkAcrsGRS49RP3mKBvJDB-fPLzovUeYnNfmFi96ib5RtjJzta5nMlm7VsmSJC7k' });
             
             if (currentToken) {
-                // Si obtiene el código, lo guarda en el perfil del usuario en la base de datos
+                // MODIFICACIÓN: En lugar de fcmToken (texto), usamos fcmTokens (Lista/Array)
+                // arrayUnion asegura que si el token ya existe, no lo duplique.
                 await updateDoc(doc(db, "users", currentUser.uid), { 
-                    fcmToken: currentToken 
+                    fcmTokens: arrayUnion(currentToken) 
                 });
-                console.log("Token de notificaciones guardado con éxito.");
+                console.log("Token de notificaciones agregado a la lista con éxito.");
             } else {
                 console.log("No se pudo generar el token de registro.");
             }
