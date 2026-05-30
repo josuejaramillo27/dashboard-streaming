@@ -381,20 +381,3 @@ body.dark-mode .btn-news-shiny:hover { background: linear-gradient(45deg, #FFCA0
         display: none !important; 
     }
 }
-
-/* Forzar que la barra de navegación no bloquee los clics cuando esté oculta */
-.bottom-nav {
-    pointer-events: none; /* Por defecto no bloquea clics */
-}
-
-/* Solo habilitar clics cuando es visible */
-body.logged-in .bottom-nav {
-    pointer-events: auto; 
-    display: flex !important;
-}
-
-/* Asegurar que la capa de autenticación esté siempre por encima */
-#authView {
-    position: relative;
-    z-index: 1000;
-}
