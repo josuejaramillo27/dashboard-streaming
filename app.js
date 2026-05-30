@@ -38,7 +38,7 @@ function showView(viewId) {
     
     // 🔒 CANDADO: Le avisa al sistema si ya entramos al panel
     if (viewId === 'appView') {
-        document.body.classList.add('logged-in');
+document.body.classList.add('logged-in');
     } else {
         document.body.classList.remove('logged-in');
     }
