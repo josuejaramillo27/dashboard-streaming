@@ -345,14 +345,9 @@
         <div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 5px;">
             <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Subir Imagen (Opcional):</label>
             <input type="file" id="newsInputImg" accept="image/*" style="background: var(--mac-surface); padding: 5px; font-size: 12px;">
-<div style="grid-column: 1 / -1; display: flex; gap: 10px;">
-    <button id="btnSaveNews" class="btn-primary" onclick="window.saveNews()">
-        <i class='bx bx-send'></i> Publicar Noticia a Todos
-    </button>
-    <button id="btnCancelNewsEdit" class="btn-secondary" style="display: none;" onclick="window.cancelEditNews()">
-        Cancelar Edición
-    </button>
-</div>
+        </div>
+        <button class="btn-primary" onclick="window.saveNews()" style="grid-column: 1 / -1;"><i class='bx bx-send'></i> Publicar Noticia a Todos</button>
+    </div>
 
     <div style="overflow-x:auto; margin-bottom: 40px;">
         <table>
