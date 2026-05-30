@@ -431,44 +431,92 @@ q.forEach((d) => {
 
     // 3. Cargar Noticias (NUEVO)
     const qN = await getDocs(collection(db, "news")); const nBody = document.getElementById('adminNewsBody'); nBody.innerHTML = ''; let arrN = []; qN.forEach(d => arrN.push({ id: d.id, ...d.data() })); arrN.sort((a,b) => new Date(b.fechaIso) - new Date(a.fechaIso));
-    arrN.forEach(n => {
+arrN.forEach(n => {
         const dateStr = new Date(n.fechaIso).toLocaleDateString('es-ES');
         const imgHtml = n.img ? `<a href="${n.img}" target="_blank" style="color:var(--mac-blue); font-size:12px;">Ver Foto</a>` : '<span style="font-size:12px; color:var(--mac-text-secondary);">Sin foto</span>';
-        const tr = document.createElement('tr'); tr.innerHTML = `<td>${dateStr}</td><td><strong>${n.titulo}</strong></td><td>${imgHtml}</td><td class="actions-cell"><button class="action-btn btn-del" onclick="window.deleteNews('${n.id}')">🗑️ Borrar</button></td>`; nBody.appendChild(tr);
+        const tr = document.createElement('tr'); 
+        tr.innerHTML = `<td>${dateStr}</td><td><strong>${n.titulo}</strong></td><td>${imgHtml}</td><td class="actions-cell" style="display: flex; gap: 5px;"><button class="action-btn" style="color: var(--mac-text-main); border: 1px solid var(--mac-border); background: transparent;" onclick="window.editNews('${n.id}')"><i class='bx bx-edit-alt'></i> Editar</button> <button class="action-btn btn-del" onclick="window.deleteNews('${n.id}')">🗑️ Borrar</button></td>`; 
+        nBody.appendChild(tr);
     });
 }
 
 /* --- FUNCIONES DE ADMINISTRAR NOTICIAS --- */
+let editingNewsId = null;
+
+window.editNews = async (id) => {
+    try {
+        const docRef = doc(db, "news", id);
+        const snap = await getDoc(docRef);
+        if (snap.exists()) {
+            const data = snap.data();
+            document.getElementById('newsInputTitle').value = data.titulo;
+            document.getElementById('newsInputDesc').value = data.desc;
+            editingNewsId = id;
+            
+            document.getElementById('btnSaveNews').innerHTML = "<i class='bx bx-save'></i> Actualizar Noticia";
+            document.getElementById('btnCancelNewsEdit').style.display = 'block';
+            
+            document.getElementById('newsInputTitle').scrollIntoView({ behavior: 'smooth' });
+        }
+    } catch(e) {
+        window.showNotification("Error al cargar: " + e.message);
+    }
+};
+
+window.cancelEditNews = () => {
+    editingNewsId = null;
+    document.getElementById('newsInputTitle').value = '';
+    document.getElementById('newsInputDesc').value = '';
+    document.getElementById('newsInputImg').value = '';
+    
+    document.getElementById('btnSaveNews').innerHTML = "<i class='bx bx-send'></i> Publicar Noticia a Todos";
+    document.getElementById('btnCancelNewsEdit').style.display = 'none';
+};
+
 window.saveNews = async () => {
     const title = document.getElementById('newsInputTitle').value;
     const desc = document.getElementById('newsInputDesc').value;
     const fileInput = document.getElementById('newsInputImg');
+    
     if (!title || !desc) return window.showNotification("Falta título o descripción");
     
-    const btn = document.querySelector('#adminView .btn-primary');
-    const origText = btn.innerText; btn.innerText = "Subiendo... ⏳"; btn.disabled = true;
+    const btn = document.getElementById('btnSaveNews');
+    const origText = btn.innerHTML; 
+    btn.innerHTML = "Subiendo... ⏳"; 
+    btn.disabled = true;
 
     try {
-        let imgUrl = "";
+        let imgUrl = null;
         if (fileInput.files.length > 0) {
             const file = fileInput.files[0];
             const storageRef = ref(storage, `news/${Date.now()}_${file.name}`);
             await uploadBytes(storageRef, file);
             imgUrl = await getDownloadURL(storageRef);
         }
-        await addDoc(collection(db, "news"), { titulo: title, desc: desc, img: imgUrl, fechaIso: new Date().toISOString() });
-        window.showNotification("Noticia publicada con éxito");
-        document.getElementById('newsInputTitle').value = ''; document.getElementById('newsInputDesc').value = ''; fileInput.value = '';
-        loadAdminData(); // Recarga la tabla
-    } catch(e) { window.showNotification("Error: " + e.message); } 
-    finally { btn.innerText = origText; btn.disabled = false; }
-};
 
-window.deleteNews = async (id) => {
-    if(confirm("¿Seguro que deseas eliminar esta noticia de todos los paneles?")) {
-        await deleteDoc(doc(db, "news", id));
-        window.showNotification("Noticia eliminada");
-        loadAdminData();
+        if (editingNewsId) {
+            const updateData = { titulo: title, desc: desc };
+            if (imgUrl) updateData.img = imgUrl; // Solo actualiza la foto si seleccionaste una nueva
+            
+            await updateDoc(doc(db, "news", editingNewsId), updateData);
+            window.showNotification("Noticia actualizada con éxito");
+        } else {
+            await addDoc(collection(db, "news"), { 
+                titulo: title, 
+                desc: desc, 
+                img: imgUrl || "", 
+                fechaIso: new Date().toISOString() 
+            });
+            window.showNotification("Noticia publicada con éxito");
+        }
+        
+        window.cancelEditNews(); // Limpia el formulario y los botones
+        loadAdminData(); // Recarga la tabla para ver el cambio
+    } catch(e) { 
+        window.showNotification("Error: " + e.message); 
+    } finally { 
+        btn.innerHTML = origText; 
+        btn.disabled = false; 
     }
 };
 window.approveSuggestion = async (id) => { await updateDoc(doc(db, "suggestions", id), { approved: true }); window.showNotification("Idea aprobada."); loadAdminData(); };
