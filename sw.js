@@ -1,5 +1,5 @@
-// sw.js - Service Worker Mejorado para auto-actualización
-const VERSION = 'v2'; // Si en el futuro haces un cambio grande, cámbialo a v3, v4...
+// sw.js - Service Worker Mejorado para auto-actualización y limpieza
+const VERSION = 'v3'; // Subimos a v3 para forzar la actualización global
 
 self.addEventListener('install', (e) => {
     console.log('[Service Worker] Instalado versión:', VERSION);
@@ -8,11 +8,25 @@ self.addEventListener('install', (e) => {
 });
 
 self.addEventListener('activate', (e) => {
-    console.log('[Service Worker] Activado');
-    // Toma el control de las pestañas abiertas al instante
-    e.waitUntil(clients.claim()); 
+    console.log('[Service Worker] Activado versión:', VERSION);
+    // Destruye cualquier caché antigua y corrupta que haya quedado en los celulares
+    e.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cache) => {
+                    if (cache !== VERSION) {
+                        console.log('[Service Worker] Borrando caché antigua:', cache);
+                        return caches.delete(cache);
+                    }
+                })
+            );
+        }).then(() => clients.claim())
+    );
 });
 
 self.addEventListener('fetch', (e) => {
-    // Deja pasar las peticiones normales a internet
+    // Obliga a que siempre descargue la versión más reciente de internet
+    e.respondWith(
+        fetch(e.request).catch(() => caches.match(e.request))
+    );
 });
