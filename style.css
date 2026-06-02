@@ -381,3 +381,16 @@ body.dark-mode .btn-news-shiny:hover { background: linear-gradient(45deg, #FFCA0
         display: none !important; 
     }
 }
+
+/* --- FIX PARA EL MENSAJE FLOTANTE EN CELULARES --- */
+#toast {
+    z-index: 9999 !important; /* Asegura que el mensaje siempre esté por encima de todo */
+}
+
+/* Solo afecta a pantallas de celular (cuando aparece la barra inferior) */
+@media (max-width: 768px) {
+    #toast.show {
+        /* Empuja el mensaje hacia arriba para que no lo tape la barra de navegación */
+        bottom: 90px !important; 
+    }
+}
