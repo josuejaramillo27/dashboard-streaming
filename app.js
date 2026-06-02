@@ -1428,6 +1428,8 @@ window.openStoreModal = () => {
 window.addStoreItem = async () => {
     const plat = document.getElementById('storePlatform').value.trim();
     const price = document.getElementById('storePrice').value;
+    const desc = document.getElementById('storeDesc').value.trim(); // <-- Nuevo campo capturado
+    
     if (!plat || !price) return window.showNotification("Completa plataforma y precio");
 
     const btn = document.querySelector('#storeModal .btn-primary');
@@ -1435,13 +1437,14 @@ window.addStoreItem = async () => {
 
     try {
         let catalog = currentUserData.storeCatalog || [];
-        catalog.push({ platform: plat, price: parseFloat(price) });
+        catalog.push({ platform: plat, price: parseFloat(price), desc: desc }); // <-- Se guarda la descripción
         
         await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
         currentUserData.storeCatalog = catalog;
         
         document.getElementById('storePlatform').value = '';
         document.getElementById('storePrice').value = '';
+        document.getElementById('storeDesc').value = ''; // <-- Limpiamos el campo
         window.renderStoreItems();
         window.showNotification("Producto añadido al catálogo");
     } catch(e) { window.showNotification("Error: " + e.message); }
@@ -1464,6 +1467,7 @@ window.renderStoreItems = () => {
         div.innerHTML = `
             <div>
                 <strong style="color:var(--mac-text-main); font-size:14px;">${item.platform}</strong><br>
+                <span style="color:var(--mac-text-secondary); font-size:12px; display:block; margin-bottom:4px;">${item.desc || ''}</span>
                 <span style="color:var(--mac-green); font-size:13px; font-weight:bold;">${globalCurrency}${item.price.toFixed(2)}</span>
             </div>
             <button class="action-btn btn-del" onclick="window.deleteStoreItem(${index})"><i class='bx bx-trash'></i></button>
@@ -1551,19 +1555,20 @@ const checkPublicStore = async () => {
                 catalog.forEach(item => {
                     const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
                     
-                    // El botón manda directo al WhatsApp del distribuidor con el texto armado
+                    // ✨ EL TRUCO DE LA VENTA: Forzamos el comando exacto de compra
                     const numLimpio = data.phone.replace(/[^\d+]/g, '');
-                    const msg = encodeURIComponent(`Hola ${data.name}, deseo adquirir la cuenta de *${item.platform}* por el precio de *${priceStr}*. ¿A dónde deposito?`);
+                    const msg = encodeURIComponent(`/comprar ${item.platform.toLowerCase()}`);
                     const waLink = `https://wa.me/${numLimpio}?text=${msg}`;
 
                     const card = document.createElement('div');
                     card.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:var(--mac-gray); padding:15px 20px; border-radius:16px; border:1px solid var(--mac-border); box-shadow:0 4px 6px rgba(0,0,0,0.1);";
                     card.innerHTML = `
-                        <div>
+                        <div style="flex: 1; padding-right: 15px;">
                             <strong style="color:var(--mac-text-main); font-size:16px;">${item.platform}</strong><br>
+                            <span style="color:var(--mac-text-secondary); font-size:13px; display:block; margin:4px 0; line-height:1.3;">${item.desc || ''}</span>
                             <span style="color:var(--mac-green); font-size:18px; font-weight:900;">${priceStr}</span>
                         </div>
-                        <a href="${waLink}" target="_blank" style="text-decoration:none; background:#25D366; color:white; padding:10px 20px; border-radius:20px; font-weight:bold; font-size:14px; box-shadow:0 4px 10px rgba(37,211,102,0.3);"><i class='bx bxl-whatsapp'></i> Comprar</a>
+                        <a href="${waLink}" target="_blank" style="text-decoration:none; background:#25D366; color:white; padding:10px 20px; border-radius:20px; font-weight:bold; font-size:14px; box-shadow:0 4px 10px rgba(37,211,102,0.3); white-space: nowrap;"><i class='bx bxl-whatsapp'></i> Comprar</a>
                     `;
                     catalogBox.appendChild(card);
                 });
