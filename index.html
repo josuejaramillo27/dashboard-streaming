@@ -686,6 +686,52 @@
         <h3 style="margin-bottom: 5px;"><i class='bx bx-store-alt'></i> Mi Tiendita Web</h3>
         <p style="font-size: 13px; color: var(--mac-text-secondary); margin-top: 0;">Configura tu catálogo público. Tus clientes verán esto y comprarán directo a tu WhatsApp.</p>
         
+        <div id="externalCatalogSetup" style="background: rgba(0, 122, 255, 0.1); border: 1px dashed var(--mac-blue); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+            <label style="font-size: 12px; font-weight: bold; color: var(--mac-blue);">¿Ya tienes un catálogo propio? Ingrésalo aquí:</label>
+            <div style="display: flex; gap: 10px; margin-top: 8px;">
+                <input type="url" id="storeExternalInput" placeholder="Ej: https://misitio.com/catalogo" style="flex: 1; background: var(--mac-surface);">
+                <button class="btn-primary" style="width: auto; padding: 0 15px;" onclick="window.saveExternalStore()"><i class='bx bx-save'></i></button>
+            </div>
+            <p style="font-size: 11px; color: var(--mac-text-secondary); margin-top: 5px; margin-bottom: 0;">Al guardar, la tiendita interna se desactivará.</p>
+        </div>
+
+        <div id="externalCatalogActive" style="display: none; background: rgba(52, 199, 89, 0.1); border: 1px solid var(--mac-green); padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: center;">
+            <h4 style="color: var(--mac-green); margin: 0 0 10px 0;"><i class='bx bx-check-circle'></i> Catálogo Externo Activado</h4>
+            <p style="font-size: 13px; color: var(--mac-text-main); margin-bottom: 15px; word-break: break-all;" id="activeExternalLinkText"></p>
+            <button class="btn-secondary" style="width: 100%; border: 1px solid var(--mac-red); color: var(--mac-red); background: transparent;" onclick="window.removeExternalStore()">🗑️ Eliminar y usar Tiendita Interna</button>
+        </div>
+
+        <div id="internalCatalogSection">
+            <div style="background: var(--mac-bg); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Añadir un producto:</label>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="storePlatform" placeholder="Ej: Netflix 1 Pantalla" style="flex: 2;">
+                        <input type="number" id="storePrice" placeholder="Precio" style="flex: 1;">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="storeDesc" placeholder="Descripción (Ej: 1 Perfil, incluye ESPN)" style="flex: 1;">
+                        <button class="btn-primary" style="width: auto; padding: 0 20px;" onclick="window.addStoreItem()"><i class='bx bx-plus'></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="storeItemsList" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; margin-bottom: 15px;">
+            </div>
+
+            <div style="border-top: 1px dashed var(--mac-border); padding-top: 15px;">
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-blue);">Tu Link Público:</label>
+                <input type="text" id="storeLinkInput" readonly style="color: var(--mac-text-secondary); background: var(--mac-surface);">
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button class="btn-primary" id="btnCopyInternalLink" onclick="window.copyStoreLink()"><i class='bx bx-copy'></i> Copiar Link</button>
+            <button class="btn-secondary" onclick="window.closeModals()">Cerrar</button>
+        </div>
+    </div>
+</div>
+        
         <div style="background: var(--mac-bg); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
             <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Añadir un producto:</label>
 <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
