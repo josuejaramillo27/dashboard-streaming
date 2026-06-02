@@ -718,7 +718,50 @@ window.saveClientData = async () => {
 };
 
 window.deleteClient = async (id) => { if(confirm('¿Borrar registro?')) { await deleteDoc(doc(db, "clients", id)); loadUserClients(); } };
-window.renewClient = async (id) => { if(confirm('¿Renovar 1 mes desde HOY?')) { const h = new Date(); h.setMonth(h.getMonth() + 1); const str = `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}-${String(h.getDate()).padStart(2,'0')}`; await updateDoc(doc(db, "clients", id), { date: str }); window.showNotification("Renovado"); loadUserClients(); } };
+window.renewClient = async (id) => { 
+    if(confirm('¿Renovar 1 mes desde HOY?')) { 
+        // 1. Buscamos los datos actuales del cliente antes de renovarlo
+        const c = clients.find(x => x.id === id);
+        if (!c) return;
+
+        // 2. Calculamos la nueva fecha matemática para Firebase
+        const h = new Date(); 
+        h.setMonth(h.getMonth() + 1); 
+        const str = `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}-${String(h.getDate()).padStart(2,'0')}`; 
+        
+        // Calculamos la fecha en formato legible para el mensaje de WhatsApp (Ej: 02/07/2026)
+        const nuevaFechaBonita = h.toLocaleDateString('es-ES'); 
+
+        try {
+            // 3. Actualizamos la base de datos (Tu código original)
+            await updateDoc(doc(db, "clients", id), { date: str }); 
+            window.showNotification("Renovado"); 
+            loadUserClients(); 
+
+            // 4. MAGIA AUTOMÁTICA: Llamamos al bot en DigitalOcean
+            // Solo intentamos enviar el mensaje si el usuario tiene el plan Pro o Elite
+            const plan = currentUserData.plan_actual || 'demo';
+            if (plan === 'pro' || plan === 'elite') {
+                const datosRenovacion = {
+                    distribuidorId: currentUser.uid,
+                    numeroCliente: c.phone,
+                    plataforma: c.platform,
+                    nuevaFecha: nuevaFechaBonita
+                };
+                
+                fetch('https://bot.panelagc.com/api/confirmar-renovacion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datosRenovacion)
+                })
+                .then(res => console.log("Señal de renovación enviada al servidor bot."))
+                .catch(err => console.error("Error de red al contactar al bot:", err));
+            }
+        } catch (error) {
+            window.showNotification("Error al renovar: " + error.message);
+        }
+    } 
+};
 
 window.startEdit = (id) => {
     editingClientId = id; const c = clients.find(x => x.id === id);
