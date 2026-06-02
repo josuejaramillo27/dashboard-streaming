@@ -22,8 +22,8 @@ messaging.onBackgroundMessage(function(payload) {
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    // Aquí puedes poner el link a la cara de Akaza para que salga en el celular
-    icon: 'https://firebasestorage.googleapis.com/v0/b/dashboard-streaming-akaza.appspot.com/o/news%2Ftu-logo-aqui.png?alt=media' 
+    // Aquí recibimos el logo personalizado o el de AGC
+    icon: payload.notification.icon || 'https://panelagc.com/AGC.png' 
   };
 
   //self.registration.showNotification(notificationTitle, notificationOptions);
