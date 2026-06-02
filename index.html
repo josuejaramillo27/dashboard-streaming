@@ -687,10 +687,15 @@
         
         <div style="background: var(--mac-bg); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
             <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Añadir un producto:</label>
-            <div style="display: flex; gap: 10px; margin-top: 5px;">
-                <input type="text" id="storePlatform" placeholder="Ej: Netflix 1 Pantalla" style="flex: 2;">
-                <input type="number" id="storePrice" placeholder="Precio" style="flex: 1;">
-                <button class="btn-primary" style="width: auto;" onclick="window.addStoreItem()"><i class='bx bx-plus'></i></button>
+<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="storePlatform" placeholder="Ej: Netflix 1 Pantalla" style="flex: 2;">
+                    <input type="number" id="storePrice" placeholder="Precio" style="flex: 1;">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="storeDesc" placeholder="Descripción (Ej: 1 Perfil, incluye ESPN)" style="flex: 1;">
+                    <button class="btn-primary" style="width: auto; padding: 0 20px;" onclick="window.addStoreItem()"><i class='bx bx-plus'></i></button>
+                </div>
             </div>
         </div>
 
