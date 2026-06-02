@@ -731,36 +731,7 @@
         </div>
     </div>
 </div>
-        
-        <div style="background: var(--mac-bg); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Añadir un producto:</label>
-<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="storePlatform" placeholder="Ej: Netflix 1 Pantalla" style="flex: 2;">
-                    <input type="number" id="storePrice" placeholder="Precio" style="flex: 1;">
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="storeDesc" placeholder="Descripción (Ej: 1 Perfil, incluye ESPN)" style="flex: 1;">
-                    <button class="btn-primary" style="width: auto; padding: 0 20px;" onclick="window.addStoreItem()"><i class='bx bx-plus'></i></button>
-                </div>
-            </div>
-        </div>
-
-        <div id="storeItemsList" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; margin-bottom: 15px;">
-            </div>
-
-        <div style="border-top: 1px dashed var(--mac-border); padding-top: 15px;">
-            <label style="font-size: 12px; font-weight: bold; color: var(--mac-blue);">Tu Link Público:</label>
-            <input type="text" id="storeLinkInput" readonly style="color: var(--mac-text-secondary); background: var(--mac-surface);">
-        </div>
-
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button class="btn-primary" onclick="window.copyStoreLink()"><i class='bx bx-copy'></i> Copiar Link</button>
-            <button class="btn-secondary" onclick="window.closeModals()">Cerrar</button>
-        </div>
-    </div>
-</div>
-
+    
 <div class="container" id="publicStoreView" style="display: none; max-width: 500px; margin: 40px auto; padding: 30px 20px;">
     <div style="text-align: center; margin-bottom: 30px;">
         <img id="publicStoreLogo" src="" style="width: 100px; height: 100px; border-radius: 20px; object-fit: cover; box-shadow: 0 10px 20px rgba(0,0,0,0.3); display: none; margin: 0 auto 15px auto;">
