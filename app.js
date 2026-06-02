@@ -273,8 +273,7 @@ window.openProfileModal = () => {
     document.getElementById('editProfileCountry').value = currentUserData.country || ''; 
     document.getElementById('editProfilePhone').value = currentUserData.phone || ''; 
     document.getElementById('editProfileAlias').value = currentUserData.storeAlias || ''; 
-    document.getElementById('profileModal').style.display = 'flex';
-    document.getElementById('editProfileExternalStore').value = currentUserData.externalStoreUrl || '';
+    document.getElementById('profileModal').style.display = 'flex'; 
 };
 
 window.saveProfile = async () => { 
@@ -300,16 +299,12 @@ window.saveProfile = async () => {
         let rawAlias = document.getElementById('editProfileAlias').value;
         let finalAlias = rawAlias.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
-        const externalStore = document.getElementById('editProfileExternalStore').value.trim();
-
         await updateDoc(doc(db, "users", currentUser.uid), { 
             name: name, country: country, currency: getCurrencyForCountry(country), 
-            phone: phone, logoUrl: logoUrl, storeAlias: finalAlias,
-            externalStoreUrl: externalStore // <-- NUEVO CAMPO
+            phone: phone, logoUrl: logoUrl, storeAlias: finalAlias 
         }); 
         
-        currentUserData.storeAlias = finalAlias;
-        currentUserData.externalStoreUrl = externalStore; // <-- ACTUALIZA MEMORIA
+        currentUserData.storeAlias = finalAlias; // Actualizamos en memoria 
         
         currentUserData.name = name;
         currentUserData.country = country;
