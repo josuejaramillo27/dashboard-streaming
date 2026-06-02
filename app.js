@@ -1392,7 +1392,7 @@ window.checkNewNews = async () => {
    MÓDULO: MI TIENDITA (EXCLUSIVO PLAN PRO)
 ========================================== */
 
-// 1. EL CANDADO DE SEGURIDAD (Solo PRO)
+// REEMPLAZA TU FUNCIÓN ACTUAL POR ESTA:
 window.openStoreModal = () => {
     const plan = currentUserData.plan_actual || 'demo';
     
@@ -1414,14 +1414,69 @@ window.openStoreModal = () => {
         return;
     }
 
-    // Si es PRO, preparamos su link único y abrimos
+    // Configurar el link interno por si lo necesita
     const aliasOrUid = currentUserData.storeAlias || currentUser.uid;
     const myUrl = window.location.origin + window.location.pathname + "?tienda=" + aliasOrUid;
     document.getElementById('storeLinkInput').value = myUrl;
     
-    // ¡ESTAS SON LAS DOS LÍNEAS QUE FALTABAN PARA QUE SE ABRA LA VENTANA!
-    window.renderStoreItems();
+    // --- NUEVO: LÓGICA PARA OCULTAR/MOSTRAR SEGÚN EL CATÁLOGO EXTERNO ---
+    const externalUrl = currentUserData.externalStoreUrl;
+    
+    if (externalUrl && externalUrl.trim() !== '') {
+        // SI TIENE LINK EXTERNO: Ocultar todo lo interno
+        document.getElementById('externalCatalogSetup').style.display = 'none';
+        document.getElementById('internalCatalogSection').style.display = 'none';
+        document.getElementById('btnCopyInternalLink').style.display = 'none';
+        
+        document.getElementById('externalCatalogActive').style.display = 'block';
+        document.getElementById('activeExternalLinkText').innerText = externalUrl;
+    } else {
+        // SI NO TIENE: Mostrar la tiendita normal
+        document.getElementById('externalCatalogSetup').style.display = 'block';
+        document.getElementById('internalCatalogSection').style.display = 'block';
+        document.getElementById('btnCopyInternalLink').style.display = 'block';
+        
+        document.getElementById('externalCatalogActive').style.display = 'none';
+        window.renderStoreItems();
+    }
+
     document.getElementById('storeModal').style.display = 'flex';
+};
+
+// PEGA ESTAS DOS FUNCIONES NUEVAS JUSTO DEBAJO:
+
+window.saveExternalStore = async () => {
+    const url = document.getElementById('storeExternalInput').value.trim();
+    if (!url) return window.showNotification("Por favor, ingresa un link válido.");
+    if (!url.startsWith('http')) return window.showNotification("⚠️ El link debe empezar con http:// o https://");
+    
+    try {
+        await updateDoc(doc(db, "users", currentUser.uid), { externalStoreUrl: url });
+        currentUserData.externalStoreUrl = url; // Actualizamos la memoria
+        
+        document.getElementById('storeExternalInput').value = '';
+        window.showNotification("¡Catálogo externo vinculado con éxito! 🔗");
+        
+        // Recargamos el modal para que se apliquen los cambios visuales
+        window.openStoreModal(); 
+    } catch(e) { 
+        window.showNotification("Error: " + e.message); 
+    }
+};
+
+window.removeExternalStore = async () => {
+    try {
+        // Borramos el campo en Firebase
+        await updateDoc(doc(db, "users", currentUser.uid), { externalStoreUrl: null });
+        currentUserData.externalStoreUrl = null; // Limpiamos la memoria
+        
+        window.showNotification("Catálogo desvinculado. Tiendita interna reactivada 🏪");
+        
+        // Recargamos el modal
+        window.openStoreModal();
+    } catch(e) { 
+        window.showNotification("Error: " + e.message); 
+    }
 };
 
 // 2. GESTIÓN DEL CATÁLOGO INTERNO
