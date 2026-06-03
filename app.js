@@ -247,20 +247,29 @@ window.closeModals = () => {
 /* --- CONFIGURACIÓN DE WHATSAPP Y PAGOS --- */
 window.openWaModal = () => { 
     const defaultMsg = "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*. Para renovar, usa estos datos:\n\n{pago}"; 
+    const defaultDelivery = `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tu nueva cuenta de *{plataforma}*:\n\n📧 *Correo:* {correo}\n🔑 *Clave:* {pass}\n📌 *PIN:* {pin}\n\n📅 *Vence el:* {fecha}\n\n⚠️ *Reglas:* {reglas}\n\n¡Que disfrutes el contenido! 🍿`;
+
     document.getElementById('editWaMessage').value = currentUserData.waTemplate || defaultMsg; 
+    document.getElementById('editWaDeliveryMessage').value = currentUserData.waDeliveryMessage || defaultDelivery; 
     document.getElementById('editWaPayment').value = currentUserData.waPaymentInfo || ''; 
+    
     document.getElementById('waModal').style.display = 'flex'; 
 };
+
 window.saveWaMessage = async () => { 
     const btn = document.querySelector('#waModal .btn-primary');
     btn.innerText = "Guardando..."; btn.disabled = true;
     try { 
         await updateDoc(doc(db, "users", currentUser.uid), { 
             waTemplate: document.getElementById('editWaMessage').value,
+            waDeliveryMessage: document.getElementById('editWaDeliveryMessage').value,
             waPaymentInfo: document.getElementById('editWaPayment').value 
         }); 
+        
         currentUserData.waTemplate = document.getElementById('editWaMessage').value;
+        currentUserData.waDeliveryMessage = document.getElementById('editWaDeliveryMessage').value;
         currentUserData.waPaymentInfo = document.getElementById('editWaPayment').value;
+        
         window.showNotification("Configuración de WhatsApp guardada."); 
         window.closeModals();
     } catch(e) { 
