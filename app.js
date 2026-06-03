@@ -1602,17 +1602,49 @@ window.copyStoreLink = () => {
     const link = document.getElementById('storeLinkInput').value;
     navigator.clipboard.writeText(link).then(() => window.showNotification("¡Link copiado! Pégalo en tu Instagram/WhatsApp."));
 };
+
+// --- SISTEMA DE REGLAS POR PLATAFORMA ---
+window.openRulesModal = () => {
+    document.getElementById('rulesModal').style.display = 'flex';
+    window.loadPlatformRule();
+};
+
+window.loadPlatformRule = () => {
+    const p = document.getElementById('rulePlatformSelect').value;
+    const rules = currentUserData.platformRules || {};
+    document.getElementById('ruleText').value = rules[p] || '';
+};
+
+window.savePlatformRule = async () => {
+    const p = document.getElementById('rulePlatformSelect').value;
+    const txt = document.getElementById('ruleText').value.trim();
+    let rules = currentUserData.platformRules || {};
+    rules[p] = txt;
+    
+    try {
+        const btn = document.querySelector('#rulesModal .btn-primary');
+        btn.innerText = "Guardando...";
+        await updateDoc(doc(db, "users", currentUser.uid), { platformRules: rules });
+        currentUserData.platformRules = rules;
+        window.showNotification("✅ Regla de " + p + " guardada.");
+        btn.innerText = "Guardar Regla";
+    } catch(e) {
+        window.showNotification("Error: " + e.message);
+    }
+};
+// ----------------------------------------
+
 /* ==========================================
    MÓDULO DE INVENTARIO (CUENTAS LIBRES)
 ========================================== */
 
 window.addInventoryAccount = async () => {
-    const platform = document.getElementById('invPlatform').value.trim();
+    const platform = document.getElementById('invPlatform').value;
+    const type = document.getElementById('invType').value;
     const email = document.getElementById('invEmail').value.trim();
     const pass = document.getElementById('invPass').value.trim();
+    const profile = document.getElementById('invProfile').value.trim() || 'N/A';
     const pin = document.getElementById('invPin').value.trim() || 'N/A';
-    const profile = document.getElementById('invProfile').value.trim() || '1';
-    const rules = document.getElementById('invRules').value.trim() || 'Uso personal, no modificar datos.';
 
     if (!platform || !email || !pass) {
         return window.showNotification("Plataforma, Correo y Contraseña son obligatorios.");
@@ -1625,17 +1657,16 @@ window.addInventoryAccount = async () => {
         let stock = currentUserData.inventory || [];
         const accountId = 'acc_' + Date.now();
         
-        stock.push({ id: accountId, platform, email, pass, profile, pin, rules, status: 'libre' });
+        // Guardamos el tipo (Completa o Perfil)
+        stock.push({ id: accountId, platform, type, email, pass, profile, pin, status: 'libre' });
 
         await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
         currentUserData.inventory = stock;
 
-        document.getElementById('invPlatform').value = '';
         document.getElementById('invEmail').value = '';
         document.getElementById('invPass').value = '';
-        document.getElementById('invPin').value = '';
         document.getElementById('invProfile').value = '';
-        document.getElementById('invRules').value = '';
+        document.getElementById('invPin').value = '';
 
         window.showNotification("✅ Cuenta añadida al stock");
         window.renderInventory();
@@ -1661,17 +1692,21 @@ window.renderInventory = () => {
     cuentasLibres.forEach(item => {
         const div = document.createElement('div');
         div.style.cssText = "background:var(--mac-surface); padding:12px; border-radius:8px; border:1px solid var(--mac-border); display:flex; justify-content:space-between; align-items:center;";
+const tipoBadge = item.type === 'Completa' ? 
+            `<span style="background:var(--mac-orange); color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px; font-weight:bold;">⭐ COMPLETA</span>` : 
+            `<span style="background:var(--mac-blue); color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px; font-weight:bold;">👤 PERFIL</span>`;
+
         div.innerHTML = `
             <div>
                 <strong style="color:var(--mac-text-main); font-size:15px;">${item.platform}</strong>
-                <span style="background:var(--mac-green); color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px;">STOCK</span>
+                ${tipoBadge}
                 <div style="color:var(--mac-text-secondary); font-size:12px; margin-top:4px;">
                     📧 ${item.email}<br>
-                    🔐 ${item.pass} | 👤 Perfil: ${item.profile} | 📌 PIN: ${item.pin}
+                    🔐 ${item.pass} | 👤: ${item.profile} | 📌: ${item.pin}
                 </div>
             </div>
             <button class="action-btn btn-del" onclick="window.deleteInventoryAccount('${item.id}')"><i class='bx bx-trash'></i></button>
-        `;
+        `;;
         list.appendChild(div);
     });
 };
@@ -1718,7 +1753,7 @@ window.openPedidosModal = async () => {
             // Creamos un selector (desplegable) con las cuentas disponibles en el inventario
             let opcionesCuentas = `<option value="">-- Selecciona una cuenta para entregar --</option>`;
             inventarioLimpio.forEach(acc => {
-                opcionesCuentas += `<option value="${acc.id}">[${acc.platform}] ${acc.email}</option>`;
+                opcionesCuentas += `<option value="${acc.id}">[${acc.platform} - ${acc.type}] ${acc.email} ${acc.type === 'Perfil' ? '(P: '+acc.profile+')' : ''}</option>`;
             });
 
             const div = document.createElement('div');
@@ -1811,16 +1846,21 @@ window.aprobarVenta = async (pedidoId, numeroCliente, selectId) => {
         // E. Cambiar el ticket a aprobado
         await updateDoc(doc(db, "pedidos", pedidoId), { estado: "aprobado" });
 
+        
+// Extraer la regla de la plataforma configurada (o un mensaje genérico si no hay)
+        const rulesDB = currentUserData.platformRules || {};
+        const reglaAutomatica = rulesDB[cuentaSeleccionada.platform] || "Uso personal, no modificar los datos de acceso.";
+
         // F. 🔥 EL DISPARO A DIGITAL OCEAN 🔥
         const payloadEntrega = {
             distribuidorId: currentUser.uid,
-            numeroCliente: numeroCliente, // Se manda crudo, el backend lo limpia
+            numeroCliente: numeroCliente, 
             plataforma: cuentaSeleccionada.platform,
-            profile: cuentaSeleccionada.profile,
+            profile: cuentaSeleccionada.profile || "1",
             email: cuentaSeleccionada.email,
             pass: cuentaSeleccionada.pass,
             pin: cuentaSeleccionada.pin,
-            rules: cuentaSeleccionada.rules,
+            rules: reglaAutomatica, // <--- INYECTA LA REGLA AUTOMÁTICA AQUÍ
             fechaVencimiento: dateWhatsApp,
             mensajeEntrega: currentUserData.waDeliveryMessage || "" 
         };
