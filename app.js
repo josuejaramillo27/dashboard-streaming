@@ -1793,7 +1793,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente, selectId) => {
             accountEmail: cuentaSeleccionada.email,      
             accountPassword: cuentaSeleccionada.pass,    
             accountPin: cuentaSeleccionada.pin,          
-            accountProfile: cuentaSeleccionada.profile, 
+            accountProfile: cuentaSeleccionada.profile || "1",
             accountUnits: 1,
             cost: 0,
             price: 0,
