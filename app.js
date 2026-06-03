@@ -222,6 +222,7 @@ onAuthStateChanged(auth, async (user) => {
                         loadUserClients();
                        window.checkNewNews();
                         window.requestNotificationPermission(); // Pide permiso al distribuidor
+                        window.renderInventory();
                     } 
                     else { await signOut(auth); window.showNotification("Tu cuenta está suspendida o pendiente."); showView('authView'); } 
                 }
@@ -1588,7 +1589,91 @@ window.copyStoreLink = () => {
     const link = document.getElementById('storeLinkInput').value;
     navigator.clipboard.writeText(link).then(() => window.showNotification("¡Link copiado! Pégalo en tu Instagram/WhatsApp."));
 };
+/* ==========================================
+   MÓDULO DE INVENTARIO (CUENTAS LIBRES)
+========================================== */
 
+window.addInventoryAccount = async () => {
+    const platform = document.getElementById('invPlatform').value.trim();
+    const email = document.getElementById('invEmail').value.trim();
+    const pass = document.getElementById('invPass').value.trim();
+    const pin = document.getElementById('invPin').value.trim() || 'N/A';
+    const rules = document.getElementById('invRules').value.trim() || 'Uso personal, no modificar datos.';
+
+    if (!platform || !email || !pass) {
+        return window.showNotification("Plataforma, Correo y Contraseña son obligatorios.");
+    }
+
+    const btn = document.querySelector('#inventoryModal .btn-primary');
+    btn.innerHTML = "⏳ Guardando..."; btn.disabled = true;
+
+    try {
+        let stock = currentUserData.inventory || [];
+        const accountId = 'acc_' + Date.now();
+        
+        stock.push({ id: accountId, platform, email, pass, pin, rules, status: 'libre' });
+
+        await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
+        currentUserData.inventory = stock;
+
+        document.getElementById('invPlatform').value = '';
+        document.getElementById('invEmail').value = '';
+        document.getElementById('invPass').value = '';
+        document.getElementById('invPin').value = '';
+        document.getElementById('invRules').value = '';
+
+        window.showNotification("✅ Cuenta añadida al stock");
+        window.renderInventory();
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
+    } finally {
+        btn.innerHTML = "<i class='bx bx-save'></i> Guardar en stock"; btn.disabled = false;
+    }
+};
+
+window.renderInventory = () => {
+    const list = document.getElementById('inventoryList');
+    if (!list) return; // Por si el HTML aún no carga
+    list.innerHTML = '';
+    const stock = currentUserData.inventory || [];
+    const cuentasLibres = stock.filter(item => item.status === 'libre');
+
+    if (cuentasLibres.length === 0) {
+        list.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); font-size:13px; margin-top:20px;">Tu inventario está vacío.</p>';
+        return;
+    }
+
+    cuentasLibres.forEach(item => {
+        const div = document.createElement('div');
+        div.style.cssText = "background:var(--mac-surface); padding:12px; border-radius:8px; border:1px solid var(--mac-border); display:flex; justify-content:space-between; align-items:center;";
+        div.innerHTML = `
+            <div>
+                <strong style="color:var(--mac-text-main); font-size:15px;">${item.platform}</strong>
+                <span style="background:var(--mac-green); color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px;">STOCK</span>
+                <div style="color:var(--mac-text-secondary); font-size:12px; margin-top:4px;">
+                    📧 ${item.email}<br>
+                    🔐 ${item.pass} | 📌 PIN: ${item.pin}
+                </div>
+            </div>
+            <button class="action-btn btn-del" onclick="window.deleteInventoryAccount('${item.id}')"><i class='bx bx-trash'></i></button>
+        `;
+        list.appendChild(div);
+    });
+};
+
+window.deleteInventoryAccount = async (id) => {
+    if (!confirm("¿Eliminar esta cuenta del inventario?")) return;
+    try {
+        let stock = currentUserData.inventory || [];
+        stock = stock.filter(item => item.id !== id);
+        await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
+        currentUserData.inventory = stock;
+        window.renderInventory();
+        window.showNotification("🗑️ Cuenta eliminada");
+    } catch (e) {
+        window.showNotification("Error al eliminar: " + e.message);
+    }
+};
 // 3. EL DETECTOR DEL CLIENTE PÚBLICO (MAGIA SPA)
 // Esta función revisa si alguien entró usando el link de "Tiendita"
 const checkPublicStore = async () => {
