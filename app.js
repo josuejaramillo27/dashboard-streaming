@@ -1607,6 +1607,7 @@ window.addInventoryAccount = async () => {
     const email = document.getElementById('invEmail').value.trim();
     const pass = document.getElementById('invPass').value.trim();
     const pin = document.getElementById('invPin').value.trim() || 'N/A';
+    const profile = document.getElementById('invProfile').value.trim() || '1';
     const rules = document.getElementById('invRules').value.trim() || 'Uso personal, no modificar datos.';
 
     if (!platform || !email || !pass) {
@@ -1620,7 +1621,7 @@ window.addInventoryAccount = async () => {
         let stock = currentUserData.inventory || [];
         const accountId = 'acc_' + Date.now();
         
-        stock.push({ id: accountId, platform, email, pass, pin, rules, status: 'libre' });
+        stock.push({ id: accountId, platform, email, pass, profile, pin, rules, status: 'libre' });
 
         await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
         currentUserData.inventory = stock;
@@ -1629,6 +1630,7 @@ window.addInventoryAccount = async () => {
         document.getElementById('invEmail').value = '';
         document.getElementById('invPass').value = '';
         document.getElementById('invPin').value = '';
+        document.getElementById('invProfile').value = '';
         document.getElementById('invRules').value = '';
 
         window.showNotification("✅ Cuenta añadida al stock");
@@ -1661,7 +1663,7 @@ window.renderInventory = () => {
                 <span style="background:var(--mac-green); color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px;">STOCK</span>
                 <div style="color:var(--mac-text-secondary); font-size:12px; margin-top:4px;">
                     📧 ${item.email}<br>
-                    🔐 ${item.pass} | 📌 PIN: ${item.pin}
+                    🔐 ${item.pass} | 👤 Perfil: ${item.profile} | 📌 PIN: ${item.pin}
                 </div>
             </div>
             <button class="action-btn btn-del" onclick="window.deleteInventoryAccount('${item.id}')"><i class='bx bx-trash'></i></button>
@@ -1787,7 +1789,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente, selectId) => {
             accountEmail: cuentaSeleccionada.email,      
             accountPassword: cuentaSeleccionada.pass,    
             accountPin: cuentaSeleccionada.pin,          
-            accountProfile: "1", 
+            accountProfile: cuentaSeleccionada.profile, 
             accountUnits: 1,
             cost: 0,
             price: 0,
