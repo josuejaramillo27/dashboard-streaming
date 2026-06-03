@@ -1755,32 +1755,37 @@ window.aprobarVenta = async (pedidoId, numeroCliente, selectId) => {
     try {
         window.showNotification("⏳ Procesando entrega...");
 
-        // A. Obtener datos de la cuenta seleccionada del inventario
+        // A. Obtener datos de la cuenta
         let stock = currentUserData.inventory || [];
         const cuentaSeleccionada = stock.find(c => c.id === cuentaId);
-        
         if (!cuentaSeleccionada) return window.showNotification("Error: Cuenta no encontrada");
 
-        // B. Calcular la fecha de vencimiento (+ 1 Mes desde HOY)
+        // B. Calcular fechas
         const h = new Date(); 
         h.setMonth(h.getMonth() + 1); 
         const dateFirebase = `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}-${String(h.getDate()).padStart(2,'0')}`; 
         const dateWhatsApp = h.toLocaleDateString('es-ES'); 
 
-        // C. Crear al cliente en tu base de datos general (Para que le lleguen los recordatorios)
+        // FIX: Formatear el número para que en la tabla del panel se vea bonito (Ej: +51999...)
+        const numeroBonito = "+" + numeroCliente.split('@')[0].split(':')[0];
+
+        // C. Crear al cliente con las variables CORRECTAS de tu base de datos
         await addDoc(collection(db, "clients"), {
             userId: currentUser.uid,
-            name: "Cliente Nuevo", // Nombre genérico, el vendedor lo puede editar después
-            phone: numeroCliente,
+            name: "Cliente Nuevo", 
+            phone: numeroBonito, 
             platform: cuentaSeleccionada.platform,
-            email: cuentaSeleccionada.email,
-            password: cuentaSeleccionada.pass,
-            pin: cuentaSeleccionada.pin,
-            profile: "1", // Por defecto
+            accountEmail: cuentaSeleccionada.email,      
+            accountPassword: cuentaSeleccionada.pass,    
+            accountPin: cuentaSeleccionada.pin,          
+            accountProfile: "1", 
+            accountUnits: 1,
+            cost: 0,
+            price: 0,
             date: dateFirebase
         });
 
-        // D. Marcar la cuenta como "vendida" en el inventario para que ya no salga libre
+        // D. Descontar la cuenta del inventario
         stock = stock.map(item => {
             if (item.id === cuentaId) return { ...item, status: 'vendida' };
             return item;
@@ -1788,34 +1793,34 @@ window.aprobarVenta = async (pedidoId, numeroCliente, selectId) => {
         await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
         currentUserData.inventory = stock;
 
-        // E. Cambiar el estado del pedido a aprobado
+        // E. Cambiar el ticket a aprobado
         await updateDoc(doc(db, "pedidos", pedidoId), { estado: "aprobado" });
 
-        // F. 🔥 EL DISPARO A DIGITAL OCEAN (El bot manda el WhatsApp)
+        // F. 🔥 EL DISPARO A DIGITAL OCEAN 🔥
         const payloadEntrega = {
             distribuidorId: currentUser.uid,
-            numeroCliente: numeroCliente,
+            numeroCliente: numeroCliente, // Se manda crudo, el backend lo limpia
             plataforma: cuentaSeleccionada.platform,
             email: cuentaSeleccionada.email,
             pass: cuentaSeleccionada.pass,
             pin: cuentaSeleccionada.pin,
             rules: cuentaSeleccionada.rules,
             fechaVencimiento: dateWhatsApp,
-            mensajeEntrega: currentUserData.waDeliveryMessage || "" // Mensaje personalizado si lo tiene
+            mensajeEntrega: currentUserData.waDeliveryMessage || "" 
         };
 
         fetch('https://bot.panelagc.com/api/entregar-cuenta', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payloadEntrega)
-        }).then(res => console.log("Señal de entrega enviada al bot"))
-          .catch(err => console.error("Error contactando al bot:", err));
+        }).then(res => console.log("Señal de entrega procesada por el servidor"))
+          .catch(err => console.error("Error de red al contactar al bot:", err));
 
         // G. Limpieza visual
         window.showNotification("✅ ¡Cuenta entregada con éxito!");
-        window.renderInventory(); // Actualizar inventario visual
-        loadUserClients(); // Actualizar lista de clientes
-        window.openPedidosModal(); // Recargar la ventana de pedidos (para que desaparezca el actual)
+        window.renderInventory(); 
+        loadUserClients(); 
+        window.openPedidosModal(); 
 
     } catch (e) {
         console.error(e);
