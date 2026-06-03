@@ -1674,6 +1674,154 @@ window.deleteInventoryAccount = async (id) => {
         window.showNotification("Error al eliminar: " + e.message);
     }
 };
+/* ==========================================
+   MÓDULO DE VENTAS PENDIENTES (ENTREGAS)
+========================================== */
+
+// 1. Abrir modal y cargar los pedidos desde Firebase
+window.openPedidosModal = async () => {
+    document.getElementById('pedidosModal').style.display = 'flex';
+    const list = document.getElementById('pedidosList');
+    list.innerHTML = '<p style="text-align:center;">Cargando ventas pendientes...</p>';
+
+    try {
+        const q = query(collection(db, "pedidos"), where("vendedorId", "==", currentUser.uid), where("estado", "==", "pendiente"));
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+            list.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); margin-top:20px;">No tienes ventas pendientes de aprobar.</p>';
+            return;
+        }
+
+        list.innerHTML = '';
+        const inventarioLimpio = (currentUserData.inventory || []).filter(i => i.status === 'libre');
+
+        snapshot.forEach(docSnap => {
+            const pedido = docSnap.data();
+            const pId = docSnap.id;
+            
+            // Creamos un selector (desplegable) con las cuentas disponibles en el inventario
+            let opcionesCuentas = `<option value="">-- Selecciona una cuenta para entregar --</option>`;
+            inventarioLimpio.forEach(acc => {
+                opcionesCuentas += `<option value="${acc.id}">[${acc.platform}] ${acc.email}</option>`;
+            });
+
+            const div = document.createElement('div');
+            div.style.cssText = "background:var(--mac-bg); padding:15px; border-radius:10px; border:1px solid var(--mac-border);";
+            div.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <div>
+                        <strong style="color:var(--mac-blue); font-size:15px;">Comprobante Recibido</strong><br>
+                        <span style="color:var(--mac-text-main); font-size:13px;">📞 Número: ${pedido.clienteNumero}</span>
+                        <span style="display:block; font-size:11px; color:var(--mac-text-secondary);">Tipo: ${pedido.tipo.toUpperCase()}</span>
+                    </div>
+                    <button class="action-btn btn-del" onclick="window.rechazarPedido('${pId}')" title="Rechazar"><i class='bx bx-x'></i></button>
+                </div>
+                
+                <select id="select_acc_${pId}" style="width:100%; margin-bottom:10px; padding:8px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border);">
+                    ${opcionesCuentas}
+                </select>
+                
+                <button class="btn-primary" style="width:100%; background:var(--mac-green); border:none;" onclick="window.aprobarVenta('${pId}', '${pedido.clienteNumero}', 'select_acc_${pId}')">
+                    <i class='bx bx-check-circle'></i> Aprobar y Enviar WhatsApp
+                </button>
+            `;
+            list.appendChild(div);
+        });
+    } catch (e) {
+        list.innerHTML = `<p style="color:red; text-align:center;">Error: ${e.message}</p>`;
+    }
+};
+
+// 2. Rechazar (Eliminar el ticket)
+window.rechazarPedido = async (pedidoId) => {
+    if (!confirm("¿Seguro que deseas rechazar y borrar este comprobante? No se enviará nada al cliente.")) return;
+    try {
+        await deleteDoc(doc(db, "pedidos", pedidoId));
+        window.showNotification("🚫 Solicitud rechazada");
+        window.openPedidosModal(); // Recargar la lista
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
+    }
+};
+
+// 3. Aprobar y Liberar Cuenta (¡LA MAGIA!)
+window.aprobarVenta = async (pedidoId, numeroCliente, selectId) => {
+    const cuentaId = document.getElementById(selectId).value;
+    if (!cuentaId) return window.showNotification("⚠️ Debes seleccionar una cuenta del inventario para entregar.");
+
+    if (!confirm("¿Confirmas la entrega de esta cuenta? Se enviará al cliente por WhatsApp y se agregará a tu lista de cobros.")) return;
+
+    try {
+        window.showNotification("⏳ Procesando entrega...");
+
+        // A. Obtener datos de la cuenta seleccionada del inventario
+        let stock = currentUserData.inventory || [];
+        const cuentaSeleccionada = stock.find(c => c.id === cuentaId);
+        
+        if (!cuentaSeleccionada) return window.showNotification("Error: Cuenta no encontrada");
+
+        // B. Calcular la fecha de vencimiento (+ 1 Mes desde HOY)
+        const h = new Date(); 
+        h.setMonth(h.getMonth() + 1); 
+        const dateFirebase = `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}-${String(h.getDate()).padStart(2,'0')}`; 
+        const dateWhatsApp = h.toLocaleDateString('es-ES'); 
+
+        // C. Crear al cliente en tu base de datos general (Para que le lleguen los recordatorios)
+        await addDoc(collection(db, "clients"), {
+            userId: currentUser.uid,
+            name: "Cliente Nuevo", // Nombre genérico, el vendedor lo puede editar después
+            phone: numeroCliente,
+            platform: cuentaSeleccionada.platform,
+            email: cuentaSeleccionada.email,
+            password: cuentaSeleccionada.pass,
+            pin: cuentaSeleccionada.pin,
+            profile: "1", // Por defecto
+            date: dateFirebase
+        });
+
+        // D. Marcar la cuenta como "vendida" en el inventario para que ya no salga libre
+        stock = stock.map(item => {
+            if (item.id === cuentaId) return { ...item, status: 'vendida' };
+            return item;
+        });
+        await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
+        currentUserData.inventory = stock;
+
+        // E. Cambiar el estado del pedido a aprobado
+        await updateDoc(doc(db, "pedidos", pedidoId), { estado: "aprobado" });
+
+        // F. 🔥 EL DISPARO A DIGITAL OCEAN (El bot manda el WhatsApp)
+        const payloadEntrega = {
+            distribuidorId: currentUser.uid,
+            numeroCliente: numeroCliente,
+            plataforma: cuentaSeleccionada.platform,
+            email: cuentaSeleccionada.email,
+            pass: cuentaSeleccionada.pass,
+            pin: cuentaSeleccionada.pin,
+            rules: cuentaSeleccionada.rules,
+            fechaVencimiento: dateWhatsApp,
+            mensajeEntrega: currentUserData.waDeliveryMessage || "" // Mensaje personalizado si lo tiene
+        };
+
+        fetch('https://bot.panelagc.com/api/entregar-cuenta', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payloadEntrega)
+        }).then(res => console.log("Señal de entrega enviada al bot"))
+          .catch(err => console.error("Error contactando al bot:", err));
+
+        // G. Limpieza visual
+        window.showNotification("✅ ¡Cuenta entregada con éxito!");
+        window.renderInventory(); // Actualizar inventario visual
+        loadUserClients(); // Actualizar lista de clientes
+        window.openPedidosModal(); // Recargar la ventana de pedidos (para que desaparezca el actual)
+
+    } catch (e) {
+        console.error(e);
+        window.showNotification("Error: " + e.message);
+    }
+};
 // 3. EL DETECTOR DEL CLIENTE PÚBLICO (MAGIA SPA)
 // Esta función revisa si alguien entró usando el link de "Tiendita"
 const checkPublicStore = async () => {
