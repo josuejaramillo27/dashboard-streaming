@@ -686,10 +686,10 @@
         <div id="wrappedContentArea"></div>
     </div>
 </div>
-    <div id="inventoryModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 500px;">
-            <h2>📦 Mi Inventario</h2>
-            <p style="color:var(--mac-text-secondary); font-size:13px; margin-bottom:15px;">Guarda aquí las cuentas que tienes listas para vender.</p>
+    <div id="inventoryModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card" style="max-width: 500px;">
+            <h3 style="margin-bottom: 5px;"><i class='bx bx-box'></i> Mi Inventario</h3>
+            <p style="color:var(--mac-text-secondary); font-size:13px; margin-bottom:15px; margin-top:0;">Guarda aquí las cuentas que tienes listas para vender.</p>
 
             <div style="display: flex; flex-direction: column; gap: 8px; background: var(--mac-bg); padding: 15px; border-radius: 10px; border: 1px solid var(--mac-border);">
                 <div style="display: flex; gap: 10px;">
@@ -707,7 +707,7 @@
             <div id="inventoryList" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto;"></div>
 
             <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button class="btn-secondary" style="width: 100%;" onclick="document.getElementById('inventoryModal').style.display='none'">Cerrar</button>
+                <button class="btn-secondary" style="width: 100%;" onclick="window.closeModals()">Cerrar</button>
             </div>
         </div>
     </div>
