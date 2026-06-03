@@ -1816,6 +1816,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente, selectId) => {
             distribuidorId: currentUser.uid,
             numeroCliente: numeroCliente, // Se manda crudo, el backend lo limpia
             plataforma: cuentaSeleccionada.platform,
+            profile: cuentaSeleccionada.profile,
             email: cuentaSeleccionada.email,
             pass: cuentaSeleccionada.pass,
             pin: cuentaSeleccionada.pin,
