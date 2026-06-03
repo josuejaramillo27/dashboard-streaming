@@ -193,6 +193,9 @@
             <i class='bx bx-store-alt'></i>
             <span>Tiendita</span>
         </a>
+        <button class="nav-item" onclick="document.getElementById('inventoryModal').style.display='flex'">
+    <i class='bx bx-box'></i> Inventario
+</button>
         <a href="#" class="nav-item" onclick="window.showWrapped(); document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active')); this.classList.add('active');">
             <i class='bx bx-bar-chart-alt-2'></i>
             <span>Resumen</span>
@@ -681,6 +684,31 @@
         <div id="wrappedContentArea"></div>
     </div>
 </div>
+    <div id="inventoryModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+            <h2>📦 Mi Inventario</h2>
+            <p style="color:var(--mac-text-secondary); font-size:13px; margin-bottom:15px;">Guarda aquí las cuentas que tienes listas para vender.</p>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; background: var(--mac-bg); padding: 15px; border-radius: 10px; border: 1px solid var(--mac-border);">
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="invPlatform" placeholder="Plataforma (Ej: Netflix)" style="flex: 1;">
+                    <input type="text" id="invPin" placeholder="PIN (Opcional)" style="flex: 1;">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <input type="email" id="invEmail" placeholder="Correo de la cuenta" style="flex: 1;">
+                    <input type="text" id="invPass" placeholder="Contraseña" style="flex: 1;">
+                </div>
+                <input type="text" id="invRules" placeholder="Reglas (Ej: Prohibido cambiar clave, 1 dispositivo)">
+                <button class="btn-primary" onclick="window.addInventoryAccount()"><i class='bx bx-save'></i> Guardar en stock</button>
+            </div>
+
+            <div id="inventoryList" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto;"></div>
+
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="btn-secondary" style="width: 100%;" onclick="document.getElementById('inventoryModal').style.display='none'">Cerrar</button>
+            </div>
+        </div>
+    </div>
 <div id="storeModal" class="modal-overlay" style="display: none;">
     <div class="modal-card">
         <h3 style="margin-bottom: 5px;"><i class='bx bx-store-alt'></i> Mi Tiendita Web</h3>
