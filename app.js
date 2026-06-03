@@ -248,6 +248,8 @@ window.closeModals = () => {
 window.openWaModal = () => { 
     const defaultMsg = "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*. Para renovar, usa estos datos:\n\n{pago}"; 
     const defaultDelivery = `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tu nueva cuenta de *{plataforma}*:\n\n📧 *Correo:* {correo}\n🔑 *Clave:* {pass}\n📌 *PIN:* {pin}\n\n📅 *Vence el:* {fecha}\n\n⚠️ *Reglas:* {reglas}\n\n¡Que disfrutes el contenido! 🍿`;
+    const defaultWelcome = "¡Hola! 👋 Bienvenido.\n\nPara ver nuestro catálogo de streaming y precios actualizados, por favor escribe el comando:\n👉 */servicios*";
+    document.getElementById('editWaWelcome').value = currentUserData.waWelcomeMessage || defaultWelcome;
 
     document.getElementById('editWaMessage').value = currentUserData.waTemplate || defaultMsg; 
     document.getElementById('editWaDeliveryMessage').value = currentUserData.waDeliveryMessage || defaultDelivery; 
@@ -263,12 +265,14 @@ window.saveWaMessage = async () => {
         await updateDoc(doc(db, "users", currentUser.uid), { 
             waTemplate: document.getElementById('editWaMessage').value,
             waDeliveryMessage: document.getElementById('editWaDeliveryMessage').value,
-            waPaymentInfo: document.getElementById('editWaPayment').value 
+            waWelcomeMessage: document.getElementById('editWaWelcome').value,
+            waPaymentInfo: document.getElementById('editWaPayment').value,
         }); 
         
         currentUserData.waTemplate = document.getElementById('editWaMessage').value;
         currentUserData.waDeliveryMessage = document.getElementById('editWaDeliveryMessage').value;
         currentUserData.waPaymentInfo = document.getElementById('editWaPayment').value;
+        currentUserData.waWelcomeMessage = document.getElementById('editWaWelcome').value;
         
         window.showNotification("Configuración de WhatsApp guardada."); 
         window.closeModals();
