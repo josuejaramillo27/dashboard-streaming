@@ -1676,6 +1676,97 @@ const checkPublicStore = async () => {
         }
     }
 };
+// ==========================================
+// MÓDULO DE INVENTARIO (CUENTAS LIBRES)
+// ==========================================
 
+// 1. Agregar una cuenta al stock
+window.addInventoryAccount = async () => {
+    const platform = document.getElementById('invPlatform').value.trim();
+    const email = document.getElementById('invEmail').value.trim();
+    const pass = document.getElementById('invPass').value.trim();
+    const pin = document.getElementById('invPin').value.trim() || 'N/A';
+    const rules = document.getElementById('invRules').value.trim() || 'Uso personal, no modificar datos.';
+
+    if (!platform || !email || !pass) {
+        return window.showNotification("Plataforma, Correo y Contraseña son obligatorios.");
+    }
+
+    try {
+        const btn = document.querySelector('#inventoryModal .btn-primary');
+        btn.innerHTML = "⏳ Guardando..."; btn.disabled = true;
+
+        // Recuperar el inventario actual de Firebase o crear uno vacío
+        let stock = currentUserData.inventory || [];
+        
+        // Generar un ID único para esta cuenta
+        const accountId = 'acc_' + Date.now();
+        
+        stock.push({ id: accountId, platform, email, pass, pin, rules, status: 'libre' });
+
+        await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
+        currentUserData.inventory = stock;
+
+        // Limpiar formulario
+        document.getElementById('invPlatform').value = '';
+        document.getElementById('invEmail').value = '';
+        document.getElementById('invPass').value = '';
+        document.getElementById('invPin').value = '';
+        document.getElementById('invRules').value = '';
+
+        window.showNotification("✅ Cuenta añadida al stock");
+        window.renderInventory();
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
+    } finally {
+        const btn = document.querySelector('#inventoryModal .btn-primary');
+        btn.innerHTML = "<i class='bx bx-save'></i> Guardar en stock"; btn.disabled = false;
+    }
+};
+
+// 2. Mostrar las cuentas en el Modal
+window.renderInventory = () => {
+    const list = document.getElementById('inventoryList');
+    list.innerHTML = '';
+    const stock = currentUserData.inventory || [];
+    const cuentasLibres = stock.filter(item => item.status === 'libre');
+
+    if (cuentasLibres.length === 0) {
+        list.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); font-size:13px; margin-top:20px;">Tu inventario está vacío.</p>';
+        return;
+    }
+
+    cuentasLibres.forEach(item => {
+        const div = document.createElement('div');
+        div.style.cssText = "background:var(--mac-surface); padding:12px; border-radius:8px; border:1px solid var(--mac-border); display:flex; justify-content:space-between; align-items:center;";
+        div.innerHTML = `
+            <div>
+                <strong style="color:var(--mac-text-main); font-size:15px;">${item.platform}</strong>
+                <span style="background:var(--mac-green); color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px;">STOCK</span>
+                <div style="color:var(--mac-text-secondary); font-size:12px; margin-top:4px;">
+                    📧 ${item.email}<br>
+                    🔐 ${item.pass} | 📌 PIN: ${item.pin}
+                </div>
+            </div>
+            <button class="action-btn btn-del" onclick="window.deleteInventoryAccount('${item.id}')"><i class='bx bx-trash'></i></button>
+        `;
+        list.appendChild(div);
+    });
+};
+
+// 3. Eliminar cuenta del stock (si te equivocas al anotarla)
+window.deleteInventoryAccount = async (id) => {
+    if (!confirm("¿Eliminar esta cuenta del inventario?")) return;
+    try {
+        let stock = currentUserData.inventory || [];
+        stock = stock.filter(item => item.id !== id);
+        await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
+        currentUserData.inventory = stock;
+        window.renderInventory();
+        window.showNotification("🗑️ Cuenta eliminada");
+    } catch (e) {
+        window.showNotification("Error al eliminar: " + e.message);
+    }
+};
 // Ejecutamos el detector apenas se lee el archivo
 checkPublicStore();
