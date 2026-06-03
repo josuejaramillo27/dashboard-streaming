@@ -378,18 +378,24 @@
     </div>
 </div>
 
+<!-- MODAL DE CONFIGURACIÓN DE WHATSAPP -->
 <div id="waModal" class="modal-overlay" style="display: none;">
-    <div class="modal-card">
-        <h3 style="margin-bottom: 5px;"><i class='bx bxl-whatsapp'></i> Mensaje y Métodos de Pago</h3>
-        <p style="font-size: 12px; color: var(--mac-text-secondary); margin-bottom: 15px; margin-top: 0;">
-            Variables: <strong style="color: var(--mac-blue);">{nombre}</strong> | <strong style="color: var(--mac-blue);">{plataforma}</strong> | <strong style="color: var(--mac-blue);">{fecha}</strong> | <strong style="color: var(--mac-green);">{pago}</strong>
+    <div class="modal-card" style="max-width: 500px;">
+        <h3 style="margin-bottom: 5px;"><i class='bx bxl-whatsapp'></i> Mensajes de WhatsApp</h3>
+        
+        <p style="font-size: 12px; color: var(--mac-text-secondary); margin-bottom: 10px; margin-top: 0;">
+            Variables de Recordatorio: <strong style="color: var(--mac-blue);">{nombre}</strong> | <strong style="color: var(--mac-blue);">{plataforma}</strong> | <strong style="color: var(--mac-blue);">{fecha}</strong> | <strong style="color: var(--mac-green);">{pago}</strong><br>
+            Variables de Entrega: <strong style="color: var(--mac-orange);">{correo}</strong> | <strong style="color: var(--mac-orange);">{pass}</strong> | <strong style="color: var(--mac-orange);">{pin}</strong> | <strong style="color: var(--mac-orange);">{reglas}</strong>
         </p>
         
         <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Tus datos de pago (Yape, Plin, Binance):</label>
         <input type="text" id="editWaPayment" placeholder="Ej: Yape: 999... / Binance Pay: 123..." style="margin-bottom: 15px; background: var(--mac-bg);">
         
-        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Mensaje Automático:</label>
-        <textarea id="editWaMessage" rows="5" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none;"></textarea>
+        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Mensaje de Renovación Automática:</label>
+        <textarea id="editWaMessage" rows="4" style="width: 100%; margin-bottom: 15px; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none;"></textarea>
+
+        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Mensaje de Entrega de Cuenta Nueva:</label>
+        <textarea id="editWaDeliveryMessage" rows="5" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none;"></textarea>
         
         <div style="display: flex; gap: 10px; margin-top: 15px;">
             <button class="btn-primary" onclick="window.saveWaMessage()">Guardar Configuración</button>
