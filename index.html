@@ -196,6 +196,9 @@
         <button class="nav-item" onclick="document.getElementById('inventoryModal').style.display='flex'">
     <i class='bx bx-box'></i> Inventario
 </button>
+        <button class="nav-item" onclick="window.openPedidosModal()">
+    <i class='bx bx-bell'></i> Ventas
+</button>
         <a href="#" class="nav-item" onclick="window.showWrapped(); document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active')); this.classList.add('active');">
             <i class='bx bx-bar-chart-alt-2'></i>
             <span>Resumen</span>
@@ -708,6 +711,19 @@
             </div>
 
             <div id="inventoryList" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto;"></div>
+
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="btn-secondary" style="width: 100%;" onclick="window.closeModals()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+    <div id="pedidosModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card" style="max-width: 550px;">
+            <h3 style="margin-bottom: 5px;"><i class='bx bx-bell'></i> Ventas por Aprobar</h3>
+            <p style="color:var(--mac-text-secondary); font-size:13px; margin-bottom:15px; margin-top:0;">Clientes que enviaron el comprobante esperando su cuenta.</p>
+
+            <div id="pedidosList" style="display: flex; flex-direction: column; gap: 10px; max-height: 350px; overflow-y: auto;">
+                </div>
 
             <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button class="btn-secondary" style="width: 100%;" onclick="window.closeModals()">Cerrar</button>
