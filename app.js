@@ -1605,7 +1605,8 @@ window.copyStoreLink = () => {
 
 // --- SISTEMA DE REGLAS POR PLATAFORMA ---
 window.openRulesModal = () => {
-    document.getElementById('rulesModal').style.display = 'flex';
+    document.getElementById('inventoryModal').style.display = 'none'; // Ocultamos el inventario para que no choque
+    document.getElementById('rulesModal').style.display = 'flex';     // Abrimos las reglas
     window.loadPlatformRule();
 };
 
