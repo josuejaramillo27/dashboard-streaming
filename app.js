@@ -237,6 +237,7 @@ onAuthStateChanged(auth, async (user) => {
 
 window.closeModals = () => { 
     document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); 
+    document.body.style.overflow = 'auto'; // <-- FIX: Devuelve el scroll al fondo
     
     // Devolver el foco al botón de Clientes en el menú inferior
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -1638,7 +1639,12 @@ window.savePlatformRule = async () => {
 /* ==========================================
    MÓDULO DE INVENTARIO (CUENTAS LIBRES)
 ========================================== */
-
+// --- ABRIR INVENTARIO SIN SCROLL FANTASMA ---
+window.openInventoryModal = () => {
+    document.getElementById('inventoryModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // <-- FIX: Bloquea el scroll de la página principal
+    window.renderInventory();
+};
 window.addInventoryAccount = async () => {
     const platform = document.getElementById('invPlatform').value;
     const type = document.getElementById('invType').value;
@@ -1732,6 +1738,7 @@ window.deleteInventoryAccount = async (id) => {
 // 1. Abrir modal y cargar los pedidos desde Firebase
 window.openPedidosModal = async () => {
     document.getElementById('pedidosModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // <-- Bloquea el scroll del fondo
     const list = document.getElementById('pedidosList');
     list.innerHTML = '<p style="text-align:center;">Cargando ventas pendientes...</p>';
 
