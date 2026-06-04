@@ -120,20 +120,22 @@
             border: none;
         }
 
-        /* 2. FIX: Pantalla completa para el inventario en celulares */
+/* 2. FIX: Pantalla completa para el inventario en celulares */
         @media (max-width: 768px) {
             #inventoryModal .modal-card {
                 width: 100% !important;
-                height: 100vh !important; /* Ocupa el 100% de la altura */
+                height: 100vh !important;
                 max-width: 100% !important;
                 max-height: 100% !important;
-                border-radius: 0 !important; /* Quita los bordes curvos */
+                border-radius: 0 !important;
                 margin: 0 !important;
+                padding: 45px 20px 20px 20px !important; /* <-- ESTO SOLUCIONA EL CORTE */
+                box-sizing: border-box !important;
                 display: flex;
                 flex-direction: column;
             }
             #inventoryList {
-                flex-grow: 1; /* Hace que la lista ocupe todo el espacio sobrante */
+                flex-grow: 1;
                 max-height: none !important;
             }
         }
@@ -816,7 +818,7 @@
             
             <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button class="btn-primary" onclick="window.savePlatformRule()">Guardar Regla</button>
-                <button class="btn-secondary" onclick="document.getElementById('rulesModal').style.display='none'">Volver</button>
+                <button class="btn-secondary" onclick="document.getElementById('rulesModal').style.display='none'; document.getElementById('inventoryModal').style.display='flex'">Volver</button>
             </div>
         </div>
     </div>
