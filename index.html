@@ -120,23 +120,38 @@
             border: none;
         }
 
-/* 2. FIX: Pantalla completa para el inventario en celulares */
+/* 2. FIX: Inventario como SECCIÓN INDIVIDUAL en celular (Cero estilo de tarjeta) */
         @media (max-width: 768px) {
-            #inventoryModal .modal-card {
+            /* Transformamos el fondo negro borroso en un fondo sólido de la app */
+            #inventoryModal.modal-overlay, #pedidosModal.modal-overlay {
+                background-color: var(--mac-bg) !important;
+                align-items: flex-start !important; 
+            }
+            
+            /* Quitamos todos los estilos de "tarjeta" (bordes, sombras, márgenes) */
+            #inventoryModal .modal-card, #pedidosModal .modal-card {
                 width: 100% !important;
-                height: 100vh !important;
+                height: 100dvh !important; /* 100% exacto de la pantalla del celular */
                 max-width: 100% !important;
-                max-height: 100% !important;
-                border-radius: 0 !important;
+                border: none !important; 
+                border-radius: 0 !important; 
                 margin: 0 !important;
-                padding: 45px 20px 20px 20px !important; /* <-- ESTO SOLUCIONA EL CORTE */
+                padding: 30px 20px 20px 20px !important;
                 box-sizing: border-box !important;
+                background-color: var(--mac-bg) !important;
+                box-shadow: none !important; 
                 display: flex;
                 flex-direction: column;
             }
-            #inventoryList {
-                flex-grow: 1;
-                max-height: none !important;
+
+            /* LA MAGIA: Hacemos que SOLO la lista haga scroll interno */
+            /* Esto mantiene los botones de arriba y el botón de Cerrar siempre fijos */
+            #inventoryList, #pedidosList {
+                flex-grow: 1 !important;
+                overflow-y: auto !important;
+                min-height: 0 !important; /* Crucial para que el botón cerrar no se baje */
+                padding-bottom: 10px;
+                margin-bottom: 10px;
             }
         }
     </style>
