@@ -701,7 +701,10 @@ window.saveClientData = async () => {
         const data = { userId: currentUser.uid, name: document.getElementById('clientName').value, platform: checked.join(', '), phone: phone, date: document.getElementById('expirationDate').value, cost: cost, price: price, accountEmail: tempAccountData.email, accountPassword: tempAccountData.password, accountProfile: tempAccountData.profile, accountPin: tempAccountData.pin, accountUnits: tempAccountData.units || 1 };
 
         if (editingClientId) { 
-            data.color = clients.find(c => c.id === editingClientId).color; 
+            const clienteAEditar = clients.find(c => c.id === editingClientId);
+            // FIX: Si el cliente fue creado por el bot y no tiene color, le asignamos uno aleatorio
+            data.color = clienteAEditar.color || macPalette[Math.floor(Math.random() * macPalette.length)]; 
+            
             await updateDoc(doc(db, "clients", editingClientId), data); 
             window.showNotification("Actualizado"); 
         } 
@@ -1840,7 +1843,8 @@ window.aprobarVenta = async (pedidoId, numeroCliente, selectId) => {
             accountUnits: 1,
             cost: 0,
             price: 0,
-            date: dateFirebase
+            date: dateFirebase,
+            color: macPalette[Math.floor(Math.random() * macPalette.length)] // <-- FIX: Le asignamos color desde el inicio
         });
 
         // D. Descontar la cuenta del inventario
