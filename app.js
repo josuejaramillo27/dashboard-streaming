@@ -1545,27 +1545,52 @@ window.removeExternalStore = async () => {
 window.addStoreItem = async () => {
     const plat = document.getElementById('storePlatform').value.trim();
     const price = document.getElementById('storePrice').value;
-    const desc = document.getElementById('storeDesc').value.trim(); // <-- Nuevo campo capturado
+    const desc = document.getElementById('storeDesc') ? document.getElementById('storeDesc').value.trim() : '';
     
+    // Capturamos el input de la imagen
+    const fileInput = document.getElementById('storeImg');
+    const file = fileInput ? fileInput.files[0] : null;
+
     if (!plat || !price) return window.showNotification("Completa plataforma y precio");
 
     const btn = document.querySelector('#storeModal .btn-primary');
-    btn.innerText = "⏳"; btn.disabled = true;
+    btn.innerText = "⏳ Subiendo..."; btn.disabled = true;
 
     try {
+        let imgUrl = "";
+        
+        // Si hay foto seleccionada, la subimos a Storage
+        if (file) {
+            const storageRef = ref(storage, `store_images/${currentUser.uid}_${Date.now()}_${file.name}`);
+            const snapshot = await uploadBytes(storageRef, file);
+            imgUrl = await getDownloadURL(snapshot.ref);
+        }
+
         let catalog = currentUserData.storeCatalog || [];
-        catalog.push({ platform: plat, price: parseFloat(price), desc: desc }); // <-- Se guarda la descripción
+        catalog.push({ 
+            id: 'item_' + Date.now(), 
+            platform: plat, 
+            price: parseFloat(price), 
+            desc: desc, 
+            imgUrl: imgUrl // Guardamos la URL de la imagen
+        });
         
         await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
         currentUserData.storeCatalog = catalog;
         
+        // Limpiamos los inputs
         document.getElementById('storePlatform').value = '';
         document.getElementById('storePrice').value = '';
-        document.getElementById('storeDesc').value = ''; // <-- Limpiamos el campo
+        if (document.getElementById('storeDesc')) document.getElementById('storeDesc').value = '';
+        if (fileInput) fileInput.value = ''; 
+        
         window.renderStoreItems();
-        window.showNotification("Producto añadido al catálogo");
-    } catch(e) { window.showNotification("Error: " + e.message); }
-    finally { btn.innerHTML = "<i class='bx bx-plus'></i>"; btn.disabled = false; }
+        window.showNotification("✅ Producto añadido al catálogo");
+    } catch(e) { 
+        window.showNotification("Error: " + e.message); 
+    } finally { 
+        btn.innerHTML = "<i class='bx bx-plus'></i>"; btn.disabled = false; 
+    }
 };
 
 window.renderStoreItems = () => {
@@ -1960,18 +1985,24 @@ const checkPublicStore = async () => {
                 catalog.forEach(item => {
                     const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
                     
-                    // ✨ EL TRUCO DE LA VENTA: Forzamos el comando exacto de compra
+                   // ✨ EL TRUCO DE LA VENTA: Forzamos el comando exacto de compra
                     const numLimpio = data.phone.replace(/[^\d+]/g, '');
                     const msg = encodeURIComponent(`/comprar ${item.platform.toLowerCase()}`);
                     const waLink = `https://wa.me/${numLimpio}?text=${msg}`;
 
+                    // Construimos la imagen para el cliente final
+                    const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}" style="width: 65px; height: 65px; border-radius: 12px; object-fit: cover; margin-right: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">` : '';
+
                     const card = document.createElement('div');
-                    card.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:var(--mac-gray); padding:15px 20px; border-radius:16px; border:1px solid var(--mac-border); box-shadow:0 4px 6px rgba(0,0,0,0.1);";
+                    card.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:var(--mac-gray); padding:15px 20px; border-radius:16px; border:1px solid var(--mac-border); box-shadow:0 4px 6px rgba(0,0,0,0.1); margin-bottom: 12px;";
                     card.innerHTML = `
-                        <div style="flex: 1; padding-right: 15px;">
-                            <strong style="color:var(--mac-text-main); font-size:16px;">${item.platform}</strong><br>
-                            <span style="color:var(--mac-text-secondary); font-size:13px; display:block; margin:4px 0; line-height:1.3;">${item.desc || ''}</span>
-                            <span style="color:var(--mac-green); font-size:18px; font-weight:900;">${priceStr}</span>
+                        <div style="display:flex; align-items:center; flex: 1; padding-right: 15px;">
+                            ${imgHTML}
+                            <div>
+                                <strong style="color:var(--mac-text-main); font-size:16px;">${item.platform}</strong><br>
+                                <span style="color:var(--mac-text-secondary); font-size:13px; display:block; margin:4px 0; line-height:1.3;">${item.desc || ''}</span>
+                                <span style="color:var(--mac-green); font-size:18px; font-weight:900;">${priceStr}</span>
+                            </div>
                         </div>
                         <a href="${waLink}" target="_blank" style="text-decoration:none; background:#25D366; color:white; padding:10px 20px; border-radius:20px; font-weight:bold; font-size:14px; box-shadow:0 4px 10px rgba(37,211,102,0.3); white-space: nowrap;"><i class='bx bxl-whatsapp'></i> Comprar</a>
                     `;
