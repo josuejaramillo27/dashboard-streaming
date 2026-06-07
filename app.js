@@ -650,7 +650,7 @@ window.loadMoreClients = async () => {
 const resetAccountButton = () => { tempAccountData = { email: '', password: '', profile: '', pin: '', units: 1 }; const btn = document.getElementById('btnAccountData'); btn.innerText = "🔑 Ingresar Datos de Cuenta"; btn.style.backgroundColor = "var(--mac-gray)"; btn.style.color = "var(--mac-text-main)"; };
 
 /* --- GUARDAR CLIENTE (CON HERENCIA DE COLOR INTELIGENTE) --- */
-/* --- GUARDAR CLIENTE (CON LÍMITES Y HERENCIA DE COLOR) --- */
+/* --- GUARDAR CLIENTE (CON LÍMITES, HERENCIA DE COLOR Y MATRIZ) --- */
 window.saveClientData = async () => {
     const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(cb => cb.value); 
     const phone = document.getElementById('phone').value.trim();
@@ -667,7 +667,7 @@ window.saveClientData = async () => {
     btn.disabled = true;
 
     try {
-        // 🔒 EL CANDADO: Verificamos el límite SOLO si es un cliente nuevo (no si está editando)
+        // 🔒 EL CANDADO DE LÍMITES
         if (!editingClientId) {
             const plan = currentUserData.plan_actual || 'demo';
             const limitePermitido = currentUserData.limite_clientes || 20;
@@ -689,7 +689,7 @@ window.saveClientData = async () => {
                     color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.mostrarPlanesSuscripcion(); // <-- Aquí llamamos al catálogo
+                        window.mostrarPlanesSuscripcion(); 
                     }
                 });
                 btn.innerText = origBtnText;
@@ -698,26 +698,26 @@ window.saveClientData = async () => {
             }
         }
 
-        const data = {
-            userId: currentUser.uid,
-            name: document.getElementById('clientName').value.trim(),
-            phone: document.getElementById('clientPhone').value.trim(),
-            platform: document.getElementById('clientPlatform').value,
-            accountEmail: document.getElementById('clientEmail').value.trim(),
-            accountPassword: document.getElementById('clientPass').value.trim(),
-            accountProfile: document.getElementById('clientProfile').value.trim(),
-            accountPin: document.getElementById('clientPin').value.trim(),
-            accountUnits: parseInt(document.getElementById('clientUnits').value) || 1,
-            cost: parseFloat(document.getElementById('clientCost').value) || 0,
-            price: parseFloat(document.getElementById('clientPrice').value) || 0,
-            date: document.getElementById('clientDate').value,
+        // 🛠️ EL FIX: Usamos los identificadores correctos de tu HTML y la memoria del botón verde
+        const data = { 
+            userId: currentUser.uid, 
+            name: document.getElementById('clientName').value, 
+            platform: checked.join(', '), 
+            phone: phone, 
+            date: document.getElementById('expirationDate').value, 
+            cost: cost, 
+            price: price, 
+            accountEmail: tempAccountData.email, 
+            accountPassword: tempAccountData.password, 
+            accountProfile: tempAccountData.profile, 
+            accountPin: tempAccountData.pin, 
+            accountUnits: tempAccountData.units || 1,
             // Guardamos el enlace si fue creado desde "Mis Cuentas"
-            linkedMasterId: variablesEnlaceMatriz.masterId || null 
+            linkedMasterId: (typeof variablesEnlaceMatriz !== 'undefined' && variablesEnlaceMatriz.masterId) ? variablesEnlaceMatriz.masterId : null 
         };
 
         if (editingClientId) { 
             const clienteAEditar = clients.find(c => c.id === editingClientId);
-            // FIX: Si el cliente fue creado por el bot y no tiene color, le asignamos uno aleatorio
             data.color = clienteAEditar.color || macPalette[Math.floor(Math.random() * macPalette.length)]; 
             
             await updateDoc(doc(db, "clients", editingClientId), data); 
@@ -734,6 +734,11 @@ window.saveClientData = async () => {
             window.showNotification("Agregado"); 
         }
         
+        // Limpiamos el puente de enlace de la Matriz para el siguiente registro
+        if(typeof variablesEnlaceMatriz !== 'undefined') {
+            variablesEnlaceMatriz = { masterId: null, profileNum: null };
+        }
+
         editingClientId = null; 
         document.getElementById('clientForm').reset(); 
         resetAccountButton(); 
