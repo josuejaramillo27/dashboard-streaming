@@ -1662,8 +1662,51 @@ window.savePlatformRule = async () => {
         window.showNotification("Error: " + e.message);
     }
 };
-// ----------------------------------------
 
+/* --- CONTROLADOR DE VISTAS (CLIENTES VS CUENTAS MATRICES) --- */
+window.switchMainTab = (tab) => {
+    const btnClientes = document.getElementById('btnTabClientes');
+    const btnCuentas = document.getElementById('btnTabCuentas');
+    const tableClientes = document.getElementById('mainTable'); // Tu tabla de clientes original
+    const loadMoreBtn = document.getElementById('loadMoreContainer');
+    const tableCuentas = document.getElementById('accountsTableContainer'); // La nueva vista
+    const subtitle = document.getElementById('userGreeting'); // "Gestión de clientes"
+    const filterSelect = document.getElementById('filterSelect');
+    const searchInput = document.getElementById('searchInput');
+
+    if (tab === 'clientes') {
+        // Estilos Botones
+        btnClientes.style.background = 'var(--mac-blue)'; btnClientes.style.color = 'white';
+        btnCuentas.style.background = 'transparent'; btnCuentas.style.color = 'var(--mac-text-secondary)';
+        
+        // Vistas y Textos
+        tableClientes.style.display = 'table'; 
+        if(loadMoreBtn) loadMoreBtn.style.display = 'block';
+        if(tableCuentas) tableCuentas.style.display = 'none';
+        if(subtitle) subtitle.innerText = 'Gestión de clientes';
+        
+        // Restablecer herramientas
+        filterSelect.style.display = 'block'; 
+        searchInput.value = '';
+        window.renderTable();
+
+    } else if (tab === 'cuentas') {
+        // Estilos Botones
+        btnCuentas.style.background = 'var(--mac-blue)'; btnCuentas.style.color = 'white';
+        btnClientes.style.background = 'transparent'; btnClientes.style.color = 'var(--mac-text-secondary)';
+        
+        // Vistas y Textos
+        tableClientes.style.display = 'none';
+        if(loadMoreBtn) loadMoreBtn.style.display = 'none';
+        if(tableCuentas) tableCuentas.style.display = 'block';
+        if(subtitle) subtitle.innerText = 'Gestión de cuentas';
+        
+        // Ocultar filtro porque las cuentas matrices no se vencen igual que un cliente
+        filterSelect.style.display = 'none'; 
+        searchInput.value = '';
+        if(typeof window.renderMasterAccounts === 'function') window.renderMasterAccounts();
+    }
+};
 /* ==========================================
    MÓDULO DE INVENTARIO (CUENTAS LIBRES)
 ========================================== */
