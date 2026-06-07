@@ -2073,15 +2073,52 @@ const checkPublicStore = async () => {
 };
 /* ========================================== MÓDULO DE CUENTAS MATRICES (ESTILO MATRIZ) ========================================== */
 let variablesEnlaceMatriz = { masterId: null, profileNum: null };
+let editingMasterId = null; // 🛠️ NUEVO: Memoria para saber si estamos editando
 
+// 1. ABRIR MODAL PARA NUEVA CUENTA
 window.openNewMasterAccountModal = () => {
+    editingMasterId = null; // Limpiamos la memoria
     document.getElementById('matEmail').value = '';
     document.getElementById('matPass').value = '';
     document.getElementById('matProfiles').value = '5';
     document.getElementById('matCost').value = '0';
+    
+    // Cambiamos el título a "Nueva"
+    document.querySelector('#masterAccountModal h3').innerHTML = "<i class='bx bx-plus-circle'></i> Nueva Cuenta Matriz";
     document.getElementById('masterAccountModal').style.display = 'flex';
 };
 
+// 2. ABRIR MODAL PARA EDITAR
+window.editMasterAccount = (id, platform, email, pass, maxProfiles, cost, provider) => {
+    editingMasterId = id; // Guardamos el ID que estamos editando
+    
+    // Rellenamos los datos en el formulario
+    document.getElementById('matPlatform').value = platform;
+    document.getElementById('matEmail').value = email;
+    document.getElementById('matPass').value = pass;
+    document.getElementById('matProfiles').value = maxProfiles;
+    document.getElementById('matCost').value = cost;
+    document.getElementById('matProvider').value = provider;
+    
+    // Cambiamos el título a "Editar"
+    document.querySelector('#masterAccountModal h3').innerHTML = "<i class='bx bx-edit'></i> Editar Cuenta Matriz";
+    document.getElementById('masterAccountModal').style.display = 'flex';
+};
+
+// 3. ELIMINAR CUENTA MATRIZ
+window.deleteMasterAccount = async (id) => {
+    if(confirm("¿Estás seguro de eliminar esta cuenta completa? Los clientes no se borrarán, pero perderán su enlace a esta matriz.")){
+        try {
+            await deleteDoc(doc(db, "masterAccounts", id));
+            window.showNotification("🗑️ Cuenta Matriz eliminada");
+            window.renderMasterAccounts();
+        } catch(e) {
+            window.showNotification("Error: " + e.message);
+        }
+    }
+};
+
+// 4. GUARDAR (CREAR O ACTUALIZAR)
 window.saveMasterAccount = async () => {
     const platform = document.getElementById('matPlatform').value;
     const email = document.getElementById('matEmail').value.trim();
@@ -2093,36 +2130,40 @@ window.saveMasterAccount = async () => {
     if (!email || !pass) return window.showNotification("⚠️ Escribe el correo y clave de la cuenta.");
 
     try {
-        await addDoc(collection(db, "masterAccounts"), {
-            userId: currentUser.uid,
-            platform,
-            email,
-            pass,
-            maxProfiles,
-            cost,
-            provider,
-            timestamp: Date.now()
-        });
+        if (editingMasterId) {
+            // Si estamos editando, actualizamos el documento
+            await updateDoc(doc(db, "masterAccounts", editingMasterId), {
+                platform, email, pass, maxProfiles, cost, provider
+            });
+            window.showNotification("✅ Cuenta Matriz actualizada");
+        } else {
+            // Si es nueva, la creamos
+            await addDoc(collection(db, "masterAccounts"), {
+                userId: currentUser.uid,
+                platform, email, pass, maxProfiles, cost, provider,
+                timestamp: Date.now()
+            });
+            window.showNotification("✅ Cuenta Matriz registrada con éxito");
+        }
 
         document.getElementById('masterAccountModal').style.display = 'none';
-        window.showNotification("✅ Cuenta Matriz registrada con éxito");
+        editingMasterId = null;
         window.renderMasterAccounts();
     } catch(e) {
         window.showNotification("Error: " + e.message);
     }
 };
 
+// 5. RENDERIZAR LAS TARJETAS (CON BOTONES)
 window.renderMasterAccounts = async () => {
     const container = document.getElementById('masterAccountsList');
     if (!container) return;
     container.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary);">Cargando tus matrices...</p>';
 
     try {
-        // 1. Traer todas las cuentas matrices del usuario
         const qMat = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
         const snapMat = await getDocs(qMat);
         
-        // 2. Traer todos los clientes activos del usuario para cruzarlos en los perfiles
         const qCli = query(collection(db, "clients"), where("userId", "==", currentUser.uid));
         const snapCli = await getDocs(qCli);
         const listaClientes = snapCli.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -2138,20 +2179,16 @@ window.renderMasterAccounts = async () => {
             const acc = docMat.data();
             const accId = docMat.id;
 
-            // Filtrar qué clientes están en esta cuenta específica
             const clientesDeEstaCuenta = listaClientes.filter(c => c.linkedMasterId === accId);
-            
-            // Cálculos financieros y cupos
             const cuposOcupados = clientesDeEstaCuenta.length;
             const cuposDisponibles = acc.maxProfiles - cuposOcupados;
             const ingresosTotales = clientesDeEstaCuenta.reduce((sum, c) => sum + (parseFloat(c.price) || 0), 0);
             const gananciaNeta = ingresosTotales - acc.cost;
 
-            // Crear la tarjeta de la cuenta completa
             const card = document.createElement('div');
             card.style.cssText = "background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);";
 
-            // Cabecera de la cuenta
+            // Cabecera con los botones de Editar y Borrar agregados
             let headerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--mac-border); padding-bottom: 12px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                     <div>
@@ -2161,20 +2198,22 @@ window.renderMasterAccounts = async () => {
                     </div>
                     <div style="text-align: right; min-width: 120px;">
                         <span style="color: ${cuposDisponibles > 0 ? 'var(--mac-green)' : 'var(--mac-orange)'}; font-weight: bold; font-size: 14px;">Disponibles: ${cuposDisponibles}/${acc.maxProfiles}</span><br>
-                        <small style="color: var(--mac-text-secondary);">Inversión: ${globalCurrency}${acc.cost.toFixed(2)}</small><br>
                         <span style="color: var(--mac-green); font-weight: 900; font-size: 13px;">Ganancia Neta: ${globalCurrency}${gananciaNeta.toFixed(2)}</span>
+                        
+                        <div style="margin-top: 10px; display: flex; gap: 6px; justify-content: flex-end;">
+                            <button onclick="window.editMasterAccount('${accId}', '${acc.platform}', '${acc.email}', '${acc.pass}', ${acc.maxProfiles}, ${acc.cost}, '${acc.provider}')" style="background: var(--mac-gray); border: 1px solid var(--mac-border); color: var(--mac-text-main); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s;"><i class='bx bx-edit'></i></button>
+                            <button onclick="window.deleteMasterAccount('${accId}')" style="background: rgba(255, 59, 48, 0.1); border: 1px solid var(--mac-red); color: var(--mac-red); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s;"><i class='bx bx-trash'></i></button>
+                        </div>
                     </div>
                 </div>
             `;
 
-            // Contenedor de la matriz de perfiles (Fila de bloques estilo Excel de 5 perfiles)
             let perfilesHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;">`;
 
             for (let i = 1; i <= acc.maxProfiles; i++) {
                 const clienteEnPerfil = clientesDeEstaCuenta.find(c => parseInt(c.accountProfile) === i);
 
                 if (clienteEnPerfil) {
-                    // Casillero Ocupado por un cliente
                     perfilesHTML += `
                         <div style="background: rgba(255, 159, 10, 0.08); border: 1px solid var(--mac-orange); padding: 10px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; min-height: 85px;">
                             <div>
@@ -2185,7 +2224,6 @@ window.renderMasterAccounts = async () => {
                         </div>
                     `;
                 } else {
-                    // Casillero Disponible (Botón inteligente para enlazar)
                     perfilesHTML += `
                         <div style="background: rgba(48, 209, 88, 0.05); border: 1px dashed var(--mac-green); padding: 10px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; min-height: 85px;">
                             <div>
@@ -2209,19 +2247,16 @@ window.renderMasterAccounts = async () => {
     }
 };
 
-// Acción para saltar al modal de clientes rellenando los datos automáticamente
+// 6. ACCIÓN PARA SALTAR AL FORMULARIO DE CLIENTE
 window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) => {
-    // 1. Guardamos el puente de enlace
     variablesEnlaceMatriz.masterId = masterId;
     variablesEnlaceMatriz.profileNum = profileNum;
 
     editingClientId = null;
     document.getElementById('clientForm').reset();
     
-    // 2. Llenamos los datos visibles del formulario
     document.getElementById('clientName').value = "Perfil " + profileNum;
     
-    // 3. Seleccionamos la plataforma en tu menú personalizado
     const cbs = document.querySelectorAll('#checkboxDropdown input'); 
     cbs.forEach(cb => cb.checked = false); 
     cbs.forEach(cb => { if(cb.value === platform) cb.checked = true; });
@@ -2231,14 +2266,12 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) =>
         selectText.classList.add('has-selection');
     }
 
-    // 4. FIX: Inyectamos los datos secretos en la memoria del botón verde
     tempAccountData.email = email;
     tempAccountData.password = pass;
     tempAccountData.profile = profileNum.toString();
     tempAccountData.pin = '';
     tempAccountData.units = 1;
 
-    // 5. Encendemos el botón verde para simular que ya se llenaron los datos
     const btnAcc = document.getElementById('btnAccountData');
     if (btnAcc) {
         btnAcc.innerText = `✅ Datos de Cuenta (1 ud)`; 
@@ -2246,7 +2279,6 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) =>
         btnAcc.style.color = "white";
     }
     
-    // 6. Cambiamos de pestaña y bajamos la pantalla hacia el formulario
     window.switchMainTab('clientes');
     document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
     
