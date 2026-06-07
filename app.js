@@ -1682,8 +1682,11 @@ window.savePlatformRule = async () => {
 window.switchMainTab = (tab) => {
     const btnClientes = document.getElementById('btnTabClientes');
     const btnCuentas = document.getElementById('btnTabCuentas');
-    const tableClientes = document.querySelector('.table-container'); 
-    const loadMoreBtn = document.getElementById('loadMoreContainer');
+    
+    // FIX: Atrapamos al contenedor general que envuelve a toda la tabla y botones
+    const mainTableEl = document.getElementById('mainTable');
+    const tableClientesWrapper = mainTableEl ? mainTableEl.parentElement : null; 
+    
     const tableCuentas = document.getElementById('accountsTableContainer'); 
     const subtitle = document.getElementById('userGreeting'); 
     const filterSelect = document.getElementById('filterSelect');
@@ -1693,9 +1696,7 @@ window.switchMainTab = (tab) => {
         if(btnClientes) { btnClientes.style.background = 'var(--mac-blue)'; btnClientes.style.color = 'white'; }
         if(btnCuentas) { btnCuentas.style.background = 'transparent'; btnCuentas.style.color = 'var(--mac-text-secondary)'; }
         
-        // Usamos setProperty con 'important' para ganarle a cualquier regla oculta del CSS en celular
-        if(tableClientes) tableClientes.style.setProperty('display', 'block', 'important'); 
-        if(loadMoreBtn) loadMoreBtn.style.setProperty('display', 'block', 'important');
+        if(tableClientesWrapper) tableClientesWrapper.style.setProperty('display', 'block', 'important'); 
         if(tableCuentas) tableCuentas.style.setProperty('display', 'none', 'important');
         if(subtitle) subtitle.innerText = 'Gestión de clientes';
         
@@ -1707,15 +1708,13 @@ window.switchMainTab = (tab) => {
         if(btnCuentas) { btnCuentas.style.background = 'var(--mac-blue)'; btnCuentas.style.color = 'white'; }
         if(btnClientes) { btnClientes.style.background = 'transparent'; btnClientes.style.color = 'var(--mac-text-secondary)'; }
         
-        // Forzamos el ocultamiento absoluto de la sección de clientes eliminando el conflicto visual
-        if(tableClientes) tableClientes.style.setProperty('display', 'none', 'important');
-        if(loadMoreBtn) loadMoreBtn.style.setProperty('display', 'none', 'important');
+        if(tableClientesWrapper) tableClientesWrapper.style.setProperty('display', 'none', 'important');
         if(tableCuentas) tableCuentas.style.setProperty('display', 'block', 'important');
         if(subtitle) subtitle.innerText = 'Gestión de cuentas';
         
         if(filterSelect) filterSelect.style.display = 'none'; 
         if(searchInput) searchInput.value = '';
-        window.renderMasterAccounts(); 
+        if(typeof window.renderMasterAccounts === 'function') window.renderMasterAccounts(); 
     }
 };
 /* ==========================================
@@ -2207,24 +2206,46 @@ window.renderMasterAccounts = async () => {
 
 // Acción para saltar al modal de clientes rellenando los datos automáticamente
 window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) => {
-    // Guardamos las variables temporales de enlace
+    // 1. Guardamos el puente de enlace
     variablesEnlaceMatriz.masterId = masterId;
     variablesEnlaceMatriz.profileNum = profileNum;
 
-    // Abrimos el formulario de clientes estándar
     editingClientId = null;
     document.getElementById('clientForm').reset();
     
-    // Rellenamos de forma automática los datos duros heredados de la cuenta completa
-    document.getElementById('clientName').value = "Cliente Perfil " + profileNum;
-    document.getElementById('clientPlatform').value = platform;
-    document.getElementById('clientEmail').value = email;
-    document.getElementById('clientPass').value = pass;
-    document.getElementById('clientProfile').value = profileNum;
+    // 2. Llenamos los datos visibles del formulario
+    document.getElementById('clientName').value = "Perfil " + profileNum;
     
-    // Cambiamos de pestaña visualmente para que trabaje en el formulario
+    // 3. Seleccionamos la plataforma en tu menú personalizado
+    const cbs = document.querySelectorAll('#checkboxDropdown input'); 
+    cbs.forEach(cb => cb.checked = false); 
+    cbs.forEach(cb => { if(cb.value === platform) cb.checked = true; });
+    const selectText = document.getElementById('selectText');
+    if (selectText) {
+        selectText.textContent = platform; 
+        selectText.classList.add('has-selection');
+    }
+
+    // 4. FIX: Inyectamos los datos secretos en la memoria del botón verde
+    tempAccountData.email = email;
+    tempAccountData.password = pass;
+    tempAccountData.profile = profileNum.toString();
+    tempAccountData.pin = '';
+    tempAccountData.units = 1;
+
+    // 5. Encendemos el botón verde para simular que ya se llenaron los datos
+    const btnAcc = document.getElementById('btnAccountData');
+    if (btnAcc) {
+        btnAcc.innerText = `✅ Datos de Cuenta (1 ud)`; 
+        btnAcc.style.backgroundColor = "var(--mac-green)"; 
+        btnAcc.style.color = "white";
+    }
+    
+    // 6. Cambiamos de pestaña y bajamos la pantalla hacia el formulario
     window.switchMainTab('clientes');
-    document.getElementById('clientModal').style.display = 'flex';
+    document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
+    
+    window.showNotification("Completa el teléfono y los precios para guardar.");
 };
 // Ejecutamos el detector apenas se lee el archivo
 checkPublicStore();
