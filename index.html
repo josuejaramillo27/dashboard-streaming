@@ -943,5 +943,64 @@
     </div>
 </div>
 <script type="module" src="app.js"></script>
+    <div id="masterAccountModal" class="modal-overlay" style="display: none; z-index: 2000;">
+    <div class="modal-card" style="max-width: 450px;">
+        <h3 style="margin-bottom: 5px;"><i class='bx bx-plus-circle'></i> Nueva Cuenta Matriz</h3>
+        <p style="color:var(--mac-text-secondary); font-size:12px; margin-bottom:15px; margin-top:0;">Registra una cuenta completa para controlar la distribución de sus perfiles.</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div>
+                <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Selecciona Plataforma:</label>
+                <select id="matPlatform" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                    <option value="Netflix">Netflix</option>
+                    <option value="Disney+">Disney+</option>
+                    <option value="Amazon Prime">Amazon Prime</option>
+                    <option value="Max">Max</option>
+                    <option value="Spotify Premium">Spotify Premium</option>
+                    <option value="YouTube Premium">YouTube Premium</option>
+                    <option value="Crunchyroll">Crunchyroll</option>
+                    <option value="Paramount">Paramount</option>
+                    <option value="Apple TV">Apple TV</option>
+                    <option value="IPTV">IPTV</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Correo:</label>
+                    <input type="email" id="matEmail" placeholder="correo@cuenta.com" style="width:100%;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Contraseña:</label>
+                    <input type="text" id="matPass" placeholder="Clave123" style="width:100%;">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">¿Cuántos perfiles tiene?:</label>
+                    <input type="number" id="matProfiles" value="5" min="1" max="10" style="width:100%;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Costo de la Cuenta (Inversión):</label>
+                    <input type="number" id="matCost" value="0" min="0" placeholder="Ej: 30" style="width:100%;">
+                </div>
+            </div>
+
+            <div>
+                <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Proveedor / Origen:</label>
+                <select id="matProvider" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                    <option value="Propia">Mia (Cuenta Propia)</option>
+                    <option value="Proveedor Externo">Proveedor Externo</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="btn-primary" onclick="window.saveMasterAccount()">Guardar Cuenta</button>
+                <button class="btn-secondary" onclick="document.getElementById('masterAccountModal').style.display='none'">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
