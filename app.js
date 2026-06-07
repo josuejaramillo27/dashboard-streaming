@@ -1682,7 +1682,7 @@ window.savePlatformRule = async () => {
 window.switchMainTab = (tab) => {
     const btnClientes = document.getElementById('btnTabClientes');
     const btnCuentas = document.getElementById('btnTabCuentas');
-    const tableClientes = document.querySelector('.table-container'); // Selector corregido para asegurar celular
+    const tableClientes = document.querySelector('.table-container'); 
     const loadMoreBtn = document.getElementById('loadMoreContainer');
     const tableCuentas = document.getElementById('accountsTableContainer'); 
     const subtitle = document.getElementById('userGreeting'); 
@@ -1693,9 +1693,10 @@ window.switchMainTab = (tab) => {
         if(btnClientes) { btnClientes.style.background = 'var(--mac-blue)'; btnClientes.style.color = 'white'; }
         if(btnCuentas) { btnCuentas.style.background = 'transparent'; btnCuentas.style.color = 'var(--mac-text-secondary)'; }
         
-        if(tableClientes) tableClientes.style.display = 'block'; 
-        if(loadMoreBtn) loadMoreBtn.style.display = 'block';
-        if(tableCuentas) tableCuentas.style.display = 'none';
+        // Usamos setProperty con 'important' para ganarle a cualquier regla oculta del CSS en celular
+        if(tableClientes) tableClientes.style.setProperty('display', 'block', 'important'); 
+        if(loadMoreBtn) loadMoreBtn.style.setProperty('display', 'block', 'important');
+        if(tableCuentas) tableCuentas.style.setProperty('display', 'none', 'important');
         if(subtitle) subtitle.innerText = 'Gestión de clientes';
         
         if(filterSelect) filterSelect.style.display = 'block'; 
@@ -1706,9 +1707,10 @@ window.switchMainTab = (tab) => {
         if(btnCuentas) { btnCuentas.style.background = 'var(--mac-blue)'; btnCuentas.style.color = 'white'; }
         if(btnClientes) { btnClientes.style.background = 'transparent'; btnClientes.style.color = 'var(--mac-text-secondary)'; }
         
-        if(tableClientes) tableClientes.style.display = 'none';
-        if(loadMoreBtn) loadMoreBtn.style.display = 'none';
-        if(tableCuentas) tableCuentas.style.display = 'block';
+        // Forzamos el ocultamiento absoluto de la sección de clientes eliminando el conflicto visual
+        if(tableClientes) tableClientes.style.setProperty('display', 'none', 'important');
+        if(loadMoreBtn) loadMoreBtn.style.setProperty('display', 'none', 'important');
+        if(tableCuentas) tableCuentas.style.setProperty('display', 'block', 'important');
         if(subtitle) subtitle.innerText = 'Gestión de cuentas';
         
         if(filterSelect) filterSelect.style.display = 'none'; 
