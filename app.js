@@ -698,7 +698,22 @@ window.saveClientData = async () => {
             }
         }
 
-        const data = { userId: currentUser.uid, name: document.getElementById('clientName').value, platform: checked.join(', '), phone: phone, date: document.getElementById('expirationDate').value, cost: cost, price: price, accountEmail: tempAccountData.email, accountPassword: tempAccountData.password, accountProfile: tempAccountData.profile, accountPin: tempAccountData.pin, accountUnits: tempAccountData.units || 1 };
+        const data = {
+            userId: currentUser.uid,
+            name: document.getElementById('clientName').value.trim(),
+            phone: document.getElementById('clientPhone').value.trim(),
+            platform: document.getElementById('clientPlatform').value,
+            accountEmail: document.getElementById('clientEmail').value.trim(),
+            accountPassword: document.getElementById('clientPass').value.trim(),
+            accountProfile: document.getElementById('clientProfile').value.trim(),
+            accountPin: document.getElementById('clientPin').value.trim(),
+            accountUnits: parseInt(document.getElementById('clientUnits').value) || 1,
+            cost: parseFloat(document.getElementById('clientCost').value) || 0,
+            price: parseFloat(document.getElementById('clientPrice').value) || 0,
+            date: document.getElementById('clientDate').value,
+            // Guardamos el enlace si fue creado desde "Mis Cuentas"
+            linkedMasterId: variablesEnlaceMatriz.masterId || null 
+        };
 
         if (editingClientId) { 
             const clienteAEditar = clients.find(c => c.id === editingClientId);
@@ -1667,44 +1682,38 @@ window.savePlatformRule = async () => {
 window.switchMainTab = (tab) => {
     const btnClientes = document.getElementById('btnTabClientes');
     const btnCuentas = document.getElementById('btnTabCuentas');
-    const tableClientes = document.getElementById('mainTable'); // Tu tabla de clientes original
+    const tableClientes = document.querySelector('.table-container'); // Selector corregido para asegurar celular
     const loadMoreBtn = document.getElementById('loadMoreContainer');
-    const tableCuentas = document.getElementById('accountsTableContainer'); // La nueva vista
-    const subtitle = document.getElementById('userGreeting'); // "Gestión de clientes"
+    const tableCuentas = document.getElementById('accountsTableContainer'); 
+    const subtitle = document.getElementById('userGreeting'); 
     const filterSelect = document.getElementById('filterSelect');
     const searchInput = document.getElementById('searchInput');
 
     if (tab === 'clientes') {
-        // Estilos Botones
-        btnClientes.style.background = 'var(--mac-blue)'; btnClientes.style.color = 'white';
-        btnCuentas.style.background = 'transparent'; btnCuentas.style.color = 'var(--mac-text-secondary)';
+        if(btnClientes) { btnClientes.style.background = 'var(--mac-blue)'; btnClientes.style.color = 'white'; }
+        if(btnCuentas) { btnCuentas.style.background = 'transparent'; btnCuentas.style.color = 'var(--mac-text-secondary)'; }
         
-        // Vistas y Textos
-        tableClientes.style.display = 'table'; 
+        if(tableClientes) tableClientes.style.display = 'block'; 
         if(loadMoreBtn) loadMoreBtn.style.display = 'block';
         if(tableCuentas) tableCuentas.style.display = 'none';
         if(subtitle) subtitle.innerText = 'Gestión de clientes';
         
-        // Restablecer herramientas
-        filterSelect.style.display = 'block'; 
-        searchInput.value = '';
+        if(filterSelect) filterSelect.style.display = 'block'; 
+        if(searchInput) searchInput.value = '';
         window.renderTable();
 
     } else if (tab === 'cuentas') {
-        // Estilos Botones
-        btnCuentas.style.background = 'var(--mac-blue)'; btnCuentas.style.color = 'white';
-        btnClientes.style.background = 'transparent'; btnClientes.style.color = 'var(--mac-text-secondary)';
+        if(btnCuentas) { btnCuentas.style.background = 'var(--mac-blue)'; btnCuentas.style.color = 'white'; }
+        if(btnClientes) { btnClientes.style.background = 'transparent'; btnClientes.style.color = 'var(--mac-text-secondary)'; }
         
-        // Vistas y Textos
-        tableClientes.style.display = 'none';
+        if(tableClientes) tableClientes.style.display = 'none';
         if(loadMoreBtn) loadMoreBtn.style.display = 'none';
         if(tableCuentas) tableCuentas.style.display = 'block';
         if(subtitle) subtitle.innerText = 'Gestión de cuentas';
         
-        // Ocultar filtro porque las cuentas matrices no se vencen igual que un cliente
-        filterSelect.style.display = 'none'; 
-        searchInput.value = '';
-        if(typeof window.renderMasterAccounts === 'function') window.renderMasterAccounts();
+        if(filterSelect) filterSelect.style.display = 'none'; 
+        if(searchInput) searchInput.value = '';
+        window.renderMasterAccounts(); 
     }
 };
 /* ==========================================
@@ -2056,6 +2065,164 @@ const checkPublicStore = async () => {
         }
     }
 };
+/* ========================================== MÓDULO DE CUENTAS MATRICES (ESTILO MATRIZ) ========================================== */
+let variablesEnlaceMatriz = { masterId: null, profileNum: null };
 
+window.openNewMasterAccountModal = () => {
+    document.getElementById('matEmail').value = '';
+    document.getElementById('matPass').value = '';
+    document.getElementById('matProfiles').value = '5';
+    document.getElementById('matCost').value = '0';
+    document.getElementById('masterAccountModal').style.display = 'flex';
+};
+
+window.saveMasterAccount = async () => {
+    const platform = document.getElementById('matPlatform').value;
+    const email = document.getElementById('matEmail').value.trim();
+    const pass = document.getElementById('matPass').value.trim();
+    const maxProfiles = parseInt(document.getElementById('matProfiles').value) || 5;
+    const cost = parseFloat(document.getElementById('matCost').value) || 0;
+    const provider = document.getElementById('matProvider').value;
+
+    if (!email || !pass) return window.showNotification("⚠️ Escribe el correo y clave de la cuenta.");
+
+    try {
+        await addDoc(collection(db, "masterAccounts"), {
+            userId: currentUser.uid,
+            platform,
+            email,
+            pass,
+            maxProfiles,
+            cost,
+            provider,
+            timestamp: Date.now()
+        });
+
+        document.getElementById('masterAccountModal').style.display = 'none';
+        window.showNotification("✅ Cuenta Matriz registrada con éxito");
+        window.renderMasterAccounts();
+    } catch(e) {
+        window.showNotification("Error: " + e.message);
+    }
+};
+
+window.renderMasterAccounts = async () => {
+    const container = document.getElementById('masterAccountsList');
+    if (!container) return;
+    container.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary);">Cargando tus matrices...</p>';
+
+    try {
+        // 1. Traer todas las cuentas matrices del usuario
+        const qMat = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
+        const snapMat = await getDocs(qMat);
+        
+        // 2. Traer todos los clientes activos del usuario para cruzarlos en los perfiles
+        const qCli = query(collection(db, "clients"), where("userId", "==", currentUser.uid));
+        const snapCli = await getDocs(qCli);
+        const listaClientes = snapCli.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        if (snapMat.empty) {
+            container.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); font-size:13px; padding:2px 0;">No tienes cuentas matrices creadas. Haz clic en el botón de arriba para registrar la primera.</p>';
+            return;
+        }
+
+        container.innerHTML = '';
+
+        snapMat.forEach(docMat => {
+            const acc = docMat.data();
+            const accId = docMat.id;
+
+            // Filtrar qué clientes están en esta cuenta específica
+            const clientesDeEstaCuenta = listaClientes.filter(c => c.linkedMasterId === accId);
+            
+            // Cálculos financieros y cupos
+            const cuposOcupados = clientesDeEstaCuenta.length;
+            const cuposDisponibles = acc.maxProfiles - cuposOcupados;
+            const ingresosTotales = clientesDeEstaCuenta.reduce((sum, c) => sum + (parseFloat(c.price) || 0), 0);
+            const gananciaNeta = ingresosTotales - acc.cost;
+
+            // Crear la tarjeta de la cuenta completa
+            const card = document.createElement('div');
+            card.style.cssText = "background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);";
+
+            // Cabecera de la cuenta
+            let headerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--mac-border); padding-bottom: 12px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <span style="background: var(--mac-blue); color: white; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 20px; display: inline-block; margin-bottom: 5px;">${acc.platform}</span>
+                        <h4 style="margin: 0; color: var(--mac-text-main); font-size: 16px;">📧 ${acc.email} <span style="font-weight:normal; color:var(--mac-text-secondary); font-size:13px;">(Clave: ${acc.pass})</span></h4>
+                        <small style="color: var(--mac-text-secondary);">Origen: <strong>${acc.provider}</strong></small>
+                    </div>
+                    <div style="text-align: right; min-width: 120px;">
+                        <span style="color: ${cuposDisponibles > 0 ? 'var(--mac-green)' : 'var(--mac-orange)'}; font-weight: bold; font-size: 14px;">Disponibles: ${cuposDisponibles}/${acc.maxProfiles}</span><br>
+                        <small style="color: var(--mac-text-secondary);">Inversión: ${globalCurrency}${acc.cost.toFixed(2)}</small><br>
+                        <span style="color: var(--mac-green); font-weight: 900; font-size: 13px;">Ganancia Neta: ${globalCurrency}${gananciaNeta.toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+
+            // Contenedor de la matriz de perfiles (Fila de bloques estilo Excel de 5 perfiles)
+            let perfilesHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;">`;
+
+            for (let i = 1; i <= acc.maxProfiles; i++) {
+                const clienteEnPerfil = clientesDeEstaCuenta.find(c => parseInt(c.accountProfile) === i);
+
+                if (clienteEnPerfil) {
+                    // Casillero Ocupado por un cliente
+                    perfilesHTML += `
+                        <div style="background: rgba(255, 159, 10, 0.08); border: 1px solid var(--mac-orange); padding: 10px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; min-height: 85px;">
+                            <div>
+                                <strong style="color: var(--mac-orange); font-size: 12px; display: block; margin-bottom: 2px;">👤 Perfil ${i}</strong>
+                                <span style="color: var(--mac-text-main); font-size: 13px; font-weight: bold; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${clienteEnPerfil.name}</span>
+                                <small style="color: var(--mac-text-secondary); font-size: 11px;">Vence: ${clienteEnPerfil.date}</small>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Casillero Disponible (Botón inteligente para enlazar)
+                    perfilesHTML += `
+                        <div style="background: rgba(48, 209, 88, 0.05); border: 1px dashed var(--mac-green); padding: 10px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; min-height: 85px;">
+                            <div>
+                                <strong style="color: var(--mac-green); font-size: 12px; display: block; margin-bottom: 4px;">🟢 Perfil ${i} Disponible</strong>
+                            </div>
+                            <button class="btn-primary" style="font-size: 11px; padding: 4px 8px; width: 100%; text-align: center; background: rgba(48, 209, 88, 0.15); color: var(--mac-green); border: 1px solid var(--mac-green);" onclick="window.vincularClienteAMatriz('${accId}', '${acc.platform}', '${acc.email}', '${acc.pass}', ${i})">
+                                <i class='bx bx-plus'></i> Asignar Cliente
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+
+            perfilesHTML += `</div>`;
+            card.innerHTML = headerHTML + perfilesHTML;
+            container.appendChild(card);
+        });
+
+    } catch(e) {
+        container.innerHTML = `<p style="text-align:center; color:var(--mac-orange);">Error cargando matrices: ${e.message}</p>`;
+    }
+};
+
+// Acción para saltar al modal de clientes rellenando los datos automáticamente
+window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) => {
+    // Guardamos las variables temporales de enlace
+    variablesEnlaceMatriz.masterId = masterId;
+    variablesEnlaceMatriz.profileNum = profileNum;
+
+    // Abrimos el formulario de clientes estándar
+    editingClientId = null;
+    document.getElementById('clientForm').reset();
+    
+    // Rellenamos de forma automática los datos duros heredados de la cuenta completa
+    document.getElementById('clientName').value = "Cliente Perfil " + profileNum;
+    document.getElementById('clientPlatform').value = platform;
+    document.getElementById('clientEmail').value = email;
+    document.getElementById('clientPass').value = pass;
+    document.getElementById('clientProfile').value = profileNum;
+    
+    // Cambiamos de pestaña visualmente para que trabaje en el formulario
+    window.switchMainTab('clientes');
+    document.getElementById('clientModal').style.display = 'flex';
+};
 // Ejecutamos el detector apenas se lee el archivo
 checkPublicStore();
