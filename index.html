@@ -359,14 +359,34 @@
         </div>
     </form>
 
-    <div class="toolbar">
-        <input type="text" id="searchInput" class="search-bar" placeholder="Buscar..." oninput="window.renderTable()">
-        <select id="filterSelect" class="filter-select" onchange="window.renderTable()">
-            <option value="all">Todos los estados</option>
-            <option value="active">Activos</option>
-            <option value="warning">Por vencer (≤ 3 días)</option>
-            <option value="expired">Vencidos</option>
-        </select>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+        
+        <div style="display: flex; gap: 10px; flex: 1; min-width: 250px;">
+            <div style="position: relative; flex: 2;">
+                <i class='bx bx-search' style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--mac-text-secondary);"></i>
+                <input type="text" id="searchInput" placeholder="Buscar..." oninput="if(document.getElementById('btnTabClientes').style.background !== 'transparent') { window.renderTable(); } else { window.renderMasterAccounts(); }" style="width: 100%; padding: 10px 10px 10px 35px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+            </div>
+            <select id="filterSelect" onchange="window.renderTable()" style="flex: 1; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                <option value="all">Todos los estados</option>
+                <option value="active">Activos</option>
+                <option value="warning">Por vencer</option>
+                <option value="expired">Vencidos</option>
+            </select>
+        </div>
+
+        <div style="display: flex; background: var(--mac-bg); padding: 4px; border-radius: 10px; border: 1px solid var(--mac-border);">
+            <button id="btnTabClientes" onclick="window.switchMainTab('clientes')" style="padding: 8px 20px; border-radius: 8px; border: none; background: var(--mac-blue); color: white; font-weight: bold; cursor: pointer; transition: 0.3s;">👤 Mis Clientes</button>
+            <button id="btnTabCuentas" onclick="window.switchMainTab('cuentas')" style="padding: 8px 20px; border-radius: 8px; border: none; background: transparent; color: var(--mac-text-secondary); font-weight: bold; cursor: pointer; transition: 0.3s;">📦 Mis Cuentas</button>
+        </div>
+    </div>
+
+    <div id="accountsTableContainer" style="display: none; width: 100%; margin-bottom: 30px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: var(--mac-gray); padding: 15px; border-radius: 12px; border: 1px solid var(--mac-border);">
+            <p style="margin: 0; color: var(--mac-text-secondary); font-size: 14px;">Gestiona tus cuentas matrices, su rentabilidad y la disponibilidad de perfiles.</p>
+            <button class="btn-primary" style="width: auto; padding: 0 15px;" onclick="window.openNewMasterAccountModal()"><i class='bx bx-plus'></i> Nueva Cuenta Matriz</button>
+        </div>
+        
+        <div id="masterAccountsList" style="display: flex; flex-direction: column; gap: 15px;"></div>
     </div>
 
     <div style="width: 100%; position: relative;">
