@@ -17,89 +17,88 @@
         /* Ajuste fino para que los íconos se alineen perfecto con el texto */
         .bx { vertical-align: middle; margin-right: 4px; font-size: 1.15em; }
         .action-btn .bx { margin-right: 0; } /* Para botones que solo tienen el ícono */
+        
         /* --- DISEÑO DEL PANEL DE NOVEDADES (PANTALLA DIVIDIDA) --- */
-.modal-large {
-    width: 90%;
-    max-width: 850px; /* Ventana más ancha para que entren las dos columnas */
-    height: 80vh;
-    max-height: 600px;
-    display: flex;
-    flex-direction: column;
-}
+        .modal-large {
+            width: 90%;
+            max-width: 850px; 
+            height: 80vh;
+            max-height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
 
-.news-layout {
-    display: flex;
-    flex-direction: row; /* Divide en izquierda y derecha */
-    flex: 1;
-    overflow: hidden;
-    border-top: 1px solid var(--mac-border);
-    margin-top: 10px;
-    padding-top: 15px;
-    gap: 20px;
-}
+        .news-layout {
+            display: flex;
+            flex-direction: row; 
+            flex: 1;
+            overflow: hidden;
+            border-top: 1px solid var(--mac-border);
+            margin-top: 10px;
+            padding-top: 15px;
+            gap: 20px;
+        }
 
-.news-sidebar {
-    flex: 0 0 35%; /* La lista toma el 35% del ancho */
-    overflow-y: auto;
-    border-right: 1px solid var(--mac-border);
-    padding-right: 10px;
-}
+        .news-sidebar {
+            flex: 0 0 35%; 
+            overflow-y: auto;
+            border-right: 1px solid var(--mac-border);
+            padding-right: 10px;
+        }
 
-.news-content-area {
-    flex: 1; /* El contenido toma el resto del espacio */
-    overflow-y: auto;
-    padding-left: 10px;
-}
+        .news-content-area {
+            flex: 1; 
+            overflow-y: auto;
+            padding-left: 10px;
+        }
 
-/* El diseño de cada botoncito de la lista */
-.news-item-title {
-    padding: 12px 15px;
-    margin-bottom: 8px;
-    border: 1px solid transparent;
-    cursor: pointer;
-    border-radius: 8px;
-    background: var(--mac-surface);
-    transition: all 0.2s ease;
-}
+        .news-item-title {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            border-radius: 8px;
+            background: var(--mac-surface);
+            transition: all 0.2s ease;
+        }
 
-.news-item-title:hover {
-    border-color: var(--mac-border);
-}
+        .news-item-title:hover {
+            border-color: var(--mac-border);
+        }
 
-.news-item-title.active {
-    background: rgba(0, 122, 255, 0.1);
-    border: 1px solid var(--mac-blue);
-    border-left: 4px solid var(--mac-blue);
-}
+        .news-item-title.active {
+            background: rgba(0, 122, 255, 0.1);
+            border: 1px solid var(--mac-blue);
+            border-left: 4px solid var(--mac-blue);
+        }
 
-/* EL FIX PARA LA IMAGEN GIGANTE */
-.news-content-img {
-    width: 100%;
-    max-height: 300px; /* Nunca será más alta que esto */
-    object-fit: contain; /* Ajusta la imagen sin deformarla ni recortarla */
-    border-radius: 12px;
-    margin-bottom: 20px;
-    background: rgba(0,0,0,0.2); /* Fondo oscuro por si la imagen es pequeña */
-}
+        .news-content-img {
+            width: 100%;
+            max-height: 300px; 
+            object-fit: contain; 
+            border-radius: 12px;
+            margin-bottom: 20px;
+            background: rgba(0,0,0,0.2); 
+        }
 
-/* Diseño para Celulares (Se pone uno encima del otro para que no se apriete) */
-@media (max-width: 768px) {
-    .news-layout {
-        flex-direction: column; /* Apila los elementos en móviles */
-    }
-    .news-sidebar {
-        flex: 0 0 auto;
-        max-height: 160px; /* Una lista pequeña arriba */
-        border-right: none;
-        border-bottom: 1px solid var(--mac-border);
-        padding-right: 0;
-        padding-bottom: 10px;
-    }
-    .news-content-area {
-        padding-left: 0;
-        padding-top: 10px;
-    }
-}
+        @media (max-width: 768px) {
+            .news-layout {
+                flex-direction: column; 
+            }
+            .news-sidebar {
+                flex: 0 0 auto;
+                max-height: 160px; 
+                border-right: none;
+                border-bottom: 1px solid var(--mac-border);
+                padding-right: 0;
+                padding-bottom: 10px;
+            }
+            .news-content-area {
+                padding-left: 0;
+                padding-top: 10px;
+            }
+        }
+        
         /* 1. FIX: Distribución perfecta del menú inferior */
         .bottom-nav {
             display: flex;
@@ -108,7 +107,7 @@
             padding: 0 !important;
         }
         .bottom-nav .nav-item {
-            flex: 1; /* Obliga a todos a tener el mismo ancho exacto */
+            flex: 1; 
             text-align: center;
             padding: 12px 0 !important;
             margin: 0 !important;
@@ -120,18 +119,16 @@
             border: none;
         }
 
-/* 2. FIX: Inventario como SECCIÓN INDIVIDUAL en celular (Cero estilo de tarjeta) */
+        /* 2. FIX: Inventario como SECCIÓN INDIVIDUAL en celular */
         @media (max-width: 768px) {
-            /* Transformamos el fondo negro borroso en un fondo sólido de la app */
             #inventoryModal.modal-overlay, #pedidosModal.modal-overlay {
                 background-color: var(--mac-bg) !important;
                 align-items: flex-start !important; 
             }
             
-            /* Quitamos todos los estilos de "tarjeta" (bordes, sombras, márgenes) */
             #inventoryModal .modal-card, #pedidosModal .modal-card {
                 width: 100% !important;
-                height: 100dvh !important; /* 100% exacto de la pantalla del celular */
+                height: 100dvh !important; 
                 max-width: 100% !important;
                 border: none !important; 
                 border-radius: 0 !important; 
@@ -144,33 +141,32 @@
                 flex-direction: column;
             }
 
-            /* LA MAGIA: Hacemos que SOLO la lista haga scroll interno */
-            /* Esto mantiene los botones de arriba y el botón de Cerrar siempre fijos */
             #inventoryList, #pedidosList {
                 flex-grow: 1 !important;
                 overflow-y: auto !important;
-                min-height: 0 !important; /* Crucial para que el botón cerrar no se baje */
+                min-height: 0 !important; 
                 padding-bottom: 10px;
                 margin-bottom: 10px;
             }
         }
+
         /* =========================================
-           DISEÑO DE TIENDITA PARA PC (PANTALLA ANCHA)
+           3. DISEÑO DE TIENDITA PARA PC (PANTALLA ANCHA)
            ========================================= */
         @media (min-width: 768px) {
-            /* 1. Ensanchamos el contenedor principal */
+            /* Ensanchamos el contenedor principal */
             #publicStoreView {
                 max-width: 900px !important;
             }
             
-            /* 2. Convertimos la lista en una cuadrícula (Grid) de 2 columnas */
+            /* Convertimos la lista en una cuadrícula (Grid) de 2 columnas */
             #publicStoreCatalog {
                 display: grid !important;
                 grid-template-columns: repeat(2, 1fr);
                 gap: 20px;
             }
             
-            /* 3. Limpiamos los márgenes individuales para que el Grid haga su trabajo */
+            /* Limpiamos los márgenes individuales para que el Grid haga su trabajo */
             #publicStoreCatalog > div {
                 margin-bottom: 0 !important;
                 height: 100%; /* Hace que todas las tarjetas midan lo mismo */
