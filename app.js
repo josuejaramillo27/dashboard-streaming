@@ -175,6 +175,7 @@ onAuthStateChanged(auth, async (user) => {
         } else {
             document.getElementById('btnSuperAdmin').style.display = 'none';
         }
+    }
     // 🛑 NUEVO CANDADO: Si el link es una tienda, detenemos el login
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('tienda')) return;
