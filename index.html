@@ -421,44 +421,56 @@
     <div class="header-top">
         <h2>Panel Global A.G.C.</h2>
         <div style="display: flex; gap: 10px;">
+            <button id="btnSuperAdmin" onclick="window.showSuperAdmin()" style="display: none; padding: 8px 15px; border-radius: 8px; border: none; background: #FF3B30; color: white; font-weight: bold; cursor: pointer; transition: 0.3s;"><i class='bx bxs-crown'></i> Modo SaaS</button>
+            
             <button class="btn-logout" onclick="window.doLogout()"><i class='bx bx-log-out'></i> Salir</button>
             <button class="theme-toggle" onclick="window.toggleTheme()"><i class='bx bx-moon'></i></button>
         </div>
     </div>
     
-    <h3><i class='bx bx-group'></i> Gestión de Distribuidores</h3>
-    <div style="overflow-x:auto; margin-bottom: 40px;">
-        <table>
-            <thead><tr><th>Nombre</th><th>País</th><th>Correo</th><th>Teléfono</th><th>Plan</th><th>Estado</th><th>Acción</th></tr></thead>
-            <tbody id="adminTableBody"></tbody>
-        </table>
-    </div>
-
- <h3><i class='bx bxs-megaphone'></i> Gestión de Noticias / Novedades</h3>
-    <div class="form-grid" style="margin-bottom: 20px; background: var(--mac-gray); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border);">
-        <input type="text" id="newsInputTitle" placeholder="Título de la noticia" style="background: var(--mac-surface);" required>
-        <textarea id="newsInputDesc" placeholder="Descripción de la noticia, oferta o sorteo..." rows="3" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-family: inherit; grid-column: 1 / -1; resize: none;" required></textarea>
-        <div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 5px;">
-            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Subir Imagen (Opcional):</label>
-            <input type="file" id="newsInputImg" accept="image/*" style="background: var(--mac-surface); padding: 5px; font-size: 12px;">
+    <div id="superAdminView" style="display: none; width: 100%; margin-bottom: 30px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(255, 59, 48, 0.1); padding: 15px; border-radius: 12px; border: 1px solid var(--mac-red);">
+            <h3 style="margin: 0; color: var(--mac-red);"><i class='bx bxs-crown'></i> Gestión de Socios del Club</h3>
+            <button class="btn-secondary" onclick="window.cerrarSuperAdmin()" style="border-color: var(--mac-red); color: var(--mac-red);">Volver a Noticias</button>
         </div>
-        <button id="btnSubmitNews" class="btn-primary" onclick="window.saveNews()" style="grid-column: 1 / -1;"><i class='bx bx-send'></i> Publicar Noticia a Todos</button>
-        <button id="btnCancelEditNews" class="btn-secondary" onclick="window.cancelEditNews()" style="grid-column: 1 / -1; display: none;">Cancelar Edición</button>
+        <div id="superAdminList" style="display: flex; flex-direction: column; gap: 15px;"></div>
     </div>
 
-    <div style="overflow-x:auto; margin-bottom: 40px;">
-        <table>
-            <thead><tr><th>Fecha</th><th>Título</th><th>Imagen</th><th>Acciones</th></tr></thead>
-            <tbody id="adminNewsBody"></tbody>
-        </table>
-    </div>
-    
-    <h3><i class='bx bx-bulb'></i> Buzón de Sugerencias</h3>
-    <div style="overflow-x:auto;">
-        <table>
-            <thead><tr><th>Fecha</th><th>Distribuidor</th><th>Sugerencia / Idea</th><th>Estado</th><th>Acciones</th></tr></thead>
-            <tbody id="adminSuggestionsBody"></tbody>
-        </table>
+    <div id="adminContent">
+        <h3><i class='bx bx-group'></i> Gestión de Distribuidores</h3>
+        <div style="overflow-x:auto; margin-bottom: 40px;">
+            <table>
+                <thead><tr><th>Nombre</th><th>País</th><th>Correo</th><th>Teléfono</th><th>Plan</th><th>Estado</th><th>Acción</th></tr></thead>
+                <tbody id="adminTableBody"></tbody>
+            </table>
+        </div>
+
+        <h3><i class='bx bxs-megaphone'></i> Gestión de Noticias / Novedades</h3>
+        <div class="form-grid" style="margin-bottom: 20px; background: var(--mac-gray); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border);">
+            <input type="text" id="newsInputTitle" placeholder="Título de la noticia" style="background: var(--mac-surface);" required>
+            <textarea id="newsInputDesc" placeholder="Descripción de la noticia, oferta o sorteo..." rows="3" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-family: inherit; grid-column: 1 / -1; resize: none;" required></textarea>
+            <div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Subir Imagen (Opcional):</label>
+                <input type="file" id="newsInputImg" accept="image/*" style="background: var(--mac-surface); padding: 5px; font-size: 12px;">
+            </div>
+            <button id="btnSubmitNews" class="btn-primary" onclick="window.saveNews()" style="grid-column: 1 / -1;"><i class='bx bx-send'></i> Publicar Noticia a Todos</button>
+            <button id="btnCancelEditNews" class="btn-secondary" onclick="window.cancelEditNews()" style="grid-column: 1 / -1; display: none;">Cancelar Edición</button>
+        </div>
+
+        <div style="overflow-x:auto; margin-bottom: 40px;">
+            <table>
+                <thead><tr><th>Fecha</th><th>Título</th><th>Imagen</th><th>Acciones</th></tr></thead>
+                <tbody id="adminNewsBody"></tbody>
+            </table>
+        </div>
+        
+        <h3><i class='bx bx-bulb'></i> Buzón de Sugerencias</h3>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead><tr><th>Fecha</th><th>Distribuidor</th><th>Sugerencia / Idea</th><th>Estado</th><th>Acciones</th></tr></thead>
+                <tbody id="adminSuggestionsBody"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
