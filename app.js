@@ -2541,37 +2541,6 @@ window.renderMasterAccounts = async () => {
     }
 };
 
-        // 6. INYECTAR RECORDATORIOS/BANNERS DE NOTIFICACIÓN
-        if (alertasVencimiento.length > 0) {
-            alertsContainer.style.display = 'flex';
-            alertasVencimiento.forEach(alerta => {
-                const box = document.createElement('div');
-                const esHoy = alerta.includes('HOY');
-                box.style.cssText = `padding: 12px 15px; border-radius: 8px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; border: 1px solid ${esHoy ? 'var(--mac-red)' : 'var(--mac-orange)'}; background: ${esHoy ? 'rgba(255,59,48,0.12)' : 'rgba(255,149,0,0.12)'}; color: ${esHoy ? 'var(--mac-red)' : 'var(--mac-orange)'};`;
-                box.innerHTML = alerta;
-                alertsContainer.appendChild(box);
-            });
-
-            // Disparar un único recordatorio SweetAlert por sesión para llamar tu atención inmediata
-            if (!window.masterAlertShown) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Vencimiento de Cuentas Matrices',
-                    html: `<div style="text-align:left; font-size:14px; display:flex; flex-direction:column; gap:8px; margin-top:10px;">${alertasVencimiento.map(a => `<p style="margin:0;">${a}</p>`).join('')}</div>`,
-                    confirmButtonText: 'Entendido, voy a revisar',
-                    confirmButtonColor: '#007AFF',
-                    background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
-                    color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
-                });
-                window.masterAlertShown = true;
-            }
-        }
-
-    } catch(e) {
-        container.innerHTML = `<p style="text-align:center; color:var(--mac-orange);">Error cargando matrices: ${e.message}</p>`;
-    }
-};
-
 // 7. ACCIÓN PARA SALTAR AL FORMULARIO DE CLIENTE
 window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) => {
     variablesEnlaceMatriz.masterId = masterId;
@@ -2607,5 +2576,6 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) =>
     document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
     window.showNotification("Completa el teléfono y los precios para guardar.");
 };
+
 // Ejecutamos el detector apenas se lee el archivo
 checkPublicStore();
