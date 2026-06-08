@@ -2252,7 +2252,7 @@ const checkPublicStore = async () => {
 /* ========================================== MÓDULO DE CUENTAS MATRICES (ESTILO MATRIZ) ========================================== */
 let variablesEnlaceMatriz = { masterId: null, profileNum: null };
 let editingMasterId = null; 
-window.masterAlertShown = false; // Evita que el aviso flotante se repita infinitamente en la misma sesión
+window.masterAlertShown = false; 
 
 // Ocultar o mostrar campos adicionales según el origen de la cuenta
 window.toggleMatProviderFields = () => {
@@ -2319,7 +2319,6 @@ window.saveMasterAccount = async () => {
     const cost = parseFloat(document.getElementById('matCost').value) || 0;
     const provider = document.getElementById('matProvider').value;
     
-    // Captura de nuevos campos
     const expiryDate = provider === 'Proveedor Externo' ? document.getElementById('matExpiryDate').value : '';
     const providerName = provider === 'Proveedor Externo' ? document.getElementById('matProviderName').value.trim() : '';
 
@@ -2354,7 +2353,6 @@ window.renderMasterAccounts = async () => {
     if (!container) return;
     container.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary);">Cargando tus matrices...</p>';
 
-    // Capturamos el texto del buscador de la barra superior
     const searchInput = document.getElementById('searchInput');
     const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
@@ -2383,7 +2381,7 @@ window.renderMasterAccounts = async () => {
 
         container.innerHTML = '';
         let alertasVencimiento = [];
-        let alertasUnicas = new Set(); // Evita alertas duplicadas del mismo ID
+        let alertasUnicas = new Set(); 
 
         let cuentasEncontradas = 0;
 
@@ -2391,11 +2389,10 @@ window.renderMasterAccounts = async () => {
             const acc = docMat.data();
             const accId = docMat.id;
 
-            // 🔍 FILTRO DEL BUSCADOR: Validar Plataforma o Correo
             if (searchTerm) {
                 const matchPlatform = acc.platform && acc.platform.toLowerCase().includes(searchTerm);
                 const matchEmail = acc.email && acc.email.toLowerCase().includes(searchTerm);
-                if (!matchPlatform && !matchEmail) return; // Si no coincide, saltamos esta tarjeta
+                if (!matchPlatform && !matchEmail) return; 
             }
 
             cuentasEncontradas++;
@@ -2511,7 +2508,6 @@ window.renderMasterAccounts = async () => {
             container.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); font-size:13px; padding:2px 0;">No se encontraron cuentas con esa búsqueda.</p>';
         }
 
-        // Mostrar notificaciones SOLO si pasaron el filtro del buscador
         if (alertasVencimiento.length > 0) {
             alertsContainer.style.display = 'flex';
             alertasVencimiento.forEach(alerta => {
