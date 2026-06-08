@@ -736,6 +736,19 @@ window.saveClientData = async () => {
         }
 
         // 🛠️ EL FIX: Usamos los identificadores correctos de tu HTML y la memoria del botón verde
+        let finalLinkedMasterId = null;
+        if (typeof variablesEnlaceMatriz !== 'undefined' && variablesEnlaceMatriz.masterId) {
+            if (editingClientId) {
+                // Si editó el correo o clave, lo desvinculamos de la matriz automáticamente
+                if (tempAccountData.email !== variablesEnlaceMatriz.originalEmail || tempAccountData.password !== variablesEnlaceMatriz.originalPass) {
+                    finalLinkedMasterId = null;
+                } else {
+                    finalLinkedMasterId = variablesEnlaceMatriz.masterId; // Mantiene el vínculo
+                }
+            } else {
+                finalLinkedMasterId = variablesEnlaceMatriz.masterId; // Registro nuevo desde matriz
+            }
+        }
         const data = { 
             userId: currentUser.uid, 
             name: document.getElementById('clientName').value, 
@@ -843,14 +856,31 @@ window.startEdit = (id) => {
     document.getElementById('clientName').value = c.name; document.getElementById('phone').value = c.phone; document.getElementById('expirationDate').value = c.date;
     document.getElementById('clientCost').value = c.cost || ''; document.getElementById('clientPrice').value = c.price || '';
     tempAccountData.email = c.accountEmail || ''; tempAccountData.password = c.accountPassword || ''; tempAccountData.profile = c.accountProfile || ''; tempAccountData.pin = c.accountPin || ''; tempAccountData.units = c.accountUnits || 1;
+    
+    // 🔥 FIX: Mantener la memoria de la matriz al editar y guardar correo original
+    if (typeof variablesEnlaceMatriz !== 'undefined') {
+        variablesEnlaceMatriz.masterId = c.linkedMasterId || null;
+        variablesEnlaceMatriz.profileNum = c.accountProfile || null;
+        variablesEnlaceMatriz.originalEmail = c.accountEmail || '';
+        variablesEnlaceMatriz.originalPass = c.accountPassword || '';
+    }
+    
     const btn = document.getElementById('btnAccountData'); btn.innerText = `✅ Datos de Cuenta (${tempAccountData.units} ud)`; btn.style.backgroundColor = "var(--mac-green)"; btn.style.color = "white";
     const cbs = document.querySelectorAll('#checkboxDropdown input'); cbs.forEach(cb => cb.checked = false); c.platform.split(', ').forEach(p => { cbs.forEach(cb => { if(cb.value === p) cb.checked = true; }); });
     document.getElementById('selectText').textContent = c.platform; document.getElementById('selectText').classList.add('has-selection');
     document.getElementById('actionButtonsContainer').innerHTML = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button type="button" class="btn-primary" onclick="window.saveClientData()">Guardar</button><button type="button" class="btn-secondary" onclick="window.cancelEdit()">Cancelar</button></div>`;
     document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
 };
-window.cancelEdit = () => { editingClientId = null; document.getElementById('clientForm').reset(); resetAccountButton(); document.getElementById('selectText').textContent = 'Plataforma(s)...'; document.getElementById('selectText').classList.remove('has-selection'); document.getElementById('actionButtonsContainer').innerHTML = `<button type="button" class="btn-primary" onclick="window.saveClientData()">Agregar Cliente</button>`; };
 
+window.cancelEdit = () => { 
+    editingClientId = null; 
+    document.getElementById('clientForm').reset(); 
+    resetAccountButton(); 
+    if (typeof variablesEnlaceMatriz !== 'undefined') { variablesEnlaceMatriz = { masterId: null, profileNum: null }; }
+    document.getElementById('selectText').textContent = 'Plataforma(s)...'; 
+    document.getElementById('selectText').classList.remove('has-selection'); 
+    document.getElementById('actionButtonsContainer').innerHTML = `<button type="button" class="btn-primary" onclick="window.saveClientData()">Agregar Cliente</button>`; 
+};
 /* --- RENDERIZAR TABLA (NOMBRES DE COLORES) --- */
 window.renderTable = () => {
     const tbody = document.getElementById('tableBody'); tbody.innerHTML = ''; const today = new Date(); today.setHours(0,0,0,0);
@@ -2258,6 +2288,9 @@ window.renderMasterAccounts = async () => {
                                 <span style="color: var(--mac-text-main); font-size: 13px; font-weight: bold; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${clienteEnPerfil.name}</span>
                                 <small style="color: var(--mac-text-secondary); font-size: 11px;">Vence: ${clienteEnPerfil.date}</small>
                             </div>
+                            <button onclick="window.editarClienteDesdeMatriz('${clienteEnPerfil.id}')" style="margin-top: 8px; background: transparent; border: 1px solid var(--mac-orange); color: var(--mac-orange); padding: 4px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: 0.2s; font-weight: bold; width: 100%;">
+                                <i class='bx bx-edit-alt'></i> Editar Cliente
+                            </button>
                         </div>
                     `;
                 } else {
@@ -2362,6 +2395,15 @@ window.generarQrAdmin = async () => {
         botStatus.style.color = "var(--mac-red)";
         console.error(e);
     }
+};
+// 7. FUNCIÓN PARA EDITAR CLIENTE DIRECTO DESDE LA MATRIZ
+window.editarClienteDesdeMatriz = (clientId) => {
+    // Cambiamos a la pestaña de clientes
+    window.switchMainTab('clientes');
+    // Le damos una micro-pausa al navegador para que dibuje la pestaña antes de editar
+    setTimeout(() => {
+        window.startEdit(clientId);
+    }, 100);
 };
 // Ejecutamos el detector apenas se lee el archivo
 checkPublicStore();
