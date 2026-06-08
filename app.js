@@ -177,13 +177,6 @@ onAuthStateChanged(auth, async (user) => {
             document.getElementById('authSubtitle').innerText = 'Cargando tu panel... ⏳';
         }
 
-        // Validación de Super Admin
-        if (user.email === 'admin@akaza.com') {
-            document.getElementById('btnSuperAdmin').style.display = 'block';
-        } else {
-            document.getElementById('btnSuperAdmin').style.display = 'none';
-        }
-
         try {
             const docSnap = await getDoc(doc(db, "users", user.uid));
             if (docSnap.exists()) {
@@ -2328,108 +2321,6 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) =>
     
     window.showNotification("Completa el teléfono y los precios para guardar.");
 };
-/* ========================================== MÓDULO SUPER ADMIN (SAAS) ========================================== */
-window.showSuperAdmin = () => {
-    // Ocultamos las noticias y la tabla normal de distribuidores
-    document.getElementById('adminContent').style.display = 'none';
-    
-    // Mostramos tu tabla VIP de cobros
-    document.getElementById('superAdminView').style.display = 'block';
-    
-    window.loadAllUsers();
-};
 
-window.cerrarSuperAdmin = () => {
-    // Ocultamos la tabla VIP
-    document.getElementById('superAdminView').style.display = 'none';
-    
-    // Volvemos a mostrar las noticias
-    document.getElementById('adminContent').style.display = 'block';
-};
-
-window.loadAllUsers = async () => {
-    const container = document.getElementById('superAdminList');
-    container.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary);">Cargando la base de datos de socios...</p>';
-    
-    try {
-        const snap = await getDocs(collection(db, "users"));
-        container.innerHTML = '';
-        
-        snap.forEach(docSnap => {
-            const u = docSnap.data();
-            const uId = docSnap.id;
-            const plan = u.plan_actual || 'demo';
-            const exp = u.plan_vencimiento || 'Sin fecha límite';
-            const maxClients = u.limite_clientes || 20;
-
-            const card = document.createElement('div');
-            card.style.cssText = "background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 12px; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;";
-            
-            // Etiqueta visual para saber si está activo o vencido
-            const hoy = new Date().toISOString().split('T')[0];
-            let estadoHTML = `<span style="color: var(--mac-green); font-size: 12px;">⚫ Activo</span>`;
-            if (exp !== 'Sin fecha límite' && exp < hoy) {
-                estadoHTML = `<span style="color: var(--mac-red); font-size: 12px;">🔴 Vencido</span>`;
-            }
-
-            card.innerHTML = `
-                <div>
-                    <strong style="color: var(--mac-text-main); font-size: 15px;">📧 ${u.email || 'Sin correo'}</strong><br>
-                    <span style="color: var(--mac-text-secondary); font-size: 13px;">Plan: <b style="color: var(--mac-blue); text-transform: uppercase;">${plan}</b> | Límite: ${maxClients} perfiles</span><br>
-                    <span style="color: var(--mac-text-secondary); font-size: 13px;">Vence: <strong>${exp}</strong> ${estadoHTML}</span>
-                </div>
-                <button onclick="window.renovarSocio('${uId}', '${u.email}', '${plan}', '${exp}')" style="background: var(--mac-blue); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s;"><i class='bx bx-calendar-check'></i> Gestionar Suscripción</button>
-            `;
-            container.appendChild(card);
-        });
-    } catch(e) {
-        container.innerHTML = `<p style="color: var(--mac-red); text-align:center;">Error de permisos: ${e.message}</p>`;
-    }
-};
-
-window.renovarSocio = async (uId, email, currentPlan, currentExp) => {
-    const { value: formValues } = await Swal.fire({
-        title: 'Gestión de Socio',
-        html:
-            `<p style="font-size:14px; color:gray; margin-bottom:15px;">Usuario: <strong>${email}</strong></p>` +
-            `<label style="text-align:left; display:block; font-size:12px; font-weight:bold;">Tipo de Plan:</label>` +
-            `<select id="swal-plan" class="swal2-input" style="width:85%; height:40px; font-size:14px; margin-top:5px;">
-                <option value="demo" ${currentPlan === 'demo' ? 'selected' : ''}>Demo Gratuita (20 perfiles)</option>
-                <option value="pro" ${currentPlan === 'pro' ? 'selected' : ''}>Socio PRO (Ilimitado)</option>
-                <option value="elite" ${currentPlan === 'elite' ? 'selected' : ''}>Socio ELITE (Bot + Ilimitado)</option>
-            </select>` +
-            `<label style="text-align:left; display:block; font-size:12px; font-weight:bold; margin-top:15px;">Vencimiento de su pago:</label>` +
-            `<input id="swal-date" type="date" class="swal2-input" value="${currentExp !== 'Sin fecha límite' ? currentExp : ''}" style="width:85%; height:40px; font-size:14px; margin-top:5px;">`,
-        focusConfirm: false,
-        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
-        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
-        showCancelButton: true,
-        confirmButtonText: 'Guardar Cambios',
-        cancelButtonText: 'Cancelar',
-        preConfirm: () => {
-            return {
-                plan: document.getElementById('swal-plan').value,
-                date: document.getElementById('swal-date').value || 'Sin fecha límite'
-            }
-        }
-    });
-
-    if (formValues) {
-        let limite = 20;
-        if(formValues.plan === 'pro' || formValues.plan === 'elite') limite = 9999;
-
-        try {
-            await updateDoc(doc(db, "users", uId), {
-                plan_actual: formValues.plan,
-                plan_vencimiento: formValues.date,
-                limite_clientes: limite
-            });
-            window.showNotification("✅ Suscripción de socio actualizada");
-            window.loadAllUsers(); // Refrescamos la lista
-        } catch(e) {
-            window.showNotification("Error al guardar: " + e.message);
-        }
-    }
-};
 // Ejecutamos el detector apenas se lee el archivo
 checkPublicStore();
