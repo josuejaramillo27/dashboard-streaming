@@ -1706,13 +1706,75 @@ window.renderStoreItems = () => {
             </div>
             <div style="display:flex; flex-direction:column; gap:5px; min-width: 100px;">
                 <button class="action-btn" style="border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 11px; padding: 4px; border-radius:6px; background:transparent;" onclick="window.toggleStoreItemStatus(${index})">🔄 Cambiar Estado</button>
+                <button class="action-btn" style="border: 1px solid var(--mac-blue); color: var(--mac-blue); font-size: 11px; padding: 4px; border-radius:6px; background:transparent;" onclick="window.editStoreItem(${index})"><i class='bx bx-edit'></i> Editar</button>
                 <button class="action-btn btn-del" style="padding: 4px; font-size: 11px; border-radius:6px;" onclick="window.deleteStoreItem(${index})"><i class='bx bx-trash'></i> Borrar</button>
             </div>
         `;
         list.appendChild(div);
     });
 };
+window.editStoreItem = async (index) => {
+    let catalog = currentUserData.storeCatalog || [];
+    let item = catalog[index];
 
+    if (!item) return;
+
+    // Abrimos el modal de SweetAlert adaptado a tu modo oscuro/claro
+    const { value: formValues } = await Swal.fire({
+        title: 'Editar Producto',
+        html: `
+            <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Nombre del Servicio/Combo:</label>
+                <input id="swal-plat" class="swal2-input" style="margin:0; width: 100%; box-sizing:border-box;" value="${item.platform}">
+                
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Precio:</label>
+                <input id="swal-price" type="number" step="0.1" class="swal2-input" style="margin:0; width: 100%; box-sizing:border-box;" value="${item.price}">
+                
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Descripción:</label>
+                <input id="swal-desc" class="swal2-input" style="margin:0; width: 100%; box-sizing:border-box;" value="${item.desc || ''}">
+            </div>
+        `,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Guardar Cambios',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#007AFF',
+        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
+        preConfirm: () => {
+            const plat = document.getElementById('swal-plat').value.trim();
+            const price = parseFloat(document.getElementById('swal-price').value);
+            const desc = document.getElementById('swal-desc').value.trim();
+
+            if (!plat || isNaN(price)) {
+                Swal.showValidationMessage('El nombre y el precio son obligatorios');
+                return false;
+            }
+
+            return { platform: plat, price: price, desc: desc };
+        }
+    });
+
+    // Si el usuario le dio a "Guardar Cambios" y no canceló
+    if (formValues) {
+        // 1. Modificamos el objeto en la memoria local
+        catalog[index].platform = formValues.platform;
+        catalog[index].price = formValues.price;
+        catalog[index].desc = formValues.desc;
+
+        try {
+            // 2. Lo enviamos a Firebase
+            await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
+            currentUserData.storeCatalog = catalog;
+            
+            // 3. Volvemos a dibujar la lista y avisamos
+            window.renderStoreItems();
+            window.showNotification("✅ Producto editado correctamente");
+        } catch(e) {
+            window.showNotification("Error al editar: " + e.message);
+        }
+    }
+};
 window.toggleStoreItemStatus = async (index) => {
     let catalog = currentUserData.storeCatalog || [];
     catalog[index].status = catalog[index].status === 'agotado' ? 'disponible' : 'agotado';
