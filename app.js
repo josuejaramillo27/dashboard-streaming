@@ -904,6 +904,7 @@ window.renderTable = () => {
         <td data-label="Acciones" class="actions-cell">
             <button class="action-btn btn-wa" onclick="window.sendWA('${c.phone}', '${c.name}', '${c.platform}', '${c.expDate.toLocaleDateString('es-ES')}')"><i class='bx bxl-whatsapp'></i> WA</button>
             <button class="action-btn" style="background: rgba(175, 82, 222, 0.15); color: #AF52DE; font-weight: bold;" onclick="window.downloadTicket('${c.id}', event)"><i class='bx bx-receipt'></i> Recibo</button>
+            <button class="action-btn" style="background: rgba(0, 122, 255, 0.15); color: #007AFF; font-weight: bold;" onclick="window.openLinkModal('${c.id}', '${c.platform}')" title="Vincular a Matriz"><i class='bx bx-link'></i></button>
             ${c.statusCat !== 'active' ? `<button class="action-btn btn-renew" onclick="window.renewClient('${c.id}')"><i class='bx bx-refresh'></i></button>` : ''}
             <button class="action-btn" style="color: var(--mac-text-main);" onclick="window.startEdit('${c.id}')"><i class='bx bx-edit-alt'></i></button>
             <button class="action-btn btn-del" onclick="window.deleteClient('${c.id}')"><i class='bx bx-trash'></i></button>
@@ -1347,6 +1348,7 @@ window.openMobileClientModal = (id) => {
     document.getElementById('mcActions').innerHTML = `
         <button class="action-btn btn-wa" style="padding:12px; font-size:14px;" onclick="window.sendWA('${c.phone}', '${c.name}', '${c.platform}', '${exp.toLocaleDateString('es-ES')}')">💬 WhatsApp</button>
         <button class="action-btn" style="padding:12px; font-size:14px; background: rgba(175, 82, 222, 0.15); color: #AF52DE; font-weight: bold;" onclick="window.downloadTicket('${c.id}', event)">🧾 Recibo</button>
+        <button class="action-btn" style="padding:12px; font-size:14px; background: rgba(0, 122, 255, 0.15); color: #007AFF; font-weight: bold;" onclick="window.closeModals(); window.openLinkModal('${c.id}', '${c.platform}')"><i class='bx bx-link'></i> Vincular</button>
         <button class="action-btn" style="padding:12px; font-size:14px; color: var(--mac-text-main);" onclick="window.closeModals(); window.startEdit('${c.id}')"><i class='bx bx-edit-alt'></i> Editar</button>
         <button class="action-btn btn-del" style="padding:12px; font-size:14px;" onclick="window.closeModals(); window.deleteClient('${c.id}')">🗑️ Borrar</button>
         ${renewBtn}
@@ -1976,11 +1978,18 @@ window.addInventoryAccount = async () => {
     const type = document.getElementById('invType').value;
     const email = document.getElementById('invEmail').value.trim();
     const pass = document.getElementById('invPass').value.trim();
-    const profile = document.getElementById('invProfile').value.trim() || 'N/A';
+    const profile = document.getElementById('invProfile').value.trim(); // Le quitamos el 'N/A' por defecto
     const pin = document.getElementById('invPin').value.trim() || 'N/A';
 
     if (!platform || !email || !pass) {
         return window.showNotification("Plataforma, Correo y Contraseña son obligatorios.");
+    }
+
+    // NUEVA VALIDACIÓN: Si es tipo "Perfil", DEBE tener un número
+    if (type === 'Perfil') {
+        if (!profile || !/\d/.test(profile)) {
+            return window.showNotification("⚠️ En 'N° Perfil' debes incluir al menos un NÚMERO (Ej: 3, J3, P4).");
+        }
     }
 
     const btn = document.querySelector('#inventoryModal .btn-primary');
@@ -2153,6 +2162,14 @@ window.aprobarVenta = async (pedidoId, numeroCliente, selectId) => {
         // FIX: Formatear el número para que en la tabla del panel se vea bonito (Ej: +51999...)
         const numeroBonito = "+" + numeroCliente.split('@')[0].split(':')[0];
 
+        // B.5 AUTO-VINCULACIÓN MÁGICA: Buscar si existe una matriz con el correo de la cuenta vendida
+        let matrizAsignada = null;
+        const qMatriz = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid), where("email", "==", cuentaSeleccionada.email));
+        const snapMatriz = await getDocs(qMatriz);
+        if (!snapMatriz.empty) {
+            matrizAsignada = snapMatriz.docs[0].id; // Extrae el ID de la matriz mágicamente
+        }
+
         // C. Crear al cliente con las variables CORRECTAS de tu base de datos
         await addDoc(collection(db, "clients"), {
             userId: currentUser.uid,
@@ -2167,7 +2184,8 @@ window.aprobarVenta = async (pedidoId, numeroCliente, selectId) => {
             cost: 0,
             price: 0,
             date: dateFirebase,
-            color: macPalette[Math.floor(Math.random() * macPalette.length)] // <-- FIX: Le asignamos color desde el inicio
+            linkedMasterId: matrizAsignada, // <--- AQUÍ SE INYECTA LA CONEXIÓN AUTOMÁTICA
+            color: macPalette[Math.floor(Math.random() * macPalette.length)]
         });
 
         // D. Descontar la cuenta del inventario
@@ -2440,7 +2458,12 @@ window.renderMasterAccounts = async () => {
             let perfilesHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;">`;
 
             for (let i = 1; i <= acc.maxProfiles; i++) {
-                const clienteEnPerfil = clientesDeEstaCuenta.find(c => parseInt(c.accountProfile) === i);
+                // NUEVA LÓGICA: Extrae solo el primer número que encuentre en el texto del perfil
+                const clienteEnPerfil = clientesDeEstaCuenta.find(c => {
+                    if (!c.accountProfile) return false;
+                    const numeroEncontrado = String(c.accountProfile).match(/\d+/); 
+                    return numeroEncontrado && parseInt(numeroEncontrado[0]) === i;
+                });
 
                 if (clienteEnPerfil) {
                     perfilesHTML += `
@@ -2542,6 +2565,77 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) =>
     document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
     window.showNotification("Completa el teléfono y los precios para guardar.");
 };
+/* --- MODAL PARA VINCULAR CLIENTE SUELTO A MATRIZ --- */
+window.openLinkModal = async (clientId, clientPlatform) => {
+    try {
+        // 1. Traer solo las matrices de este usuario
+        const qMat = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
+        const snapMat = await getDocs(qMat);
+        
+        let optionsHTML = '<option value="">-- Selecciona una Matriz --</option>';
+        let count = 0;
 
+        snapMat.forEach(doc => {
+            const mat = doc.data();
+            // Filtrar inteligentemente: Solo muestra matrices que coincidan con la plataforma del cliente
+            if (clientPlatform.toLowerCase().includes(mat.platform.toLowerCase())) {
+                optionsHTML += `<option value="${doc.id}">${mat.platform} - ${mat.email}</option>`;
+                count++;
+            }
+        });
+
+        if (count === 0) {
+            return window.showNotification("No tienes Cuentas Matrices creadas para la plataforma: " + clientPlatform);
+        }
+
+        // 2. Mostrar la alerta de SweetAlert2
+        const { value: formValues } = await Swal.fire({
+            title: '🔗 Vincular a Matriz',
+            html: `
+                <p style="font-size: 13px; color: var(--mac-text-secondary); text-align: left;">Selecciona a qué cuenta matriz pertenece este cliente y qué N° de perfil ocupa para que aparezca en el cuadrito.</p>
+                
+                <select id="swal-matriz" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main);">
+                    ${optionsHTML}
+                </select>
+                
+                <input id="swal-perfil" placeholder="N° de Perfil (Ej: 3, J3)" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); box-sizing: border-box;">
+            `,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'Guardar Vínculo',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#007AFF',
+            background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+            color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
+            preConfirm: () => {
+                const matrizId = document.getElementById('swal-matriz').value;
+                const perfil = document.getElementById('swal-perfil').value.trim();
+                
+                if (!matrizId) {
+                    Swal.showValidationMessage('Debes seleccionar una matriz.');
+                    return false;
+                }
+                if (!perfil || !/\d/.test(perfil)) {
+                    Swal.showValidationMessage('El perfil debe contener al menos un NÚMERO (Ej: 3, J3).');
+                    return false;
+                }
+                return { matrizId, perfil };
+            }
+        });
+
+        // 3. Guardar en Firebase si todo salió bien
+        if (formValues) {
+            await updateDoc(doc(db, "clients", clientId), {
+                linkedMasterId: formValues.matrizId,
+                accountProfile: formValues.perfil
+            });
+            window.showNotification("✅ Cliente vinculado exitosamente a la Matriz.");
+            loadUserClients(); // Recargamos para que se actualice todo internamente
+        }
+
+    } catch (e) {
+        window.showNotification("Error al vincular: " + e.message);
+    }
+};
 // Ejecutamos el detector apenas se lee el archivo
 checkPublicStore();
