@@ -1627,13 +1627,13 @@ window.removeExternalStore = async () => {
     }
 };
 
-// 2. GESTIÓN DEL CATÁLOGO INTERNO
+// 2. GESTIÓN DEL CATÁLOGO INTERNO (Con Combos y Estado Agotado)
 window.addStoreItem = async () => {
+    const type = document.getElementById('storeType') ? document.getElementById('storeType').value : 'Servicio';
     const plat = document.getElementById('storePlatform').value.trim();
     const price = document.getElementById('storePrice').value;
     const desc = document.getElementById('storeDesc') ? document.getElementById('storeDesc').value.trim() : '';
     
-    // Capturamos el input de la imagen
     const fileInput = document.getElementById('storeImg');
     const file = fileInput ? fileInput.files[0] : null;
 
@@ -1645,7 +1645,6 @@ window.addStoreItem = async () => {
     try {
         let imgUrl = "";
         
-        // Si hay foto seleccionada, la subimos a Storage
         if (file) {
             const storageRef = ref(storage, `store_images/${currentUser.uid}_${Date.now()}_${file.name}`);
             const snapshot = await uploadBytes(storageRef, file);
@@ -1658,13 +1657,14 @@ window.addStoreItem = async () => {
             platform: plat, 
             price: parseFloat(price), 
             desc: desc, 
-            imgUrl: imgUrl // Guardamos la URL de la imagen
+            imgUrl: imgUrl,
+            type: type, // Guarda si es Combo o Servicio
+            status: 'disponible' // Por defecto siempre está disponible al crearlo
         });
         
         await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
         currentUserData.storeCatalog = catalog;
         
-        // Limpiamos los inputs
         document.getElementById('storePlatform').value = '';
         document.getElementById('storePrice').value = '';
         if (document.getElementById('storeDesc')) document.getElementById('storeDesc').value = '';
@@ -1690,18 +1690,37 @@ window.renderStoreItems = () => {
     }
 
     catalog.forEach((item, index) => {
+        const isAgotado = item.status === 'agotado';
+        const statusBadge = isAgotado ? `<span style="background:var(--mac-red); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold;">AGOTADO</span>` : `<span style="background:var(--mac-green); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold;">DISPONIBLE</span>`;
+        const typeBadge = item.type === 'Combo' ? `<span style="background:var(--mac-orange); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold; margin-right:5px;">🎁 COMBO</span>` : '';
+
         const div = document.createElement('div');
-        div.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:var(--mac-surface); padding:10px; border-radius:8px; border:1px solid var(--mac-border);";
+        div.style.cssText = `display:flex; justify-content:space-between; align-items:center; background:var(--mac-surface); padding:10px; border-radius:8px; border:1px solid var(--mac-border); opacity: ${isAgotado ? '0.7' : '1'};`;
         div.innerHTML = `
-            <div>
+            <div style="flex:1; padding-right:10px;">
+                ${typeBadge}
                 <strong style="color:var(--mac-text-main); font-size:14px;">${item.platform}</strong><br>
-                <span style="color:var(--mac-text-secondary); font-size:12px; display:block; margin-bottom:4px;">${item.desc || ''}</span>
+                <span style="color:var(--mac-text-secondary); font-size:12px; display:block; margin:4px 0;">${item.desc || ''}</span>
                 <span style="color:var(--mac-green); font-size:13px; font-weight:bold;">${globalCurrency}${item.price.toFixed(2)}</span>
+                <div style="margin-top: 5px;">${statusBadge}</div>
             </div>
-            <button class="action-btn btn-del" onclick="window.deleteStoreItem(${index})"><i class='bx bx-trash'></i></button>
+            <div style="display:flex; flex-direction:column; gap:5px; min-width: 100px;">
+                <button class="action-btn" style="border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 11px; padding: 4px; border-radius:6px; background:transparent;" onclick="window.toggleStoreItemStatus(${index})">🔄 Cambiar Estado</button>
+                <button class="action-btn btn-del" style="padding: 4px; font-size: 11px; border-radius:6px;" onclick="window.deleteStoreItem(${index})"><i class='bx bx-trash'></i> Borrar</button>
+            </div>
         `;
         list.appendChild(div);
     });
+};
+
+window.toggleStoreItemStatus = async (index) => {
+    let catalog = currentUserData.storeCatalog || [];
+    catalog[index].status = catalog[index].status === 'agotado' ? 'disponible' : 'agotado';
+    try {
+        await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
+        currentUserData.storeCatalog = catalog;
+        window.renderStoreItems();
+    } catch(e) { window.showNotification("Error al cambiar estado"); }
 };
 
 window.deleteStoreItem = async (index) => {
@@ -1717,6 +1736,98 @@ window.deleteStoreItem = async (index) => {
 window.copyStoreLink = () => {
     const link = document.getElementById('storeLinkInput').value;
     navigator.clipboard.writeText(link).then(() => window.showNotification("¡Link copiado! Pégalo en tu Instagram/WhatsApp."));
+};
+
+// 3. EL DETECTOR DEL CLIENTE PÚBLICO (MAGIA SPA)
+const checkPublicStore = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const storeId = urlParams.get('tienda');
+    
+    if (storeId) {
+        document.getElementById('authView').style.display = 'none';
+        document.getElementById('appView').style.display = 'none';
+        document.getElementById('adminView').style.display = 'none';
+        
+        const storeView = document.getElementById('publicStoreView');
+        storeView.style.display = 'block';
+
+        try {
+            let data = null;
+            const q = query(collection(db, "users"), where("storeAlias", "==", storeId));
+            const snap = await getDocs(q);
+            
+            if (!snap.empty) { data = snap.docs[0].data(); } 
+            else {
+                const docRef = await getDoc(doc(db, "users", storeId));
+                if (docRef.exists()) data = docRef.data();
+            }
+
+            if (!data) {
+                document.getElementById('publicStoreName').innerText = "Tienda no encontrada";
+                return;
+            }
+            
+            const plan = data.plan_actual || 'demo';
+            if ((plan !== 'pro' && plan !== 'elite') || data.active === false) {
+                document.getElementById('publicStoreName').innerText = "Tienda inactiva";
+                document.getElementById('publicStoreCatalog').innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary);">Este distribuidor no tiene su catálogo habilitado en este momento.</p>';
+                return;
+            }
+
+            document.getElementById('publicStoreName').innerText = data.name || "Distribuidor A.G.C.";
+            
+            const logoEl = document.getElementById('publicStoreLogo');
+            if (data.logoUrl) {
+                logoEl.src = data.logoUrl;
+                logoEl.style.display = 'block';
+            }
+
+            const catalogBox = document.getElementById('publicStoreCatalog');
+            const catalog = data.storeCatalog || [];
+            
+            if (catalog.length === 0) {
+                catalogBox.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary);">No hay productos publicados aún.</p>';
+            } else {
+                catalogBox.innerHTML = '';
+                catalog.forEach(item => {
+                    const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
+                    const isAgotado = item.status === 'agotado';
+                    const typeBadge = item.type === 'Combo' ? `<span style="background:var(--mac-orange); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold; margin-bottom: 5px; display:inline-block;">🎁 COMBO</span><br>` : '';
+                    
+                    const numLimpio = data.phone.replace(/[^\d+]/g, '');
+                    const msg = encodeURIComponent(`/comprar ${item.platform.toLowerCase()}`);
+                    const waLink = `https://wa.me/${numLimpio}?text=${msg}`;
+
+                    const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}" style="width: 65px; height: 65px; border-radius: 12px; object-fit: cover; margin-right: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">` : '';
+
+                    let btnHTML = '';
+                    if (isAgotado) {
+                        btnHTML = `<span style="background:var(--mac-gray); color:var(--mac-text-secondary); padding:10px 20px; border-radius:20px; font-weight:bold; font-size:14px; border: 1px solid var(--mac-border); white-space: nowrap;">Agotado</span>`;
+                    } else {
+                        btnHTML = `<a href="${waLink}" target="_blank" style="text-decoration:none; background:#25D366; color:white; padding:10px 20px; border-radius:20px; font-weight:bold; font-size:14px; box-shadow:0 4px 10px rgba(37,211,102,0.3); white-space: nowrap;"><i class='bx bxl-whatsapp'></i> Comprar</a>`;
+                    }
+
+                    const card = document.createElement('div');
+                    card.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:var(--mac-gray); padding:15px 20px; border-radius:16px; border:1px solid var(--mac-border); box-shadow:0 4px 6px rgba(0,0,0,0.1); margin-bottom: 12px;";
+                    card.innerHTML = `
+                        <div style="display:flex; align-items:center; flex: 1; padding-right: 15px; opacity: ${isAgotado ? '0.5' : '1'};">
+                            ${imgHTML}
+                            <div>
+                                ${typeBadge}
+                                <strong style="color:var(--mac-text-main); font-size:16px;">${item.platform}</strong><br>
+                                <span style="color:var(--mac-text-secondary); font-size:13px; display:block; margin:4px 0; line-height:1.3;">${item.desc || ''}</span>
+                                <span style="color:var(--mac-green); font-size:18px; font-weight:900;">${priceStr}</span>
+                            </div>
+                        </div>
+                        ${btnHTML}
+                    `;
+                    catalogBox.appendChild(card);
+                });
+            }
+        } catch (e) {
+            console.error("Error cargando tienda:", e);
+        }
+    }
 };
 
 // --- SISTEMA DE REGLAS POR PLATAFORMA ---
@@ -2237,13 +2348,16 @@ window.saveMasterAccount = async () => {
     }
 };
 
-// 5. RENDERIZAR LAS TARJETAS CON ALERTAS DE VENCIMIENTO
+// 5. RENDERIZAR LAS TARJETAS CON BUSCADOR Y ALERTAS OPTIMIZADAS
 window.renderMasterAccounts = async () => {
     const container = document.getElementById('masterAccountsList');
     if (!container) return;
     container.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary);">Cargando tus matrices...</p>';
 
-    // Crear o limpiar contenedor de notificaciones urgentes en la zona superior de las pestañas
+    // Capturamos el texto del buscador de la barra superior
+    const searchInput = document.getElementById('searchInput');
+    const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
     let alertsContainer = document.getElementById('masterAccountsAlerts');
     if(!alertsContainer) {
         alertsContainer = document.createElement('div');
@@ -2263,16 +2377,28 @@ window.renderMasterAccounts = async () => {
         const listaClientes = snapCli.docs.map(d => ({ id: d.id, ...d.data() }));
 
         if (snapMat.empty) {
-            container.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); font-size:13px; padding:2px 0;">No tienes cuentas matrices creadas. Haz clic en el botón de arriba para registrar la primera.</p>';
+            container.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); font-size:13px; padding:2px 0;">No tienes cuentas matrices creadas.</p>';
             return;
         }
 
         container.innerHTML = '';
         let alertasVencimiento = [];
+        let alertasUnicas = new Set(); // Evita alertas duplicadas del mismo ID
+
+        let cuentasEncontradas = 0;
 
         snapMat.forEach(docMat => {
             const acc = docMat.data();
             const accId = docMat.id;
+
+            // 🔍 FILTRO DEL BUSCADOR: Validar Plataforma o Correo
+            if (searchTerm) {
+                const matchPlatform = acc.platform && acc.platform.toLowerCase().includes(searchTerm);
+                const matchEmail = acc.email && acc.email.toLowerCase().includes(searchTerm);
+                if (!matchPlatform && !matchEmail) return; // Si no coincide, saltamos esta tarjeta
+            }
+
+            cuentasEncontradas++;
 
             const clientesDeEstaCuenta = listaClientes.filter(c => c.linkedMasterId === accId);
             const cuposOcupados = clientesDeEstaCuenta.length;
@@ -2280,7 +2406,6 @@ window.renderMasterAccounts = async () => {
             const ingresosTotales = clientesDeEstaCuenta.reduce((sum, c) => sum + (parseFloat(c.price) || 0), 0);
             const gananciaNeta = ingresosTotales - acc.cost;
 
-            // ANALIZAR FECHAS DE PROVEEDOR EXTERNO PARA RECORDATORIOS
             let infoVencimientoHTML = '';
             if (acc.provider === 'Proveedor Externo') {
                 const nombreProv = acc.providerName ? ` (${acc.providerName})` : '';
@@ -2294,26 +2419,31 @@ window.renderMasterAccounts = async () => {
 
                     if (diffDays === 1) {
                         infoVencimientoHTML = `<br><span style="color: var(--mac-orange); font-size:12px; font-weight:bold;">📅 Vence MAÑANA: ${acc.expiryDate}${nombreProv} ⏳</span>`;
-                        alertasVencimiento.push(`⚠️ Tu cuenta completa <strong>${acc.platform}</strong> (${acc.email}) asignada a <strong>${acc.providerName || 'Proveedor Externo'}</strong> vence <strong>mañana</strong>.`);
+                        if (!alertasUnicas.has(accId)) {
+                            alertasVencimiento.push(`⚠️ Tu cuenta completa <strong>${acc.platform}</strong> (${acc.email}) vence <strong>mañana</strong>.`);
+                            alertasUnicas.add(accId);
+                        }
                     } else if (diffDays === 0) {
                         infoVencimientoHTML = `<br><span style="color: var(--mac-red); font-size:12px; font-weight:bold;">🚨 Vence HOY: ${acc.expiryDate}${nombreProv} ⚠️</span>`;
-                        alertasVencimiento.push(`🚨 ¡ATENCIÓN! Tu cuenta completa <strong>${acc.platform}</strong> (${acc.email}) de <strong>${acc.providerName || 'Proveedor Externo'}</strong> vence <strong>HOY</strong>.`);
+                        if (!alertasUnicas.has(accId)) {
+                            alertasVencimiento.push(`🚨 ¡ATENCIÓN! Tu cuenta completa <strong>${acc.platform}</strong> (${acc.email}) vence <strong>HOY</strong>.`);
+                            alertasUnicas.add(accId);
+                        }
                     } else if (diffDays < 0) {
                         infoVencimientoHTML = `<br><span style="color: var(--mac-red); font-size:12px;">❌ VENCIDA HACE ${Math.abs(diffDays)} DÍAS${nombreProv}</span>`;
                     } else {
                         infoVencimientoHTML = `<br><small style="color: var(--mac-text-secondary);">Origen: <strong>${acc.provider}${nombreProv}</strong> | Vence: ${acc.expiryDate}</small>`;
                     }
                 } else {
-                    infoVencimientoHTML = `<br><small style="color: var(--mac-text-secondary);">Origen: <strong>${acc.provider}${nombreProv}</strong> | <span style="color:var(--mac-orange);">Falta asignar fecha</span></small>`;
+                    infoVencimientoHTML = `<br><small style="color: var(--mac-text-secondary);">Origen: <strong>${acc.provider}${nombreProv}</strong> | <span style="color:var(--mac-orange);">Falta fecha</span></small>`;
                 }
             } else {
-                infoVencimientoHTML = `<br><small style="color: var(--mac-text-secondary);">Origen: <strong>Cuenta Propia (Mía)</strong></small>`;
+                infoVencimientoHTML = `<br><small style="color: var(--mac-text-secondary);">Origen: <strong>Cuenta Propia</strong></small>`;
             }
 
             const card = document.createElement('div');
             card.style.cssText = "background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);";
 
-            // Escapamos cadenas para evitar errores de sintaxis al editar
             const pPlat = acc.platform.replace(/'/g, "\\'");
             const pMail = acc.email.replace(/'/g, "\\'");
             const pPass = acc.pass.replace(/'/g, "\\'");
@@ -2376,6 +2506,40 @@ window.renderMasterAccounts = async () => {
             card.innerHTML = headerHTML + perfilesHTML;
             container.appendChild(card);
         });
+
+        if (cuentasEncontradas === 0) {
+            container.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); font-size:13px; padding:2px 0;">No se encontraron cuentas con esa búsqueda.</p>';
+        }
+
+        // Mostrar notificaciones SOLO si pasaron el filtro del buscador
+        if (alertasVencimiento.length > 0) {
+            alertsContainer.style.display = 'flex';
+            alertasVencimiento.forEach(alerta => {
+                const box = document.createElement('div');
+                const esHoy = alerta.includes('HOY');
+                box.style.cssText = `padding: 12px 15px; border-radius: 8px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; border: 1px solid ${esHoy ? 'var(--mac-red)' : 'var(--mac-orange)'}; background: ${esHoy ? 'rgba(255,59,48,0.12)' : 'rgba(255,149,0,0.12)'}; color: ${esHoy ? 'var(--mac-red)' : 'var(--mac-orange)'};`;
+                box.innerHTML = alerta;
+                alertsContainer.appendChild(box);
+            });
+
+            if (!window.masterAlertShown) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Cuentas Matrices',
+                    html: `<div style="text-align:left; font-size:14px; display:flex; flex-direction:column; gap:8px; margin-top:10px;">${alertasVencimiento.map(a => `<p style="margin:0;">${a}</p>`).join('')}</div>`,
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#007AFF',
+                    background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+                    color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+                });
+                window.masterAlertShown = true;
+            }
+        }
+
+    } catch(e) {
+        container.innerHTML = `<p style="text-align:center; color:var(--mac-orange);">Error cargando matrices: ${e.message}</p>`;
+    }
+};
 
         // 6. INYECTAR RECORDATORIOS/BANNERS DE NOTIFICACIÓN
         if (alertasVencimiento.length > 0) {
