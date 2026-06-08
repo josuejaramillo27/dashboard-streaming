@@ -164,50 +164,51 @@ window.doLogout = async () => {
 };
 
 onAuthStateChanged(auth, async (user) => {
+    // 🛑 Candado de tienda
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('tienda')) return;
+
     if (user) {
         currentUser = user;
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'block';
 
-        // 👑 VALIDACIÓN DE SUPER ADMIN
+        // 🔥 MEJORA VISUAL: Ocultar login y dar feedback INMEDIATO
+        document.getElementById('loginForm').style.display = 'none';
+        if(document.getElementById('authSubtitle')) {
+            document.getElementById('authSubtitle').innerText = 'Cargando tu panel... ⏳';
+        }
+
+        // Validación de Super Admin
         if (user.email === 'admin@akaza.com') {
             document.getElementById('btnSuperAdmin').style.display = 'block';
         } else {
             document.getElementById('btnSuperAdmin').style.display = 'none';
         }
-    }
-    // 🛑 NUEVO CANDADO: Si el link es una tienda, detenemos el login
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('tienda')) return;
-    try {
-        if (user) {
+
+        try {
             const docSnap = await getDoc(doc(db, "users", user.uid));
             if (docSnap.exists()) {
-                currentUserData = docSnap.data(); currentUser = user;
+                currentUserData = docSnap.data();
                 globalCurrency = currentUserData.currency || "S/";
 
                 if(document.getElementById('brandName')) document.getElementById('brandName').innerText = currentUserData.name || 'Mi Panel';
-               // --- LÓGICA DEL BADGE DE PLAN (NUEVO) ---
+                
                 const planBadge = document.getElementById('userPlanBadge');
                 if (planBadge && currentUserData.role !== 'admin') {
                     const planActual = (currentUserData.plan_actual || 'demo').toLowerCase();
                     planBadge.style.display = 'inline-block';
                     planBadge.innerText = `Plan ${planActual}`;
                     
-                    // Asignación de colores
                     if (planActual === 'pro' || planActual === 'elite') {
-                        planBadge.style.color = '#FFD700'; // Dorado Premium
-                        planBadge.style.backgroundColor = 'rgba(255, 215, 0, 0.1)';
+                        planBadge.style.color = '#FFD700'; planBadge.style.backgroundColor = 'rgba(255, 215, 0, 0.1)';
                     } else if (planActual === 'basico') {
-                        planBadge.style.color = 'var(--mac-green)'; // Verde
-                        planBadge.style.backgroundColor = 'rgba(52, 199, 89, 0.1)';
+                        planBadge.style.color = 'var(--mac-green)'; planBadge.style.backgroundColor = 'rgba(52, 199, 89, 0.1)';
                     } else {
-                        planBadge.style.color = 'var(--mac-text-secondary)'; // Gris para Demo
-                        planBadge.style.backgroundColor = 'rgba(152, 152, 157, 0.1)';
+                        planBadge.style.color = 'var(--mac-text-secondary)'; planBadge.style.backgroundColor = 'rgba(152, 152, 157, 0.1)';
                     }
                 } else if (planBadge) {
-                    planBadge.style.display = 'none'; // Lo ocultamos para ti (Súper Admin)
+                    planBadge.style.display = 'none';
                 }
+
                 if(currentUserData.logoUrl && document.getElementById('brandLogo')) {
                     document.getElementById('brandLogo').src = currentUserData.logoUrl;
                     document.getElementById('brandLogo').style.display = 'block';
@@ -216,34 +217,54 @@ onAuthStateChanged(auth, async (user) => {
                 if(document.getElementById('clientCost')) document.getElementById('clientCost').placeholder = `Costo Proveedor (${globalCurrency})`;
                 if(document.getElementById('clientPrice')) document.getElementById('clientPrice').placeholder = `Precio de Venta (${globalCurrency})`;
                 
+                // 🔥 MEJORA DE RENDIMIENTO: Guardado asíncrono SIN bloquear la pantalla
                 const now = new Date(); let needsUpdate = false;
-                if (currentUserData.active === true && currentUserData.activeUntil) { if (now > new Date(currentUserData.activeUntil)) { currentUserData.active = false; currentUserData.activeUntil = null; needsUpdate = true; } } 
-                else if (currentUserData.active === false && currentUserData.suspendedUntil) { if (now > new Date(currentUserData.suspendedUntil)) { currentUserData.active = true; currentUserData.suspendedUntil = null; needsUpdate = true; } }
-                if (needsUpdate) { await updateDoc(doc(db, "users", user.uid), { active: currentUserData.active, activeUntil: currentUserData.activeUntil || null, suspendedUntil: currentUserData.suspendedUntil || null }); }
+                if (currentUserData.active === true && currentUserData.activeUntil) { 
+                    if (now > new Date(currentUserData.activeUntil)) { currentUserData.active = false; currentUserData.activeUntil = null; needsUpdate = true; } 
+                } else if (currentUserData.active === false && currentUserData.suspendedUntil) { 
+                    if (now > new Date(currentUserData.suspendedUntil)) { currentUserData.active = true; currentUserData.suspendedUntil = null; needsUpdate = true; } 
+                }
                 
-                const loginBtn = document.querySelector('#loginForm .btn-primary'); if (loginBtn) { loginBtn.innerText = "Ingresar"; loginBtn.disabled = false; }
+                if (needsUpdate) { 
+                    // NO usar await aquí. Firebase lo envía en segundo plano.
+                    updateDoc(doc(db, "users", user.uid), { active: currentUserData.active, activeUntil: currentUserData.activeUntil || null, suspendedUntil: currentUserData.suspendedUntil || null }); 
+                }
                 
+                const loginBtn = document.querySelector('#loginForm .btn-primary'); 
+                if (loginBtn) { loginBtn.innerText = "Ingresar"; loginBtn.disabled = false; }
+                
+                // Carga de vistas
                 if (currentUserData.role === 'admin') { 
-                    showView('adminView'); loadAdminData(); 
-                    window.requestNotificationPermission(); // Pide permiso al admin
-                } 
-                else { 
+                    showView('adminView'); 
+                    loadAdminData(); 
+                    window.requestNotificationPermission(); 
+                } else { 
                     if (currentUserData.active === true) { 
                         showView('appView'); 
                         if(document.getElementById('userGreeting')) document.getElementById('userGreeting').innerText = `Gestión de clientes`; 
                         loadUserClients();
-                       window.checkNewNews();
-                        window.requestNotificationPermission(); // Pide permiso al distribuidor
+                        window.checkNewNews();
+                        window.requestNotificationPermission(); 
                         window.renderInventory();
+                    } else { 
+                        await signOut(auth); 
+                        window.showNotification("Tu cuenta está suspendida o pendiente."); 
+                        showView('authView'); 
+                        window.showLogin();
                     } 
-                    else { await signOut(auth); window.showNotification("Tu cuenta está suspendida o pendiente."); showView('authView'); } 
                 }
-            } else { await signOut(auth); showView('authView'); }
-        } else { currentUser = null; currentUserData = null; showView('authView'); window.showLogin(); }
-    } catch (e) { 
-        console.error(e); 
-        window.showNotification("ERROR DB: " + e.message); 
+            } else { await signOut(auth); showView('authView'); window.showLogin(); }
+        } catch (e) { 
+            console.error(e); 
+            window.showNotification("ERROR DB: " + e.message); 
+            showView('authView'); 
+            window.showLogin();
+        }
+    } else { 
+        currentUser = null; currentUserData = null; 
         showView('authView'); 
+        window.showLogin(); 
+        if(document.getElementById('authSubtitle')) document.getElementById('authSubtitle').innerText = 'Área de Gestión y Control';
     }
 });
 
@@ -424,9 +445,16 @@ window.savePlan = async () => {
 };
 /* --- CARGA DEL PANEL GLOBAL (ADMIN) --- */
 async function loadAdminData() {
+    // 🔥 MEJORA DE RENDIMIENTO: Descargar todas las colecciones al mismo tiempo
+    const [qUsers, qSuggestions, qNews] = await Promise.all([
+        getDocs(collection(db, "users")),
+        getDocs(collection(db, "suggestions")),
+        getDocs(collection(db, "news"))
+    ]);
+
     // 1. Cargar Usuarios
-    const q = await getDocs(collection(db, "users")); const tbody = document.getElementById('adminTableBody'); tbody.innerHTML = '';
-q.forEach((d) => {
+    const tbody = document.getElementById('adminTableBody'); tbody.innerHTML = '';
+    qUsers.forEach((d) => {
         const data = d.data(), id = d.id; 
         if(data.role === 'admin') return;
         
@@ -434,9 +462,7 @@ q.forEach((d) => {
         let expText = ""; 
         if (data.active && data.activeUntil) { expText = `<br><span style="font-size:11px; color:var(--mac-text-secondary);">Vence: ${new Date(data.activeUntil).toLocaleString('es-ES', {dateStyle:'short', timeStyle:'short'})}</span>`; } else if (!data.active && data.suspendedUntil) { expText = `<br><span style="font-size:11px; color:var(--mac-text-secondary);">Hasta: ${new Date(data.suspendedUntil).toLocaleString('es-ES', {dateStyle:'short', timeStyle:'short'})}</span>`; }
         
-        // --- NUEVA LÓGICA DE PLANES ---
         const planDisplay = (data.plan_actual || 'demo').toUpperCase();
-        // Le damos color al texto según el plan (Azul para Pro, Verde para Básico)
         const planColor = planDisplay === 'PRO' ? 'var(--mac-blue)' : (planDisplay === 'BASICO' ? 'var(--mac-green)' : 'var(--mac-text-secondary)');
         
         const tr = document.createElement('tr'); 
@@ -455,13 +481,20 @@ q.forEach((d) => {
     });
 
     // 2. Cargar Sugerencias
-    const qS = await getDocs(collection(db, "suggestions")); const sBody = document.getElementById('adminSuggestionsBody'); sBody.innerHTML = ''; let arrS = []; qS.forEach(d => arrS.push({ id: d.id, ...d.data() })); arrS.sort((a,b) => new Date(b.date) - new Date(a.date));
-    arrS.forEach(s => { const tr = document.createElement('tr'); tr.innerHTML = `<td>${new Date(s.date).toLocaleDateString('es-ES')}</td><td><strong>${s.userName}</strong></td><td style="color:var(--mac-text-secondary);">${s.text}</td><td>${s.approved ? '<span style="color:var(--mac-green);font-weight:bold;">✅ Aprobada</span>' : '<span style="color:var(--mac-orange);font-weight:bold;">⏳ Pendiente</span>'}</td><td class="actions-cell">${s.approved ? '' : `<button class="action-btn btn-wa" onclick="window.approveSuggestion('${s.id}')">✔️ Aprobar</button>`} <button class="action-btn btn-del" onclick="window.deleteSuggestion('${s.id}')">🗑️</button></td>`; sBody.appendChild(tr); });
-
-    // 3. Cargar Noticias (NUEVO)
-    const qN = await getDocs(collection(db, "news")); const nBody = document.getElementById('adminNewsBody'); nBody.innerHTML = ''; let arrN = []; qN.forEach(d => arrN.push({ id: d.id, ...d.data() })); 
+    const sBody = document.getElementById('adminSuggestionsBody'); sBody.innerHTML = ''; 
+    let arrS = []; qSuggestions.forEach(d => arrS.push({ id: d.id, ...d.data() })); 
+    arrS.sort((a,b) => new Date(b.date) - new Date(a.date));
     
-    // ORDEN INTELIGENTE: 1ro los Fijados, 2do por fecha
+    arrS.forEach(s => { 
+        const tr = document.createElement('tr'); 
+        tr.innerHTML = `<td>${new Date(s.date).toLocaleDateString('es-ES')}</td><td><strong>${s.userName}</strong></td><td style="color:var(--mac-text-secondary);">${s.text}</td><td>${s.approved ? '<span style="color:var(--mac-green);font-weight:bold;">✅ Aprobada</span>' : '<span style="color:var(--mac-orange);font-weight:bold;">⏳ Pendiente</span>'}</td><td class="actions-cell">${s.approved ? '' : `<button class="action-btn btn-wa" onclick="window.approveSuggestion('${s.id}')">✔️ Aprobar</button>`} <button class="action-btn btn-del" onclick="window.deleteSuggestion('${s.id}')">🗑️</button></td>`; 
+        sBody.appendChild(tr); 
+    });
+
+    // 3. Cargar Noticias
+    const nBody = document.getElementById('adminNewsBody'); nBody.innerHTML = ''; 
+    let arrN = []; qNews.forEach(d => arrN.push({ id: d.id, ...d.data() })); 
+    
     arrN.sort((a,b) => {
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
@@ -475,7 +508,6 @@ q.forEach((d) => {
         const titleSafe = n.titulo ? n.titulo.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
         const descSafe = n.desc ? n.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : '';
 
-        // UI de fijado
         const pinnedIcon = n.isPinned ? '<i class="bx bxs-pin" style="color: var(--mac-orange); margin-right: 5px;" title="Noticia Fijada"></i>' : '';
         const pinBtnColor = n.isPinned ? 'var(--mac-orange)' : 'var(--mac-text-secondary)';
 
