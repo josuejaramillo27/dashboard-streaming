@@ -2140,34 +2140,48 @@ const checkPublicStore = async () => {
 };
 /* ========================================== MÓDULO DE CUENTAS MATRICES (ESTILO MATRIZ) ========================================== */
 let variablesEnlaceMatriz = { masterId: null, profileNum: null };
-let editingMasterId = null; // 🛠️ NUEVO: Memoria para saber si estamos editando
+let editingMasterId = null; 
+window.masterAlertShown = false; // Evita que el aviso flotante se repita infinitamente en la misma sesión
+
+// Ocultar o mostrar campos adicionales según el origen de la cuenta
+window.toggleMatProviderFields = () => {
+    const provider = document.getElementById('matProvider').value;
+    const extFields = document.getElementById('externalProviderFields');
+    if (extFields) {
+        extFields.style.display = (provider === 'Proveedor Externo') ? 'flex' : 'none';
+    }
+};
 
 // 1. ABRIR MODAL PARA NUEVA CUENTA
 window.openNewMasterAccountModal = () => {
-    editingMasterId = null; // Limpiamos la memoria
+    editingMasterId = null;
     document.getElementById('matEmail').value = '';
     document.getElementById('matPass').value = '';
     document.getElementById('matProfiles').value = '5';
     document.getElementById('matCost').value = '0';
+    document.getElementById('matProvider').value = 'Propia';
+    document.getElementById('matExpiryDate').value = '';
+    document.getElementById('matProviderName').value = '';
     
-    // Cambiamos el título a "Nueva"
+    window.toggleMatProviderFields();
     document.querySelector('#masterAccountModal h3').innerHTML = "<i class='bx bx-plus-circle'></i> Nueva Cuenta Matriz";
     document.getElementById('masterAccountModal').style.display = 'flex';
 };
 
 // 2. ABRIR MODAL PARA EDITAR
-window.editMasterAccount = (id, platform, email, pass, maxProfiles, cost, provider) => {
-    editingMasterId = id; // Guardamos el ID que estamos editando
+window.editMasterAccount = (id, platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName) => {
+    editingMasterId = id;
     
-    // Rellenamos los datos en el formulario
     document.getElementById('matPlatform').value = platform;
     document.getElementById('matEmail').value = email;
     document.getElementById('matPass').value = pass;
     document.getElementById('matProfiles').value = maxProfiles;
     document.getElementById('matCost').value = cost;
     document.getElementById('matProvider').value = provider;
+    document.getElementById('matExpiryDate').value = expiryDate || '';
+    document.getElementById('matProviderName').value = providerName || '';
     
-    // Cambiamos el título a "Editar"
+    window.toggleMatProviderFields();
     document.querySelector('#masterAccountModal h3').innerHTML = "<i class='bx bx-edit'></i> Editar Cuenta Matriz";
     document.getElementById('masterAccountModal').style.display = 'flex';
 };
@@ -2193,21 +2207,23 @@ window.saveMasterAccount = async () => {
     const maxProfiles = parseInt(document.getElementById('matProfiles').value) || 5;
     const cost = parseFloat(document.getElementById('matCost').value) || 0;
     const provider = document.getElementById('matProvider').value;
+    
+    // Captura de nuevos campos
+    const expiryDate = provider === 'Proveedor Externo' ? document.getElementById('matExpiryDate').value : '';
+    const providerName = provider === 'Proveedor Externo' ? document.getElementById('matProviderName').value.trim() : '';
 
     if (!email || !pass) return window.showNotification("⚠️ Escribe el correo y clave de la cuenta.");
 
     try {
         if (editingMasterId) {
-            // Si estamos editando, actualizamos el documento
             await updateDoc(doc(db, "masterAccounts", editingMasterId), {
-                platform, email, pass, maxProfiles, cost, provider
+                platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName
             });
             window.showNotification("✅ Cuenta Matriz actualizada");
         } else {
-            // Si es nueva, la creamos
             await addDoc(collection(db, "masterAccounts"), {
                 userId: currentUser.uid,
-                platform, email, pass, maxProfiles, cost, provider,
+                platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName,
                 timestamp: Date.now()
             });
             window.showNotification("✅ Cuenta Matriz registrada con éxito");
@@ -2221,11 +2237,22 @@ window.saveMasterAccount = async () => {
     }
 };
 
-// 5. RENDERIZAR LAS TARJETAS (CON BOTONES)
+// 5. RENDERIZAR LAS TARJETAS CON ALERTAS DE VENCIMIENTO
 window.renderMasterAccounts = async () => {
     const container = document.getElementById('masterAccountsList');
     if (!container) return;
     container.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary);">Cargando tus matrices...</p>';
+
+    // Crear o limpiar contenedor de notificaciones urgentes en la zona superior de las pestañas
+    let alertsContainer = document.getElementById('masterAccountsAlerts');
+    if(!alertsContainer) {
+        alertsContainer = document.createElement('div');
+        alertsContainer.id = 'masterAccountsAlerts';
+        alertsContainer.style.cssText = "display: none; flex-direction: column; gap: 8px; margin-bottom: 15px; width:100%;";
+        container.parentNode.insertBefore(alertsContainer, container);
+    }
+    alertsContainer.style.display = 'none';
+    alertsContainer.innerHTML = '';
 
     try {
         const qMat = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
@@ -2241,6 +2268,7 @@ window.renderMasterAccounts = async () => {
         }
 
         container.innerHTML = '';
+        let alertasVencimiento = [];
 
         snapMat.forEach(docMat => {
             const acc = docMat.data();
@@ -2252,23 +2280,60 @@ window.renderMasterAccounts = async () => {
             const ingresosTotales = clientesDeEstaCuenta.reduce((sum, c) => sum + (parseFloat(c.price) || 0), 0);
             const gananciaNeta = ingresosTotales - acc.cost;
 
+            // ANALIZAR FECHAS DE PROVEEDOR EXTERNO PARA RECORDATORIOS
+            let infoVencimientoHTML = '';
+            if (acc.provider === 'Proveedor Externo') {
+                const nombreProv = acc.providerName ? ` (${acc.providerName})` : '';
+                
+                if (acc.expiryDate) {
+                    const hoy = new Date(); hoy.setHours(0,0,0,0);
+                    const [year, month, day] = acc.expiryDate.split('-');
+                    const fechaVenc = new Date(year, month - 1, day);
+                    const diffTime = fechaVenc - hoy;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (diffDays === 1) {
+                        infoVencimientoHTML = `<br><span style="color: var(--mac-orange); font-size:12px; font-weight:bold;">📅 Vence MAÑANA: ${acc.expiryDate}${nombreProv} ⏳</span>`;
+                        alertasVencimiento.push(`⚠️ Tu cuenta completa <strong>${acc.platform}</strong> (${acc.email}) asignada a <strong>${acc.providerName || 'Proveedor Externo'}</strong> vence <strong>mañana</strong>.`);
+                    } else if (diffDays === 0) {
+                        infoVencimientoHTML = `<br><span style="color: var(--mac-red); font-size:12px; font-weight:bold;">🚨 Vence HOY: ${acc.expiryDate}${nombreProv} ⚠️</span>`;
+                        alertasVencimiento.push(`🚨 ¡ATENCIÓN! Tu cuenta completa <strong>${acc.platform}</strong> (${acc.email}) de <strong>${acc.providerName || 'Proveedor Externo'}</strong> vence <strong>HOY</strong>.`);
+                    } else if (diffDays < 0) {
+                        infoVencimientoHTML = `<br><span style="color: var(--mac-red); font-size:12px;">❌ VENCIDA HACE ${Math.abs(diffDays)} DÍAS${nombreProv}</span>`;
+                    } else {
+                        infoVencimientoHTML = `<br><small style="color: var(--mac-text-secondary);">Origen: <strong>${acc.provider}${nombreProv}</strong> | Vence: ${acc.expiryDate}</small>`;
+                    }
+                } else {
+                    infoVencimientoHTML = `<br><small style="color: var(--mac-text-secondary);">Origen: <strong>${acc.provider}${nombreProv}</strong> | <span style="color:var(--mac-orange);">Falta asignar fecha</span></small>`;
+                }
+            } else {
+                infoVencimientoHTML = `<br><small style="color: var(--mac-text-secondary);">Origen: <strong>Cuenta Propia (Mía)</strong></small>`;
+            }
+
             const card = document.createElement('div');
             card.style.cssText = "background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);";
 
-            // Cabecera con los botones de Editar y Borrar agregados
+            // Escapamos cadenas para evitar errores de sintaxis al editar
+            const pPlat = acc.platform.replace(/'/g, "\\'");
+            const pMail = acc.email.replace(/'/g, "\\'");
+            const pPass = acc.pass.replace(/'/g, "\\'");
+            const pProv = acc.provider.replace(/'/g, "\\'");
+            const pExp = (acc.expiryDate || '').replace(/'/g, "\\'");
+            const pPName = (acc.providerName || '').replace(/'/g, "\\'");
+
             let headerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--mac-border); padding-bottom: 12px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                     <div>
                         <span style="background: var(--mac-blue); color: white; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 20px; display: inline-block; margin-bottom: 5px;">${acc.platform}</span>
                         <h4 style="margin: 0; color: var(--mac-text-main); font-size: 16px;">📧 ${acc.email} <span style="font-weight:normal; color:var(--mac-text-secondary); font-size:13px;">(Clave: ${acc.pass})</span></h4>
-                        <small style="color: var(--mac-text-secondary);">Origen: <strong>${acc.provider}</strong></small>
+                        ${infoVencimientoHTML}
                     </div>
                     <div style="text-align: right; min-width: 120px;">
                         <span style="color: ${cuposDisponibles > 0 ? 'var(--mac-green)' : 'var(--mac-orange)'}; font-weight: bold; font-size: 14px;">Disponibles: ${cuposDisponibles}/${acc.maxProfiles}</span><br>
                         <span style="color: var(--mac-green); font-weight: 900; font-size: 13px;">Ganancia Neta: ${globalCurrency}${gananciaNeta.toFixed(2)}</span>
                         
                         <div style="margin-top: 10px; display: flex; gap: 6px; justify-content: flex-end;">
-                            <button onclick="window.editMasterAccount('${accId}', '${acc.platform}', '${acc.email}', '${acc.pass}', ${acc.maxProfiles}, ${acc.cost}, '${acc.provider}')" style="background: var(--mac-gray); border: 1px solid var(--mac-border); color: var(--mac-text-main); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s;"><i class='bx bx-edit'></i></button>
+                            <button onclick="window.editMasterAccount('${accId}', '${pPlat}', '${pMail}', '${pPass}', ${acc.maxProfiles}, ${acc.cost}, '${pProv}', '${pExp}', '${pPName}')" style="background: var(--mac-gray); border: 1px solid var(--mac-border); color: var(--mac-text-main); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s;"><i class='bx bx-edit'></i></button>
                             <button onclick="window.deleteMasterAccount('${accId}')" style="background: rgba(255, 59, 48, 0.1); border: 1px solid var(--mac-red); color: var(--mac-red); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s;"><i class='bx bx-trash'></i></button>
                         </div>
                     </div>
@@ -2284,23 +2349,23 @@ window.renderMasterAccounts = async () => {
                     perfilesHTML += `
                         <div style="background: rgba(255, 159, 10, 0.08); border: 1px solid var(--mac-orange); padding: 10px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; min-height: 85px;">
                             <div>
-                                <strong style="color: var(--mac-orange); font-size: 12px; display: block; margin-bottom: 2px;">👤 Perfil ${i}</strong>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+                                    <strong style="color: var(--mac-orange); font-size: 12px;">👤 Perfil ${i}</strong>
+                                    <button class="action-btn" onclick="window.editarClienteDesdeMatriz('${clienteEnPerfil.id}')" style="background:none; border:none; padding:0; cursor:pointer; color:var(--mac-text-secondary); font-size:12px;"><i class='bx bx-edit-alt'></i></button>
+                                </div>
                                 <span style="color: var(--mac-text-main); font-size: 13px; font-weight: bold; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${clienteEnPerfil.name}</span>
                                 <small style="color: var(--mac-text-secondary); font-size: 11px;">Vence: ${clienteEnPerfil.date}</small>
                             </div>
-                            <button onclick="window.editarClienteDesdeMatriz('${clienteEnPerfil.id}')" style="margin-top: 8px; background: transparent; border: 1px solid var(--mac-orange); color: var(--mac-orange); padding: 4px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: 0.2s; font-weight: bold; width: 100%;">
-                                <i class='bx bx-edit-alt'></i> Editar Cliente
-                            </button>
                         </div>
                     `;
                 } else {
                     perfilesHTML += `
                         <div style="background: rgba(48, 209, 88, 0.05); border: 1px dashed var(--mac-green); padding: 10px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; min-height: 85px;">
                             <div>
-                                <strong style="color: var(--mac-green); font-size: 12px; display: block; margin-bottom: 4px;">🟢 Perfil ${i} Disponible</strong>
+                                <strong style="color: var(--mac-green); font-size: 12px; display: block; margin-bottom: 4px;">🟢 Perfil ${i} Libre</strong>
                             </div>
-                            <button class="btn-primary" style="font-size: 11px; padding: 4px 8px; width: 100%; text-align: center; background: rgba(48, 209, 88, 0.15); color: var(--mac-green); border: 1px solid var(--mac-green);" onclick="window.vincularClienteAMatriz('${accId}', '${acc.platform}', '${acc.email}', '${acc.pass}', ${i})">
-                                <i class='bx bx-plus'></i> Asignar Cliente
+                            <button class="btn-primary" style="font-size: 11px; padding: 4px 8px; width: 100%; text-align: center; background: rgba(48, 209, 88, 0.15); color: var(--mac-green); border: 1px solid var(--mac-green);" onclick="window.vincularClienteAMatriz('${accId}', '${pPlat}', '${pMail}', '${pPass}', ${i})">
+                                <i class='bx bx-plus'></i> Asignar
                             </button>
                         </div>
                     `;
@@ -2312,19 +2377,44 @@ window.renderMasterAccounts = async () => {
             container.appendChild(card);
         });
 
+        // 6. INYECTAR RECORDATORIOS/BANNERS DE NOTIFICACIÓN
+        if (alertasVencimiento.length > 0) {
+            alertsContainer.style.display = 'flex';
+            alertasVencimiento.forEach(alerta => {
+                const box = document.createElement('div');
+                const esHoy = alerta.includes('HOY');
+                box.style.cssText = `padding: 12px 15px; border-radius: 8px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; border: 1px solid ${esHoy ? 'var(--mac-red)' : 'var(--mac-orange)'}; background: ${esHoy ? 'rgba(255,59,48,0.12)' : 'rgba(255,149,0,0.12)'}; color: ${esHoy ? 'var(--mac-red)' : 'var(--mac-orange)'};`;
+                box.innerHTML = alerta;
+                alertsContainer.appendChild(box);
+            });
+
+            // Disparar un único recordatorio SweetAlert por sesión para llamar tu atención inmediata
+            if (!window.masterAlertShown) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Vencimiento de Cuentas Matrices',
+                    html: `<div style="text-align:left; font-size:14px; display:flex; flex-direction:column; gap:8px; margin-top:10px;">${alertasVencimiento.map(a => `<p style="margin:0;">${a}</p>`).join('')}</div>`,
+                    confirmButtonText: 'Entendido, voy a revisar',
+                    confirmButtonColor: '#007AFF',
+                    background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+                    color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+                });
+                window.masterAlertShown = true;
+            }
+        }
+
     } catch(e) {
         container.innerHTML = `<p style="text-align:center; color:var(--mac-orange);">Error cargando matrices: ${e.message}</p>`;
     }
 };
 
-// 6. ACCIÓN PARA SALTAR AL FORMULARIO DE CLIENTE
+// 7. ACCIÓN PARA SALTAR AL FORMULARIO DE CLIENTE
 window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) => {
     variablesEnlaceMatriz.masterId = masterId;
     variablesEnlaceMatriz.profileNum = profileNum;
 
     editingClientId = null;
     document.getElementById('clientForm').reset();
-    
     document.getElementById('clientName').value = "Perfil " + profileNum;
     
     const cbs = document.querySelectorAll('#checkboxDropdown input'); 
@@ -2351,59 +2441,7 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) =>
     
     window.switchMainTab('clientes');
     document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
-    
     window.showNotification("Completa el teléfono y los precios para guardar.");
-};
-/* ==========================================
-   CONEXIÓN DE BOT - PANEL ADMINISTRADOR
-========================================== */
-window.abrirModalAdminBot = () => {
-    document.getElementById('adminBotModal').style.display = 'flex';
-    document.getElementById('adminBotQrImage').style.display = 'none';
-    document.getElementById('adminBotStatus').innerText = "Haz clic en Generar QR para empezar.";
-    document.getElementById('adminBotStatus').style.color = "var(--mac-text-secondary)";
-};
-
-window.generarQrAdmin = async () => {
-    const botStatus = document.getElementById('adminBotStatus');
-    const botQrImage = document.getElementById('adminBotQrImage');
-    
-    botQrImage.style.display = 'none'; 
-    botStatus.innerText = "⏳ Conectando con el servidor...";
-    botStatus.style.color = "var(--mac-text-secondary)";
-
-    try {
-        // currentUser.uid es tu ID de administrador
-        // REEMPLAZA EL LINK CON TU DOMINIO O IP REAL (EJ: https://bot.panelagc.com)
-        const response = await fetch(`https://bot.panelagc.com/api/conectar/${currentUser.uid}`);
-        const data = await response.json();
-
-        if (data.status === 'qr') {
-            botQrImage.src = data.qr;
-            botQrImage.style.display = 'inline-block';
-            botStatus.innerText = "📱 Escanea este código con tu WhatsApp (Dispositivos Vinculados).";
-            botStatus.style.color = "var(--mac-text-main)";
-        } 
-        else if (data.status === 'conectado') {
-            botQrImage.style.display = 'none';
-            botStatus.innerText = "✅ " + data.message;
-            botStatus.style.color = "var(--mac-green)";
-        }
-    } catch (e) {
-        botQrImage.style.display = 'none';
-        botStatus.innerText = "❌ Error: El servidor del bot está apagado o no responde.";
-        botStatus.style.color = "var(--mac-red)";
-        console.error(e);
-    }
-};
-// 7. FUNCIÓN PARA EDITAR CLIENTE DIRECTO DESDE LA MATRIZ
-window.editarClienteDesdeMatriz = (clientId) => {
-    // Cambiamos a la pestaña de clientes
-    window.switchMainTab('clientes');
-    // Le damos una micro-pausa al navegador para que dibuje la pestaña antes de editar
-    setTimeout(() => {
-        window.startEdit(clientId);
-    }, 100);
 };
 // Ejecutamos el detector apenas se lee el archivo
 checkPublicStore();
