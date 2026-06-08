@@ -894,27 +894,31 @@
             <button class="btn-secondary" style="width: 100%; border: 1px solid var(--mac-red); color: var(--mac-red); background: transparent;" onclick="window.removeExternalStore()">🗑️ Eliminar y usar Tiendita Interna</button>
         </div>
 
-        <div id="internalCatalogSection">
-    <div style="background: var(--mac-bg); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Añadir un producto:</label>
-        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
-            
-            <div style="display: flex; gap: 10px;">
-                <input type="text" id="storePlatform" placeholder="Ej: Netflix 1 Pantalla" style="flex: 2;">
-                <input type="number" id="storePrice" placeholder="Precio" style="flex: 1;">
+<div id="internalCatalogSection">
+            <div style="background: var(--mac-bg); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Añadir un producto o combo:</label>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <select id="storeType" style="flex: 1; padding: 8px; border-radius: 6px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                            <option value="Servicio">Servicio Único</option>
+                            <option value="Combo">🎁 Combo</option>
+                        </select>
+                        <input type="text" id="storePlatform" placeholder="Ej: Combo Disney+Max" style="flex: 2;">
+                        <input type="number" id="storePrice" placeholder="Precio" style="flex: 1;">
+                    </div>
+                    
+                    <div>
+                        <label style="font-size: 11px; color: var(--mac-text-secondary); display: block; margin-bottom: 4px;">Imagen de portada (Opcional):</label>
+                        <input type="file" id="storeImg" accept="image/*" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 12px;">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="storeDesc" placeholder="Descripción (Ej: 1 Perfil de cada uno)" style="flex: 1;">
+                        <button class="btn-primary" style="width: auto; padding: 0 20px;" onclick="window.addStoreItem()"><i class='bx bx-plus'></i></button>
+                    </div>
+                    
+                </div>
             </div>
-            
-            <div>
-                <label style="font-size: 11px; color: var(--mac-text-secondary); display: block; margin-bottom: 4px;">Imagen de portada (Opcional):</label>
-                <input type="file" id="storeImg" accept="image/*" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 12px;">
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <input type="text" id="storeDesc" placeholder="Descripción (Ej: 1 Perfil, incluye ESPN)" style="flex: 1;">
-                <button class="btn-primary" style="width: auto; padding: 0 20px;" onclick="window.addStoreItem()"><i class='bx bx-plus'></i></button>
-            </div>
-            
-        </div>
-    </div>
 
             <div id="storeItemsList" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; margin-bottom: 15px;">
             </div>
