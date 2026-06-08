@@ -2330,21 +2330,21 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) =>
 };
 /* ========================================== MÓDULO SUPER ADMIN (SAAS) ========================================== */
 window.showSuperAdmin = () => {
-    // Apagamos los botones normales
-    document.getElementById('btnTabClientes').style.background = 'transparent'; document.getElementById('btnTabClientes').style.color = 'var(--mac-text-secondary)';
-    document.getElementById('btnTabCuentas').style.background = 'transparent'; document.getElementById('btnTabCuentas').style.color = 'var(--mac-text-secondary)';
+    // Ocultamos las noticias y la tabla normal de distribuidores
+    document.getElementById('adminContent').style.display = 'none';
     
-    // Ocultamos las tablas normales
-    document.querySelector('.table-container').style.setProperty('display', 'none', 'important');
-    const tableCuentas = document.getElementById('accountsTableContainer');
-    if(tableCuentas) tableCuentas.style.setProperty('display', 'none', 'important');
-    document.getElementById('loadMoreContainer').style.display = 'none';
-    
-    // Mostramos la vista Admin
+    // Mostramos tu tabla VIP de cobros
     document.getElementById('superAdminView').style.display = 'block';
-    document.getElementById('userGreeting').innerText = 'Panel de Control SaaS';
     
     window.loadAllUsers();
+};
+
+window.cerrarSuperAdmin = () => {
+    // Ocultamos la tabla VIP
+    document.getElementById('superAdminView').style.display = 'none';
+    
+    // Volvemos a mostrar las noticias
+    document.getElementById('adminContent').style.display = 'block';
 };
 
 window.loadAllUsers = async () => {
