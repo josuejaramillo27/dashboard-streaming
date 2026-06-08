@@ -2321,6 +2321,47 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) =>
     
     window.showNotification("Completa el teléfono y los precios para guardar.");
 };
+/* ==========================================
+   CONEXIÓN DE BOT - PANEL ADMINISTRADOR
+========================================== */
+window.abrirModalAdminBot = () => {
+    document.getElementById('adminBotModal').style.display = 'flex';
+    document.getElementById('adminBotQrImage').style.display = 'none';
+    document.getElementById('adminBotStatus').innerText = "Haz clic en Generar QR para empezar.";
+    document.getElementById('adminBotStatus').style.color = "var(--mac-text-secondary)";
+};
 
+window.generarQrAdmin = async () => {
+    const botStatus = document.getElementById('adminBotStatus');
+    const botQrImage = document.getElementById('adminBotQrImage');
+    
+    botQrImage.style.display = 'none'; 
+    botStatus.innerText = "⏳ Conectando con el servidor...";
+    botStatus.style.color = "var(--mac-text-secondary)";
+
+    try {
+        // currentUser.uid es tu ID de administrador
+        // REEMPLAZA EL LINK CON TU DOMINIO O IP REAL (EJ: https://bot.panelagc.com)
+        const response = await fetch(`https://bot.panelagc.com/api/conectar/${currentUser.uid}`);
+        const data = await response.json();
+
+        if (data.status === 'qr') {
+            botQrImage.src = data.qr;
+            botQrImage.style.display = 'inline-block';
+            botStatus.innerText = "📱 Escanea este código con tu WhatsApp (Dispositivos Vinculados).";
+            botStatus.style.color = "var(--mac-text-main)";
+        } 
+        else if (data.status === 'conectado') {
+            botQrImage.style.display = 'none';
+            botStatus.innerText = "✅ " + data.message;
+            botStatus.style.color = "var(--mac-green)";
+        }
+    } catch (e) {
+        botQrImage.style.display = 'none';
+        botStatus.innerText = "❌ Error: El servidor del bot está apagado o no responde.";
+        botStatus.style.color = "var(--mac-red)";
+        console.error(e);
+    }
+};
 // Ejecutamos el detector apenas se lee el archivo
 checkPublicStore();
