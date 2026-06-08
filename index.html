@@ -375,19 +375,10 @@
         </div>
 
         <div style="display: flex; background: var(--mac-bg); padding: 4px; border-radius: 10px; border: 1px solid var(--mac-border);">
-            <button id="btnSuperAdmin" onclick="window.showSuperAdmin()" style="display: none; padding: 8px 15px; border-radius: 8px; border: none; background: #FF3B30; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; margin-right: 5px;"><i class='bx bxs-crown'></i> Admin</button>
             
             <button id="btnTabClientes" onclick="window.switchMainTab('clientes')" style="padding: 8px 20px; border-radius: 8px; border: none; background: var(--mac-blue); color: white; font-weight: bold; cursor: pointer; transition: 0.3s;">👤 Mis Clientes</button>
             <button id="btnTabCuentas" onclick="window.switchMainTab('cuentas')" style="padding: 8px 20px; border-radius: 8px; border: none; background: transparent; color: var(--mac-text-secondary); font-weight: bold; cursor: pointer; transition: 0.3s;">📦 Mis Cuentas</button>
         </div>
-    </div>
-
-    <div id="superAdminView" style="display: none; width: 100%; margin-bottom: 30px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(255, 59, 48, 0.1); padding: 15px; border-radius: 12px; border: 1px solid var(--mac-red);">
-            <h3 style="margin: 0; color: var(--mac-red);"><i class='bx bxs-crown'></i> Gestión de Socios del Club</h3>
-            <button class="btn-secondary" onclick="window.switchMainTab('clientes')" style="border-color: var(--mac-red); color: var(--mac-red);">Cerrar Admin</button>
-        </div>
-        <div id="superAdminList" style="display: flex; flex-direction: column; gap: 15px;"></div>
     </div>
 
     <div id="accountsTableContainer" style="display: none; width: 100%; margin-bottom: 30px;">
@@ -422,12 +413,11 @@
         <h2>Panel Global A.G.C.</h2>
         <div style="display: flex; gap: 10px;">
             <button id="btnSuperAdmin" onclick="window.showSuperAdmin()" style="display: none; padding: 8px 15px; border-radius: 8px; border: none; background: #FF3B30; color: white; font-weight: bold; cursor: pointer; transition: 0.3s;"><i class='bx bxs-crown'></i> Modo SaaS</button>
-            
             <button class="btn-logout" onclick="window.doLogout()"><i class='bx bx-log-out'></i> Salir</button>
             <button class="theme-toggle" onclick="window.toggleTheme()"><i class='bx bx-moon'></i></button>
         </div>
     </div>
-    
+
     <div id="superAdminView" style="display: none; width: 100%; margin-bottom: 30px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(255, 59, 48, 0.1); padding: 15px; border-radius: 12px; border: 1px solid var(--mac-red);">
             <h3 style="margin: 0; color: var(--mac-red);"><i class='bx bxs-crown'></i> Gestión de Socios del Club</h3>
