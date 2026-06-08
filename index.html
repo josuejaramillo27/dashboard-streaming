@@ -154,6 +154,28 @@
                 margin-bottom: 10px;
             }
         }
+        /* =========================================
+           DISEÑO DE TIENDITA PARA PC (PANTALLA ANCHA)
+           ========================================= */
+        @media (min-width: 768px) {
+            /* 1. Ensanchamos el contenedor principal */
+            #publicStoreView {
+                max-width: 900px !important;
+            }
+            
+            /* 2. Convertimos la lista en una cuadrícula (Grid) de 2 columnas */
+            #publicStoreCatalog {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+            
+            /* 3. Limpiamos los márgenes individuales para que el Grid haga su trabajo */
+            #publicStoreCatalog > div {
+                margin-bottom: 0 !important;
+                height: 100%; /* Hace que todas las tarjetas midan lo mismo */
+            }
+        }
     </style>
 </head>
 <body>
