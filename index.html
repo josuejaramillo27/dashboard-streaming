@@ -991,12 +991,25 @@
                 </div>
             </div>
 
-            <div>
+<div>
                 <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Proveedor / Origen:</label>
-                <select id="matProvider" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                <select id="matProvider" onchange="window.toggleMatProviderFields()" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
                     <option value="Propia">Mia (Cuenta Propia)</option>
                     <option value="Proveedor Externo">Proveedor Externo</option>
                 </select>
+            </div>
+
+            <div id="externalProviderFields" style="display: none; flex-direction: column; gap: 12px;">
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">¿Cuándo vence esta cuenta?:</label>
+                        <input type="date" id="matExpiryDate" style="width:100%;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Nombre del Proveedor (Opcional):</label>
+                        <input type="text" id="matProviderName" placeholder="Ej: Juan Distribuidor" style="width:100%;">
+                    </div>
+                </div>
             </div>
             
             <div style="display: flex; gap: 10px; margin-top: 10px;">
