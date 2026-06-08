@@ -181,11 +181,16 @@
         width: 90% !important;
     }
 }
-        /* =========================================
+/* =========================================
    FORZAR ALERTAS SIEMPRE AL FRENTE
    ========================================= */
-#toast, .swal2-container {
-    z-index: 9999 !important;
+#toast {
+    z-index: 999999 !important;
+    position: fixed !important;
+}
+
+.swal2-container {
+    z-index: 999999 !important;
 }
     </style>
 </head>
