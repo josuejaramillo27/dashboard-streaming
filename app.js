@@ -735,20 +735,22 @@ window.saveClientData = async () => {
             }
         }
 
-        // 🛠️ EL FIX: Usamos los identificadores correctos de tu HTML y la memoria del botón verde
+        // 🛠️ VINCULACIÓN DINÁMICA INTELIGENTE (AUTO-DETECCIÓN POR CORREO)
         let finalLinkedMasterId = null;
-        if (typeof variablesEnlaceMatriz !== 'undefined' && variablesEnlaceMatriz.masterId) {
-            if (editingClientId) {
-                // Si editó el correo o clave, lo desvinculamos de la matriz automáticamente
-                if (tempAccountData.email !== variablesEnlaceMatriz.originalEmail || tempAccountData.password !== variablesEnlaceMatriz.originalPass) {
-                    finalLinkedMasterId = null;
-                } else {
-                    finalLinkedMasterId = variablesEnlaceMatriz.masterId; // Mantiene el vínculo
-                }
-            } else {
-                finalLinkedMasterId = variablesEnlaceMatriz.masterId; // Registro nuevo desde matriz
+        if (tempAccountData.email) {
+            const qMatriz = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid), where("email", "==", tempAccountData.email));
+            const snapMatriz = await getDocs(qMatriz);
+            if (!snapMatriz.empty) {
+                // Si el correo actual coincide con alguna cuenta matriz (ya sea nueva o existente), se vincula a ella automáticamente
+                finalLinkedMasterId = snapMatriz.docs[0].id;
             }
         }
+        
+        // Si por algún motivo quedó en null pero venía de un flujo forzado del botón verde "Asignar"
+        if (!finalLinkedMasterId && typeof variablesEnlaceMatriz !== 'undefined' && variablesEnlaceMatriz.masterId && !editingClientId) {
+            finalLinkedMasterId = variablesEnlaceMatriz.masterId;
+        }
+
         const data = { 
             userId: currentUser.uid, 
             name: document.getElementById('clientName').value, 
@@ -762,8 +764,7 @@ window.saveClientData = async () => {
             accountProfile: tempAccountData.profile, 
             accountPin: tempAccountData.pin, 
             accountUnits: tempAccountData.units || 1,
-            // Guardamos el enlace si fue creado desde "Mis Cuentas"
-            linkedMasterId: (typeof variablesEnlaceMatriz !== 'undefined' && variablesEnlaceMatriz.masterId) ? variablesEnlaceMatriz.masterId : null 
+            linkedMasterId: finalLinkedMasterId // <--- CORREGIDO: Inyecta el ID dinámico detectado
         };
 
         if (editingClientId) { 
@@ -2568,18 +2569,18 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) =>
 /* --- MODAL PARA VINCULAR CLIENTE SUELTO A MATRIZ --- */
 window.openLinkModal = async (clientId, clientPlatform) => {
     try {
-        // 1. Traer solo las matrices de este usuario
         const qMat = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
         const snapMat = await getDocs(qMat);
         
         let optionsHTML = '<option value="">-- Selecciona una Matriz --</option>';
+        let masterDataMap = {}; // Guardará los datos de las cuentas para heredarlos
         let count = 0;
 
         snapMat.forEach(doc => {
             const mat = doc.data();
-            // Filtrar inteligentemente: Solo muestra matrices que coincidan con la plataforma del cliente
             if (clientPlatform.toLowerCase().includes(mat.platform.toLowerCase())) {
                 optionsHTML += `<option value="${doc.id}">${mat.platform} - ${mat.email}</option>`;
+                masterDataMap[doc.id] = mat; // Guardamos la información completa de la matriz
                 count++;
             }
         });
@@ -2588,7 +2589,6 @@ window.openLinkModal = async (clientId, clientPlatform) => {
             return window.showNotification("No tienes Cuentas Matrices creadas para la plataforma: " + clientPlatform);
         }
 
-        // 2. Mostrar la alerta de SweetAlert2
         const { value: formValues } = await Swal.fire({
             title: '🔗 Vincular a Matriz',
             html: `
@@ -2623,14 +2623,19 @@ window.openLinkModal = async (clientId, clientPlatform) => {
             }
         });
 
-        // 3. Guardar en Firebase si todo salió bien
         if (formValues) {
+            const matrizSeleccionada = masterDataMap[formValues.matrizId]; // Obtenemos la matriz elegida
+
+            // Actualizamos el vínculo Y sobreescribimos los datos del cliente con los de la matriz
             await updateDoc(doc(db, "clients", clientId), {
                 linkedMasterId: formValues.matrizId,
-                accountProfile: formValues.perfil
+                accountProfile: formValues.perfil,
+                accountEmail: matrizSeleccionada.email,      // Hereda el correo de la matriz
+                accountPassword: matrizSeleccionada.pass     // Hereda la clave de la matriz
             });
-            window.showNotification("✅ Cliente vinculado exitosamente a la Matriz.");
-            loadUserClients(); // Recargamos para que se actualice todo internamente
+            
+            window.showNotification("✅ Cliente vinculado y datos actualizados con la Matriz.");
+            loadUserClients(); 
         }
 
     } catch (e) {
