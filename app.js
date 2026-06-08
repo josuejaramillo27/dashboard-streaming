@@ -2637,5 +2637,19 @@ window.openLinkModal = async (clientId, clientPlatform) => {
         window.showNotification("Error al vincular: " + e.message);
     }
 };
+/* --- EDITAR CLIENTE DIRECTO DESDE LA MATRIZ --- */
+window.editarClienteDesdeMatriz = (clientId) => {
+    // 1. Cambiamos a la vista de "Mis Clientes"
+    window.switchMainTab('clientes');
+    
+    // 2. Ejecutamos tu función original de edición
+    window.startEdit(clientId);
+    
+    // 3. Hacemos scroll suave hacia el formulario
+    document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
+    
+    window.showNotification("✏️ Modo edición activado.");
+};
+
 // Ejecutamos el detector apenas se lee el archivo
 checkPublicStore();
