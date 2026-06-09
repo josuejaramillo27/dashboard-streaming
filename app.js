@@ -979,7 +979,7 @@ window.renderTable = () => {
             deviceBadge = `<span style="background: rgba(255, 59, 48, 0.15); color: var(--mac-red); font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 6px; border: 1px solid var(--mac-red); display: inline-block; margin-left: 8px; vertical-align: middle;">Inactivo</span>`;
         }
 
-        const tr = document.createElement('tr');
+const tr = document.createElement('tr');
         tr.innerHTML = `
             <td data-label="Cliente" onclick="if(window.innerWidth <= 768) window.openMobileClientModal('${c.id}')">
                 <div class="client-profile">
@@ -989,20 +989,19 @@ window.renderTable = () => {
             <td data-label="Plataformas" style="font-weight: 500; white-space: nowrap;">
                 <span style="vertical-align: middle;">${c.platform}</span>${deviceBadge}
             </td>
-        `;
-        <td data-label="Cuenta"><button class="action-btn" style="color:var(--mac-text-main); font-weight:bold; border: 1px solid var(--mac-border);" onclick="window.viewAccountData('${c.id}')">🔑 Ver Datos</button></td>
-        <td data-label="WhatsApp">${c.phone}</td>
-        <td data-label="Utilidad (${globalCurrency})"><span style="color:var(--mac-green); font-weight:bold;">+${globalCurrency}${prof.toFixed(2)}</span>${dispUnits}</td>
-        <td data-label="Vencimiento">${c.expDate.toLocaleDateString('es-ES')}</td>
-        <td data-label="Estado"><span class="status ${c.statusCat}">${stText}</span></td>
-        <td data-label="Acciones" class="actions-cell">
-            <button class="action-btn btn-wa" onclick="window.sendWA('${c.phone}', '${c.name}', '${c.platform}', '${c.expDate.toLocaleDateString('es-ES')}')"><i class='bx bxl-whatsapp'></i> WA</button>
-            <button class="action-btn" style="background: rgba(175, 82, 222, 0.15); color: #AF52DE; font-weight: bold;" onclick="window.downloadTicket('${c.id}', event)"><i class='bx bx-receipt'></i> Recibo</button>
-            <button class="action-btn" style="background: rgba(0, 122, 255, 0.15); color: #007AFF; font-weight: bold;" onclick="window.openLinkModal('${c.id}', '${c.platform}')" title="Vincular a Matriz"><i class='bx bx-link'></i></button>
-            ${c.statusCat !== 'active' ? `<button class="action-btn btn-renew" onclick="window.renewClient('${c.id}')"><i class='bx bx-refresh'></i></button>` : ''}
-            <button class="action-btn" style="color: var(--mac-text-main);" onclick="window.startEdit('${c.id}')"><i class='bx bx-edit-alt'></i></button>
-            <button class="action-btn btn-del" onclick="window.deleteClient('${c.id}')"><i class='bx bx-trash'></i></button>
-        </td>`;
+            <td data-label="Cuenta"><button class="action-btn" style="color:var(--mac-text-main); font-weight:bold; border: 1px solid var(--mac-border);" onclick="window.viewAccountData('${c.id}')">🔑 Ver Datos</button></td>
+            <td data-label="WhatsApp">${c.phone}</td>
+            <td data-label="Utilidad (${globalCurrency})"><span style="color:var(--mac-green); font-weight:bold;">+${globalCurrency}${prof.toFixed(2)}</span>${dispUnits}</td>
+            <td data-label="Vencimiento">${c.expDate.toLocaleDateString('es-ES')}</td>
+            <td data-label="Estado"><span class="status ${c.statusCat}">${stText}</span></td>
+            <td data-label="Acciones" class="actions-cell">
+                <button class="action-btn btn-wa" onclick="window.sendWA('${c.phone}', '${c.name}', '${c.platform}', '${c.expDate.toLocaleDateString('es-ES')}')"><i class='bx bxl-whatsapp'></i> WA</button>
+                <button class="action-btn" style="background: rgba(175, 82, 222, 0.15); color: #AF52DE; font-weight: bold;" onclick="window.downloadTicket('${c.id}', event)"><i class='bx bx-receipt'></i> Recibo</button>
+                <button class="action-btn" style="background: rgba(0, 122, 255, 0.15); color: #007AFF; font-weight: bold;" onclick="window.openLinkModal('${c.id}', '${c.platform}')" title="Vincular a Matriz"><i class='bx bx-link'></i></button>
+                ${c.statusCat !== 'active' ? `<button class="action-btn btn-renew" onclick="window.renewClient('${c.id}')"><i class='bx bx-refresh'></i></button>` : ''}
+                <button class="action-btn" style="color: var(--mac-text-main);" onclick="window.startEdit('${c.id}')"><i class='bx bx-edit-alt'></i></button>
+                <button class="action-btn btn-del" onclick="window.deleteClient('${c.id}')"><i class='bx bx-trash'></i></button>
+            </td>`;
         tbody.appendChild(tr);
     });
     if(document.getElementById('statsPanel').style.display === 'grid') window.toggleStats(true);
