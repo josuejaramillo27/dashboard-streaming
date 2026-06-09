@@ -53,7 +53,17 @@ body {
     background-size: cover;
 }
 
-/* Aplicar el Desenfoque (Blur) a las ventanas principales */
+/* RECUPERANDO LOS ESPACIOS Y BORDES DEL CONTENEDOR PRINCIPAL */
+.container {
+    max-width: 1200px; 
+    margin: 40px auto; 
+    padding: 30px;
+    border-radius: 24px;
+    position: relative; 
+    z-index: 1;
+}
+
+/* Aplicar el Desenfoque (Blur) a las ventanas principales (SIN chocar bordes) */
 .container, .stat-card, .modal-card, .user-profile-compact {
     background: var(--mac-surface) !important;
     backdrop-filter: var(--glass-blur);
@@ -61,6 +71,7 @@ body {
     border: 1px solid var(--mac-border) !important;
     box-shadow: var(--glass-shadow) !important;
 }
+
 .login-container { max-width: 400px; text-align: center; }
 .auth-form { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
 .auth-link { color: var(--mac-blue); cursor: pointer; font-size: 14px; margin-top: 10px; }
