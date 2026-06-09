@@ -254,3 +254,108 @@ td { font-size: 14px; }
 .nav-item i { font-size: 24px; transition: transform 0.3s ease; }
 .nav-item.active { color: var(--mac-blue) !important; }
 .nav-item.active i { transform: translateY(-3px) scale(1.1); }
+
+/* ========================================================
+   RECUPERACIÓN DE ESTILOS VITALES (LOGIN, TOAST, EXTRAS)
+======================================================== */
+/* Notificaciones (Toast) - Estilo Cristal */
+#toast {
+    visibility: hidden;
+    min-width: 250px;
+    background: var(--mac-surface);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    color: var(--mac-text-main);
+    text-align: center;
+    border-radius: 12px;
+    padding: 16px;
+    position: fixed;
+    z-index: 999999;
+    left: 50%;
+    bottom: -50px;
+    transform: translateX(-50%);
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: var(--glass-shadow);
+    border: 1px solid var(--mac-border);
+    opacity: 0;
+    transition: opacity 0.3s, bottom 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+#toast.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 30px;
+}
+
+/* Botón de Google */
+.btn-google {
+    width: 100%;
+    background: var(--mac-surface);
+    color: var(--mac-text-main);
+    border: 1px solid var(--mac-border-solid);
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    transition: background 0.2s;
+}
+.btn-google:hover {
+    background: var(--mac-gray);
+}
+
+/* Ocultar / Mostrar Contraseña */
+.pwd-wrapper {
+    position: relative;
+    width: 100%;
+}
+.pwd-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: var(--mac-text-secondary);
+    cursor: pointer;
+    padding: 0;
+}
+
+/* Links del Login */
+.auth-link {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+    font-size: 13px;
+    color: var(--mac-blue);
+    cursor: pointer;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+.auth-link:hover {
+    color: var(--mac-blue-hover);
+    text-decoration: underline;
+}
+
+/* Divisor del Login */
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--mac-text-secondary);
+    font-size: 12px;
+    margin-bottom: 20px;
+}
+.divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--mac-border-solid);
+}
+.divider span {
+    padding: 0 10px;
+}
