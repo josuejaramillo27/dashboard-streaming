@@ -1,19 +1,66 @@
 :root {
-    --mac-bg: #f5f5f7; --mac-surface: #ffffff; --mac-text-main: #1d1d1f;
-    --mac-text-secondary: #86868b; --mac-border: #d2d2d7; --mac-blue: #007aff;
-    --mac-blue-hover: #006ae6; --mac-red: #ff3b30; --mac-green: #34c759;
-    --mac-orange: #ff9500; --mac-gray: #e5e5ea; --mac-table-hover: #f9f9f9;
-    --mac-dropdown-bg: rgba(255, 255, 255, 0.95);
+    --mac-bg: #f5f5f7; 
+    --mac-surface: rgba(255, 255, 255, 0.65); /* Cristal claro */
+    --mac-text-main: #1d1d1f;
+    --mac-text-secondary: #86868b; 
+    --mac-border: rgba(255, 255, 255, 0.6); 
+    --mac-border-solid: rgba(0, 0, 0, 0.1); 
+    --mac-blue: #007aff;
+    --mac-blue-hover: #006ae6; 
+    --mac-red: #ff3b30; 
+    --mac-green: #34c759;
+    --mac-orange: #ff9500; 
+    --mac-gray: rgba(229, 229, 234, 0.5); 
+    --mac-table-hover: rgba(0, 0, 0, 0.04);
+    --mac-dropdown-bg: rgba(255, 255, 255, 0.75);
+    
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    --glass-blur: blur(20px);
 }
+
 body.dark-mode {
-    --mac-bg: #000000; --mac-surface: #1c1c1e; --mac-text-main: #f5f5f7;
-    --mac-text-secondary: #ebebf599; --mac-border: #38383a; --mac-blue: #0a84ff;
-    --mac-blue-hover: #0070e0; --mac-red: #ff453a; --mac-green: #30d158;
-    --mac-orange: #ff9f0a; --mac-gray: #2c2c2e; --mac-table-hover: #2c2c2e;
-    --mac-dropdown-bg: rgba(28, 28, 30, 0.95);
+    --mac-bg: #000000; 
+    --mac-surface: rgba(28, 28, 30, 0.65); /* Cristal oscuro */
+    --mac-text-main: #f5f5f7;
+    --mac-text-secondary: #ebebf599; 
+    --mac-border: rgba(255, 255, 255, 0.08); 
+    --mac-border-solid: rgba(255, 255, 255, 0.15);
+    --mac-blue: #0a84ff;
+    --mac-blue-hover: #0070e0; 
+    --mac-red: #ff453a; 
+    --mac-green: #30d158;
+    --mac-orange: #ff9f0a; 
+    --mac-gray: rgba(44, 44, 46, 0.5); 
+    --mac-table-hover: rgba(255, 255, 255, 0.05);
+    --mac-dropdown-bg: rgba(28, 28, 30, 0.75);
+    
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    --glass-blur: blur(20px);
 }
-body { font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif; background-color: var(--mac-bg); color: var(--mac-text-main); margin: 0; padding: 20px 10px; transition: background-color 0.3s, color 0.3s; }
-.container { max-width: 1200px; margin: auto; background: var(--mac-surface); padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid var(--mac-border); }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--mac-bg); color: var(--mac-text-main);
+    margin: 0; padding: 0; transition: background-color 0.3s, color 0.3s;
+    -webkit-font-smoothing: antialiased;
+    
+    /* Fondo Mesh Gradient (Manchas de color) */
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(0, 122, 255, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(52, 199, 89, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(255, 45, 85, 0.12) 0px, transparent 50%);
+    background-attachment: fixed;
+    background-size: cover;
+}
+
+/* Aplicar el Desenfoque (Blur) a las ventanas */
+.container, .auth-form, .stat-card, .modal-card, .user-profile-compact {
+    background: var(--mac-surface) !important;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--mac-border) !important;
+    box-shadow: var(--glass-shadow) !important;
+}
 .login-container { max-width: 400px; text-align: center; }
 .auth-form { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
 .auth-link { color: var(--mac-blue); cursor: pointer; font-size: 14px; margin-top: 10px; }
