@@ -53,8 +53,8 @@ body {
     background-size: cover;
 }
 
-/* Aplicar el Desenfoque (Blur) a las ventanas */
-.container, .auth-form, .stat-card, .modal-card, .user-profile-compact {
+/* Aplicar el Desenfoque (Blur) a las ventanas principales */
+.container, .stat-card, .modal-card, .user-profile-compact {
     background: var(--mac-surface) !important;
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
