@@ -56,25 +56,45 @@ body {
     padding: 0; 
     transition: background-color 0.3s, color 0.3s;
     -webkit-font-smoothing: antialiased;
-    
-    /* Fondo Mesh Gradient */
-    background-image: 
-        radial-gradient(at 0% 0%, var(--wave-1) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, var(--wave-2) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, var(--wave-3) 0px, transparent 50%),
-        radial-gradient(at 0% 100%, var(--wave-1) 0px, transparent 50%);
-    background-size: 200% 200%;
-    animation: meshMovement 12s ease-in-out infinite alternate;
-    background-attachment: fixed;
+    position: relative;
+    overflow-x: hidden; /* Evita que los orbes creen scroll horizontal en PC */
 }
 
-/* Animación del Mesh Gradient */
-@keyframes meshMovement {
-    0% { background-position: 0% 0%; }
-    25% { background-position: 100% 0%; }
-    50% { background-position: 100% 100%; }
-    75% { background-position: 0% 100%; }
-    100% { background-position: 0% 0%; }
+/* Creación de los Orbes Flotantes */
+body::before, body::after {
+    content: "";
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(90px); /* El desenfoque extremo crea la ilusión de luz */
+    z-index: 0; /* Asegura que queden detrás de tu clase .container (que tiene z-index: 1) */
+    opacity: 0.7;
+    animation: floatBlobs 18s infinite alternate ease-in-out;
+}
+
+/* Orbe 1 (Arriba a la izquierda) */
+body::before {
+    width: 45vw;
+    height: 45vw;
+    background: var(--wave-1);
+    top: -10%;
+    left: -10%;
+}
+
+/* Orbe 2 (Abajo a la derecha) */
+body::after {
+    width: 40vw;
+    height: 40vw;
+    background: var(--wave-2);
+    bottom: -10%;
+    right: -10%;
+    animation-delay: -9s; /* Se mueve a destiempo del primero */
+}
+
+/* Animación de flotación orgánica */
+@keyframes floatBlobs {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(10vw, 15vh) scale(1.1); }
+    100% { transform: translate(-5vw, 10vh) scale(0.9); }
 }
 
 /* RECUPERANDO LOS ESPACIOS Y BORDES DEL CONTENEDOR PRINCIPAL */
