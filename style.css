@@ -50,30 +50,31 @@ body.dark-mode {
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: var(--mac-bg); color: var(--mac-text-main);
-    margin: 0; padding: 0; transition: background-color 0.3s, color 0.3s;
+    background-color: var(--mac-bg); 
+    color: var(--mac-text-main);
+    margin: 0; 
+    padding: 0; 
+    transition: background-color 0.3s, color 0.3s;
     -webkit-font-smoothing: antialiased;
     
-    /* Fondo con movimiento adaptativo (Cambia según el modo claro/oscuro) */
-    background: linear-gradient(
-        -45deg, 
-        var(--mac-bg), 
-        var(--wave-1), 
-        var(--mac-bg), 
-        var(--wave-2), 
-        var(--mac-bg), 
-        var(--wave-3)
-    );
-    background-size: 400% 400%;
-    animation: waveBackground 15s ease infinite;
+    /* Fondo Mesh Gradient */
+    background-image: 
+        radial-gradient(at 0% 0%, var(--wave-1) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, var(--wave-2) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, var(--wave-3) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, var(--wave-1) 0px, transparent 50%);
+    background-size: 200% 200%;
+    animation: meshMovement 12s ease-in-out infinite alternate;
     background-attachment: fixed;
 }
 
-/* El motor que hace que el fondo se mueva (Una sola vez) */
-@keyframes waveBackground {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+/* Animación del Mesh Gradient */
+@keyframes meshMovement {
+    0% { background-position: 0% 0%; }
+    25% { background-position: 100% 0%; }
+    50% { background-position: 100% 100%; }
+    75% { background-position: 0% 100%; }
+    100% { background-position: 0% 0%; }
 }
 
 /* RECUPERANDO LOS ESPACIOS Y BORDES DEL CONTENEDOR PRINCIPAL */
