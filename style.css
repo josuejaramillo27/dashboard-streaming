@@ -65,7 +65,7 @@ body {
         var(--wave-3)
     );
     background-size: 400% 400%;
-    animation: waveBackground 15s ease infinite;
+    animation: waveBackground 45s ease infinite;
     background-attachment: fixed;
 }
 
