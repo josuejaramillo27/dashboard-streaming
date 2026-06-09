@@ -452,3 +452,13 @@ body.dark-mode .btn-news-shiny:hover { background: linear-gradient(45deg, #FFCA0
         bottom: 90px !important; 
     }
 }
+
+/* =========================================================
+   MEJORA VISUAL PARA EL CUADRO DE PERFIL (LOGO Y NOMBRE)
+========================================================= */
+.user-profile-compact {
+    padding: 15px 20px !important; /* Le da más aire arriba, abajo y a los lados */
+    border-radius: 16px !important; /* Redondea las esquinas */
+    align-items: center !important; /* Mantiene el logo y los textos perfectamente centrados */
+    margin-bottom: 25px !important; /* Separa este cuadro de las tarjetas de abajo */
+}
