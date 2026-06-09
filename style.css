@@ -50,51 +50,30 @@ body.dark-mode {
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: var(--mac-bg); 
-    color: var(--mac-text-main);
-    margin: 0; 
-    padding: 0; 
-    transition: background-color 0.3s, color 0.3s;
+    background-color: var(--mac-bg); color: var(--mac-text-main);
+    margin: 0; padding: 0; transition: background-color 0.3s, color 0.3s;
     -webkit-font-smoothing: antialiased;
-    position: relative;
-    overflow-x: hidden; /* Evita que los orbes creen scroll horizontal en PC */
+    
+    /* Fondo con movimiento adaptativo (Cambia según el modo claro/oscuro) */
+    background: linear-gradient(
+        -45deg, 
+        var(--mac-bg), 
+        var(--wave-1), 
+        var(--mac-bg), 
+        var(--wave-2), 
+        var(--mac-bg), 
+        var(--wave-3)
+    );
+    background-size: 400% 400%;
+    animation: waveBackground 15s ease infinite;
+    background-attachment: fixed;
 }
 
-/* Creación de los Orbes Flotantes */
-body::before, body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(90px); /* El desenfoque extremo crea la ilusión de luz */
-    z-index: 0; /* Asegura que queden detrás de tu clase .container (que tiene z-index: 1) */
-    opacity: 0.7;
-    animation: floatBlobs 18s infinite alternate ease-in-out;
-}
-
-/* Orbe 1 (Arriba a la izquierda) */
-body::before {
-    width: 45vw;
-    height: 45vw;
-    background: var(--wave-1);
-    top: -10%;
-    left: -10%;
-}
-
-/* Orbe 2 (Abajo a la derecha) */
-body::after {
-    width: 40vw;
-    height: 40vw;
-    background: var(--wave-2);
-    bottom: -10%;
-    right: -10%;
-    animation-delay: -9s; /* Se mueve a destiempo del primero */
-}
-
-/* Animación de flotación orgánica */
-@keyframes floatBlobs {
-    0% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(10vw, 15vh) scale(1.1); }
-    100% { transform: translate(-5vw, 10vh) scale(0.9); }
+/* El motor que hace que el fondo se mueva (Una sola vez) */
+@keyframes waveBackground {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 /* RECUPERANDO LOS ESPACIOS Y BORDES DEL CONTENEDOR PRINCIPAL */
