@@ -370,8 +370,52 @@ window.saveProfile = async () => {
 window.openSuggestionModal = () => { document.getElementById('suggestionText').value = ''; document.getElementById('suggestionModal').style.display = 'flex'; };
 window.sendSuggestion = async () => { const text = document.getElementById('suggestionText').value; if (!text) return window.showNotification("Escribe algo primero."); const btn = document.querySelector('#suggestionModal .btn-primary'); btn.innerText = "Enviando..."; btn.disabled = true; try { await addDoc(collection(db, "suggestions"), { userId: currentUser.uid, userName: currentUserData.name, text: text, date: new Date().toISOString(), approved: false }); window.showNotification("¡Gracias! 🚀"); window.closeModals(); } catch(e) { window.showNotification("Error: " + e.message); } finally { btn.innerText = "Enviar Idea 🚀"; btn.disabled = false; } };
 
-window.openAccountModal = () => { document.getElementById('accEmail').value = tempAccountData.email; document.getElementById('accPassword').value = tempAccountData.password; document.getElementById('accProfile').value = tempAccountData.profile; document.getElementById('accPin').value = tempAccountData.pin; document.getElementById('accUnits').value = tempAccountData.units || 1; document.getElementById('accountModal').style.display = 'flex'; };
-window.confirmAccountData = () => { tempAccountData.email = document.getElementById('accEmail').value; tempAccountData.password = document.getElementById('accPassword').value; tempAccountData.profile = document.getElementById('accProfile').value; tempAccountData.pin = document.getElementById('accPin').value; tempAccountData.units = parseInt(document.getElementById('accUnits').value) || 1; window.closeModals(); const btn = document.getElementById('btnAccountData'); btn.innerText = `✅ Datos Ingresados (${tempAccountData.units} ud)`; btn.style.backgroundColor = "var(--mac-green)"; btn.style.color = "white"; };
+window.openAccountModal = () => {
+    document.getElementById('accountEmail').value = tempAccountData.email || '';
+    document.getElementById('accountPassword').value = tempAccountData.password || '';
+    document.getElementById('accountProfile').value = tempAccountData.profile || '';
+    document.getElementById('accountPin').value = tempAccountData.pin || '';
+    document.getElementById('accountCost').value = tempAccountData.cost || '';
+    document.getElementById('accountUnits').value = tempAccountData.units || 1;
+    document.getElementById('accountRules').value = tempAccountData.rules || '';
+    
+    // Nuevos campos mapeados
+    document.getElementById('accountProvider').value = tempAccountData.provider || '';
+    document.getElementById('deviceType').value = tempAccountData.deviceType || '';
+    document.getElementById('deviceName').value = tempAccountData.deviceName || '';
+    
+    document.getElementById('accountModal').style.display = 'flex';
+};
+window.saveAccountModal = () => { 
+    tempAccountData.email = document.getElementById('accountEmail').value.trim(); 
+    tempAccountData.password = document.getElementById('accountPassword').value.trim(); 
+    tempAccountData.profile = document.getElementById('accountProfile').value.trim(); 
+    tempAccountData.pin = document.getElementById('accountPin').value.trim(); 
+    tempAccountData.cost = parseFloat(document.getElementById('accountCost').value) || 0; 
+    tempAccountData.units = parseInt(document.getElementById('accountUnits').value) || 1; 
+    tempAccountData.rules = document.getElementById('accountRules').value.trim(); 
+    
+    tempAccountData.provider = document.getElementById('accountProvider').value.trim();
+    tempAccountData.deviceType = document.getElementById('deviceType').value;
+    tempAccountData.deviceName = document.getElementById('deviceName').value.trim();
+
+    document.getElementById('accountModal').style.display = 'none'; 
+    
+    const btnAcc = document.getElementById('btnAccountData'); 
+    if (tempAccountData.email || tempAccountData.password || tempAccountData.profile) { 
+        btnAcc.innerText = `✅ Datos Ingresados (${tempAccountData.units} ud)`; 
+        btnAcc.style.backgroundColor = "var(--mac-green)"; 
+        btnAcc.style.color = "white"; 
+    } else { 
+        btnAcc.innerText = "🔑 Ingresar Datos de Cuenta"; 
+        btnAcc.style.backgroundColor = "var(--mac-gray)"; 
+        btnAcc.style.color = "var(--mac-text-main)"; 
+    } 
+};
+
+// Necesitamos renombrar la función en el HTML porque ahora la llamamos saveAccountModal. 
+// Si la tenías como confirmAccountData, dejaremos este puente para no romper nada viejo.
+window.confirmAccountData = window.saveAccountModal;
 window.viewAccountData = (id) => { const c = clients.find(x => x.id === id); document.getElementById('viewAccEmail').innerText = c.accountEmail || '-'; document.getElementById('viewAccPassword').innerText = c.accountPassword || '-'; document.getElementById('viewAccProfile').innerText = c.accountProfile || '-'; document.getElementById('viewAccPin').innerText = c.accountPin || '-'; document.getElementById('viewAccUnits').innerText = c.accountUnits || '1'; document.getElementById('viewAccountModal').style.display = 'flex'; };
 
 window.openManageModal = (id, name, isActive) => { currentManageUserId = id; document.getElementById('manageUserName').innerText = name; document.getElementById('manageAction').value = isActive ? "true" : "false"; document.getElementById('manageDuration').value = "permanent"; window.toggleDurationFields(); document.getElementById('adminManageModal').style.display = 'flex'; };
