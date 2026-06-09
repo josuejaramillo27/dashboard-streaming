@@ -17,10 +17,10 @@
     --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
     --glass-blur: blur(20px);
 
-/* Olas elegantes con contraste suave para MODO CLARO */
-    --wave-1: #e2e8f0; /* Gris azulado suave */
-    --wave-2: #cbd5e1; /* Gris azulado medio (aporta la profundidad) */
-    --wave-3: #f8fafc; /* Brillo sutil */
+/* Olas con contraste definitivo para MODO CLARO */
+    --wave-1: #a3b8cc; /* Azul grisáceo marcado */
+    --wave-2: #7a9ebf; /* Azul más profundo para el centro de la ola */
+    --wave-3: #c2d1e0; /* Azul claro para suavizar la transición */
 }
 
 body.dark-mode {
