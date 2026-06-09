@@ -16,6 +16,11 @@
     
     --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
     --glass-blur: blur(20px);
+
+    /* Olas elegantes para MODO CLARO */
+    --wave-1: #e5e5ea;
+    --wave-2: #d1d1d6;
+    --wave-3: #ffffff;
 }
 
 body.dark-mode {
@@ -36,6 +41,11 @@ body.dark-mode {
     
     --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
     --glass-blur: blur(20px);
+
+    /* Olas profundas para MODO OSCURO */
+    --wave-1: #1c1c1e;
+    --wave-2: #2c2c2e;
+    --wave-3: #0a0a0a;
 }
 
 body {
@@ -44,29 +54,22 @@ body {
     margin: 0; padding: 0; transition: background-color 0.3s, color 0.3s;
     -webkit-font-smoothing: antialiased;
     
-    /* Fondo vivo con movimiento de olas OSCURAS y elegantes */
+    /* Fondo con movimiento adaptativo (Cambia según el modo claro/oscuro) */
     background: linear-gradient(
         -45deg, 
         var(--mac-bg), 
-        rgba(80, 80, 80, 0.08), 
+        var(--wave-1), 
         var(--mac-bg), 
-        rgba(40, 40, 40, 0.12), 
+        var(--wave-2), 
         var(--mac-bg), 
-        rgba(100, 100, 100, 0.05)
+        var(--wave-3)
     );
     background-size: 400% 400%;
     animation: waveBackground 15s ease infinite;
     background-attachment: fixed;
 }
 
-/* El motor que hace que el fondo se mueva (Si ya lo tienes, déjalo igual) */
-@keyframes waveBackground {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* El motor que hace que el fondo se mueva */
+/* El motor que hace que el fondo se mueva (Una sola vez) */
 @keyframes waveBackground {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
