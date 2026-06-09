@@ -785,7 +785,7 @@ window.saveClientData = async () => {
             accountProfile: tempAccountData.profile, 
             accountPin: tempAccountData.pin, 
             accountUnits: tempAccountData.units || 1,
-            linkedMasterId: finalLinkedMasterId // <--- CORREGIDO: Inyecta el ID dinámico detectado
+            linkedMasterId: finalLinkedMasterId, // <--- CORREGIDO: Inyecta el ID dinámico detectado
             accountDeviceName: tempAccountData.deviceName, // NUEVO
             accountDeviceType: tempAccountData.deviceType  // NUEVO
         };
