@@ -413,7 +413,9 @@ window.viewAccountData = (id) => {
     const deviceEl = document.getElementById('viewAccDevice');
     if(deviceEl) deviceEl.innerText = deviceText;
 
-    document.getElementById('viewAccUnits').innerText = c.accountUnits || '1'; 
+    document.getElementById('viewAccUnits').innerText = c.accountUnits || '1';
+    const providerEl = document.getElementById('viewAccProvider');
+    if(providerEl) providerEl.innerText = c.providerName || 'Sin especificar';
     document.getElementById('viewAccountModal').style.display = 'flex'; 
 };
 
