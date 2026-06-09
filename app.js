@@ -799,7 +799,8 @@ window.saveClientData = async () => {
             platform: checked.join(', '), 
             phone: phone, 
             date: document.getElementById('expirationDate').value, 
-            cost: cost, 
+            cost: cost,
+            providerName: document.getElementById('clientProviderName').value,
             price: price, 
             accountEmail: tempAccountData.email, 
             accountPassword: tempAccountData.password, 
@@ -899,7 +900,7 @@ window.renewClient = async (id) => {
 window.startEdit = (id) => {
     editingClientId = id; const c = clients.find(x => x.id === id);
     document.getElementById('clientName').value = c.name; document.getElementById('phone').value = c.phone; document.getElementById('expirationDate').value = c.date;
-    document.getElementById('clientCost').value = c.cost || ''; document.getElementById('clientPrice').value = c.price || '';
+    document.getElementById('clientCost').value = c.cost || ''; document.getElementById('clientPrice').value = c.price || ''; document.getElementById('clientProviderName').value = c.providerName || '';
     tempAccountData.email = c.accountEmail || ''; tempAccountData.password = c.accountPassword || ''; tempAccountData.profile = c.accountProfile || ''; tempAccountData.pin = c.accountPin || ''; tempAccountData.units = c.accountUnits || 1;
     tempAccountData.deviceName = c.accountDeviceName || ''; // NUEVO
     tempAccountData.deviceType = c.accountDeviceType || ''; // NUEVO
