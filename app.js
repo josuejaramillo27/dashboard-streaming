@@ -394,7 +394,28 @@ window.confirmAccountData = () => {
     btn.innerText = `✅ Datos Ingresados (${tempAccountData.units} ud)`; 
     btn.style.backgroundColor = "var(--mac-green)"; btn.style.color = "white"; 
 };
-window.viewAccountData = (id) => { const c = clients.find(x => x.id === id); document.getElementById('viewAccEmail').innerText = c.accountEmail || '-'; document.getElementById('viewAccPassword').innerText = c.accountPassword || '-'; document.getElementById('viewAccProfile').innerText = c.accountProfile || '-'; document.getElementById('viewAccPin').innerText = c.accountPin || '-'; document.getElementById('viewAccUnits').innerText = c.accountUnits || '1'; document.getElementById('viewAccountModal').style.display = 'flex'; };
+window.viewAccountData = (id) => { 
+    const c = clients.find(x => x.id === id); 
+    document.getElementById('viewAccEmail').innerText = c.accountEmail || '-'; 
+    document.getElementById('viewAccPassword').innerText = c.accountPassword || '-'; 
+    document.getElementById('viewAccProfile').innerText = c.accountProfile || '-'; 
+    document.getElementById('viewAccPin').innerText = c.accountPin || '-'; 
+    
+    // Lógica para mostrar el dispositivo en "Ver Datos"
+    let deviceText = 'Sin configurar';
+    if (c.accountDeviceType) {
+        let emoji = '';
+        if (c.accountDeviceType === 'TV') emoji = '📺';
+        if (c.accountDeviceType === 'PC') emoji = '💻';
+        if (c.accountDeviceType === 'Celular') emoji = '📱';
+        deviceText = `${emoji} ${c.accountDeviceType} ${c.accountDeviceName ? '(' + c.accountDeviceName + ')' : ''}`;
+    }
+    const deviceEl = document.getElementById('viewAccDevice');
+    if(deviceEl) deviceEl.innerText = deviceText;
+
+    document.getElementById('viewAccUnits').innerText = c.accountUnits || '1'; 
+    document.getElementById('viewAccountModal').style.display = 'flex'; 
+};
 
 window.openManageModal = (id, name, isActive) => { currentManageUserId = id; document.getElementById('manageUserName').innerText = name; document.getElementById('manageAction').value = isActive ? "true" : "false"; document.getElementById('manageDuration').value = "permanent"; window.toggleDurationFields(); document.getElementById('adminManageModal').style.display = 'flex'; };
 window.toggleDurationFields = () => { document.getElementById('temporaryFields').style.display = document.getElementById('manageDuration').value === 'temporary' ? 'flex' : 'none'; };
