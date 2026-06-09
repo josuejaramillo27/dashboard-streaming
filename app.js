@@ -970,17 +970,26 @@ window.renderTable = () => {
         const stText = c.diffDays > 0 ? `Faltan ${c.diffDays} d` : (c.diffDays === 0 ? 'Hoy' : 'Vencido');
         const uCount = c.accountUnits || 1; const prof = ((c.price || 0) - (c.cost || 0)) * uCount; const dispUnits = uCount > 1 ? `<span style="font-size:11px;color:var(--mac-text-secondary);display:block;">(${uCount} unidades)</span>` : '';
 
+// 🚨 LÓGICA DEL BOTÓN DE DISPOSITIVO (DISEÑO HORIZONTAL COMPACTO)
         let deviceBadge = '';
         if (c.deviceType) {
             const emoji = c.deviceType === 'TV' ? '📺' : (c.deviceType === 'PC' ? '💻' : '📱');
-            deviceBadge = `<br><span style="background: rgba(48, 209, 88, 0.15); color: var(--mac-green); font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 10px; border: 1px solid var(--mac-green); display: inline-flex; align-items: center; gap: 4px; margin-top: 6px;">${emoji} Activo</span>`;
+            deviceBadge = `<span style="background: rgba(48, 209, 88, 0.15); color: var(--mac-green); font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 6px; border: 1px solid var(--mac-green); display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; vertical-align: middle;">${emoji} Activo</span>`;
         } else {
-            deviceBadge = `<br><span style="background: rgba(255, 59, 48, 0.15); color: var(--mac-red); font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 10px; border: 1px solid var(--mac-red); display: inline-block; margin-top: 6px;">Inactivo</span>`;
+            deviceBadge = `<span style="background: rgba(255, 59, 48, 0.15); color: var(--mac-red); font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 6px; border: 1px solid var(--mac-red); display: inline-block; margin-left: 8px; vertical-align: middle;">Inactivo</span>`;
         }
 
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td data-label="Cliente" onclick="if(window.innerWidth <= 768) window.openMobileClientModal('${c.id}')"><div class="client-profile"><span style="color:${c.color || 'var(--mac-text-main)'}; font-weight: 800; font-size: 15px; letter-spacing: 0.5px;">${c.name}</span></div></td>
-        <td data-label="Plataformas" style="font-weight: 500;">${c.platform} ${deviceBadge}</td>
+        tr.innerHTML = `
+            <td data-label="Cliente" onclick="if(window.innerWidth <= 768) window.openMobileClientModal('${c.id}')">
+                <div class="client-profile">
+                    <span style="color:${c.color || 'var(--mac-text-main)'}; font-weight: 800; font-size: 15px; letter-spacing: 0.5px;">${c.name}</span>
+                </div>
+            </td>
+            <td data-label="Plataformas" style="font-weight: 500; white-space: nowrap;">
+                <span style="vertical-align: middle;">${c.platform}</span>${deviceBadge}
+            </td>
+        `;
         <td data-label="Cuenta"><button class="action-btn" style="color:var(--mac-text-main); font-weight:bold; border: 1px solid var(--mac-border);" onclick="window.viewAccountData('${c.id}')">🔑 Ver Datos</button></td>
         <td data-label="WhatsApp">${c.phone}</td>
         <td data-label="Utilidad (${globalCurrency})"><span style="color:var(--mac-green); font-weight:bold;">+${globalCurrency}${prof.toFixed(2)}</span>${dispUnits}</td>
