@@ -192,6 +192,28 @@
 .swal2-container {
     z-index: 999999 !important;
 }
+
+/* --- LUCES DE ESTADO DE DISPOSITIVO --- */
+.device-dot-green {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: #34C759;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #34C759; /* Efecto de brillo */
+    margin-left: 6px;
+    vertical-align: middle;
+}
+.device-dot-red {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: #FF3B30;
+    border-radius: 50%;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+        
     </style>
 </head>
 <body>
@@ -601,11 +623,26 @@
             <input type="text" id="accProfile" placeholder="Nombre del Perfil (Ej: Perfil 1)">
             <input type="text" id="accPin" placeholder="PIN del Perfil (Ej: 1234)">
             
-            <div style="display: flex; flex-direction: column; gap: 4px;">
+<div style="display: flex; flex-direction: column; gap: 4px;">
                 <label style="font-size: 12px; font-weight: 600; color: var(--mac-text-secondary);">Unidades / Pantallas vendidas:</label>
                 <input type="number" id="accUnits" value="1" min="1" placeholder="Cantidad de unidades" required>
             </div>
-        </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 5px;">
+                <div style="flex: 1;">
+                    <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Dispositivo (Opcional):</label>
+                    <input type="text" id="accDeviceName" placeholder="Ej: TV Sala" style="width:100%;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Tipo:</label>
+                    <select id="accDeviceType" style="width:100%; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                        <option value="">No definido</option>
+                        <option value="TV">📺 TV</option>
+                        <option value="PC">💻 PC / Laptop</option>
+                        <option value="Celular">📱 Celular</option>
+                    </select>
+                </div>
+            </div>
         <div style="display: flex; gap: 10px; margin-top: 15px;">
             <button class="btn-primary" onclick="window.confirmAccountData()">Confirmar Datos</button>
             <button class="btn-secondary" onclick="window.closeModals()">Cancelar</button>
