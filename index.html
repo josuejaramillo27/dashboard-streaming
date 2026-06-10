@@ -424,8 +424,12 @@
             </select>
 
             <div style="display: flex; background: var(--mac-bg); padding: 4px; border-radius: 10px; border: 1px solid var(--mac-border);">
-                <button id="btnTabClientes" onclick="window.switchMainTab('clientes')" style="padding: 8px 20px; border-radius: 8px; border: none; background: var(--mac-blue); color: white; font-weight: bold; cursor: pointer; transition: 0.3s;">👤 Mis Clientes</button>
-                <button id="btnTabCuentas" onclick="window.switchMainTab('cuentas')" style="padding: 8px 20px; border-radius: 8px; border: none; background: transparent; color: var(--mac-text-secondary); font-weight: bold; cursor: pointer; transition: 0.3s;">📦 Mis Cuentas</button>
+                <button id="btnTabClientes" onclick="window.switchMainTab('clientes')" style="padding: 8px 20px; border-radius: 8px; border: none; background: var(--mac-blue); color: white; font-weight: bold; cursor: pointer; transition: 0.3s;">
+                    <i class='bx bx-user'></i> Mis Clientes
+                </button>
+                <button id="btnTabCuentas" onclick="window.switchMainTab('cuentas')" style="padding: 8px 20px; border-radius: 8px; border: none; background: transparent; color: var(--mac-text-secondary); font-weight: bold; cursor: pointer; transition: 0.3s;">
+                    <i class='bx bx-box'></i> Mis Cuentas
+                </button>
             </div>
             
         </div>
@@ -593,7 +597,9 @@
         </div>
         <div style="margin-top: 15px; border-top: 1px dashed var(--mac-border); padding-top: 15px;">
             <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Automatización de WhatsApp (Bot):</label>
-            <button class="btn-secondary" style="width: 100%; margin-top: 5px; background: rgba(52, 199, 89, 0.1); color: var(--mac-green); border: 1px solid var(--mac-green);" onclick="window.vincularBot()">🤖 Activar Mensajes Automáticos</button>
+            <button class="btn-secondary" style="width: 100%; margin-top: 5px; background: rgba(52, 199, 89, 0.1); color: var(--mac-green); border: 1px solid var(--mac-green);" onclick="window.vincularBot()">
+                <i class='bx bx-bot'></i> Activar Mensajes Automáticos
+            </button>
             
             <div id="qrContainer" style="text-align: center; margin-top: 10px; display: none;">
                 <img id="botQrImage" src="" style="width: 180px; height: 180px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
@@ -995,7 +1001,9 @@
         <div id="externalCatalogActive" style="display: none; background: rgba(52, 199, 89, 0.1); border: 1px solid var(--mac-green); padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: center;">
             <h4 style="color: var(--mac-green); margin: 0 0 10px 0;"><i class='bx bx-check-circle'></i> Catálogo Externo Activado</h4>
             <p style="font-size: 13px; color: var(--mac-text-main); margin-bottom: 15px; word-break: break-all;" id="activeExternalLinkText"></p>
-            <button class="btn-secondary" style="width: 100%; border: 1px solid var(--mac-red); color: var(--mac-red); background: transparent;" onclick="window.removeExternalStore()">🗑️ Eliminar y usar Tiendita Interna</button>
+            <button class="btn-secondary" style="width: 100%; border: 1px solid var(--mac-red); color: var(--mac-red); background: transparent;" onclick="window.removeExternalStore()">
+                <i class='bx bx-trash'></i> Eliminar y usar Tiendita Interna
+            </button>
         </div>
 
 <div id="internalCatalogSection">
