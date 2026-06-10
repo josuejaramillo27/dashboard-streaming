@@ -2132,12 +2132,12 @@ window.deleteInventoryAccount = async (id) => {
     }
 };
 /* ==========================================
-   MÓDULO DE VENTAS PENDIENTES (ENTREGAS)
+   MÓDULO DE VENTAS PENDIENTES (COMBOS Y ENTREGAS)
 ========================================== */
 
 // 1. Abrir modal y cargar los pedidos desde Firebase
 window.openPedidosModal = async () => {
-    window.closeModals(false); // 🧹 LIMPIEZA SILENCIOSA ANTES DE ABRIR
+    window.closeModals(false); 
     document.getElementById('pedidosModal').style.display = 'flex';
     document.body.style.overflow = 'hidden'; 
     const list = document.getElementById('pedidosList');
@@ -2155,15 +2155,15 @@ window.openPedidosModal = async () => {
         list.innerHTML = '';
         const inventarioLimpio = (currentUserData.inventory || []).filter(i => i.status === 'libre');
 
+        // Guardamos las opciones globalmente para poder clonarlas en los combos
+        window.opcionesCuentasGlobal = `<option value="">-- Selecciona una cuenta para entregar --</option>`;
+        inventarioLimpio.forEach(acc => {
+            window.opcionesCuentasGlobal += `<option value="${acc.id}">[${acc.platform} - ${acc.type}] ${acc.email} ${acc.type === 'Perfil' ? '(P: '+acc.profile+')' : ''}</option>`;
+        });
+
         snapshot.forEach(docSnap => {
             const pedido = docSnap.data();
             const pId = docSnap.id;
-            
-            // Creamos un selector (desplegable) con las cuentas disponibles en el inventario
-            let opcionesCuentas = `<option value="">-- Selecciona una cuenta para entregar --</option>`;
-            inventarioLimpio.forEach(acc => {
-                opcionesCuentas += `<option value="${acc.id}">[${acc.platform} - ${acc.type}] ${acc.email} ${acc.type === 'Perfil' ? '(P: '+acc.profile+')' : ''}</option>`;
-            });
 
             const div = document.createElement('div');
             div.style.cssText = "background:var(--mac-bg); padding:15px; border-radius:10px; border:1px solid var(--mac-border);";
@@ -2177,11 +2177,21 @@ window.openPedidosModal = async () => {
                     <button class="action-btn btn-del" onclick="window.rechazarPedido('${pId}')" title="Rechazar"><i class='bx bx-x'></i></button>
                 </div>
                 
-                <select id="select_acc_${pId}" style="width:100%; margin-bottom:10px; padding:8px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border);">
-                    ${opcionesCuentas}
-                </select>
+                <div id="cuentas_container_${pId}">
+                    <select class="select_acc_${pId}" style="width:100%; margin-bottom:5px; padding:8px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border);">
+                        ${window.opcionesCuentasGlobal}
+                    </select>
+                </div>
                 
-                <button class="btn-primary" style="width:100%; background:var(--mac-green); border:none;" onclick="window.aprobarVenta('${pId}', '${pedido.clienteNumero}', 'select_acc_${pId}')">
+                <button class="action-btn" style="color:var(--mac-blue); font-size:12px; margin-bottom:10px; font-weight:bold; background:transparent; border:none; padding:0; cursor:pointer;" onclick="window.addSelectToPedido('${pId}')">
+                    + Añadir otra cuenta (Combos)
+                </button>
+                
+                <div style="margin-bottom:10px;">
+                    <input type="number" id="precio_venta_${pId}" placeholder="Precio Total Cobrado (Ej: 30.00)" style="width:100%; padding:8px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border);">
+                </div>
+
+                <button class="btn-primary" style="width:100%; background:var(--mac-green); border:none;" onclick="window.aprobarVenta('${pId}', '${pedido.clienteNumero}')">
                     <i class='bx bx-check-circle'></i> Aprobar y Enviar WhatsApp
                 </button>
             `;
@@ -2192,94 +2202,95 @@ window.openPedidosModal = async () => {
     }
 };
 
+window.addSelectToPedido = (pId) => {
+    const container = document.getElementById(`cuentas_container_${pId}`);
+    const select = document.createElement('select');
+    select.className = `select_acc_${pId}`;
+    select.style.cssText = "width:100%; margin-bottom:5px; padding:8px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border);";
+    select.innerHTML = window.opcionesCuentasGlobal;
+    container.appendChild(select);
+};
+
 // 2. Rechazar (Eliminar el ticket)
 window.rechazarPedido = async (pedidoId) => {
     if (!confirm("¿Seguro que deseas rechazar y borrar este comprobante? No se enviará nada al cliente.")) return;
     try {
         await deleteDoc(doc(db, "pedidos", pedidoId));
         window.showNotification("🚫 Solicitud rechazada");
-        window.openPedidosModal(); // Recargar la lista
+        window.openPedidosModal(); 
     } catch (e) {
         window.showNotification("Error: " + e.message);
     }
 };
 
-// 3. Aprobar y Liberar Cuenta (¡LA MAGIA!)
-window.aprobarVenta = async (pedidoId, numeroCliente, selectId) => {
-    const cuentaId = document.getElementById(selectId).value;
-    if (!cuentaId) return window.showNotification("⚠️ Debes seleccionar una cuenta del inventario para entregar.");
+// 3. Aprobar y Liberar Cuenta(s) (SISTEMA DE COMBOS)
+window.aprobarVenta = async (pedidoId, numeroCliente) => {
+    const selects = document.querySelectorAll(`.select_acc_${pedidoId}`);
+    const cuentasIds = Array.from(selects).map(s => s.value).filter(val => val !== "");
+    
+    if (cuentasIds.length === 0) return window.showNotification("⚠️ Debes seleccionar al menos una cuenta del inventario para entregar.");
+    
+    const precioTotal = parseFloat(document.getElementById(`precio_venta_${pedidoId}`).value) || 0;
+    const precioDividido = precioTotal / cuentasIds.length;
 
-    if (!confirm("¿Confirmas la entrega de esta cuenta? Se enviará al cliente por WhatsApp y se agregará a tu lista de cobros.")) return;
+    if (!confirm(`¿Confirmas la entrega de ${cuentasIds.length} cuenta(s)? Se enviarán juntas al cliente por WhatsApp.`)) return;
 
     try {
         window.showNotification("⏳ Procesando entrega...");
 
-        // A. Obtener datos de la cuenta
         let stock = currentUserData.inventory || [];
-        const cuentaSeleccionada = stock.find(c => c.id === cuentaId);
-        if (!cuentaSeleccionada) return window.showNotification("Error: Cuenta no encontrada");
-
-        // B. Calcular fechas
+        let cuentasEntregar = [];
         const h = new Date(); 
         h.setMonth(h.getMonth() + 1); 
         const dateFirebase = `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}-${String(h.getDate()).padStart(2,'0')}`; 
         const dateWhatsApp = h.toLocaleDateString('es-ES'); 
-
-        // FIX: Formatear el número para que en la tabla del panel se vea bonito (Ej: +51999...)
         const numeroBonito = "+" + numeroCliente.split('@')[0].split(':')[0];
+        const rulesDB = currentUserData.platformRules || {};
 
-        // B.5 AUTO-VINCULACIÓN MÁGICA: Buscar si existe una matriz con el correo de la cuenta vendida
-        let matrizAsignada = null;
-        const qMatriz = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid), where("email", "==", cuentaSeleccionada.email));
-        const snapMatriz = await getDocs(qMatriz);
-        if (!snapMatriz.empty) {
-            matrizAsignada = snapMatriz.docs[0].id; // Extrae el ID de la matriz mágicamente
+        // Validamos que todas existan
+        for (let id of cuentasIds) {
+            const acc = stock.find(c => c.id === id);
+            if (!acc) return window.showNotification("Error: Una de las cuentas ya no está en el inventario.");
+            cuentasEntregar.push(acc);
         }
 
-        // C. Crear al cliente con las variables CORRECTAS de tu base de datos
-        await addDoc(collection(db, "clients"), {
-            userId: currentUser.uid,
-            name: "Cliente Nuevo", 
-            phone: numeroBonito, 
-            platform: cuentaSeleccionada.platform,
-            accountEmail: cuentaSeleccionada.email,      
-            accountPassword: cuentaSeleccionada.pass,    
-            accountPin: cuentaSeleccionada.pin,          
-            accountProfile: cuentaSeleccionada.profile || "1",
-            accountUnits: 1,
-            cost: 0,
-            price: 0,
-            date: dateFirebase,
-            linkedMasterId: matrizAsignada, // <--- AQUÍ SE INYECTA LA CONEXIÓN AUTOMÁTICA
-            color: macPalette[Math.floor(Math.random() * macPalette.length)]
-        });
+        // Bucle de creación (Separación Inteligente para la Matriz)
+        for (let cuenta of cuentasEntregar) {
+            let matrizAsignada = null;
+            const qMatriz = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid), where("email", "==", cuenta.email));
+            const snapMatriz = await getDocs(qMatriz);
+            if (!snapMatriz.empty) matrizAsignada = snapMatriz.docs[0].id;
 
-        // D. Descontar la cuenta del inventario
-        stock = stock.map(item => {
-            if (item.id === cuentaId) return { ...item, status: 'vendida' };
-            return item;
-        });
+            await addDoc(collection(db, "clients"), {
+                userId: currentUser.uid,
+                name: "Cliente Nuevo", 
+                phone: numeroBonito, 
+                platform: cuenta.platform,
+                accountEmail: cuenta.email,      
+                accountPassword: cuenta.pass,    
+                accountPin: cuenta.pin,          
+                accountProfile: cuenta.profile || "1",
+                accountUnits: 1,
+                cost: 0,
+                price: precioDividido, 
+                date: dateFirebase,
+                linkedMasterId: matrizAsignada, 
+                color: macPalette[Math.floor(Math.random() * macPalette.length)]
+            });
+
+            cuenta.rules = rulesDB[cuenta.platform] || "Uso personal, no modificar los datos de acceso.";
+            stock = stock.map(item => item.id === cuenta.id ? { ...item, status: 'vendida' } : item);
+        }
+
         await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
         currentUserData.inventory = stock;
-
-        // E. Cambiar el ticket a aprobado
         await updateDoc(doc(db, "pedidos", pedidoId), { estado: "aprobado" });
 
-        
-// Extraer la regla de la plataforma configurada (o un mensaje genérico si no hay)
-        const rulesDB = currentUserData.platformRules || {};
-        const reglaAutomatica = rulesDB[cuentaSeleccionada.platform] || "Uso personal, no modificar los datos de acceso.";
-
-        // F. 🔥 EL DISPARO A DIGITAL OCEAN 🔥
+        // EL DISPARO AL BOT (Cuentas Agrupadas)
         const payloadEntrega = {
             distribuidorId: currentUser.uid,
             numeroCliente: numeroCliente, 
-            plataforma: cuentaSeleccionada.platform,
-            profile: cuentaSeleccionada.profile || "1",
-            email: cuentaSeleccionada.email,
-            pass: cuentaSeleccionada.pass,
-            pin: cuentaSeleccionada.pin,
-            rules: reglaAutomatica, // <--- INYECTA LA REGLA AUTOMÁTICA AQUÍ
+            cuentas: cuentasEntregar, 
             fechaVencimiento: dateWhatsApp,
             mensajeEntrega: currentUserData.waDeliveryMessage || "" 
         };
@@ -2291,8 +2302,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente, selectId) => {
         }).then(res => console.log("Señal de entrega procesada por el servidor"))
           .catch(err => console.error("Error de red al contactar al bot:", err));
 
-        // G. Limpieza visual
-        window.showNotification("✅ ¡Cuenta entregada con éxito!");
+        window.showNotification("✅ ¡Entrega completada con éxito!");
         window.renderInventory(); 
         loadUserClients(); 
         window.openPedidosModal(); 
