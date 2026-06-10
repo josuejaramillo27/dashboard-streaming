@@ -254,14 +254,7 @@ th { color: var(--mac-text-secondary); border-bottom: 2px solid var(--mac-border
     overflow-y: auto; 
 }
 
-/* Scrollbar premium para que no se vea feo el scroll de Windows */
-.modal-card::-webkit-scrollbar {
-    width: 6px;
-}
-.modal-card::-webkit-scrollbar-thumb {
-    background: var(--mac-border);
-    border-radius: 10px;
-}
+
 @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 /* --- CORRECCIÓN FORZADA PARA EL MENÚ DESPLEGABLE --- */
@@ -437,7 +430,53 @@ body.dark-mode .btn-news-shiny:hover { background: linear-gradient(45deg, #FFCA0
 .swal2-icon {
     border-color: var(--mac-border) !important;
 }
+/* =========================================================
+   SCROLLBARS PREMIUM MACOS (INVISIBLES / ADAPTATIVAS)
+========================================================= */
+/* 1. Configuración del espacio total del scroll (Afecta a todo el sistema) */
+::-webkit-scrollbar {
+    width: 10px;  /* Ancho para scroll vertical */
+    height: 10px; /* Alto para scroll horizontal */
+}
 
+/* El canal por donde corre la barra siempre se mantiene invisible */
+::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+/* 2. El indicador flotante (Estado en Reposo - Ultra Delgado y Sutil) */
+::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2); /* Gris oscuro translúcido en Modo Claro */
+    border: 3px solid transparent; /* 🪄 EL SECRETO: Un borde transparente grueso lo vuelve una línea fina */
+    background-clip: padding-box; /* Fuerza al color a quedarse dentro del borde */
+    border-radius: 10px;
+}
+
+/* Ajuste del indicador flotante para Modo Oscuro */
+body.dark-mode::-webkit-scrollbar-thumb,
+body.dark-mode ::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2); /* Gris claro translúcido en Modo Oscuro */
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+
+/* 3. ✨ EFECTO HOVER: Cuando pasas el mouse por encima de la zona, la barra se enciende y "engorda" */
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.45) !important;
+    border: 1px solid transparent; /* Al achicar el borde transparente, la barra visualmente se expande */
+}
+
+body.dark-mode::-webkit-scrollbar-thumb:hover,
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.45) !important;
+    border: 1px solid transparent;
+}
+
+/* Soporte premium y minimalista idéntico para Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(134, 134, 139, 0.25) transparent;
+}
 /* =========================================================
    REGLA PARA CELULARES (La barra siempre debe estar expandida)
 ========================================================= */
