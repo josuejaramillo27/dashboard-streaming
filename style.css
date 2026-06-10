@@ -436,6 +436,29 @@ body.dark-mode .btn-news-shiny:hover { background: linear-gradient(45deg, #FFCA0
 .swal2-icon {
     border-color: var(--mac-border) !important;
 }
+
+/* =========================================================
+   5. EFECTO DE ILUMINACIÓN EN FILAS (HOVER PREMIUM PC)
+========================================================= */
+/* Le damos a las filas una transición suave para que no parpadeen de golpe */
+#tableBody tr {
+    transition: background-color 0.2s ease-in-out;
+}
+
+/* 🪄 LA MAGIA: @media (hover: hover) asegura que esto SOLO pase en PC
+   y evita que el color se quede "pegado" al tocar la pantalla en celulares */
+@media (hover: hover) and (pointer: fine) {
+    #tableBody tr:hover {
+        /* Usamos tu variable mac-table-hover que ya tiene el nivel de transparencia perfecto para ambos modos */
+        background-color: var(--mac-table-hover) !important;
+    }
+    
+    /* Pequeño detalle extra: Los botones de esa fila resaltan un poquito más */
+    #tableBody tr:hover .action-btn {
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+}
+
 /* =========================================================
    REGLA PARA CELULARES (La barra siempre debe estar expandida)
 ========================================================= */
