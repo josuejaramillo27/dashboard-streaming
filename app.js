@@ -261,14 +261,16 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-window.closeModals = () => { 
+window.closeModals = (resetTab = true) => { 
     document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); 
-    document.body.style.overflow = 'auto'; // <-- FIX: Devuelve el scroll al fondo
+    document.body.style.overflow = 'auto'; // Devuelve el scroll al fondo
     
-    // Devolver el foco al botón de Clientes en el menú inferior
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    const btnClientes = document.getElementById('navClientes');
-    if(btnClientes) btnClientes.classList.add('active');
+    // Solo devuelve el foco al botón de Clientes si es un cierre total (ej: tocar la X)
+    if (resetTab === true) {
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        const btnClientes = document.getElementById('navClientes');
+        if(btnClientes) btnClientes.classList.add('active');
+    }
 };
 
 /* --- CONFIGURACIÓN DE WHATSAPP Y PAGOS --- */
@@ -1202,6 +1204,7 @@ window.viewNewsDetail = (noticia, element) => {
    A.G.C. WRAPPED - ALGORITMO DE MÉTRICAS PREMIUM SIN LOGO
 ========================================================= */
 window.showWrapped = () => {
+    window.closeModals(false);
     let totalUnits = 0;
     let platformCounts = {};
     let dayCounts = {};
@@ -1604,12 +1607,11 @@ window.checkNewNews = async () => {
    MÓDULO: MI TIENDITA (EXCLUSIVO PLAN PRO)
 ========================================== */
 
-// REEMPLAZA TU FUNCIÓN ACTUAL POR ESTA:
 window.openStoreModal = () => {
     const plan = currentUserData.plan_actual || 'demo';
     
     if (plan !== 'pro' && plan !== 'elite') {
-        window.closeModals();
+        window.closeModals(true); // Vuelve a clientes porque falló la validación
         Swal.fire({
             icon: 'lock',
             title: 'Función Premium',
@@ -1626,16 +1628,17 @@ window.openStoreModal = () => {
         return;
     }
 
+    window.closeModals(false); // 🧹 LIMPIEZA SILENCIOSA ANTES DE ABRIR
+
     // Configurar el link interno por si lo necesita
     const aliasOrUid = currentUserData.storeAlias || currentUser.uid;
     const myUrl = window.location.origin + window.location.pathname + "?tienda=" + aliasOrUid;
     document.getElementById('storeLinkInput').value = myUrl;
     
-    // --- NUEVO: LÓGICA PARA OCULTAR/MOSTRAR SEGÚN EL CATÁLOGO EXTERNO ---
+    // LÓGICA PARA OCULTAR/MOSTRAR SEGÚN EL CATÁLOGO EXTERNO
     const externalUrl = currentUserData.externalStoreUrl;
     
     if (externalUrl && externalUrl.trim() !== '') {
-        // SI TIENE LINK EXTERNO: Ocultar todo lo interno
         document.getElementById('externalCatalogSetup').style.display = 'none';
         document.getElementById('internalCatalogSection').style.display = 'none';
         document.getElementById('btnCopyInternalLink').style.display = 'none';
@@ -1643,7 +1646,6 @@ window.openStoreModal = () => {
         document.getElementById('externalCatalogActive').style.display = 'block';
         document.getElementById('activeExternalLinkText').innerText = externalUrl;
     } else {
-        // SI NO TIENE: Mostrar la tiendita normal
         document.getElementById('externalCatalogSetup').style.display = 'block';
         document.getElementById('internalCatalogSection').style.display = 'block';
         document.getElementById('btnCopyInternalLink').style.display = 'block';
@@ -2031,8 +2033,9 @@ window.switchMainTab = (tab) => {
 ========================================== */
 // --- ABRIR INVENTARIO SIN SCROLL FANTASMA ---
 window.openInventoryModal = () => {
+    window.closeModals(false); // 🧹 LIMPIEZA SILENCIOSA ANTES DE ABRIR
     document.getElementById('inventoryModal').style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // <-- FIX: Bloquea el scroll de la página principal
+    document.body.style.overflow = 'hidden'; 
     window.renderInventory();
 };
 window.addInventoryAccount = async () => {
@@ -2134,8 +2137,9 @@ window.deleteInventoryAccount = async (id) => {
 
 // 1. Abrir modal y cargar los pedidos desde Firebase
 window.openPedidosModal = async () => {
+    window.closeModals(false); // 🧹 LIMPIEZA SILENCIOSA ANTES DE ABRIR
     document.getElementById('pedidosModal').style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // <-- Bloquea el scroll del fondo
+    document.body.style.overflow = 'hidden'; 
     const list = document.getElementById('pedidosList');
     list.innerHTML = '<p style="text-align:center;">Cargando ventas pendientes...</p>';
 
