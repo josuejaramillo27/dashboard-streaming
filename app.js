@@ -1326,7 +1326,7 @@ window.showWrapped = () => {
             </div>
             
             <button class="btn-primary" style="padding:16px; font-size:15px; width:100%; max-width:320px; background: linear-gradient(45deg, #FF2D55, #5856D6); border:none; box-shadow: 0 10px 20px rgba(88, 86, 214, 0.3);" onclick="window.downloadWrapup('${totalUnits}', '${topPlatform}', '${topDay}', '${topClientName}', '${topClientUnits}', '${frase}', '${mesActual}', event)">
-                📸 Descargar Historia (IG/WA)
+                <i class='bx bxs-camera'></i> Descargar Historia (IG/WA)
             </button>
         </div>
     `;
@@ -1408,14 +1408,14 @@ window.openMobileClientModal = (id) => {
     statusBadge.innerText = stText;
     
     // 3. Inyectar Botones Grandes
-    const renewBtn = statusCat !== 'active' ? `<button class="action-btn btn-renew" style="padding:12px; font-size:14px;" onclick="window.closeModals(); window.renewClient('${c.id}')">🔄 Renovar</button>` : '';
+    const renewBtn = statusCat !== 'active' ? `<button class="action-btn btn-renew" style="padding:12px; font-size:14px;" onclick="window.closeModals(); window.renewClient('${c.id}')"><i class='bx bx-refresh'></i> Renovar</button>` : '';
     
     document.getElementById('mcActions').innerHTML = `
-        <button class="action-btn btn-wa" style="padding:12px; font-size:14px;" onclick="window.sendWA('${c.phone}', '${c.name}', '${c.platform}', '${exp.toLocaleDateString('es-ES')}')">💬 WhatsApp</button>
-        <button class="action-btn" style="padding:12px; font-size:14px; background: rgba(175, 82, 222, 0.15); color: #AF52DE; font-weight: bold;" onclick="window.downloadTicket('${c.id}', event)">🧾 Recibo</button>
+        <button class="action-btn btn-wa" style="padding:12px; font-size:14px;" onclick="window.sendWA('${c.phone}', '${c.name}', '${c.platform}', '${exp.toLocaleDateString('es-ES')}')"><i class='bx bxl-whatsapp'></i> WhatsApp</button>
+        <button class="action-btn" style="padding:12px; font-size:14px; background: rgba(175, 82, 222, 0.15); color: #AF52DE; font-weight: bold;" onclick="window.downloadTicket('${c.id}', event)"><i class='bx bx-receipt'></i> Recibo</button>
         <button class="action-btn" style="padding:12px; font-size:14px; background: rgba(0, 122, 255, 0.15); color: #007AFF; font-weight: bold;" onclick="window.closeModals(); window.openLinkModal('${c.id}', '${c.platform}')"><i class='bx bx-link'></i> Vincular</button>
         <button class="action-btn" style="padding:12px; font-size:14px; color: var(--mac-text-main);" onclick="window.closeModals(); window.startEdit('${c.id}')"><i class='bx bx-edit-alt'></i> Editar</button>
-        <button class="action-btn btn-del" style="padding:12px; font-size:14px;" onclick="window.closeModals(); window.deleteClient('${c.id}')">🗑️ Borrar</button>
+        <button class="action-btn btn-del" style="padding:12px; font-size:14px;" onclick="window.closeModals(); window.deleteClient('${c.id}')"><i class='bx bx-trash'></i> Borrar</button>
         ${renewBtn}
     `;
     
@@ -1758,7 +1758,7 @@ window.renderStoreItems = () => {
     catalog.forEach((item, index) => {
         const isAgotado = item.status === 'agotado';
         const statusBadge = isAgotado ? `<span style="background:var(--mac-red); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold;">AGOTADO</span>` : `<span style="background:var(--mac-green); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold;">DISPONIBLE</span>`;
-        const typeBadge = item.type === 'Combo' ? `<span style="background:var(--mac-orange); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold; margin-right:5px;">🎁 COMBO</span>` : '';
+        const typeBadge = item.type === 'Combo' ? `<span style="background:var(--mac-orange); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold; margin-right:5px;"><i class='bx bx-gift'></i> COMBO</span>` : '';
 
         const div = document.createElement('div');
         div.style.cssText = `display:flex; justify-content:space-between; align-items:center; background:var(--mac-surface); padding:10px; border-radius:8px; border:1px solid var(--mac-border); opacity: ${isAgotado ? '0.7' : '1'};`;
@@ -1920,7 +1920,7 @@ const checkPublicStore = async () => {
                 catalog.forEach(item => {
                     const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
                     const isAgotado = item.status === 'agotado';
-                    const typeBadge = item.type === 'Combo' ? `<span style="background:var(--mac-orange); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold; margin-bottom: 5px; display:inline-block;">🎁 COMBO</span><br>` : '';
+                    const typeBadge = item.type === 'Combo' ? `<span style="background:var(--mac-orange); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold; margin-bottom: 5px; display:inline-block;"><i class='bx bx-gift'></i> COMBO</span><br>` : '';
                     
                     const numLimpio = data.phone.replace(/[^\d+]/g, '');
                     const msg = encodeURIComponent(`/comprar ${item.platform.toLowerCase()}`);
