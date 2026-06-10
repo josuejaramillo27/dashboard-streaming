@@ -2099,7 +2099,7 @@ window.renderInventory = () => {
     cuentasLibres.forEach(item => {
         const div = document.createElement('div');
         div.style.cssText = "background:var(--mac-surface); padding:12px; border-radius:8px; border:1px solid var(--mac-border); display:flex; justify-content:space-between; align-items:center;";
-onst tipoBadge = item.type === 'Completa' ? 
+const tipoBadge = item.type === 'Completa' ? 
             `<span style="background:var(--mac-orange); color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px; font-weight:bold;"><i class='bx bxs-star'></i> COMPLETA</span>` : 
             `<span style="background:var(--mac-blue); color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px; font-weight:bold;"><i class='bx bxs-user'></i> PERFIL</span>`;
 
