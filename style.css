@@ -49,53 +49,31 @@ body.dark-mode {
 }
 
 /* =========================================================
-   FONDO LÍQUIDO ORGÁNICO (ESTILO MACOS MONOCROMÁTICO)
+   FONDO DINÁMICO DE OLAS (MOVIMIENTO DE LADO A LADO)
 ========================================================= */
 body {
-    position: relative;
-    overflow-x: hidden;
-    background-color: var(--mac-bg); /* Mantiene tu negro/blanco base */
-    z-index: 0;
+    /* Creamos una mezcla en diagonal usando tus colores base y las olas */
+    background: linear-gradient(
+        135deg, 
+        var(--mac-bg) 0%, 
+        var(--wave-1) 25%, 
+        var(--wave-2) 50%, 
+        var(--wave-3) 75%, 
+        var(--mac-bg) 100%
+    );
+    background-size: 300% 300%; /* Hacemos el fondo gigante */
+    animation: sweepingWaves 10s ease-in-out infinite alternate; /* Va y viene cada 10 segundos */
+    
+    /* Aseguramos que la tipografía se mantenga nítida y original */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
 }
 
-/* Primera Ola (Arriba a la izquierda) */
-body::before {
-    content: "";
-    position: fixed;
-    width: 140vw;
-    height: 140vw;
-    top: -40vw;
-    left: -40vw;
-    z-index: -1; 
-    /* Usamos tu color de superficie para un contraste súper sutil y elegante */
-    background: radial-gradient(circle, var(--mac-surface) 0%, transparent 65%);
-    border-radius: 43%; /* El secreto: no es un círculo perfecto, parece una gota */
-    animation: liquidDrift 30s infinite linear;
-    pointer-events: none;
-    filter: blur(60px); /* Difuminado extremo para que parezca una ola de luz/sombra */
-}
-
-/* Segunda Ola (Abajo a la derecha) */
-body::after {
-    content: "";
-    position: fixed;
-    width: 100vw;
-    height: 100vw;
-    bottom: -20vw;
-    right: -20vw;
-    z-index: -1;
-    background: radial-gradient(circle, var(--mac-border) 0%, transparent 60%);
-    border-radius: 38%;
-    animation: liquidDrift 25s infinite linear reverse; /* Gira al revés */
-    pointer-events: none;
-    filter: blur(50px);
-}
-
-/* La coreografía del movimiento líquido */
-@keyframes liquidDrift {
-    0% { transform: rotate(0deg) scale(1); }
-    50% { transform: rotate(180deg) scale(1.05); } /* Se estira un poco a la mitad */
-    100% { transform: rotate(360deg) scale(1); }
+/* La coreografía del movimiento (De izquierda a derecha) */
+@keyframes sweepingWaves {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
 }
 
 /* RECUPERANDO LOS ESPACIOS Y BORDES DEL CONTENEDOR PRINCIPAL */
