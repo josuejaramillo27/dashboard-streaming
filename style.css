@@ -438,22 +438,6 @@ body.dark-mode .btn-news-shiny:hover { background: linear-gradient(45deg, #FFCA0
 }
 
 /* =========================================================
-   5. EFECTO DE ILUMINACIÓN EN FILAS (HOVER INSTANTÁNEO)
-========================================================= */
-/* Solo se activa en PC para evitar que el color se quede pegado en celulares */
-@media (hover: hover) and (pointer: fine) {
-    /* Al cambiar solo el color de fondo, respetamos la animación de entrada de la tabla */
-    #tableBody tr:hover {
-        background-color: var(--mac-table-hover) !important;
-    }
-    
-    /* Los botones de la fila resaltan instantáneamente */
-    #tableBody tr:hover .action-btn {
-        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    }
-}
-
-/* =========================================================
    REGLA PARA CELULARES (La barra siempre debe estar expandida)
 ========================================================= */
 @media (max-width: 768px) {
