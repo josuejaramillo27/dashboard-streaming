@@ -373,7 +373,69 @@ body.dark-mode .btn-news-shiny:hover { background: linear-gradient(45deg, #FFCA0
 .expandable-search input:not(:placeholder-shown) + i {
     color: var(--mac-blue);
 }
+/* =========================================================
+   POP-UPS Y ALERTAS (SWEETALERT2 ESTILO APPLE / CRISTAL)
+========================================================= */
+/* El contenedor de la alerta */
+.swal2-popup {
+    background: var(--mac-surface) !important;
+    backdrop-filter: blur(25px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
+    border: 1px solid var(--mac-border) !important;
+    border-radius: 24px !important;
+    color: var(--mac-text-main) !important;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.25) !important;
+    padding: 2em !important;
+    font-family: inherit !important;
+}
 
+/* Títulos y textos descriptivos */
+.swal2-title {
+    color: var(--mac-text-main) !important;
+    font-weight: 800 !important;
+    font-size: 22px !important;
+}
+
+.swal2-html-container {
+    color: var(--mac-text-secondary) !important;
+    font-size: 14px !important;
+}
+
+/* Botón Principal (Ej: Confirmar / Mejorar a PRO) */
+.swal2-confirm {
+    background: var(--mac-blue) !important;
+    color: #ffffff !important;
+    border-radius: 12px !important;
+    font-weight: bold !important;
+    padding: 12px 24px !important;
+    box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3) !important;
+    transition: transform 0.2s, filter 0.2s !important;
+}
+
+.swal2-confirm:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+/* Botón Secundario (Ej: Cancelar) */
+.swal2-cancel {
+    background: var(--mac-gray) !important;
+    color: var(--mac-text-main) !important;
+    border-radius: 12px !important;
+    font-weight: bold !important;
+    padding: 12px 24px !important;
+    transition: background 0.2s !important;
+}
+
+.swal2-cancel:hover {
+    background: rgba(255, 59, 48, 0.15) !important; /* Un leve tono rojizo al intentar cancelar */
+    color: var(--mac-red) !important;
+}
+
+/* Ajuste del icono de advertencia/error para que no desentone */
+.swal2-icon {
+    border-color: var(--mac-border) !important;
+}
 /* =========================================================
    REGLA PARA CELULARES (La barra siempre debe estar expandida)
 ========================================================= */
