@@ -409,12 +409,14 @@
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;" id="topControlsBar">
         
-        <div style="display: flex; gap: 10px; flex: 1; min-width: 250px;">
-            <div style="position: relative; flex: 2;">
-                <i class='bx bx-search' style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--mac-text-secondary);"></i>
-                <input type="text" id="searchInput" placeholder="Buscar..." oninput="if(document.getElementById('btnTabClientes').style.background !== 'transparent') { window.renderTable(); } else { window.renderMasterAccounts(); }" style="width: 100%; padding: 10px 10px 10px 35px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+        <div style="display: flex; gap: 10px; align-items: center; flex: 1;">
+            
+            <div class="expandable-search">
+                <input type="text" id="searchInput" placeholder="Buscar..." oninput="if(document.getElementById('btnTabClientes').style.background !== 'transparent') { window.renderTable(); } else { window.renderMasterAccounts(); }">
+                <i class='bx bx-search'></i>
             </div>
-            <select id="filterSelect" onchange="window.renderTable()" style="flex: 1; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+            
+            <select id="filterSelect" onchange="window.renderTable()" style="padding: 12px 14px; border-radius: 10px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); outline: none; transition: all 0.25s;">
                 <option value="all">Todos los estados</option>
                 <option value="active">Activos</option>
                 <option value="warning">Por vencer</option>
@@ -423,7 +425,6 @@
         </div>
 
         <div style="display: flex; background: var(--mac-bg); padding: 4px; border-radius: 10px; border: 1px solid var(--mac-border);">
-            
             <button id="btnTabClientes" onclick="window.switchMainTab('clientes')" style="padding: 8px 20px; border-radius: 8px; border: none; background: var(--mac-blue); color: white; font-weight: bold; cursor: pointer; transition: 0.3s;">👤 Mis Clientes</button>
             <button id="btnTabCuentas" onclick="window.switchMainTab('cuentas')" style="padding: 8px 20px; border-radius: 8px; border: none; background: transparent; color: var(--mac-text-secondary); font-weight: bold; cursor: pointer; transition: 0.3s;">📦 Mis Cuentas</button>
         </div>
