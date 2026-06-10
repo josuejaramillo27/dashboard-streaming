@@ -149,8 +149,19 @@ window.doRegister = async () => {
 window.doLogin = async () => {
     const email = document.getElementById('loginEmail').value, password = document.getElementById('loginPassword').value;
     if(!email || !password) return window.showNotification("Ingresa tus datos");
-    const btn = document.querySelector('#loginForm .btn-primary'); const orig = btn.innerText; btn.innerText = "Iniciando... ⏳"; btn.disabled = true;
-    try { await signInWithEmailAndPassword(auth, email, password); } catch (e) { window.showNotification("Error Login: " + e.message); btn.innerText = orig; btn.disabled = false; }
+    
+    const btn = document.querySelector('#loginForm .btn-primary'); 
+    const orig = btn.innerHTML; // Cambiamos innerText por innerHTML
+    btn.innerHTML = "Iniciando... <i class='bx bx-loader-alt bx-spin'></i>"; // Usamos el spinner
+    btn.disabled = true;
+    
+    try { 
+        await signInWithEmailAndPassword(auth, email, password); 
+    } catch (e) { 
+        window.showNotification("Error Login: " + e.message); 
+        btn.innerHTML = orig; 
+        btn.disabled = false; 
+    }
 };
 
 window.doResetPassword = async () => {
@@ -174,7 +185,7 @@ onAuthStateChanged(auth, async (user) => {
         // 🔥 MEJORA VISUAL: Ocultar login y dar feedback INMEDIATO
         document.getElementById('loginForm').style.display = 'none';
         if(document.getElementById('authSubtitle')) {
-            document.getElementById('authSubtitle').innerText = 'Cargando tu panel... ⏳';
+            document.getElementById('authSubtitle').innerHTML = "Cargando tu panel... <i class='bx bx-loader-alt bx-spin'></i>";
         }
 
         try {
