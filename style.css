@@ -173,6 +173,11 @@ th { color: var(--mac-text-secondary); border-bottom: 2px solid var(--mac-border
     text-transform: uppercase;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+    
+    /* 🛠️ FIX PARA EVITAR QUE SE CORTE O SE DOBLE */
+    display: inline-block; /* Lo convierte en un bloque sólido */
+    white-space: nowrap;   /* Obliga al texto a quedarse en una sola línea */
+    width: max-content;    /* Ajusta el ancho al contenido exacto */
 }
 
 .active { 
