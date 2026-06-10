@@ -438,35 +438,18 @@ body.dark-mode .btn-news-shiny:hover { background: linear-gradient(45deg, #FFCA0
 }
 
 /* =========================================================
-   5. EFECTO DE ILUMINACIÓN EN FILAS (PULSO TEMPORAL DE 3s)
+   5. EFECTO DE ILUMINACIÓN EN FILAS (HOVER INSTANTÁNEO)
 ========================================================= */
-/* Preparamos la fila para transiciones suaves */
-#tableBody tr {
-    transition: background-color 0.2s ease-in-out;
-}
-
-/* 🪄 FIX: Agregamos opacity: 1 y transform: translateX(0) en todos los pasos 
-   para evitar que choque con la animación de entrada (slideFadeRow) */
-@keyframes rowPulse {
-    0% { background-color: transparent; opacity: 1; transform: translateX(0); }
-    15% { background-color: var(--mac-table-hover); opacity: 1; transform: translateX(0); }
-    75% { background-color: var(--mac-table-hover); opacity: 1; transform: translateX(0); }
-    100% { background-color: transparent; opacity: 1; transform: translateX(0); }
-}
-
-/* Solo se activa en PC */
+/* Solo se activa en PC para evitar que el color se quede pegado en celulares */
 @media (hover: hover) and (pointer: fine) {
+    /* Al cambiar solo el color de fondo, respetamos la animación de entrada de la tabla */
     #tableBody tr:hover {
-        /* Ejecutamos el pulso y le ponemos blindaje extra para que no desaparezca */
-        animation: rowPulse 3s ease-in-out forwards !important;
-        opacity: 1 !important; 
-        transform: translateX(0) !important; 
+        background-color: var(--mac-table-hover) !important;
     }
     
-    /* Pequeño detalle extra: Los botones mantienen una leve sombra mientras el mouse esté ahí */
+    /* Los botones de la fila resaltan instantáneamente */
     #tableBody tr:hover .action-btn {
         box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-        transition: box-shadow 0.3s ease;
     }
 }
 
