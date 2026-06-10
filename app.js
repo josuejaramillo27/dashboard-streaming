@@ -2099,17 +2099,17 @@ window.renderInventory = () => {
     cuentasLibres.forEach(item => {
         const div = document.createElement('div');
         div.style.cssText = "background:var(--mac-surface); padding:12px; border-radius:8px; border:1px solid var(--mac-border); display:flex; justify-content:space-between; align-items:center;";
-const tipoBadge = item.type === 'Completa' ? 
-            `<span style="background:var(--mac-orange); color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px; font-weight:bold;">⭐ COMPLETA</span>` : 
-            `<span style="background:var(--mac-blue); color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px; font-weight:bold;">👤 PERFIL</span>`;
+onst tipoBadge = item.type === 'Completa' ? 
+            `<span style="background:var(--mac-orange); color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px; font-weight:bold;"><i class='bx bxs-star'></i> COMPLETA</span>` : 
+            `<span style="background:var(--mac-blue); color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px; font-weight:bold;"><i class='bx bxs-user'></i> PERFIL</span>`;
 
         div.innerHTML = `
             <div>
                 <strong style="color:var(--mac-text-main); font-size:15px;">${item.platform}</strong>
                 ${tipoBadge}
                 <div style="color:var(--mac-text-secondary); font-size:12px; margin-top:4px;">
-                    📧 ${item.email}<br>
-                    🔐 ${item.pass} | 👤: ${item.profile} | 📌: ${item.pin}
+                    <i class='bx bx-envelope'></i> ${item.email}<br>
+                    <i class='bx bx-lock-alt'></i> ${item.pass} | <i class='bx bx-user-circle'></i>: ${item.profile} | <i class='bx bx-pin'></i>: ${item.pin}
                 </div>
             </div>
             <button class="action-btn btn-del" onclick="window.deleteInventoryAccount('${item.id}')"><i class='bx bx-trash'></i></button>
