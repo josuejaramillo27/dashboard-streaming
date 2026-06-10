@@ -392,7 +392,7 @@ body.dark-mode .btn-news-shiny:hover { background: linear-gradient(45deg, #FFCA0
     z-index: 99999 !important;
 }
 /* =========================================================
-   BARRA DE NAVEGACIÓN INFERIOR (BOTTOM NAV) - SPOTIFY PERMANENTE
+   BARRA DE NAVEGACIÓN INFERIOR (BOTTOM NAV) - ADAPTATIVO REAL
 ========================================================= */
 .bottom-nav {
     display: none !important; 
@@ -401,11 +401,11 @@ body.dark-mode .btn-news-shiny:hover { background: linear-gradient(45deg, #FFCA0
     left: 0;
     width: 100%;
     
-    /* 🖤 DEGRADADO NEGRO SE QUEDA FIJO EN AMBOS MODOS */
+    /* ⚪ DEGRADADO CLARO (Elimina la mancha oscura en Modo Claro) */
     background: linear-gradient(to top, 
-        rgba(0, 0, 0, 1) 0%, 
-        rgba(0, 0, 0, 0.75) 55%, 
-        rgba(0, 0, 0, 0) 100%) !important; 
+        rgba(245, 245, 247, 1) 0%,       /* Color mac-bg sólido en la base */
+        rgba(245, 245, 247, 0.8) 45%,    /* Semitransparente en el medio */
+        rgba(245, 245, 247, 0) 100%) !important; /* 100% Invisible arriba */
     
     backdrop-filter: none !important; 
     -webkit-backdrop-filter: none !important;
@@ -420,17 +420,24 @@ body.dark-mode .btn-news-shiny:hover { background: linear-gradient(45deg, #FFCA0
     pointer-events: none; 
 }
 
+/* Reactiva los clics y asegura el color correcto de los íconos inactivos */
 .bottom-nav .nav-item {
     pointer-events: auto; 
-    /* Forzamos a que los íconos no activos sean gris claro en ambos modos */
-    color: rgba(255, 255, 255, 0.55) !important; 
+    color: var(--mac-text-secondary) !important; 
 }
 
-/* El botón que esté activo brillará con tu azul premium */
+/* El ícono seleccionado brilla en azul */
 .bottom-nav .nav-item.active {
     color: var(--mac-blue) !important;
 }
 
+/* ⚫ DEGRADADO OSCURO (Se activa SOLO en Modo Oscuro) */
+body.dark-mode .bottom-nav {
+    background: linear-gradient(to top, 
+        rgba(0, 0, 0, 1) 0%, 
+        rgba(0, 0, 0, 0.8) 50%, 
+        rgba(0, 0, 0, 0) 100%) !important; 
+}
 .nav-item {
     display: flex;
     flex-direction: column;
