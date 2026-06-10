@@ -445,19 +445,22 @@ body.dark-mode .btn-news-shiny:hover { background: linear-gradient(45deg, #FFCA0
     transition: background-color 0.2s ease-in-out;
 }
 
-/* Creamos la coreografía de la luz (3 Segundos en total) */
+/* 🪄 FIX: Agregamos opacity: 1 y transform: translateX(0) en todos los pasos 
+   para evitar que choque con la animación de entrada (slideFadeRow) */
 @keyframes rowPulse {
-    0% { background-color: transparent; }
-    15% { background-color: var(--mac-table-hover); } /* 1. Se ilumina suavemente al entrar */
-    75% { background-color: var(--mac-table-hover); } /* 2. Se mantiene para que leas cómodamente */
-    100% { background-color: transparent; }           /* 3. Se desvanece dejándolo limpio */
+    0% { background-color: transparent; opacity: 1; transform: translateX(0); }
+    15% { background-color: var(--mac-table-hover); opacity: 1; transform: translateX(0); }
+    75% { background-color: var(--mac-table-hover); opacity: 1; transform: translateX(0); }
+    100% { background-color: transparent; opacity: 1; transform: translateX(0); }
 }
 
-/* Solo se activa en PC (Evita bugs visuales en pantallas táctiles) */
+/* Solo se activa en PC */
 @media (hover: hover) and (pointer: fine) {
     #tableBody tr:hover {
-        /* Ejecuta la animación y el "forwards" asegura que se quede apagado al terminar */
+        /* Ejecutamos el pulso y le ponemos blindaje extra para que no desaparezca */
         animation: rowPulse 3s ease-in-out forwards !important;
+        opacity: 1 !important; 
+        transform: translateX(0) !important; 
     }
     
     /* Pequeño detalle extra: Los botones mantienen una leve sombra mientras el mouse esté ahí */
