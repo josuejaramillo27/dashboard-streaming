@@ -414,17 +414,19 @@ window.viewAccountData = (id) => {
     document.getElementById('viewAccProfile').innerText = c.accountProfile || '-'; 
     document.getElementById('viewAccPin').innerText = c.accountPin || '-'; 
     
-    // Lógica para mostrar el dispositivo en "Ver Datos"
+// Lógica para mostrar el dispositivo en "Ver Datos" usando Boxicons
     let deviceText = 'Sin configurar';
     if (c.accountDeviceType) {
-        let emoji = '';
-        if (c.accountDeviceType === 'TV') emoji = '📺';
-        if (c.accountDeviceType === 'PC') emoji = '💻';
-        if (c.accountDeviceType === 'Celular') emoji = '📱';
-        deviceText = `${emoji} ${c.accountDeviceType} ${c.accountDeviceName ? '(' + c.accountDeviceName + ')' : ''}`;
+        let iconHtml = '';
+        if (c.accountDeviceType === 'TV') iconHtml = "<i class='bx bx-tv'></i>";
+        if (c.accountDeviceType === 'PC') iconHtml = "<i class='bx bx-laptop'></i>";
+        if (c.accountDeviceType === 'Celular') iconHtml = "<i class='bx bx-mobile-alt'></i>";
+        
+        deviceText = `${iconHtml} ${c.accountDeviceType} ${c.accountDeviceName ? '(' + c.accountDeviceName + ')' : ''}`;
     }
     const deviceEl = document.getElementById('viewAccDevice');
-    if(deviceEl) deviceEl.innerText = deviceText;
+    // Como ahora usamos HTML (la etiqueta <i>), debemos usar innerHTML
+    if(deviceEl) deviceEl.innerHTML = deviceText;
 
     document.getElementById('viewAccUnits').innerText = c.accountUnits || '1';
     const providerEl = document.getElementById('viewAccProvider');
@@ -955,16 +957,16 @@ window.renderTable = () => {
         if (search && !c.name.toLowerCase().includes(search) && !c.phone.toLowerCase().includes(search) && !c.platform.toLowerCase().includes(search)) return;
         const stText = c.diffDays > 0 ? `Faltan ${c.diffDays} d` : (c.diffDays === 0 ? 'Hoy' : 'Vencido');
         const uCount = c.accountUnits || 1; const prof = ((c.price || 0) - (c.cost || 0)) * uCount; const dispUnits = uCount > 1 ? `<span style="font-size:11px;color:var(--mac-text-secondary);display:block;">(${uCount} unidades)</span>` : '';
-        // LOGICA DE DISPOSITIVOS
+// LOGICA DE DISPOSITIVOS CON BOXICONS
         let deviceIndicator = '';
         if (c.accountDeviceType) {
-            let emoji = '';
-            if (c.accountDeviceType === 'TV') emoji = '📺';
-            if (c.accountDeviceType === 'PC') emoji = '💻';
-            if (c.accountDeviceType === 'Celular') emoji = '📱';
+            let iconHtml = '';
+            if (c.accountDeviceType === 'TV') iconHtml = "<i class='bx bx-tv'></i>";
+            if (c.accountDeviceType === 'PC') iconHtml = "<i class='bx bx-laptop'></i>";
+            if (c.accountDeviceType === 'Celular') iconHtml = "<i class='bx bx-mobile-alt'></i>";
             
             let tooltip = c.accountDeviceName ? `Dispositivo: ${c.accountDeviceName}` : 'Dispositivo Activo';
-            deviceIndicator = `<span title="${tooltip}" style="cursor:help; margin-left:5px; font-size:14px;">${emoji}<span class="device-dot-green"></span></span>`;
+            deviceIndicator = `<span title="${tooltip}" style="cursor:help; margin-left:5px; font-size:14px;">${iconHtml}<span class="device-dot-green"></span></span>`;
         } else {
             deviceIndicator = `<span title="Sin dispositivo configurado" class="device-dot-red"></span>`;
         }
