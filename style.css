@@ -111,7 +111,41 @@ h3 { text-align: center; color: var(--mac-text-secondary); font-size: 14px; marg
 .stat-card p { margin: 0; font-size: 24px; font-weight: bold; color: var(--mac-text-main); }
 .stat-active p { color: var(--mac-green); } .stat-warning p { color: var(--mac-orange); } .stat-expired p { color: var(--mac-red); }
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 25px; }
-input, select, .select-box { padding: 10px 12px; border: 1px solid var(--mac-border); border-radius: 8px; font-size: 14px; width: 100%; box-sizing: border-box; background-color: transparent; color: var(--mac-text-main); }
+/* =========================================================
+   CAMPOS DE TEXTO, FORMULARIOS Y BUSCADOR (ESTILO APPLE)
+========================================================= */
+input, select, .select-box, textarea { 
+    padding: 12px 14px; 
+    border: 1px solid var(--mac-border); 
+    border-radius: 10px; /* Bordes un poco más suaves */
+    font-size: 14px; 
+    width: 100%; 
+    box-sizing: border-box; 
+    
+    /* Fondo cristalino en lugar de totalmente transparente */
+    background-color: var(--mac-surface); 
+    color: var(--mac-text-main);
+    
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    outline: none; /* Eliminamos el borde tosco del navegador */
+    font-family: inherit;
+    -webkit-appearance: none; /* Limpia estilos forzados en celulares iOS/Android */
+}
+
+/* 🪄 LA MAGIA: El efecto al tocar o hacer clic para escribir */
+input:focus, select:focus, textarea:focus, .select-box:focus {
+    border-color: var(--mac-blue);
+    background-color: var(--mac-bg); /* Se vuelve sólido para facilitar la lectura */
+    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.15); /* El famoso anillo de luz iOS */
+    transform: translateY(-1px); /* Se levanta un milímetro */
+}
+
+/* Estilo elegante para el texto de relleno (placeholder) */
+input::placeholder, textarea::placeholder {
+    color: var(--mac-text-secondary);
+    opacity: 0.6;
+    font-weight: 400;
+}
 .custom-select { position: relative; width: 100%; }
 .select-box { cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: var(--mac-text-secondary); }
 .checkbox-dropdown { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: var(--mac-dropdown-bg); backdrop-filter: blur(10px); border: 1px solid var(--mac-border); border-radius: 8px; max-height: 200px; overflow-y: auto; z-index: 100; padding: 5px; box-sizing: border-box;}
