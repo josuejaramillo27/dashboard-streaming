@@ -392,7 +392,7 @@ body.dark-mode .btn-news-shiny:hover { background: linear-gradient(45deg, #FFCA0
     z-index: 99999 !important;
 }
 /* =========================================================
-   BARRA DE NAVEGACIÓN INFERIOR (BOTTOM NAV) - TIPO SPOTIFY
+   BARRA DE NAVEGACIÓN INFERIOR (BOTTOM NAV) - SPOTIFY PERMANENTE
 ========================================================= */
 .bottom-nav {
     display: none !important; 
@@ -401,8 +401,12 @@ body.dark-mode .btn-news-shiny:hover { background: linear-gradient(45deg, #FFCA0
     left: 0;
     width: 100%;
     
-    /* MAGIA TRANSPARENTE */
-    background: transparent !important; 
+    /* 🖤 DEGRADADO NEGRO SE QUEDA FIJO EN AMBOS MODOS */
+    background: linear-gradient(to top, 
+        rgba(0, 0, 0, 1) 0%, 
+        rgba(0, 0, 0, 0.75) 55%, 
+        rgba(0, 0, 0, 0) 100%) !important; 
+    
     backdrop-filter: none !important; 
     -webkit-backdrop-filter: none !important;
     border-top: none !important; 
@@ -410,16 +414,21 @@ body.dark-mode .btn-news-shiny:hover { background: linear-gradient(45deg, #FFCA0
     
     justify-content: space-around;
     align-items: center;
-    padding: 15px 0; /* Un poco más de altura para tocar fácil */
-    padding-bottom: env(safe-area-inset-bottom, 15px);
-    z-index: 999999 !important; /* Nivel máximo garantizado */
-    /* Para que los iconos no se pierdan si el fondo tiene el mismo color */
-    pointer-events: none; /* Permite hacer clic "a través" del espacio vacío... */
+    padding: 25px 0 10px 0; 
+    padding-bottom: env(safe-area-inset-bottom, 10px);
+    z-index: 999999 !important; 
+    pointer-events: none; 
 }
 
-/* ...pero reactiva los clics solo en los botones */
 .bottom-nav .nav-item {
     pointer-events: auto; 
+    /* Forzamos a que los íconos no activos sean gris claro en ambos modos */
+    color: rgba(255, 255, 255, 0.55) !important; 
+}
+
+/* El botón que esté activo brillará con tu azul premium */
+.bottom-nav .nav-item.active {
+    color: var(--mac-blue) !important;
 }
 
 .nav-item {
