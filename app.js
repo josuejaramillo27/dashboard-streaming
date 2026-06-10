@@ -960,7 +960,7 @@ window.renderTable = () => {
         const tr = document.createElement('tr');
         tr.innerHTML = `<td data-label="Cliente" onclick="if(window.innerWidth <= 768) window.openMobileClientModal('${c.id}')"><div class="client-profile"><span style="color:${c.color || 'var(--mac-text-main)'}; font-weight: 800; font-size: 15px; letter-spacing: 0.5px;">${c.name}</span></div></td>
         <td data-label="Plataformas" style="font-weight: 500;">${c.platform}${deviceIndicator}</td>
-        <td data-label="Cuenta"><button class="action-btn" style="color:var(--mac-text-main); font-weight:bold; border: 1px solid var(--mac-border);" onclick="window.viewAccountData('${c.id}')">🔑 Ver Datos</button></td>
+        <td data-label="Cuenta"><button class="action-btn" style="color:var(--mac-text-main); font-weight:bold; border: 1px solid var(--mac-border);" onclick="window.viewAccountData('${c.id}')"><i class='bx bx-key'></i> Ver Datos</button></td>
         <td data-label="WhatsApp">${c.phone}</td>
         <td data-label="Utilidad (${globalCurrency})"><span style="color:var(--mac-green); font-weight:bold;">+${globalCurrency}${prof.toFixed(2)}</span>${dispUnits}</td>
         <td data-label="Vencimiento">${c.expDate.toLocaleDateString('es-ES')}</td>
