@@ -311,6 +311,90 @@ body.dark-mode .btn-news-shiny:hover { background: linear-gradient(45deg, #FFCA0
 .pwd-wrapper input { width: 100% !important; padding-right: 40px !important; box-sizing: border-box !important; }
 .pwd-toggle { position: absolute !important; right: 12px !important; top: 50% !important; transform: translateY(-50%) !important; background: none !important; border: none !important; cursor: pointer !important; color: var(--mac-text-main) !important; width: auto !important; height: auto !important; padding: 0 !important; font-size: 16px !important; margin: 0 !important; }
 
+/* =========================================================
+   BUSCADOR EXPANDIBLE ANIMADO (ESTILO APPLE SPOTLIGHT)
+========================================================= */
+.expandable-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Estado Inicial: Solo es un botón circular */
+.expandable-search input {
+    width: 44px;
+    height: 44px;
+    padding: 10px 10px 10px 44px; /* Empuja todo el contenido hacia la derecha */
+    border-radius: 22px; /* Forma de píldora/círculo perfecto */
+    background-color: var(--mac-surface);
+    color: transparent; /* Oculta el cursor y el texto cuando está cerrado */
+    border: 1px solid var(--mac-border);
+    outline: none;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+/* Posición estática de la lupa */
+.expandable-search i {
+    position: absolute;
+    left: 13px;
+    font-size: 18px;
+    color: var(--mac-text-secondary);
+    pointer-events: none; /* Permite hacer clic "a través" de la lupa para abrir el input */
+    transition: color 0.3s;
+}
+
+/* Ocultar el texto de ayuda cuando está cerrado */
+.expandable-search input::placeholder {
+    color: transparent;
+}
+
+/* 🪄 LA MAGIA: Estado Expandido (Al hacer clic o si ya escribiste algo) */
+.expandable-search input:focus,
+.expandable-search input:not(:placeholder-shown) {
+    width: 280px; /* El tamaño de la barra desplegada */
+    padding-left: 38px; /* El cursor se acomoda a la perfección al lado de la lupa */
+    cursor: text;
+    color: var(--mac-text-main);
+    background-color: var(--mac-bg);
+    border-color: var(--mac-blue);
+    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.15); /* Anillo de luz */
+}
+
+/* El texto de ayuda regresa suavemente */
+.expandable-search input:focus::placeholder {
+    color: var(--mac-text-secondary);
+    opacity: 0.6;
+}
+
+/* La lupa se ilumina de azul al expandirse */
+.expandable-search input:focus + i,
+.expandable-search input:not(:placeholder-shown) + i {
+    color: var(--mac-blue);
+}
+
+/* =========================================================
+   REGLA PARA CELULARES (La barra siempre debe estar expandida)
+========================================================= */
+@media (max-width: 768px) {
+    .expandable-search {
+        width: 100%;
+        flex: 1;
+    }
+    .expandable-search input {
+        width: 100% !important; /* Fuerza la barra a ocupar el máximo espacio */
+        height: auto;
+        border-radius: 10px; /* Borde cuadrado clásico de iOS */
+        padding: 12px 14px 12px 38px;
+        color: var(--mac-text-main);
+        cursor: text;
+    }
+    .expandable-search input::placeholder {
+        color: var(--mac-text-secondary);
+        opacity: 0.6;
+    }
+}
 
 /* ==========================================================================
    MAGIA RESPONSIVA: CONTROL ABSOLUTO EXCLUSIVO PARA CELULARES
