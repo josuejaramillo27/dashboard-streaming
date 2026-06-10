@@ -322,14 +322,18 @@ body.dark-mode .btn-news-shiny:hover { background: linear-gradient(45deg, #FFCA0
     position: absolute;
     top: 130%;
     right: 0;
-    background: var(--mac-surface);
+    /* Usamos tu variable específica para dropdowns y forzamos el desenfoque */
+    background: var(--mac-dropdown-bg) !important;
+    backdrop-filter: blur(25px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
+    
     border: 1px solid var(--mac-border);
     border-radius: 14px;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-    display: none; /* Oculto por defecto */
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6); /* Sombra más fuerte para separarlo del fondo */
+    display: none; 
     flex-direction: column;
     min-width: 160px;
-    z-index: 1000;
+    z-index: 99999; /* Z-index altísimo para que pise cualquier texto o tarjeta */
     overflow: hidden;
     animation: slideUp 0.2s ease forwards;
 }
