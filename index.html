@@ -297,28 +297,9 @@
     </div>
 </div>
 
-<div class="container" id="appView" style="display: none;">
+<div id="appView" style="display: none; width: 100%;">
+    <div class="container">
     
-    <nav class="bottom-nav">
-        <a href="#" id="navClientes" class="nav-item active" onclick="window.closeModals()">
-            <i class='bx bx-group'></i>
-            <span>Clientes</span>
-        </a>
-        <a href="#" class="nav-item" onclick="window.openStoreModal(); document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active')); this.classList.add('active');">
-            <i class='bx bx-store-alt'></i>
-            <span>Tiendita</span>
-        </a>
-        <button class="nav-item" onclick="window.openInventoryModal()">
-    <i class='bx bx-box'></i> Inventario
-</button>
-        <button class="nav-item" onclick="window.openPedidosModal()">
-    <i class='bx bx-bell'></i> Ventas
-</button>
-        <a href="#" class="nav-item" onclick="window.showWrapped(); document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active')); this.classList.add('active');">
-            <i class='bx bx-bar-chart-alt-2'></i>
-            <span>Resumen</span>
-        </a>
-    </nav>
     <div class="header-top">
         <div class="mac-controls">
             <div class="mac-dot close" onclick="window.openWaModal()" title="Editar Mensaje WhatsApp"></div>
@@ -467,10 +448,28 @@
         <div style="text-align: center; margin-top: 20px; display: none;" id="loadMoreContainer">
             <button class="btn-secondary" style="width: auto; padding: 10px 30px;" onclick="window.loadMoreClients()"><i class='bx bx-chevron-down'></i> Cargar más clientes</button>
         </div>
-    </div>
-</div>
+    </div> </div> <nav class="bottom-nav">
+        <a href="#" id="navClientes" class="nav-item active" onclick="window.closeModals()">
+            <i class='bx bx-group'></i>
+            <span>Clientes</span>
+        </a>
+        <a href="#" class="nav-item" onclick="window.openStoreModal(); document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active')); this.classList.add('active');">
+            <i class='bx bx-store-alt'></i>
+            <span>Tiendita</span>
+        </a>
+        <button class="nav-item" onclick="window.openInventoryModal()">
+            <i class='bx bx-box'></i> Inventario
+        </button>
+        <button class="nav-item" onclick="window.openPedidosModal()">
+            <i class='bx bx-bell'></i> Ventas
+        </button>
+        <a href="#" class="nav-item" onclick="window.showWrapped(); document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active')); this.classList.add('active');">
+            <i class='bx bx-bar-chart-alt-2'></i>
+            <span>Resumen</span>
+        </a>
+    </nav>
 
-<div class="container" id="adminView" style="display: none;">
+</div> <div class="container" id="adminView" style="display: none;">
     <div class="header-top">
         <h2>Panel Global A.G.C.</h2>
         <div style="display: flex; gap: 10px;">
