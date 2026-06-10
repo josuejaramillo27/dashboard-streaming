@@ -127,11 +127,72 @@ th, td { padding: 12px; border-bottom: 1px solid var(--mac-gray); text-align: le
 th { color: var(--mac-text-secondary); border-bottom: 2px solid var(--mac-border); }
 .client-profile { display: flex; align-items: center; gap: 8px; }
 .avatar { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+/* =========================================================
+   ETIQUETAS DE ESTADO Y BOTONES DE ACCIÓN (ESTILO PREMIUM iOS)
+========================================================= */
 .actions-cell { display: flex; gap: 5px; flex-wrap: wrap; }
-.action-btn { padding: 6px 8px; border-radius: 6px; font-size: 12px; background: var(--mac-gray); width: auto; color: var(--mac-text-main); }
-.btn-wa { background: rgba(52,199,89,0.15); color: var(--mac-green); } .btn-renew { background: rgba(0,122,255,0.15); color: var(--mac-blue); } .btn-del { background: rgba(255,59,48,0.15); color: var(--mac-red); }
-.status { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
-.active { background: rgba(52,199,89,0.15); color: var(--mac-green); } .warning { background: rgba(255,149,0,0.15); color: var(--mac-orange); } .expired { background: rgba(255,59,48,0.15); color: var(--mac-red); }
+
+.action-btn { 
+    padding: 6px 10px; 
+    border-radius: 8px; 
+    font-size: 12px; 
+    font-weight: 600;
+    width: auto; 
+    color: var(--mac-text-main);
+    background: var(--mac-surface); /* Fondo cristalino en lugar de gris sólido */
+    border: 1px solid var(--mac-border);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+/* Botones de acción específicos con brillo y cristal */
+.btn-wa { 
+    background: rgba(52, 199, 89, 0.12) !important; 
+    color: var(--mac-green) !important; 
+    border: 1px solid rgba(52, 199, 89, 0.3) !important;
+} 
+.btn-renew { 
+    background: rgba(0, 122, 255, 0.12) !important; 
+    color: var(--mac-blue) !important; 
+    border: 1px solid rgba(0, 122, 255, 0.3) !important;
+} 
+.btn-del { 
+    background: rgba(255, 59, 48, 0.12) !important; 
+    color: var(--mac-red) !important; 
+    border: 1px solid rgba(255, 59, 48, 0.3) !important;
+}
+
+/* Etiquetas de Estado de las Cuentas */
+.status { 
+    padding: 5px 10px; 
+    border-radius: 12px; 
+    font-size: 11px; 
+    font-weight: 800; 
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.active { 
+    background: rgba(52, 199, 89, 0.15); 
+    color: var(--mac-green); 
+    border: 1px solid rgba(52, 199, 89, 0.4);
+    box-shadow: 0 0 10px rgba(52, 199, 89, 0.1);
+} 
+.warning { 
+    background: rgba(255, 149, 0, 0.15); 
+    color: var(--mac-orange); 
+    border: 1px solid rgba(255, 149, 0, 0.4);
+    box-shadow: 0 0 10px rgba(255, 149, 0, 0.1);
+} 
+.expired { 
+    background: rgba(255, 59, 48, 0.15); 
+    color: var(--mac-red); 
+    border: 1px solid rgba(255, 59, 48, 0.4);
+    box-shadow: 0 0 10px rgba(255, 59, 48, 0.1);
+}
 #toast { position: fixed; bottom: 20px; right: 20px; background: var(--mac-text-main); color: var(--mac-bg); padding: 10px 20px; border-radius: 8px; font-size: 13px; z-index: 1000; opacity: 0; transform: translateY(20px); transition: 0.3s; pointer-events: none; }
 #toast.show { opacity: 1; transform: translateY(0); }
 
