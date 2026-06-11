@@ -1830,6 +1830,9 @@ window.editStoreItem = async (index) => {
                 
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Descripción:</label>
                 <input id="swal-desc" class="swal2-input" style="margin:0; width: 100%; box-sizing:border-box;" value="${item.desc || ''}">
+
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Cambiar Imagen (Opcional):</label>
+                <input type="file" id="swal-img" accept="image/*" style="margin:0; width: 100%; padding: 10px; font-size: 12px; border: 1px solid var(--mac-border); border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
             </div>
         `,
         focusConfirm: false,
@@ -1843,24 +1846,37 @@ window.editStoreItem = async (index) => {
             const plat = document.getElementById('swal-plat').value.trim();
             const price = parseFloat(document.getElementById('swal-price').value);
             const desc = document.getElementById('swal-desc').value.trim();
+            const fileInput = document.getElementById('swal-img');
+            const file = fileInput && fileInput.files.length > 0 ? fileInput.files[0] : null;
 
             if (!plat || isNaN(price)) {
                 Swal.showValidationMessage('El nombre y el precio son obligatorios');
                 return false;
             }
 
-            return { platform: plat, price: price, desc: desc };
+            return { platform: plat, price: price, desc: desc, file: file };
         }
     });
 
     // Si el usuario le dio a "Guardar Cambios" y no canceló
     if (formValues) {
-        // 1. Modificamos el objeto en la memoria local
-        catalog[index].platform = formValues.platform;
-        catalog[index].price = formValues.price;
-        catalog[index].desc = formValues.desc;
+        let newImgUrl = item.imgUrl || ""; // Mantiene la foto vieja por defecto
 
         try {
+            // Si seleccionó una nueva foto, la subimos primero a Firebase Storage
+            if (formValues.file) {
+                window.showNotification("⏳ Subiendo nueva imagen...");
+                const storageRef = ref(storage, \`store_images/\${currentUser.uid}_\${Date.now()}_\${formValues.file.name}\`);
+                const snapshot = await uploadBytes(storageRef, formValues.file);
+                newImgUrl = await getDownloadURL(snapshot.ref);
+            }
+
+            // 1. Modificamos el objeto en la memoria local
+            catalog[index].platform = formValues.platform;
+            catalog[index].price = formValues.price;
+            catalog[index].desc = formValues.desc;
+            catalog[index].imgUrl = newImgUrl; // Guardamos la foto (nueva o mantenemos la vieja)
+
             // 2. Lo enviamos a Firebase
             await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
             currentUserData.storeCatalog = catalog;
