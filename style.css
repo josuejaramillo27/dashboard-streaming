@@ -500,31 +500,34 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
 }
 
 /* =========================================================
-   TIENDITA WEB: HEADER PREMIUM Y VERIFICADO ANIMADO
+   TIENDITA WEB: PANTALLA COMPLETA (SIN CAJA FLOTANTE)
 ========================================================= */
-/* Quitamos el espacio de arriba para que el banner toque el techo */
+/* Obligamos al contenedor a ser invisible y pegarse al techo */
 #publicStoreView {
-    padding-top: 0 !important;
-    max-width: 900px !important; /* Lo hacemos más ancho para que quepan más productos en PC */
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    margin: 0 auto !important; 
 }
 
-/* 1. NUEVO BANNER CUSTOMIZABLE */
+/* 1. NUEVO BANNER GIGANTE Y FLUIDO */
 .store-cover-banner {
     width: 100%;
-    height: 160px;
-    background-color: transparent; /* Sin gradientes feos */
+    height: 220px; /* Más alto, estilo portada de Twitter/Instagram */
+    background-color: transparent; 
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     position: relative;
     z-index: 1;
-    /* Se mantiene oculto hasta que JS confirme que hay imagen */
+    border-radius: 0 0 32px 32px; /* Esquinas redondeadas SOLO en la parte de abajo */
 }
 
-/* 🪄 LA MAGIA: Si hay banner, el perfil sube para superponerse. 
-   Si no hay banner, se queda abajo de forma natural y limpia. */
+/* 🪄 LA MAGIA: Subimos un poco más el perfil para que muerda el nuevo banner alto */
 .profile-overlap {
-    margin-top: -50px !important;
+    margin-top: -70px !important;
 }
 
 /* El Contenedor del Verificado Animado (Se mantiene igual) */
