@@ -349,14 +349,25 @@ window.saveProfile = async () => {
             logoUrl = await getDownloadURL(storageRef);
         }
 
+        // 🪄 NUEVO: Lógica para subir el Banner
+        let bannerUrl = currentUserData.bannerUrl || null;
+        const bannerInput = document.getElementById('editBannerUpload');
+        if (bannerInput && bannerInput.files.length > 0) {
+            const fileBanner = bannerInput.files[0];
+            const storageRefBanner = ref(storage, `banners/${currentUser.uid}`);
+            await uploadBytes(storageRefBanner, fileBanner);
+            bannerUrl = await getDownloadURL(storageRefBanner);
+        }
+
         // Limpiamos el alias (solo minúsculas, números y guiones)
         let rawAlias = document.getElementById('editProfileAlias').value;
         let finalAlias = rawAlias.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
+        // 🪄 NUEVO: Agregamos bannerUrl al guardado de Firebase
         await updateDoc(doc(db, "users", currentUser.uid), { 
             name: name, country: country, currency: getCurrencyForCountry(country), 
-            phone: phone, logoUrl: logoUrl, storeAlias: finalAlias 
-        }); 
+            phone: phone, logoUrl: logoUrl, bannerUrl: bannerUrl, storeAlias: finalAlias 
+        });
         
         currentUserData.storeAlias = finalAlias; // Actualizamos en memoria 
         
@@ -364,6 +375,7 @@ window.saveProfile = async () => {
         currentUserData.country = country;
         currentUserData.phone = phone;
         currentUserData.logoUrl = logoUrl;
+        currentUserData.bannerUrl = bannerUrl;
         globalCurrency = getCurrencyForCountry(country);
         currentUserData.currency = globalCurrency;
 
@@ -1921,6 +1933,19 @@ const checkPublicStore = async () => {
             if (data.logoUrl) {
                 logoEl.src = data.logoUrl;
                 logoEl.style.display = 'block';
+            }
+
+            // 🪄 NUEVO: Lógica visual del Banner Adaptativo
+            const bannerEl = document.getElementById('publicStoreBanner');
+            const headerProfileEl = document.getElementById('publicStoreHeaderProfile');
+            
+            if (data.bannerUrl) {
+                bannerEl.style.backgroundImage = `url(${data.bannerUrl})`;
+                bannerEl.style.display = 'block';
+                if (headerProfileEl) headerProfileEl.classList.add('profile-overlap');
+            } else {
+                bannerEl.style.display = 'none';
+                if (headerProfileEl) headerProfileEl.classList.remove('profile-overlap');
             }
 
             const catalogBox = document.getElementById('publicStoreCatalog');
