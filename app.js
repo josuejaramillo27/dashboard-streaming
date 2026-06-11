@@ -2025,6 +2025,12 @@ const checkPublicStore = async () => {
             }
 
             document.getElementById('publicStoreName').innerText = data.name || "Distribuidor A.G.C.";
+            // 🪄 NUEVO: Mostramos el check verificado y el Footer SOLO cuando la tienda cargó con éxito
+            const verifiedBadge = document.getElementById('publicStoreVerified');
+            if (verifiedBadge) verifiedBadge.style.display = 'inline-flex';
+            
+            const storeFooter = document.getElementById('publicStoreFooter');
+            if (storeFooter) storeFooter.style.display = 'flex';
             
             const logoEl = document.getElementById('publicStoreLogo');
             if (data.logoUrl) {
