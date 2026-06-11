@@ -499,6 +499,109 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
     }
 }
 
+/* =========================================================
+   TIENDITA WEB: HEADER PREMIUM Y VERIFICADO ANIMADO
+========================================================= */
+/* Quitamos el espacio de arriba para que el banner toque el techo */
+#publicStoreView {
+    padding-top: 0 !important;
+    max-width: 900px !important; /* Lo hacemos más ancho para que quepan más productos en PC */
+}
+
+/* 1. NUEVO BANNER (Elegante, Neutro y Oscuro) */
+.store-cover-banner {
+    width: 100%;
+    height: 140px;
+    background: linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%);
+    position: relative;
+    z-index: 1;
+}
+
+/* El Contenedor del Verificado Animado (Se mantiene igual) */
+.premium-verified-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mac-blue); 
+    font-size: 26px; 
+    border-radius: 50%;
+    overflow: hidden; 
+    animation: premiumPulse 3s infinite ease-in-out;
+}
+.premium-verified-badge i { position: relative; z-index: 2; }
+.premium-verified-badge .shimmer {
+    position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+    z-index: 3; transform: skewX(-20deg); 
+    animation: premiumShimmer 3s infinite; 
+}
+@keyframes premiumPulse { 0% { transform: scale(1); } 10% { transform: scale(1.1); } 20% { transform: scale(1); } 100% { transform: scale(1); } }
+@keyframes premiumShimmer { 0% { left: -100%; } 15% { left: 200%; } 100% { left: 200%; } }
+
+/* =========================================================
+   2. TARJETAS DE PRODUCTO: ESTILO APP STORE / BENTO BOX
+========================================================= */
+
+/* Separación del catálogo y creación de la cuadrícula (Grid) */
+#publicStoreCatalog {
+    margin-top: 30px !important; 
+    padding: 0 20px 40px 20px !important; 
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important; /* 1 columna en celular, múltiples en PC */
+    gap: 25px !important; /* Espacio perfecto entre tarjetas */
+}
+
+/* El diseño de la tarjeta individual */
+#publicStoreCatalog > div {
+    background: var(--mac-surface) !important;
+    border: 1px solid var(--mac-border) !important;
+    border-radius: 24px !important; /* Esquinas bien redondeadas */
+    padding: 24px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    margin-bottom: 0 !important; /* Quitamos el margen viejo para usar el 'gap' del Grid */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05) !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
+}
+
+/* Efecto al pasar el cursor (Solo en PC) */
+@media (hover: hover) and (pointer: fine) {
+    #publicStoreCatalog > div:hover {
+        transform: translateY(-5px) !important; /* La tarjeta se eleva */
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important;
+        border-color: var(--mac-blue) !important; /* El borde se ilumina */
+    }
+}
+
+/* Ajustes de los textos internos para mayor jerarquía visual */
+#publicStoreCatalog > div h3 {
+    font-size: 19px !important;
+    font-weight: 800 !important;
+    margin-bottom: 8px !important;
+}
+
+#publicStoreCatalog > div p {
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    margin-bottom: 15px !important;
+}
+
+/* Botón de Comprar con diseño vibrante y unificado */
+#publicStoreCatalog > div .btn-wa {
+    width: 100% !important;
+    margin-top: auto !important; /* Empuja el botón siempre hasta abajo */
+    padding: 12px !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3) !important;
+    border: none !important;
+}
+
 /* ==========================================================================
    MAGIA RESPONSIVA: CONTROL ABSOLUTO EXCLUSIVO PARA CELULARES
    ========================================================================== */
@@ -759,73 +862,6 @@ body.dark-mode .bottom-nav {
     transform: translateY(-3px) scale(1.1); 
 }
 
-/* =========================================================
-   TIENDITA WEB: HEADER PREMIUM Y VERIFICADO ANIMADO
-========================================================= */
-/* Quitamos el espacio de arriba para que el banner toque el techo */
-#publicStoreView {
-    padding-top: 0 !important;
-}
-
-/* El Banner de Fondo (Degradado elegante) */
-.store-cover-banner {
-    width: 100%;
-    height: 140px;
-    background: linear-gradient(135deg, var(--mac-blue) 0%, #AF52DE 100%);
-    position: relative;
-    z-index: 1;
-}
-
-/* El Contenedor del Verificado Animado */
-.premium-verified-badge {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--mac-blue); /* Color del check oficial */
-    font-size: 26px; /* Tamaño del check */
-    border-radius: 50%;
-    overflow: hidden; /* Evita que el brillo se salga del ícono */
-    
-    /* Animación 1: Latido sutil */
-    animation: premiumPulse 3s infinite ease-in-out;
-}
-
-/* Aseguramos que el ícono esté por encima del brillo */
-.premium-verified-badge i {
-    position: relative;
-    z-index: 2;
-}
-
-/* Animación 2: El brillo de luz (Shimmer) */
-.premium-verified-badge .shimmer {
-    position: absolute;
-    top: 0;
-    left: -100%; /* Empieza fuera del ícono por la izquierda */
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
-    z-index: 3;
-    transform: skewX(-20deg); /* Inclinamos la luz para darle velocidad */
-    
-    /* Viaja de lado a lado cada 3 segundos */
-    animation: premiumShimmer 3s infinite; 
-}
-
-/* Coreografía del Latido */
-@keyframes premiumPulse {
-    0% { transform: scale(1); }
-    10% { transform: scale(1.1); } /* Se agranda un poquito */
-    20% { transform: scale(1); }
-    100% { transform: scale(1); } /* Pausa larga */
-}
-
-/* Coreografía de la Luz Brillante */
-@keyframes premiumShimmer {
-    0% { left: -100%; }
-    15% { left: 200%; } /* Atraviesa el ícono súper rápido */
-    100% { left: 200%; } /* Espera a que termine el latido */
-}
 
 /* 📱 MAGIA PARA CELULARES (MÓVIL) */
 @media (max-width: 768px) {
