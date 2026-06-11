@@ -759,6 +759,74 @@ body.dark-mode .bottom-nav {
     transform: translateY(-3px) scale(1.1); 
 }
 
+/* =========================================================
+   TIENDITA WEB: HEADER PREMIUM Y VERIFICADO ANIMADO
+========================================================= */
+/* Quitamos el espacio de arriba para que el banner toque el techo */
+#publicStoreView {
+    padding-top: 0 !important;
+}
+
+/* El Banner de Fondo (Degradado elegante) */
+.store-cover-banner {
+    width: 100%;
+    height: 140px;
+    background: linear-gradient(135deg, var(--mac-blue) 0%, #AF52DE 100%);
+    position: relative;
+    z-index: 1;
+}
+
+/* El Contenedor del Verificado Animado */
+.premium-verified-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mac-blue); /* Color del check oficial */
+    font-size: 26px; /* Tamaño del check */
+    border-radius: 50%;
+    overflow: hidden; /* Evita que el brillo se salga del ícono */
+    
+    /* Animación 1: Latido sutil */
+    animation: premiumPulse 3s infinite ease-in-out;
+}
+
+/* Aseguramos que el ícono esté por encima del brillo */
+.premium-verified-badge i {
+    position: relative;
+    z-index: 2;
+}
+
+/* Animación 2: El brillo de luz (Shimmer) */
+.premium-verified-badge .shimmer {
+    position: absolute;
+    top: 0;
+    left: -100%; /* Empieza fuera del ícono por la izquierda */
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+    z-index: 3;
+    transform: skewX(-20deg); /* Inclinamos la luz para darle velocidad */
+    
+    /* Viaja de lado a lado cada 3 segundos */
+    animation: premiumShimmer 3s infinite; 
+}
+
+/* Coreografía del Latido */
+@keyframes premiumPulse {
+    0% { transform: scale(1); }
+    10% { transform: scale(1.1); } /* Se agranda un poquito */
+    20% { transform: scale(1); }
+    100% { transform: scale(1); } /* Pausa larga */
+}
+
+/* Coreografía de la Luz Brillante */
+@keyframes premiumShimmer {
+    0% { left: -100%; }
+    15% { left: 200%; } /* Atraviesa el ícono súper rápido */
+    100% { left: 200%; } /* Espera a que termine el latido */
+}
+
 /* 📱 MAGIA PARA CELULARES (MÓVIL) */
 @media (max-width: 768px) {
     /* 🔒 CANDADO: Solo se muestra si el body tiene la clase 'logged-in' */
