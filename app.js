@@ -1890,7 +1890,11 @@ window.copyStoreLink = () => {
     const link = document.getElementById('storeLinkInput').value;
     navigator.clipboard.writeText(link).then(() => window.showNotification("¡Link copiado! Pégalo en tu Instagram/WhatsApp."));
 };
-
+window.openProductDesc = (title, desc) => {
+    document.getElementById('descModalTitle').innerText = title;
+    document.getElementById('descModalText').innerText = desc;
+    document.getElementById('productDescModal').style.display = 'flex';
+};
 // 3. EL DETECTOR DEL CLIENTE PÚBLICO (MAGIA SPA)
 const checkPublicStore = async () => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -1973,19 +1977,37 @@ const checkPublicStore = async () => {
                         btnHTML = `<a href="${waLink}" target="_blank" style="text-decoration:none; background:#25D366; color:white; padding:10px 20px; border-radius:20px; font-weight:bold; font-size:14px; box-shadow:0 4px 10px rgba(37,211,102,0.3); white-space: nowrap;"><i class='bx bxl-whatsapp'></i> Comprar</a>`;
                     }
 
+                    const titleSafe = item.platform.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : 'Este producto no tiene detalles adicionales.';
+
+                    // Imagen con efecto hover y evento click para abrir el modal
+                    const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}" onclick="window.openProductDesc('${titleSafe}', '${descSafe}')" style="width: 75px; height: 75px; border-radius: 14px; object-fit: cover; margin-right: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" title="Ver descripción">` : '';
+
+                    // Texto de ayuda debajo del precio
+                    const hintText = item.imgUrl && item.desc ? `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:4px;">👆 Presiona la imagen para leer la descripción</span>` : '';
+
+                    let btnHTML = '';
+                    if (isAgotado) {
+                        btnHTML = `<span style="background:var(--mac-gray); color:var(--mac-text-secondary); padding:10px 20px; border-radius:20px; font-weight:bold; font-size:14px; border: 1px solid var(--mac-border); white-space: nowrap;">Agotado</span>`;
+                    } else {
+                        btnHTML = `<a href="${waLink}" target="_blank" style="text-decoration:none; background:#25D366; color:white; padding:10px 20px; border-radius:20px; font-weight:bold; font-size:14px; box-shadow:0 4px 10px rgba(37,211,102,0.3); white-space: nowrap;"><i class='bx bxl-whatsapp'></i> Comprar</a>`;
+                    }
+
                     const card = document.createElement('div');
-                    card.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:var(--mac-gray); padding:15px 20px; border-radius:16px; border:1px solid var(--mac-border); box-shadow:0 4px 6px rgba(0,0,0,0.1); margin-bottom: 12px;";
+                    card.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:var(--mac-surface); padding:15px 20px; border-radius:16px; border:1px solid var(--mac-border); box-shadow:0 4px 6px rgba(0,0,0,0.05); margin-bottom: 0;";
                     card.innerHTML = `
-                        <div style="display:flex; align-items:center; flex: 1; padding-right: 15px; opacity: ${isAgotado ? '0.5' : '1'};">
+                        <div style="display:flex; align-items:center; flex: 1; padding-right: 10px; opacity: ${isAgotado ? '0.5' : '1'};">
                             ${imgHTML}
                             <div>
                                 ${typeBadge}
-                                <strong style="color:var(--mac-text-main); font-size:16px;">${item.platform}</strong><br>
-                                <span style="color:var(--mac-text-secondary); font-size:13px; display:block; margin:4px 0; line-height:1.3;">${item.desc || ''}</span>
-                                <span style="color:var(--mac-green); font-size:18px; font-weight:900;">${priceStr}</span>
+                                <strong style="color:var(--mac-text-main); font-size:17px; display:block; line-height: 1.2;">${item.platform}</strong>
+                                <span style="color:var(--mac-green); font-size:18px; font-weight:900; display:block; margin-top:2px;">${priceStr}</span>
+                                ${hintText}
                             </div>
                         </div>
-                        ${btnHTML}
+                        <div style="margin-left: auto;">
+                            ${btnHTML}
+                        </div>
                     `;
                     catalogBox.appendChild(card);
                 });
