@@ -559,8 +559,12 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
     margin-top: 40px !important;
     padding: 0 20px 40px 20px !important;
     display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)) !important;
+    /* 🔥 FIX: Obligamos a que sean exactamente 3 columnas en PC (no se estiran) */
+    grid-template-columns: repeat(3, 1fr) !important;
     gap: 30px !important;
+    max-width: 1050px !important; /* Centramos el catálogo para que las 3 columnas se vean perfectas */
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 
 .store-product-card {
@@ -752,7 +756,6 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
    FILTROS CHIPS Y SOPORTE FLOTANTE (UX PREMIUM)
 ========================================================= */
 .store-chips-container {
-    display: flex !important;
     justify-content: center;
     gap: 12px;
     margin: 20px auto 30px auto;
