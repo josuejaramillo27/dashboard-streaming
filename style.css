@@ -919,3 +919,20 @@ body.dark-mode .bottom-nav {
     align-items: center !important; /* Mantiene el logo y los textos perfectamente centrados */
     margin-bottom: 25px !important; /* Separa este cuadro de las tarjetas de abajo */
 }
+/* =========================================================
+   FIX: DISEÑO DE TIENDITA EN CELULAR
+========================================================= */
+@media (max-width: 768px) {
+    #publicStoreView {
+        padding: 0 20px 50px 20px !important; 
+    }
+    .store-cover-banner {
+        height: 150px !important; 
+        border-radius: 0 0 24px 24px !important;
+    }
+    #publicStoreCatalog > div {
+        margin-bottom: 15px !important; 
+        flex-direction: row !important; 
+        padding: 15px !important;
+    }
+}
