@@ -1866,7 +1866,7 @@ window.editStoreItem = async (index) => {
             // Si seleccionó una nueva foto, la subimos primero a Firebase Storage
             if (formValues.file) {
                 window.showNotification("⏳ Subiendo nueva imagen...");
-                const storageRef = ref(storage, \`store_images/\${currentUser.uid}_\${Date.now()}_\${formValues.file.name}\`);
+                const storageRef = ref(storage, `store_images/${currentUser.uid}_${Date.now()}_${formValues.file.name}`);
                 const snapshot = await uploadBytes(storageRef, formValues.file);
                 newImgUrl = await getDownloadURL(snapshot.ref);
             }
