@@ -844,3 +844,112 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
         font-size: 13px !important;
     }
 }
+
+/* ==========================================================================
+   1. MAGIA RESPONSIVA: CONTROL ABSOLUTO EXCLUSIVO PARA CELULARES
+   ========================================================================== */
+@media (max-width: 768px) {
+    .header-top { flex-direction: column !important; align-items: flex-start !important; gap: 15px !important; }
+    .header-top > div:last-child { width: 100% !important; display: flex !important; justify-content: space-between !important; gap: 8px !important; }
+    .header-top > div:last-child button { flex: 1 !important; width: 100% !important; height: 42px !important; padding: 5px !important; font-size: 11px !important; justify-content: center !important; margin: 0 !important; white-space: nowrap !important; }
+
+    table, thead, tbody, th, td, tr { display: block !important; }
+    thead tr { display: none !important; }
+    tr { border: 1px solid var(--mac-border) !important; border-radius: 10px !important; margin-bottom: 15px !important; padding: 12px !important; background: var(--mac-surface) !important; box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important; }
+    td { display: flex !important; justify-content: space-between !important; align-items: center !important; border: none !important; padding: 8px 0 !important; border-bottom: 1px solid var(--mac-gray) !important; }
+    td:nth-child(3) { border-bottom: none !important; }
+    td::before { content: attr(data-label) !important; font-weight: 600 !important; color: var(--mac-text-secondary) !important; font-size: 11px !important; text-transform: uppercase !important; }
+
+    #mainTable td:nth-child(4), 
+    #mainTable td:nth-child(5), 
+    #mainTable td:nth-child(6), 
+    #mainTable td:nth-child(7), 
+    #mainTable td:nth-child(8) { display: none !important; }
+
+    td[data-label="Cliente"] { cursor: pointer !important; background: rgba(0, 122, 255, 0.08) !important; border-radius: 6px !important; padding: 8px !important; flex-direction: column !important; align-items: flex-start !important; }
+    td[data-label="Cliente"]::after { content: "👆 Toca para ver detalles y acciones" !important; font-size: 10px !important; color: var(--mac-blue) !important; margin-top: 5px !important; font-weight: bold !important; align-self: flex-end !important; }
+    .client-profile { justify-content: space-between !important; width: 100% !important; }
+}
+
+.logo-dashboard { background-color: transparent !important; }
+
+/* =========================================================
+   2. ANIMACIONES Y TRANSICIONES PREMIUM (UI/UX)
+========================================================= */
+.action-btn, .btn-primary, .btn-secondary, .btn-news-shiny { transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1); will-change: transform, box-shadow; }
+.action-btn:hover, .btn-primary:hover, .btn-secondary:hover, .btn-news-shiny:hover { transform: translateY(-3px) scale(1.02); filter: brightness(1.15); }
+.action-btn:active, .btn-primary:active, .btn-secondary:active, .btn-news-shiny:active { transform: translateY(1px) scale(0.96); filter: brightness(0.9); }
+
+.modal-overlay { animation: fadeInOverlay 0.3s ease forwards; }
+.modal-card { animation: popUpModal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important; }
+@keyframes fadeInOverlay { from { background-color: rgba(0, 0, 0, 0); backdrop-filter: blur(0px); } to { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); } }
+@keyframes popUpModal { from { opacity: 0; transform: scale(0.8) translateY(30px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+#tableBody tr { opacity: 0; animation: slideFadeRow 0.4s ease forwards; }
+@keyframes slideFadeRow { from { opacity: 0; transform: translateX(-15px); } to { opacity: 1; transform: translateX(0); } }
+#tableBody tr:nth-child(1) { animation-delay: 0.05s; }
+#tableBody tr:nth-child(2) { animation-delay: 0.10s; }
+#tableBody tr:nth-child(3) { animation-delay: 0.15s; }
+#tableBody tr:nth-child(4) { animation-delay: 0.20s; }
+#tableBody tr:nth-child(5) { animation-delay: 0.25s; }
+#tableBody tr:nth-child(6) { animation-delay: 0.30s; }
+#tableBody tr:nth-child(7) { animation-delay: 0.35s; }
+#tableBody tr:nth-child(n+8) { animation-delay: 0.40s; }
+
+/* =========================================================
+   3. MENÚ DESPLEGABLE DE CONFIGURACIÓN Y ALINEACIONES
+========================================================= */
+.settings-dropdown { position: absolute; top: 130%; right: 0; background: var(--mac-dropdown-bg) !important; backdrop-filter: blur(25px) saturate(180%) !important; -webkit-backdrop-filter: blur(25px) saturate(180%) !important; border: 1px solid var(--mac-border); border-radius: 14px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); display: none; flex-direction: column; min-width: 160px; z-index: 99999; overflow: hidden; animation: slideUp 0.2s ease forwards; }
+.settings-dropdown.show { display: flex; }
+.dropdown-item { background: transparent; border: none; padding: 12px 18px; text-align: left; color: var(--mac-text-main); font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-family: inherit; }
+.dropdown-item:hover { background: rgba(255, 255, 255, 0.08); }
+.dropdown-item.text-danger { color: #FF3B30; }
+.dropdown-item.text-danger:hover { background: rgba(255, 59, 48, 0.1); }
+
+#mainTable tbody tr td { vertical-align: middle !important; }
+.actions-cell { display: table-cell !important; white-space: nowrap; }
+.actions-cell .action-btn { display: inline-flex; align-items: center; justify-content: center; margin-right: 6px; vertical-align: middle; }
+.actions-cell .action-btn:last-child { margin-right: 0; }
+.swal2-container { z-index: 99999 !important; }
+
+/* =========================================================
+   4. BARRA DE NAVEGACIÓN INFERIOR Y CUADRO DE PERFIL
+========================================================= */
+.bottom-nav { display: none !important; position: fixed; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(245, 245, 247, 1) 0%, rgba(245, 245, 247, 0.8) 45%, rgba(245, 245, 247, 0) 100%) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; border-top: none !important; box-shadow: none !important; justify-content: space-around; align-items: center; padding: 25px 0 10px 0; padding-bottom: env(safe-area-inset-bottom, 10px); z-index: 999999 !important; pointer-events: none; }
+.bottom-nav .nav-item { pointer-events: auto; color: var(--mac-text-secondary) !important; }
+.bottom-nav .nav-item.active { color: var(--mac-blue) !important; }
+body.dark-mode .bottom-nav { background: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0) 100%) !important; }
+.nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: var(--mac-text-secondary); font-size: 11px; font-weight: 700; gap: 4px; transition: all 0.3s ease; flex: 1; -webkit-tap-highlight-color: transparent; background: transparent !important; }
+.nav-item i { font-size: 24px; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.nav-item.active { color: var(--mac-blue) !important; background: transparent !important; }
+.nav-item.active i { transform: translateY(-3px) scale(1.1); }
+
+@media (max-width: 768px) {
+    body.logged-in .bottom-nav { display: flex !important; }
+    #authView ~ .bottom-nav { display: none !important; }
+    body.logged-in { padding-bottom: 85px !important; }
+    .btn-desktop-only { display: none !important; }
+    #toast { z-index: 9999 !important; }
+    #toast.show { bottom: 90px !important; }
+}
+
+.user-profile-compact { padding: 15px 20px !important; border-radius: 16px !important; align-items: center !important; margin-bottom: 25px !important; }
+
+/* =========================================================
+   5. FILTROS CHIPS Y SOPORTE FLOTANTE (UX PREMIUM TIENDITA)
+========================================================= */
+.store-chips-container { display: flex; justify-content: center; gap: 12px; margin: 20px auto 30px auto; padding: 0 20px; flex-wrap: wrap; max-width: 600px; }
+.chip-btn { width: auto !important; padding: 8px 20px !important; border-radius: 20px !important; font-size: 13px !important; font-weight: 700 !important; background: var(--mac-gray) !important; color: var(--mac-text-main) !important; border: 1px solid var(--mac-border) !important; transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important; cursor: pointer; }
+.chip-btn:hover { background: var(--mac-border-solid) !important; transform: translateY(-1px); }
+.chip-btn.active { background: var(--mac-blue) !important; color: white !important; border-color: var(--mac-blue) !important; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25) !important; }
+
+.store-floating-support { position: fixed !important; bottom: 25px !important; right: 25px !important; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important; color: white !important; text-decoration: none !important; padding: 12px 22px !important; border-radius: 30px !important; font-size: 14px !important; font-weight: 800 !important; display: inline-flex !important; align-items: center !important; gap: 8px !important; box-shadow: 0 8px 24px rgba(37, 211, 102, 0.35) !important; z-index: 999998 !important; animation: supportFloatAnimation 2s infinite alternate ease-in-out; transition: all 0.3s ease !important; }
+.store-floating-support i { font-size: 20px !important; }
+@keyframes supportFloatAnimation { 0% { transform: translateY(0); box-shadow: 0 8px 24px rgba(37, 211, 102, 0.35); } 100% { transform: translateY(-5px); box-shadow: 0 12px 28px rgba(37, 211, 102, 0.5); } }
+
+@media (max-width: 768px) {
+    .store-chips-container { justify-content: flex-start !important; flex-wrap: nowrap !important; overflow-x: auto !important; padding: 5px 20px 15px 20px !important; margin-bottom: 15px !important; -webkit-overflow-scrolling: touch; }
+    .store-chips-container::-webkit-scrollbar { display: none !important; }
+    .chip-btn { flex-shrink: 0 !important; }
+    .store-floating-support { bottom: 20px !important; right: 20px !important; padding: 10px 18px !important; font-size: 13px !important; }
+}
