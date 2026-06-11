@@ -568,6 +568,8 @@
             <input type="file" id="editLogoUpload" accept="image/*" style="padding: 5px; font-size: 12px;">
             <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 5px;">Banner de la tienda (Opcional, formato Horizontal):</label>
             <input type="file" id="editBannerUpload" accept="image/*" style="padding: 5px; font-size: 12px;">
+            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Link de Referencias (Telegram, Instagram, Drive...):</label>
+            <input type="url" id="editReferencesLink" placeholder="https://..." style="padding: 5px; font-size: 12px; margin-bottom: 5px; width: 100%; border: 1px solid var(--mac-border); border-radius: 6px; background: var(--mac-bg);">
             
             <input type="text" id="editProfileName" placeholder="Nombre Comercial / Marca">
             <label style="font-size: 11px; font-weight: bold; color: var(--mac-blue); margin-top: 5px;">Link personalizado de tu tienda:</label>
@@ -1077,6 +1079,22 @@
 
     <div id="publicStoreCatalog"></div>
 
+    <div class="store-trust-footer" id="publicStoreFooter">
+        <a id="publicStoreReferencesBtn" href="#" target="_blank" class="references-btn" style="display: none;">
+            <i class='bx bxs-star'></i> Ver Referencias de Clientes
+        </a>
+        
+        <p style="font-size: 12px; color: var(--mac-text-secondary); margin: 20px 0 10px 0; font-weight: 700;">MÉTODOS DE PAGO ACEPTADOS</p>
+        <div class="payment-methods">
+            <span class="pay-badge yape">Yape</span>
+            <span class="pay-badge plin">Plin</span>
+            <span class="pay-badge binance"><i class='bx bxl-bitcoin'></i> USDT</span>
+            <span class="pay-badge bank"><i class='bx bxs-bank'></i> Transferencia</span>
+        </div>
+        
+        <p class="guarantee-text"><i class='bx bx-shield-quarter'></i> Pagos 100% seguros. Soporte garantizado durante tu suscripción.</p>
+    </div>
+    
     <a id="publicStoreSupportBtn" href="#" target="_blank" class="store-floating-support" style="display: none;">
         <i class='bx bxl-whatsapp'></i>
         <span>Chatear</span>
