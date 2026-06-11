@@ -923,13 +923,23 @@ body.dark-mode .bottom-nav {
    FIX: DISEÑO DE TIENDITA EN CELULAR
 ========================================================= */
 @media (max-width: 768px) {
+    /* 1. Seguro global: Corta cualquier elemento rebelde que ensanche la pantalla */
+    html, body {
+        overflow-x: hidden !important;
+    }
+    
     #publicStoreView {
         padding: 0 20px 50px 20px !important; 
+        /* 2. Seguro de caja: Obliga a que el padding se empuje hacia adentro */
+        box-sizing: border-box !important; 
+        width: 100% !important;
     }
+    
     .store-cover-banner {
         height: 150px !important; 
         border-radius: 0 0 24px 24px !important;
     }
+    
     #publicStoreCatalog > div {
         margin-bottom: 15px !important; 
         flex-direction: row !important; 
