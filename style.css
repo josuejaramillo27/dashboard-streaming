@@ -953,3 +953,74 @@ body.dark-mode .bottom-nav { background: linear-gradient(to top, rgba(0, 0, 0, 1
     .chip-btn { flex-shrink: 0 !important; }
     .store-floating-support { bottom: 20px !important; right: 20px !important; padding: 10px 18px !important; font-size: 13px !important; }
 }
+/* =========================================================
+   FOOTER DE CONFIANZA Y REFERENCIAS
+========================================================= */
+.store-trust-footer {
+    margin: 20px auto 40px auto;
+    padding: 30px 20px;
+    text-align: center;
+    max-width: 800px;
+    border-top: 1px solid var(--mac-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Botón VIP Dorado para Referencias */
+.references-btn {
+    background: linear-gradient(135deg, #FFD700 0%, #FF9500 100%) !important;
+    color: #1d1d1f !important;
+    padding: 14px 28px !important;
+    border-radius: 25px !important;
+    font-weight: 900 !important;
+    font-size: 15px !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    box-shadow: 0 8px 25px rgba(255, 149, 0, 0.3) !important;
+    transition: transform 0.3s ease !important;
+}
+.references-btn:hover { transform: translateY(-4px) scale(1.02) !important; }
+.references-btn i { color: #fff !important; font-size: 18px !important; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
+/* Insignias de Pago Limpias */
+.payment-methods {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+}
+.pay-badge {
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.5px;
+}
+.pay-badge.yape { background: #742284; color: white; }
+.pay-badge.plin { background: #00E4C3; color: #000; }
+.pay-badge.binance { background: #FCD535; color: #000; }
+.pay-badge.bank { background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); }
+
+/* Texto de Garantía */
+.guarantee-text {
+    color: var(--mac-text-main);
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0;
+    background: rgba(52, 199, 89, 0.1);
+    padding: 10px 20px;
+    border-radius: 12px;
+    color: var(--mac-green);
+}
+.guarantee-text i { font-size: 18px; }
