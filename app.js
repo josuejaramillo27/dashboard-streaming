@@ -1962,8 +1962,15 @@ const checkPublicStore = async () => {
                 catalog.forEach(item => {
                     const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
                     const isAgotado = item.status === 'agotado';
-                    const typeBadge = item.type === 'Combo' ? `<span style="background:var(--mac-orange); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold; margin-bottom: 5px; display:inline-block;"><i class='bx bx-gift'></i> COMBO</span><br>` : '';
                     
+                    // 🎨 DETECTOR INTELIGENTE DE INSIGNIAS VIBRANTES
+                    let typeBadgeHtml = '';
+                    if (item.type === 'Combo') {
+                        typeBadgeHtml = `<div class="store-vibrant-badge badge-combo"><i class='bx bx-gift'></i> Combo</div>`;
+                    } else if (item.desc && item.desc.toLowerCase().includes('oferta')) {
+                        typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta"><i class='bx bxs-flame'></i> Oferta</div>`;
+                    }
+
                     const numLimpio = data.phone.replace(/[^\d+]/g, '');
                     const msg = encodeURIComponent(`/comprar ${item.platform.toLowerCase()}`);
                     const waLink = `https://wa.me/${numLimpio}?text=${msg}`;
@@ -1971,33 +1978,40 @@ const checkPublicStore = async () => {
                     const titleSafe = item.platform.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                     const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : 'Este producto no tiene detalles adicionales.';
 
-                    // Imagen interactiva con Modal
-                    const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}" onclick="window.openProductDesc('${titleSafe}', '${descSafe}')" style="width: 75px; height: 75px; border-radius: 14px; object-fit: cover; margin-right: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" title="Ver descripción">` : '';
-
-                    // Texto de ayuda debajo del precio
-                    const hintText = item.imgUrl && item.desc ? `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:4px;">👆 Presiona la imagen para leer la descripción</span>` : '';
+                    // Imagen principal del Bento Box (si no hay, genera un degradado premium de respaldo)
+                    const imgHTML = item.imgUrl 
+                        ? `<img src="${item.imgUrl}" alt="${item.platform}">` 
+                        : `<div style="width:100%; height:100%; background:linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%); display:flex; align-items:center; justify-content:center;"><i class='bx bx-streaming' style='font-size:48px; color:var(--mac-text-secondary); opacity:0.3;'></i></div>`;
 
                     let btnHTML = '';
                     if (isAgotado) {
-                        btnHTML = `<span style="background:var(--mac-gray); color:var(--mac-text-secondary); padding:10px 20px; border-radius:20px; font-weight:bold; font-size:14px; border: 1px solid var(--mac-border); white-space: nowrap;">Agotado</span>`;
+                        btnHTML = `<span class="status expired" style="padding:10px 16px; border-radius:20px; font-weight:800; font-size:13px; text-transform:none; letter-spacing:0;">Agotado</span>`;
                     } else {
-                        btnHTML = `<a href="${waLink}" target="_blank" style="text-decoration:none; background:#25D366; color:white; padding:10px 20px; border-radius:20px; font-weight:bold; font-size:14px; box-shadow:0 4px 10px rgba(37,211,102,0.3); white-space: nowrap;"><i class='bx bxl-whatsapp'></i> Comprar</a>`;
+                        btnHTML = `<a href="${waLink}" target="_blank" class="btn-wa" style="text-decoration:none; padding:10px 18px; border-radius:20px; font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:4px; margin:0;"><i class='bx bxl-whatsapp' style='font-size:16px;'></i> Comprar</a>`;
                     }
 
+                    // Creamos el contenedor Bento con su nueva clase CSS
                     const card = document.createElement('div');
-                    card.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:var(--mac-surface); padding:15px 20px; border-radius:16px; border:1px solid var(--mac-border); box-shadow:0 4px 6px rgba(0,0,0,0.05); margin-bottom: 0;";
+                    card.className = `store-product-card ${isAgotado ? 'is-agotado' : ''}`;
+                    
                     card.innerHTML = `
-                        <div style="display:flex; align-items:center; flex: 1; padding-right: 10px; opacity: ${isAgotado ? '0.5' : '1'};">
+                        ${typeBadgeHtml}
+                        
+                        <div class="store-product-visual" onclick="window.openProductDesc('${titleSafe}', '${descSafe}')">
                             ${imgHTML}
-                            <div>
-                                ${typeBadge}
-                                <strong style="color:var(--mac-text-main); font-size:17px; display:block; line-height: 1.2;">${item.platform}</strong>
-                                <span style="color:var(--mac-green); font-size:18px; font-weight:900; display:block; margin-top:2px;">${priceStr}</span>
-                                ${hintText}
+                            <div class="store-product-visual-overlay">
+                                <span class="view-desc-hint"><i class='bx bx-zoom-in'></i> Ver Detalles</span>
                             </div>
                         </div>
-                        <div style="margin-left: auto;">
-                            ${btnHTML}
+                        
+                        <div class="store-product-glass-footer">
+                            <div class="store-product-info">
+                                <strong class="store-product-title">${item.platform}</strong>
+                                <span class="store-product-price">${priceStr}</span>
+                            </div>
+                            <div class="store-product-action">
+                                ${btnHTML}
+                            </div>
                         </div>
                     `;
                     catalogBox.appendChild(card);
