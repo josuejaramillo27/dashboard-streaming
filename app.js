@@ -1895,7 +1895,93 @@ window.openProductDesc = (title, desc) => {
     document.getElementById('descModalText').innerText = desc;
     document.getElementById('productDescModal').style.display = 'flex';
 };
-// 3. EL DETECTOR DEL CLIENTE PÚBLICO (MAGIA SPA)
+// Funciones auxiliares para controlar el filtrado de categorías en tiempo real
+window.filterStore = (type) => {
+    // Alterna la clase activa en la interfaz visual de los chips
+    document.querySelectorAll('.chip-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent.includes('Combos') && type === 'Combo') btn.classList.add('active');
+        else if (btn.textContent.includes('Servicios') && type === 'Servicio') btn.classList.add('active');
+        else if (btn.textContent === 'Todos' && type === 'Todos') btn.classList.add('active');
+    });
+    window.renderPublicCatalog(type);
+};
+
+window.renderPublicCatalog = (filterType) => {
+    const catalogBox = document.getElementById('publicStoreCatalog');
+    if (!catalogBox) return;
+    catalogBox.innerHTML = '';
+    
+    const catalog = window.publicCatalogCache || [];
+    const data = window.publicStoreDataCache;
+    if (!data) return;
+
+    // Filtrado analítico en base al Chip seleccionado
+    const itemsFiltrados = catalog.filter(item => {
+        if (filterType === 'Todos') return true;
+        return item.type === filterType;
+    });
+
+    if (itemsFiltrados.length === 0) {
+        catalogBox.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); width: 100%; grid-column: 1/-1; padding: 40px 0; font-weight: 500;">No hay productos disponibles en esta sección por el momento.</p>';
+        return;
+    }
+
+    itemsFiltrados.forEach(item => {
+        const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
+        const isAgotado = item.status === 'agotado';
+        
+        let typeBadgeHtml = '';
+        if (item.type === 'Combo') {
+            typeBadgeHtml = `<div class="store-vibrant-badge badge-combo"><i class='bx bx-gift'></i> Combo</div>`;
+        } else if (item.desc && item.desc.toLowerCase().includes('oferta')) {
+            typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta"><i class='bx bxs-flame'></i> Oferta</div>`;
+        }
+
+        const numLimpio = data.phone.replace(/[^\d+]/g, '');
+        const msg = encodeURIComponent(`/comprar ${item.platform.toLowerCase()}`);
+        const waLink = `https://wa.me/${numLimpio}?text=${msg}`;
+
+        const titleSafe = item.platform.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : 'Este producto no tiene detalles adicionales.';
+
+        const imgHTML = item.imgUrl 
+            ? `<img src="${item.imgUrl}" alt="${item.platform}">` 
+            : `<div style="width:100%; height:100%; background:linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%); display:flex; align-items:center; justify-content:center;"><i class='bx bx-play-circle' style='font-size:48px; color:var(--mac-text-secondary); opacity:0.3;'></i></div>`;
+
+        let btnHTML = '';
+        if (isAgotado) {
+            btnHTML = `<span class="status expired" style="padding:10px 16px; border-radius:20px; font-weight:800; font-size:13px; text-transform:none; letter-spacing:0;">Agotado</span>`;
+        } else {
+            btnHTML = `<a href="${waLink}" target="_blank" class="btn-wa" style="text-decoration:none; padding:10px 18px; border-radius:20px; font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:4px; margin:0;"><i class='bx bxl-whatsapp' style='font-size:16px;'></i> Comprar</a>`;
+        }
+
+        const card = document.createElement('div');
+        card.className = `store-product-card ${isAgotado ? 'is-agotado' : ''}`;
+        card.innerHTML = `
+            ${typeBadgeHtml}
+            <div class="store-product-visual" onclick="window.openProductDesc('${titleSafe}', '${descSafe}')">
+                ${imgHTML}
+                <div class="store-product-visual-overlay">
+                    <span class="view-desc-hint"><i class='bx bx-zoom-in'></i> Ver Detalles</span>
+                </div>
+            </div>
+            <div class="store-product-glass-footer">
+                <div class="store-product-info">
+                    <strong class="store-product-title">${item.platform}</strong>
+                    <span class="store-product-price">${priceStr}</span>
+                    ${item.imgUrl && item.desc ? `<span style="font-size:9px; color:var(--mac-text-secondary); display:block; margin-top:2px;">👆 Presiona la foto para ver detalles</span>` : ''}
+                </div>
+                <div class="store-product-action">
+                    ${btnHTML}
+                </div>
+            </div>
+        `;
+        catalogBox.appendChild(card);
+    });
+};
+
+// EL DETECTOR DEL CLIENTE PÚBLICO (MÓDULO DE TIENDITA OPTIMIZADO)
 const checkPublicStore = async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const storeId = urlParams.get('tienda');
@@ -1939,7 +2025,6 @@ const checkPublicStore = async () => {
                 logoEl.style.display = 'block';
             }
 
-            // 🪄 NUEVO: Lógica visual del Banner Adaptativo
             const bannerEl = document.getElementById('publicStoreBanner');
             const headerProfileEl = document.getElementById('publicStoreHeaderProfile');
             
@@ -1952,73 +2037,26 @@ const checkPublicStore = async () => {
                 if (headerProfileEl) headerProfileEl.classList.remove('profile-overlap');
             }
 
-            const catalogBox = document.getElementById('publicStoreCatalog');
-            const catalog = data.storeCatalog || [];
-            
-            if (catalog.length === 0) {
-                catalogBox.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary);">No hay productos publicados aún.</p>';
-            } else {
-                catalogBox.innerHTML = '';
-                catalog.forEach(item => {
-                    const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
-                    const isAgotado = item.status === 'agotado';
-                    
-                    // 🎨 DETECTOR INTELIGENTE DE INSIGNIAS VIBRANTES
-                    let typeBadgeHtml = '';
-                    if (item.type === 'Combo') {
-                        typeBadgeHtml = `<div class="store-vibrant-badge badge-combo"><i class='bx bx-gift'></i> Combo</div>`;
-                    } else if (item.desc && item.desc.toLowerCase().includes('oferta')) {
-                        typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta"><i class='bx bxs-flame'></i> Oferta</div>`;
-                    }
+            // Guardamos la información en memoria caché global para agilizar los filtros instantáneos
+            window.publicCatalogCache = data.storeCatalog || [];
+            window.publicStoreDataCache = data;
 
-                    const numLimpio = data.phone.replace(/[^\d+]/g, '');
-                    const msg = encodeURIComponent(`/comprar ${item.platform.toLowerCase()}`);
-                    const waLink = `https://wa.me/${numLimpio}?text=${msg}`;
+            // Activamos la barra de chips y el botón de soporte flotante vinculando el número de WhatsApp
+            const filtersEl = document.getElementById('publicStoreFilters');
+            if (filtersEl && window.publicCatalogCache.length > 0) filtersEl.style.display = 'flex';
 
-                    const titleSafe = item.platform.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                    const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : 'Este producto no tiene detalles adicionales.';
-
-                    // Imagen principal del Bento Box (si no hay, genera un degradado premium de respaldo)
-                    const imgHTML = item.imgUrl 
-                        ? `<img src="${item.imgUrl}" alt="${item.platform}">` 
-                        : `<div style="width:100%; height:100%; background:linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%); display:flex; align-items:center; justify-content:center;"><i class='bx bx-streaming' style='font-size:48px; color:var(--mac-text-secondary); opacity:0.3;'></i></div>`;
-
-                    let btnHTML = '';
-                    if (isAgotado) {
-                        btnHTML = `<span class="status expired" style="padding:10px 16px; border-radius:20px; font-weight:800; font-size:13px; text-transform:none; letter-spacing:0;">Agotado</span>`;
-                    } else {
-                        btnHTML = `<a href="${waLink}" target="_blank" class="btn-wa" style="text-decoration:none; padding:10px 18px; border-radius:20px; font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:4px; margin:0;"><i class='bx bxl-whatsapp' style='font-size:16px;'></i> Comprar</a>`;
-                    }
-
-                    // Creamos el contenedor Bento con su nueva clase CSS
-                    const card = document.createElement('div');
-                    card.className = `store-product-card ${isAgotado ? 'is-agotado' : ''}`;
-                    
-                    card.innerHTML = `
-                        ${typeBadgeHtml}
-                        
-                        <div class="store-product-visual" onclick="window.openProductDesc('${titleSafe}', '${descSafe}')">
-                            ${imgHTML}
-                            <div class="store-product-visual-overlay">
-                                <span class="view-desc-hint"><i class='bx bx-zoom-in'></i> Ver Detalles</span>
-                            </div>
-                        </div>
-                        
-                        <div class="store-product-glass-footer">
-                            <div class="store-product-info">
-                                <strong class="store-product-title">${item.platform}</strong>
-                                <span class="store-product-price">${priceStr}</span>
-                            </div>
-                            <div class="store-product-action">
-                                ${btnHTML}
-                            </div>
-                        </div>
-                    `;
-                    catalogBox.appendChild(card);
-                });
+            const supportBtn = document.getElementById('publicStoreSupportBtn');
+            if (supportBtn) {
+                const numLimpio = data.phone.replace(/[^\d+]/g, '');
+                supportBtn.href = `https://wa.me/${numLimpio}?text=${encodeURIComponent('¡Hola! Estoy visitando tu catálogo virtual y me gustaría hacerte una consulta.')}`;
+                supportBtn.style.display = 'inline-flex';
             }
+
+            // Primer renderizado general automático
+            window.renderPublicCatalog('Todos');
+
         } catch (e) {
-            console.error("Error cargando tienda:", e);
+            console.error("Error cargando la tienda pública:", e);
         }
     }
 };
