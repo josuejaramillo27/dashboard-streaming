@@ -327,7 +327,8 @@ window.openProfileModal = () => {
     document.getElementById('editProfileCountry').value = currentUserData.country || ''; 
     document.getElementById('editProfilePhone').value = currentUserData.phone || ''; 
     document.getElementById('editProfileAlias').value = currentUserData.storeAlias || ''; 
-    document.getElementById('profileModal').style.display = 'flex'; 
+    document.getElementById('profileModal').style.display = 'flex';
+    document.getElementById('editReferencesLink').value = currentUserData.referencesLink || '';
 };
 
 window.saveProfile = async () => { 
@@ -359,14 +360,19 @@ window.saveProfile = async () => {
             bannerUrl = await getDownloadURL(storageRefBanner);
         }
 
-        // Limpiamos el alias (solo minúsculas, números y guiones)
+        // Limpiamos el alias
         let rawAlias = document.getElementById('editProfileAlias').value;
         let finalAlias = rawAlias.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
-        // 🪄 NUEVO: Agregamos bannerUrl al guardado de Firebase
+        // 🪄 NUEVO: Capturamos el link de referencias
+        let refInput = document.getElementById('editReferencesLink');
+        let referencesLink = refInput ? refInput.value.trim() : '';
+
+        // 🪄 NUEVO: Agregamos referencesLink a Firebase
         await updateDoc(doc(db, "users", currentUser.uid), { 
             name: name, country: country, currency: getCurrencyForCountry(country), 
-            phone: phone, logoUrl: logoUrl, bannerUrl: bannerUrl, storeAlias: finalAlias 
+            phone: phone, logoUrl: logoUrl, bannerUrl: bannerUrl, storeAlias: finalAlias,
+            referencesLink: referencesLink // Guardado en la nube
         });
         
         currentUserData.storeAlias = finalAlias; // Actualizamos en memoria 
@@ -376,6 +382,7 @@ window.saveProfile = async () => {
         currentUserData.phone = phone;
         currentUserData.logoUrl = logoUrl;
         currentUserData.bannerUrl = bannerUrl;
+        currentUserData.referencesLink = referencesLink;
         globalCurrency = getCurrencyForCountry(country);
         currentUserData.currency = globalCurrency;
 
@@ -2050,6 +2057,16 @@ const checkPublicStore = async () => {
                 const numLimpio = data.phone.replace(/[^\d+]/g, '');
                 supportBtn.href = `https://wa.me/${numLimpio}?text=${encodeURIComponent('¡Hola! Estoy visitando tu catálogo virtual y me gustaría hacerte una consulta.')}`;
                 supportBtn.style.display = 'inline-flex';
+            }
+            // Activamos el botón de Referencias si el usuario configuró su link
+            const refBtn = document.getElementById('publicStoreReferencesBtn');
+            if (refBtn) {
+                if (data.referencesLink && data.referencesLink !== '') {
+                    refBtn.href = data.referencesLink;
+                    refBtn.style.display = 'inline-flex';
+                } else {
+                    refBtn.style.display = 'none'; // Se oculta si no hay link
+                }
             }
 
             // Primer renderizado general automático
