@@ -508,13 +508,23 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
     max-width: 900px !important; /* Lo hacemos más ancho para que quepan más productos en PC */
 }
 
-/* 1. NUEVO BANNER (Elegante, Neutro y Oscuro) */
+/* 1. NUEVO BANNER CUSTOMIZABLE */
 .store-cover-banner {
     width: 100%;
-    height: 140px;
-    background: linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%);
+    height: 160px;
+    background-color: transparent; /* Sin gradientes feos */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     position: relative;
     z-index: 1;
+    /* Se mantiene oculto hasta que JS confirme que hay imagen */
+}
+
+/* 🪄 LA MAGIA: Si hay banner, el perfil sube para superponerse. 
+   Si no hay banner, se queda abajo de forma natural y limpia. */
+.profile-overlap {
+    margin-top: -50px !important;
 }
 
 /* El Contenedor del Verificado Animado (Se mantiene igual) */
