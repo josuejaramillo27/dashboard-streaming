@@ -1968,19 +1968,10 @@ const checkPublicStore = async () => {
                     const msg = encodeURIComponent(`/comprar ${item.platform.toLowerCase()}`);
                     const waLink = `https://wa.me/${numLimpio}?text=${msg}`;
 
-                    const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}" style="width: 65px; height: 65px; border-radius: 12px; object-fit: cover; margin-right: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">` : '';
-
-                    let btnHTML = '';
-                    if (isAgotado) {
-                        btnHTML = `<span style="background:var(--mac-gray); color:var(--mac-text-secondary); padding:10px 20px; border-radius:20px; font-weight:bold; font-size:14px; border: 1px solid var(--mac-border); white-space: nowrap;">Agotado</span>`;
-                    } else {
-                        btnHTML = `<a href="${waLink}" target="_blank" style="text-decoration:none; background:#25D366; color:white; padding:10px 20px; border-radius:20px; font-weight:bold; font-size:14px; box-shadow:0 4px 10px rgba(37,211,102,0.3); white-space: nowrap;"><i class='bx bxl-whatsapp'></i> Comprar</a>`;
-                    }
-
                     const titleSafe = item.platform.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                     const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : 'Este producto no tiene detalles adicionales.';
 
-                    // Imagen con efecto hover y evento click para abrir el modal
+                    // Imagen interactiva con Modal
                     const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}" onclick="window.openProductDesc('${titleSafe}', '${descSafe}')" style="width: 75px; height: 75px; border-radius: 14px; object-fit: cover; margin-right: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" title="Ver descripción">` : '';
 
                     // Texto de ayuda debajo del precio
