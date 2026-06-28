@@ -84,14 +84,15 @@ window.loginWithGoogle = async () => {
 };
 
 window.doRegister = async () => {
-    const name = document.getElementById('regName').value, phone = document.getElementById('regPhone').value.trim();
-    const email = document.getElementById('regEmail').value, password = document.getElementById('regPassword').value;
+    const name = document.getElementById('regName').value;
+    const phone = document.getElementById('regPhone').value.trim();
+    const email = document.getElementById('regEmail').value;
+    const password = document.getElementById('regPassword').value;
     const country = document.getElementById('regCountry').value;
     
     if(!name || !email || !password || !country || !phone) return window.showNotification("Llena todos los campos");
     if(!phone.startsWith('+')) return window.showNotification("⚠️ El teléfono DEBE incluir el código de país (Ej: +51...)");
     
-    const currency = getCurrencyForCountry(country);
     const btn = document.querySelector('#registerForm .btn-primary'); 
     const orig = btn.innerText; 
     btn.innerText = "Creando... ⏳"; 
@@ -102,47 +103,30 @@ window.doRegister = async () => {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         
-        // 2. Calculamos las fechas para la Demo (3 días)
-        const fechaActual = new Date();
-        const fechaVencimiento = new Date();
-        fechaVencimiento.setDate(fechaActual.getDate() + 3);
+        // 2. Obtenemos el Token de Identidad (El pasaporte digital del usuario)
+        const idToken = await user.getIdToken();
 
-        // 3. Asignación de Roles por defecto
-        let role = 'distribuidor'; 
-        let plan = 'demo';
-        let limite = 20;
-        let active = true; // Lo dejamos activo para que puedan usar la demo de inmediato
-        
-        // Mantengo tu regla para hacerte admin automáticamente con ese correo
-        if (email.toLowerCase() === 'admin@akaza.com') { 
-            role = 'admin'; 
-            plan = 'elite'; 
-            limite = 9999;
-        }
-
-        // 4. Guardamos el perfil en la colección "users" (tu BD usa "users" en vez de "distribuidores")
-        await setDoc(doc(db, "users", user.uid), { 
-            name: name, 
-            phone: phone, 
-            email: email, 
-            country: country, 
-            currency: currency, 
-            role: role, 
-            active: active, 
-            plan_actual: plan,
-            limite_clientes: limite,
-            createdAt: fechaActual.toISOString(),
-            vencimiento_plan: fechaVencimiento.toISOString(),
-            suspendedUntil: null 
+        // 3. Enviamos los datos a tu Bot en DigitalOcean para que él cree el perfil
+        const response = await fetch('https://bot.panelagc.com/api/completar-registro', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                idToken: idToken,
+                name: name,
+                phone: phone,
+                country: country
+            })
         });
 
+        if (!response.ok) throw new Error("Error del servidor al asignar perfil.");
+
         window.showNotification("¡Cuenta creada con éxito! Disfruta tu prueba gratuita.");
-        // Firebase Auth detectará el inicio de sesión y la función onAuthStateChanged hará el resto
         
     } catch (e) { 
         window.showNotification("Error Reg: " + e.message); 
+    } finally {
         btn.innerText = orig; 
-        btn.disabled = false; 
+        btn.disabled = false;
     }
 };
 
