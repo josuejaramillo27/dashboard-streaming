@@ -2859,3 +2859,51 @@ window.editarClienteDesdeMatriz = (clientId) => {
 
 // Ejecutamos el detector apenas se lee el archivo
 checkPublicStore();
+
+/* --- FUNCIONES DEL MODAL DEL BOT (ADMIN GLOBAL) --- */
+window.abrirModalAdminBot = () => {
+    document.getElementById('adminBotModal').style.display = 'flex';
+    document.getElementById('adminBotStatus').innerText = "Haz clic en Generar QR para empezar.";
+    document.getElementById('adminBotStatus').style.color = "var(--mac-text-secondary)";
+    document.getElementById('adminBotQrImage').style.display = 'none';
+};
+
+window.generarQrAdmin = async () => {
+    const statusEl = document.getElementById('adminBotStatus');
+    const qrImgEl = document.getElementById('adminBotQrImage');
+    
+    statusEl.innerText = "⏳ Generando código QR...";
+    statusEl.style.color = "var(--mac-orange)";
+    qrImgEl.style.display = 'none';
+
+    try {
+        // 🔥 CORRECCIÓN: Ahora usa tu UID real para que el cron job de cobranza te reconozca
+        const response = await fetch(`https://bot.panelagc.com/api/conectar/${currentUser.uid}`);
+        
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+
+        if (data.status === 'qr') {
+            qrImgEl.src = data.qr;
+            qrImgEl.style.display = 'block';
+            statusEl.innerText = "📱 Escanea este código con el WhatsApp administrador.";
+            statusEl.style.color = "var(--mac-text-main)";
+        } else if (data.status === 'conectado') {
+            qrImgEl.style.display = 'none';
+            statusEl.innerText = "✅ " + data.message;
+            statusEl.style.color = "var(--mac-green)";
+        } else {
+             statusEl.innerText = "⚠️ Respuesta inesperada del servidor.";
+             statusEl.style.color = "var(--mac-orange)";
+        }
+
+    } catch (error) {
+        qrImgEl.style.display = 'none';
+        statusEl.innerText = "❌ Error al contactar al servidor. Revisa la consola.";
+        statusEl.style.color = "var(--mac-red)";
+        console.error("Error en generarQrAdmin:", error);
+    }
+};
