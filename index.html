@@ -642,7 +642,13 @@
             </div>
             <input type="text" id="accProfile" placeholder="Nombre del Perfil (Ej: Perfil 1)">
             <input type="text" id="accPin" placeholder="PIN del Perfil (Ej: 1234)">
-            
+            <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 5px;">
+    <label style="font-size: 12px; font-weight: 600; color: var(--mac-text-secondary);">Tipo de Venta:</label>
+    <select id="accSaleType" style="width:100%; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+        <option value="Perfil">👤 Perfil</option>
+        <option value="Cuenta Completa">⭐ Cuenta Completa</option>
+    </select>
+</div>
             <div style="display: flex; flex-direction: column; gap: 4px;">
                 <label style="font-size: 12px; font-weight: 600; color: var(--mac-text-secondary);">Unidades / Pantallas vendidas:</label>
                 <input type="number" id="accUnits" value="1" min="1" placeholder="Cantidad de unidades" required>
@@ -678,6 +684,7 @@
         <p style="margin: 5px 0;"><strong>Contraseña:</strong> <span id="viewAccPassword" style="color: var(--mac-text-secondary);"></span></p>
         <p style="margin: 5px 0;"><strong>Perfil:</strong> <span id="viewAccProfile" style="color: var(--mac-text-secondary);"></span></p>
         <p style="margin: 5px 0;"><strong>PIN:</strong> <span id="viewAccPin" style="color: var(--mac-text-secondary);"></span></p>
+        <p style="margin: 5px 0;"><strong>Tipo de Venta:</strong> <span id="viewAccSaleType" style="color: var(--mac-blue); font-weight: bold;"></span></p>
         <p style="margin: 5px 0;"><strong>Dispositivo:</strong> <span id="viewAccDevice" style="color: var(--mac-text-secondary);"></span></p>
         <p style="margin: 5px 0;"><strong>Unidades Totales:</strong> <span id="viewAccUnits" style="color: var(--mac-blue); font-weight: bold;"></span></p>
         <p style="margin: 5px 0;"><strong>Proveedor:</strong> <span id="viewAccProvider" style="color: var(--mac-text-secondary);"></span></p>
