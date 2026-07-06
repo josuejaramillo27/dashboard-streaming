@@ -750,7 +750,13 @@ window.loadMoreClients = async () => {
     }
 };
 
-const resetAccountButton = () => { tempAccountData = { email: '', password: '', profile: '', pin: '', units: 1, deviceName: '', deviceType: '', saleType: 'Perfil' }; const btn = document.getElementById('btnAccountData'); btn.innerText = "🔑 Ingresar Datos de Cuenta"; btn.style.backgroundColor = "var(--mac-gray)"; btn.style.color = "var(--mac-text-main)"; };
+const resetAccountButton = () => { 
+    tempAccountData = { email: '', password: '', profile: '', pin: '', units: 1, deviceName: '', deviceType: '', saleType: 'Perfil', inventoryId: null }; 
+    const btn = document.getElementById('btnAccountData'); 
+    btn.innerText = "🔑 Ingresar Datos de Cuenta"; 
+    btn.style.backgroundColor = "var(--mac-gray)"; 
+    btn.style.color = "var(--mac-text-main)"; 
+};
 /* --- GUARDAR CLIENTE (CON HERENCIA DE COLOR INTELIGENTE) --- */
 /* --- GUARDAR CLIENTE (CON LÍMITES, HERENCIA DE COLOR Y MATRIZ) --- */
 window.saveClientData = async () => {
@@ -852,6 +858,13 @@ window.saveClientData = async () => {
             }
             await addDoc(collection(db, "clients"), data); 
             window.showNotification("Agregado"); 
+        }
+        // 🗑️ MAGIA AUTOMÁTICA: Si la cuenta venía del inventario, la eliminamos del stock
+        if (tempAccountData.inventoryId) {
+            let stock = currentUserData.inventory || [];
+            stock = stock.filter(item => item.id !== tempAccountData.inventoryId);
+            await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
+            currentUserData.inventory = stock;
         }
         
         // Limpiamos el puente de enlace de la Matriz para el siguiente registro
@@ -2268,6 +2281,7 @@ window.deliverFromInventory = (id) => {
     tempAccountData.pin = item.pin || '';
     tempAccountData.units = 1;
     tempAccountData.saleType = item.type === 'Completa' ? 'Cuenta Completa' : 'Perfil';
+    tempAccountData.inventoryId = item.id;
 
     // 3. Seleccionar la plataforma en el multiselect
     const cbs = document.querySelectorAll('#checkboxDropdown input');
