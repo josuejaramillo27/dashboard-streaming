@@ -22,7 +22,7 @@ const googleProvider = new GoogleAuthProvider();
 
 let currentUser = null; let currentUserData = null; let clients = []; let editingClientId = null;
 let currentManageUserId = null; 
-let tempAccountData = { email: '', password: '', profile: '', pin: '', units: 1, deviceName: '', deviceType: '' };
+let tempAccountData = { email: '', password: '', profile: '', pin: '', units: 1, deviceName: '', deviceType: '', saleType: 'Perfil' };
 let globalCurrency = "S/";
 let lastVisibleDoc = null;
 let editingNewsId = null;
@@ -390,7 +390,8 @@ window.openAccountModal = () => {
     document.getElementById('accEmail').value = tempAccountData.email; 
     document.getElementById('accPassword').value = tempAccountData.password; 
     document.getElementById('accProfile').value = tempAccountData.profile; 
-    document.getElementById('accPin').value = tempAccountData.pin; 
+    document.getElementById('accPin').value = tempAccountData.pin;
+    document.getElementById('accSaleType').value = tempAccountData.saleType || 'Perfil';
     document.getElementById('accUnits').value = tempAccountData.units || 1; 
     document.getElementById('accDeviceName').value = tempAccountData.deviceName || ''; 
     document.getElementById('accDeviceType').value = tempAccountData.deviceType || ''; 
@@ -401,7 +402,8 @@ window.confirmAccountData = () => {
     tempAccountData.email = document.getElementById('accEmail').value; 
     tempAccountData.password = document.getElementById('accPassword').value; 
     tempAccountData.profile = document.getElementById('accProfile').value; 
-    tempAccountData.pin = document.getElementById('accPin').value; 
+    tempAccountData.pin = document.getElementById('accPin').value;
+    tempAccountData.saleType = document.getElementById('accSaleType').value;
     tempAccountData.units = parseInt(document.getElementById('accUnits').value) || 1; 
     tempAccountData.deviceName = document.getElementById('accDeviceName').value; 
     tempAccountData.deviceType = document.getElementById('accDeviceType').value; 
@@ -411,7 +413,8 @@ window.confirmAccountData = () => {
     btn.style.backgroundColor = "var(--mac-green)"; btn.style.color = "white"; 
 };
 window.viewAccountData = (id) => { 
-    const c = clients.find(x => x.id === id); 
+    const c = clients.find(x => x.id === id);
+    document.getElementById('viewAccSaleType').innerText = c.accountSaleType || 'Perfil';
     document.getElementById('viewAccEmail').innerText = c.accountEmail || '-'; 
     document.getElementById('viewAccPassword').innerText = c.accountPassword || '-'; 
     document.getElementById('viewAccProfile').innerText = c.accountProfile || '-'; 
@@ -747,7 +750,7 @@ window.loadMoreClients = async () => {
     }
 };
 
-const resetAccountButton = () => { tempAccountData = { email: '', password: '', profile: '', pin: '', units: 1, deviceName: '', deviceType: '' }; const btn = document.getElementById('btnAccountData'); btn.innerText = "🔑 Ingresar Datos de Cuenta"; btn.style.backgroundColor = "var(--mac-gray)"; btn.style.color = "var(--mac-text-main)"; };
+const resetAccountButton = () => { tempAccountData = { email: '', password: '', profile: '', pin: '', units: 1, deviceName: '', deviceType: '', saleType: 'Perfil' }; const btn = document.getElementById('btnAccountData'); btn.innerText = "🔑 Ingresar Datos de Cuenta"; btn.style.backgroundColor = "var(--mac-gray)"; btn.style.color = "var(--mac-text-main)"; };
 /* --- GUARDAR CLIENTE (CON HERENCIA DE COLOR INTELIGENTE) --- */
 /* --- GUARDAR CLIENTE (CON LÍMITES, HERENCIA DE COLOR Y MATRIZ) --- */
 window.saveClientData = async () => {
@@ -821,11 +824,12 @@ window.saveClientData = async () => {
             date: document.getElementById('expirationDate').value, 
             cost: cost,
             providerName: document.getElementById('clientProviderName').value,
-            price: price, 
+            price: price,
+            accountSaleType: tempAccountData.saleType,
             accountEmail: tempAccountData.email, 
             accountPassword: tempAccountData.password, 
             accountProfile: tempAccountData.profile, 
-            accountPin: tempAccountData.pin, 
+            accountPin: tempAccountData.pin,
             accountUnits: tempAccountData.units || 1,
             linkedMasterId: finalLinkedMasterId, // <--- CORREGIDO: Inyecta el ID dinámico detectado
             accountDeviceName: tempAccountData.deviceName, // NUEVO
@@ -921,9 +925,10 @@ window.startEdit = (id) => {
     editingClientId = id; const c = clients.find(x => x.id === id);
     document.getElementById('clientName').value = c.name; document.getElementById('phone').value = c.phone; document.getElementById('expirationDate').value = c.date;
     document.getElementById('clientCost').value = c.cost || ''; document.getElementById('clientPrice').value = c.price || ''; document.getElementById('clientProviderName').value = c.providerName || '';
-    tempAccountData.email = c.accountEmail || ''; tempAccountData.password = c.accountPassword || ''; tempAccountData.profile = c.accountProfile || ''; tempAccountData.pin = c.accountPin || ''; tempAccountData.units = c.accountUnits || 1;
+    tempAccountData.saleType = c.accountSaleType || 'Perfil'; tempAccountData.email = c.accountEmail || ''; tempAccountData.password = c.accountPassword || ''; tempAccountData.profile = c.accountProfile || ''; tempAccountData.pin = c.accountPin || ''; tempAccountData.units = c.accountUnits || 1;
     tempAccountData.deviceName = c.accountDeviceName || ''; // NUEVO
     tempAccountData.deviceType = c.accountDeviceType || ''; // NUEVO
+    
     
     // 🔥 FIX: Mantener la memoria de la matriz al editar y guardar correo original
     if (typeof variablesEnlaceMatriz !== 'undefined') {
@@ -2238,12 +2243,89 @@ const tipoBadge = item.type === 'Completa' ?
                     <i class='bx bx-lock-alt'></i> ${item.pass} | <i class='bx bx-user-circle'></i>: ${item.profile} | <i class='bx bx-pin'></i>: ${item.pin}
                 </div>
             </div>
-            <button class="action-btn btn-del" onclick="window.deleteInventoryAccount('${item.id}')"><i class='bx bx-trash'></i></button>
+            <div style="display:flex; gap: 5px;">
+    <button class="action-btn" style="color:var(--mac-text-main); border:1px solid var(--mac-border);" onclick="window.copyFromInventory('${item.id}')" title="Copiar Datos"><i class='bx bx-copy'></i></button>
+    <button class="action-btn" style="color:var(--mac-green); border:1px solid var(--mac-green); background: rgba(52, 199, 89, 0.1);" onclick="window.deliverFromInventory('${item.id}')" title="Entregar a Cliente"><i class='bx bx-send'></i></button>
+    <button class="action-btn btn-del" onclick="window.deleteInventoryAccount('${item.id}')"><i class='bx bx-trash'></i></button>
+</div>
         `;;
         list.appendChild(div);
     });
 };
+window.deliverFromInventory = (id) => {
+    const stock = currentUserData.inventory || [];
+    const item = stock.find(i => i.id === id);
+    if(!item) return;
 
+    // 1. Ir a la vista principal
+    window.closeModals(true);
+    window.switchMainTab('clientes');
+    
+    // 2. Rellenar los datos de cuenta
+    tempAccountData.email = item.email || '';
+    tempAccountData.password = item.pass || '';
+    tempAccountData.profile = item.profile || '';
+    tempAccountData.pin = item.pin || '';
+    tempAccountData.units = 1;
+    tempAccountData.saleType = item.type === 'Completa' ? 'Cuenta Completa' : 'Perfil';
+
+    // 3. Seleccionar la plataforma en el multiselect
+    const cbs = document.querySelectorAll('#checkboxDropdown input');
+    cbs.forEach(cb => cb.checked = false);
+    cbs.forEach(cb => { if(cb.value === item.platform) cb.checked = true; });
+    const selectText = document.getElementById('selectText');
+    if (selectText) {
+        selectText.textContent = item.platform;
+        selectText.classList.add('has-selection');
+    }
+
+    // 4. Cambiar el botón verde
+    const btnAcc = document.getElementById('btnAccountData');
+    if (btnAcc) {
+        btnAcc.innerText = `✅ Datos de Cuenta Cargados`;
+        btnAcc.style.backgroundColor = "var(--mac-green)";
+        btnAcc.style.color = "white";
+    }
+
+    // 5. Scroll al formulario
+    document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
+    window.showNotification("✅ Datos cargados. Completa la info del cliente.");
+};
+
+window.copyFromInventory = (id) => {
+    const stock = currentUserData.inventory || [];
+    const item = stock.find(i => i.id === id);
+    if(!item) return;
+
+    // Obtener formato desde configuración de WhatsApp del usuario
+    const baseMsg = currentUserData.waDeliveryMessage || "🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tu nueva cuenta de *{plataforma}*:\n\n📧 *Correo:* {correo}\n🔑 *Clave:* {pass}\n📌 *PIN:* {pin}\n\n📅 *Vence el:* {fecha}\n\n⚠️ *Reglas:* {reglas}\n\n¡Que disfrutes el contenido! 🍿";
+    
+    // Calcular 1 mes desde hoy
+    const h = new Date();
+    h.setMonth(h.getMonth() + 1);
+    const dateStr = h.toLocaleDateString('es-ES');
+    
+    // Obtener reglas de la plataforma
+    const rulesDB = currentUserData.platformRules || {};
+    const itemRules = rulesDB[item.platform] || "Uso personal, no modificar los datos de acceso.";
+
+    // Reemplazar las variables dinámicas
+    const finalMsg = baseMsg
+        .replace(/{plataforma}/gi, item.platform || '-')
+        .replace(/{correo}/gi, item.email || '-')
+        .replace(/{pass}/gi, item.pass || '-')
+        .replace(/{pin}/gi, item.pin || 'N/A')
+        .replace(/{profile}/gi, item.profile || 'N/A')
+        .replace(/{fecha}/gi, dateStr)
+        .replace(/{reglas}/gi, itemRules);
+    
+    // Copiar al portapapeles
+    navigator.clipboard.writeText(finalMsg).then(() => {
+        window.showNotification("📋 Formato de entrega copiado con fecha a 1 mes");
+    }).catch(e => {
+        window.showNotification("Error al copiar");
+    });
+};
 window.deleteInventoryAccount = async (id) => {
     if (!confirm("¿Eliminar esta cuenta del inventario?")) return;
     try {
@@ -2652,6 +2734,7 @@ window.renderMasterAccounts = async () => {
                         <div style="margin-top: 10px; display: flex; gap: 6px; justify-content: flex-end;">
                             <button onclick="window.editMasterAccount('${accId}', '${pPlat}', '${pMail}', '${pPass}', ${acc.maxProfiles}, ${acc.cost}, '${pProv}', '${pExp}', '${pPName}')" style="background: var(--mac-gray); border: 1px solid var(--mac-border); color: var(--mac-text-main); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s;"><i class='bx bx-edit'></i></button>
                             <button onclick="window.deleteMasterAccount('${accId}')" style="background: rgba(255, 59, 48, 0.1); border: 1px solid var(--mac-red); color: var(--mac-red); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s;"><i class='bx bx-trash'></i></button>
+                            <button onclick="window.sendFreeProfilesToInventory('${accId}')" style="background: rgba(52, 199, 89, 0.1); border: 1px solid var(--mac-green); color: var(--mac-green); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s;" title="Enviar perfiles libres al inventario"><i class='bx bx-archive-in'></i></button>
                         </div>
                     </div>
                 </div>
@@ -2905,5 +2988,52 @@ window.generarQrAdmin = async () => {
         statusEl.innerText = "❌ Error al contactar al servidor. Revisa la consola.";
         statusEl.style.color = "var(--mac-red)";
         console.error("Error en generarQrAdmin:", error);
+    }
+};
+
+window.sendFreeProfilesToInventory = async (masterId) => {
+    try {
+        const docSnap = await getDoc(doc(db, "masterAccounts", masterId));
+        if (!docSnap.exists()) return;
+        const mat = docSnap.data();
+        
+        const qCli = query(collection(db, "clients"), where("userId", "==", currentUser.uid), where("linkedMasterId", "==", masterId));
+        const snapCli = await getDocs(qCli);
+        
+        const occupiedProfiles = snapCli.docs.map(d => {
+            const p = d.data().accountProfile;
+            const num = p ? String(p).match(/\d+/) : null;
+            return num ? parseInt(num[0]) : null;
+        }).filter(n => n !== null);
+
+        let stock = currentUserData.inventory || [];
+        let added = 0;
+
+        for (let i = 1; i <= mat.maxProfiles; i++) {
+            if (!occupiedProfiles.includes(i)) {
+                stock.push({
+                    id: 'acc_' + Date.now() + '_' + i,
+                    platform: mat.platform,
+                    type: 'Perfil',
+                    email: mat.email,
+                    pass: mat.pass,
+                    profile: String(i),
+                    pin: 'N/A',
+                    status: 'libre'
+                });
+                added++;
+            }
+        }
+
+        if (added > 0) {
+            await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
+            currentUserData.inventory = stock;
+            window.showNotification(`📦 ${added} perfiles enviados al inventario.`);
+            window.renderInventory();
+        } else {
+            window.showNotification("⚠️ No hay perfiles libres en esta matriz.");
+        }
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
     }
 };
