@@ -1024,3 +1024,200 @@ body.dark-mode .bottom-nav { background: linear-gradient(to top, rgba(0, 0, 0, 1
     color: var(--mac-green);
 }
 .guarantee-text i { font-size: 18px; }
+
+/* ==========================================================================
+   NUEVA ARQUITECTURA DASHBOARD (SOLO PC) - TRANSICIÓN DE MODALES A SECCIONES
+   ========================================================================== */
+
+/* 1. Estructura Principal del Layout en PC */
+@media (min-width: 769px) {
+    body.logged-in {
+        display: flex;
+        overflow: hidden; /* Evitamos el doble scroll en la ventana principal */
+        height: 100vh;
+        margin: 0;
+    }
+
+    /* Ocultamos el contenedor general antiguo (que centraba todo) en PC */
+    body.logged-in > .container {
+        display: none !important;
+    }
+
+    /* 2. La Barra Lateral (Sidebar) Cristalina */
+    .dashboard-sidebar {
+        display: flex !important; /* Visible solo en PC */
+        flex-direction: column;
+        width: 250px;
+        min-width: 250px;
+        height: 100vh;
+        background: var(--mac-surface);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        border-right: 1px solid var(--mac-border);
+        box-shadow: 4px 0 24px rgba(0,0,0,0.05);
+        padding: 20px;
+        box-sizing: border-box;
+        z-index: 100;
+        transition: background 0.3s, border-color 0.3s;
+    }
+
+    /* Logo y Branding en el Sidebar */
+    .sidebar-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--mac-border);
+    }
+    .sidebar-brand img {
+        width: 45px;
+        height: 45px;
+        border-radius: 12px;
+        object-fit: cover;
+    }
+    .sidebar-brand-info h2 {
+        margin: 0;
+        font-size: 16px;
+        color: var(--mac-text-main);
+        font-weight: 800;
+    }
+    .sidebar-brand-info span {
+        font-size: 11px;
+        color: var(--mac-text-secondary);
+        font-weight: 500;
+    }
+
+    /* Menú de Navegación del Sidebar */
+    .sidebar-menu {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex-grow: 1;
+    }
+    
+    .sidebar-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        border-radius: 12px;
+        color: var(--mac-text-secondary);
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        background: transparent;
+        border: 1px solid transparent;
+    }
+    
+    .sidebar-item i {
+        font-size: 20px;
+        transition: transform 0.2s;
+    }
+    
+    .sidebar-item:hover {
+        background: var(--mac-gray);
+        color: var(--mac-text-main);
+    }
+    
+    .sidebar-item.active {
+        background: var(--mac-blue);
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25);
+    }
+    
+    .sidebar-item.active i {
+        transform: scale(1.1);
+    }
+
+    /* 3. Área de Contenido Central */
+    .dashboard-main {
+        flex-grow: 1;
+        height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        position: relative;
+        padding: 30px 40px;
+        box-sizing: border-box;
+    }
+
+    /* Transformación de los Modales en Secciones Fluidas */
+    /* Apagamos el comportamiento de "modal-overlay" que oscurece el fondo y centra en PC */
+    .dashboard-section.modal-overlay {
+        position: relative !important;
+        background: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        height: auto !important;
+        display: none; /* Ocultas por defecto */
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        z-index: 1;
+    }
+    
+    /* Esta clase controlará qué sección se ve */
+    .dashboard-section.modal-overlay.active-section {
+        display: block !important;
+        animation: fadeSlideUp 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* La tarjeta del modal ahora es el contenedor principal de la sección */
+    .dashboard-section .modal-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        animation: none !important;
+    }
+
+    /* Los botones de "Cerrar" de los modales ya no se necesitan en PC (porque navegas por el sidebar) */
+    .dashboard-section .btn-secondary[onclick*="window.closeModals"],
+    .dashboard-section .action-btn[onclick*="window.closeModals"] {
+        display: none !important;
+    }
+
+    /* El contenedor "Home" (Dashboard Principal) */
+    #homeSection {
+        display: none;
+    }
+    #homeSection.active-section {
+        display: block;
+        animation: fadeSlideUp 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    @keyframes fadeSlideUp {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+}
+
+/* 4. Comportamiento en Celulares (Se mantiene la app igual) */
+@media (max-width: 768px) {
+    .dashboard-sidebar {
+        display: none !important; /* El sidebar no existe en móvil */
+    }
+    .dashboard-main {
+        padding: 0 !important;
+        overflow: visible !important;
+        height: auto !important;
+    }
+    body.logged-in {
+        overflow: auto; /* Devolvemos el scroll normal a body en celular */
+    }
+    body.logged-in > .container {
+        display: block !important; /* El contenedor original vuelve a mandar en móvil */
+    }
+    /* En celular, las secciones vuelven a comportarse como modales (overlays negros) */
+    .dashboard-section.modal-overlay {
+        display: none; /* Controlado por el JS original */
+    }
+    /* Ocultamos la vista Home creada para el Dashboard porque en celular ya tenemos el .container */
+    #homeSection {
+        display: none !important;
+    }
+}
