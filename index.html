@@ -100,6 +100,28 @@
             .news-sidebar { flex: 0 0 auto; max-height: 160px; border-right: none; border-bottom: 1px solid var(--mac-border); padding-right: 0; padding-bottom: 10px; }
             .news-content-area { padding-left: 0; padding-top: 10px; }
         }
+        /* ==========================================================================
+           ANIMACIÓN VIP DORADA ESTILO PASS ROYALE
+           ========================================================================== */
+        .badge-pro-animated {
+            background: linear-gradient(110deg, #FFD700 0%, #FFF8DC 25%, #FFD700 50%, #B8860B 75%, #FFD700 100%);
+            background-size: 200% auto;
+            color: #5c4000 !important;
+            font-weight: 900;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+            animation: shineGold 3s linear infinite;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            display: inline-block;
+            letter-spacing: 0.5px;
+        }
+
+        @keyframes shineGold {
+            to { background-position: 200% center; }
+        }
     </style>
 </head>
 <body>
@@ -183,37 +205,37 @@
         </div>
 
         <div class="sidebar-menu">
-            <a href="#" class="sidebar-item active" onclick="window.switchDashboardSection('homeSection', this)">
-                <i class='bx bx-home-alt-2'></i> <span>Dashboard Central</span>
-            </a>
-            <a href="#" class="sidebar-item" onclick="window.switchDashboardSection('storeModal', this); window.renderStoreItems();">
-                <i class='bx bx-store-alt'></i> <span>Mi Tiendita Web</span>
-            </a>
-            <a href="#" class="sidebar-item" onclick="window.switchDashboardSection('inventoryModal', this); window.renderInventory();">
-                <i class='bx bx-box'></i> <span>Gestión de Inventario</span>
-            </a>
-            <a href="#" class="sidebar-item" onclick="window.switchDashboardSection('pedidosModal', this); window.openPedidosModal();">
-                <i class='bx bx-bell'></i> <span>Ventas Pendientes</span>
-            </a>
-            <div style="margin: 15px 0; border-top: 1px dashed var(--mac-border);"></div>
-            <a href="#" class="sidebar-item" onclick="window.switchDashboardSection('wrappedModal', this); window.showWrapped();">
-                <i class='bx bx-bar-chart-alt-2'></i> <span>Resumen A.G.C.</span>
-            </a>
-            <a href="#" class="sidebar-item" onclick="window.openNewsModal()">
-                <i class='bx bxs-envelope'></i> <span>Novedades</span>
-                <span id="newsBadgeSidebar" style="display:none; background:#FF2D55; width:8px; height:8px; border-radius:50%; margin-left:auto;"></span>
-            </a>
-            <div style="margin: 15px 0; border-top: 1px dashed var(--mac-border);"></div>
-            <a href="#" class="sidebar-item" onclick="window.openProfileModal()">
-                <i class='bx bx-user-circle'></i> <span>Mi Perfil & Bot</span>
-            </a>
-            <a href="#" class="sidebar-item" onclick="window.toggleTheme()">
-                <i class='bx bx-moon' id="themeIconSidebar"></i> <span>Cambiar Tema</span>
-            </a>
-            <a href="#" class="sidebar-item" style="color: var(--mac-red);" onclick="window.doLogout()">
-                <i class='bx bx-log-out'></i> <span>Cerrar Sesión</span>
-            </a>
-        </div>
+    <a href="#" class="sidebar-item active" onclick="window.switchDashboardSection('homeSection', this)">
+        <i class='bx bx-home-alt-2'></i> <span>Dashboard Central</span>
+    </a>
+    <a href="#" class="sidebar-item" onclick="window.openStoreModal(); window.switchDashboardSection('storeModal', this);">
+        <i class='bx bx-store-alt'></i> <span>Mi Tiendita Web</span>
+    </a>
+    <a href="#" class="sidebar-item" onclick="window.openInventoryModal(); window.switchDashboardSection('inventoryModal', this);">
+        <i class='bx bx-box'></i> <span>Gestión de Inventario</span>
+    </a>
+    <a href="#" class="sidebar-item" onclick="window.openPedidosModal(); window.switchDashboardSection('pedidosModal', this);">
+        <i class='bx bx-bell'></i> <span>Ventas Pendientes</span>
+    </a>
+    <div style="margin: 15px 0; border-top: 1px dashed var(--mac-border);"></div>
+    <a href="#" class="sidebar-item" onclick="window.showWrapped(); window.switchDashboardSection('wrappedModal', this);">
+        <i class='bx bx-bar-chart-alt-2'></i> <span>Resumen A.G.C.</span>
+    </a>
+    <a href="#" class="sidebar-item" onclick="window.openNewsModal()">
+        <i class='bx bxs-envelope'></i> <span>Novedades</span>
+        <span id="newsBadgeSidebar" style="display:none; background:#FF2D55; width:8px; height:8px; border-radius:50%; margin-left:auto;"></span>
+    </a>
+    <div style="margin: 15px 0; border-top: 1px dashed var(--mac-border);"></div>
+    <a href="#" class="sidebar-item" onclick="window.openProfileModal()">
+        <i class='bx bx-user-circle'></i> <span>Mi Perfil & Bot</span>
+    </a>
+    <a href="#" class="sidebar-item" onclick="window.toggleTheme()">
+        <i class='bx bx-moon' id="themeIconSidebar"></i> <span>Cambiar Tema</span>
+    </a>
+    <a href="#" class="sidebar-item" style="color: var(--mac-red);" onclick="window.doLogout()">
+        <i class='bx bx-log-out'></i> <span>Cerrar Sesión</span>
+    </a>
+</div>
     </div>
 
     <!-- ÁREA DE CONTENIDO CENTRAL -->
