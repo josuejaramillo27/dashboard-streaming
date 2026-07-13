@@ -179,16 +179,30 @@ onAuthStateChanged(auth, async (user) => {
                 globalCurrency = currentUserData.currency || "S/";
 
                 if(document.getElementById('brandName')) document.getElementById('brandName').innerText = currentUserData.name || 'Mi Panel';
-                if(document.getElementById('brandNameSidebar')) document.getElementById('brandNameSidebar').innerText = currentUserData.name || 'Mi Panel';
-if(document.getElementById('brandLogoSidebar') && currentUserData.logoUrl) document.getElementById('brandLogoSidebar').src = currentUserData.logoUrl;
                 
-                const planBadge = document.getElementById('userPlanBadge');
-                if (planBadge && currentUserData.role !== 'admin') {
+                // --- INYECTAR INFO EN LA BARRA LATERAL PC ---
+                if(document.getElementById('brandNameSidebar')) document.getElementById('brandNameSidebar').innerText = currentUserData.name || 'Mi Panel';
+                if(document.getElementById('brandLogoSidebar') && currentUserData.logoUrl) document.getElementById('brandLogoSidebar').src = currentUserData.logoUrl;
+                
+                // Lógica del Badge PRO Animado en PC
+                const planBadgeSide = document.getElementById('userPlanBadgeSidebar');
+                if (planBadgeSide && currentUserData.role !== 'admin') {
                     const planActual = (currentUserData.plan_actual || 'demo').toLowerCase();
-                    planBadge.style.display = 'inline-block';
-                    planBadge.innerText = `Plan ${planActual}`;
+                    planBadgeSide.style.display = 'inline-block';
+                    planBadgeSide.innerText = `Plan ${planActual}`;
                     
                     if (planActual === 'pro' || planActual === 'elite') {
+                        // Le damos la clase mágica animada si es VIP
+                        planBadgeSide.className = 'badge-pro-animated';
+                    } else {
+                        // Plan normal: Gris sin animación
+                        planBadgeSide.className = '';
+                        planBadgeSide.style.color = 'var(--mac-text-secondary)';
+                        planBadgeSide.style.backgroundColor = 'rgba(152, 152, 157, 0.1)';
+                        planBadgeSide.style.border = 'none';
+                        planBadgeSide.style.boxShadow = 'none';
+                    }
+                }
                         planBadge.style.color = '#FFD700'; planBadge.style.backgroundColor = 'rgba(255, 215, 0, 0.1)';
                     } else if (planActual === 'basico') {
                         planBadge.style.color = 'var(--mac-green)'; planBadge.style.backgroundColor = 'rgba(52, 199, 89, 0.1)';
