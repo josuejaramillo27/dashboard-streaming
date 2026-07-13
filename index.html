@@ -62,19 +62,57 @@
                 display: flex !important; flex-direction: column; width: 250px; min-width: 250px; height: 100vh;
                 background: var(--mac-surface); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
                 border-right: 1px solid var(--mac-border); box-shadow: 4px 0 24px rgba(0,0,0,0.05);
-                padding: 20px; box-sizing: border-box; z-index: 100; transition: background 0.3s, border-color 0.3s;
+                padding: 20px; box-sizing: border-box; z-index: 100; 
+                transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), background 0.3s, border-color 0.3s;
+                overflow-x: hidden;
             }
-            .sidebar-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--mac-border); }
-            .sidebar-brand img { width: 45px; height: 45px; border-radius: 12px; object-fit: cover; }
+
+            /* 🔥 ESTADO COMPRIMIDO (TIPO SPOTIFY) */
+            .dashboard-sidebar.collapsed {
+                width: 85px;
+                min-width: 85px;
+                padding: 20px 10px;
+            }
+
+            /* Cabecera del Menú */
+            .sidebar-header {
+                display: flex; justify-content: space-between; align-items: center; 
+                margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid var(--mac-border);
+                white-space: nowrap; overflow: hidden;
+            }
+            .sidebar-brand { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+            .sidebar-brand img { width: 40px; height: 40px; border-radius: 12px; object-fit: cover; flex-shrink: 0; }
             .sidebar-brand-info h2 { margin: 0; font-size: 16px; color: var(--mac-text-main); font-weight: 800; }
             .sidebar-brand-info span { font-size: 11px; color: var(--mac-text-secondary); font-weight: 500; }
 
-            .sidebar-menu { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
-            .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 12px; color: var(--mac-text-secondary); font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s ease; text-decoration: none; background: transparent; border: 1px solid transparent; }
-            .sidebar-item i { font-size: 20px; transition: transform 0.2s; }
+            /* Botón de Hamburguesa */
+            .sidebar-toggle-btn {
+                background: transparent; border: none; color: var(--mac-text-secondary);
+                font-size: 26px; cursor: pointer; padding: 4px; border-radius: 8px;
+                display: flex; align-items: center; justify-content: center; transition: 0.2s;
+                flex-shrink: 0;
+            }
+            .sidebar-toggle-btn:hover { background: var(--mac-gray); color: var(--mac-text-main); }
+
+            /* Efectos al Comprimir la Cabecera */
+            .dashboard-sidebar.collapsed .sidebar-brand { display: none; }
+            .dashboard-sidebar.collapsed .sidebar-header { justify-content: center; }
+
+            /* Íconos del menú */
+            .sidebar-menu { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; overflow-x: hidden; }
+            .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 12px; color: var(--mac-text-secondary); font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s ease; text-decoration: none; background: transparent; border: 1px solid transparent; white-space: nowrap; }
+            .sidebar-item i { font-size: 20px; transition: transform 0.2s; flex-shrink: 0; }
             .sidebar-item:hover { background: var(--mac-gray); color: var(--mac-text-main); }
             .sidebar-item.active { background: var(--mac-blue); color: white !important; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25); }
             .sidebar-item.active i { transform: scale(1.1); }
+
+            /* Efectos al Comprimir los Íconos */
+            .dashboard-sidebar.collapsed .sidebar-item { justify-content: center; padding: 12px 0; }
+            .dashboard-sidebar.collapsed .sidebar-item span { display: none; }
+            .dashboard-sidebar.collapsed .sidebar-item i { font-size: 24px; margin: 0; }
+            
+            /* Ajuste del punto rojo de novedades */
+            .dashboard-sidebar.collapsed #newsBadgeSidebar { position: absolute; top: 10px; right: 22px; margin: 0 !important; }
 
             .dashboard-main { flex-grow: 1; height: 100vh; overflow-y: auto; overflow-x: hidden; position: relative; padding: 30px 40px; box-sizing: border-box; }
 
@@ -203,47 +241,56 @@
 <div id="appView" style="display: none; width: 100%;">
     
     <!-- BARRA LATERAL (SOLO PC) -->
-    <div class="dashboard-sidebar">
-        <div class="sidebar-brand">
-            <img id="brandLogoSidebar" src="AGC.png" alt="Logo">
-            <div class="sidebar-brand-info">
-                <h2 id="brandNameSidebar">Mi Panel</h2>
-                <span id="userPlanBadgeSidebar" style="color: var(--mac-blue);">Plan PRO</span>
+    <!-- BARRA LATERAL (SOLO PC) -->
+    <div class="dashboard-sidebar" id="mainSidebar">
+        
+        <!-- NUEVA CABECERA CON BOTÓN COMPRIMIR -->
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+                <img id="brandLogoSidebar" src="AGC.png" alt="Logo">
+                <div class="sidebar-brand-info">
+                    <h2 id="brandNameSidebar">Mi Panel</h2>
+                    <span id="userPlanBadgeSidebar" style="color: var(--mac-blue);">Plan PRO</span>
+                </div>
             </div>
+            <button class="sidebar-toggle-btn" onclick="window.toggleSidebar()" title="Comprimir / Expandir">
+                <i class='bx bx-menu'></i>
+            </button>
         </div>
 
+        <!-- MENÚ CON TOOLTIPS AÑADIDOS -->
         <div class="sidebar-menu">
-    <a href="#" class="sidebar-item active" onclick="window.switchDashboardSection('homeSection', this)">
-        <i class='bx bx-home-alt-2'></i> <span>Dashboard Central</span>
-    </a>
-    <a href="#" class="sidebar-item" onclick="window.openStoreModal(); window.switchDashboardSection('storeModal', this);">
-        <i class='bx bx-store-alt'></i> <span>Mi Tiendita Web</span>
-    </a>
-    <a href="#" class="sidebar-item" onclick="window.openInventoryModal(); window.switchDashboardSection('inventoryModal', this);">
-        <i class='bx bx-box'></i> <span>Gestión de Inventario</span>
-    </a>
-    <a href="#" class="sidebar-item" onclick="window.openPedidosModal(); window.switchDashboardSection('pedidosModal', this);">
-        <i class='bx bx-bell'></i> <span>Ventas Pendientes</span>
-    </a>
-    <div style="margin: 15px 0; border-top: 1px dashed var(--mac-border);"></div>
-    <a href="#" class="sidebar-item" onclick="window.showWrapped(); window.switchDashboardSection('wrappedModal', this);">
-        <i class='bx bx-bar-chart-alt-2'></i> <span>Resumen A.G.C.</span>
-    </a>
-    <a href="#" class="sidebar-item" onclick="window.openNewsModal()">
-        <i class='bx bxs-envelope'></i> <span>Novedades</span>
-        <span id="newsBadgeSidebar" style="display:none; background:#FF2D55; width:8px; height:8px; border-radius:50%; margin-left:auto;"></span>
-    </a>
-    <div style="margin: 15px 0; border-top: 1px dashed var(--mac-border);"></div>
-    <a href="#" class="sidebar-item" onclick="window.openProfileModal()">
-        <i class='bx bx-user-circle'></i> <span>Mi Perfil & Bot</span>
-    </a>
-    <a href="#" class="sidebar-item" onclick="window.toggleTheme()">
-        <i class='bx bx-moon' id="themeIconSidebar"></i> <span>Cambiar Tema</span>
-    </a>
-    <a href="#" class="sidebar-item" style="color: var(--mac-red);" onclick="window.doLogout()">
-        <i class='bx bx-log-out'></i> <span>Cerrar Sesión</span>
-    </a>
-</div>
+            <a href="#" class="sidebar-item active" title="Dashboard Central" onclick="window.switchDashboardSection('homeSection', this)">
+                <i class='bx bx-home-alt-2'></i> <span>Dashboard Central</span>
+            </a>
+            <a href="#" class="sidebar-item" title="Mi Tiendita Web" onclick="window.openStoreModal(); window.switchDashboardSection('storeModal', this);">
+                <i class='bx bx-store-alt'></i> <span>Mi Tiendita Web</span>
+            </a>
+            <a href="#" class="sidebar-item" title="Gestión de Inventario" onclick="window.openInventoryModal(); window.switchDashboardSection('inventoryModal', this);">
+                <i class='bx bx-box'></i> <span>Gestión de Inventario</span>
+            </a>
+            <a href="#" class="sidebar-item" title="Ventas Pendientes" onclick="window.openPedidosModal(); window.switchDashboardSection('pedidosModal', this);">
+                <i class='bx bx-bell'></i> <span>Ventas Pendientes</span>
+            </a>
+            <div style="margin: 15px 0; border-top: 1px dashed var(--mac-border);"></div>
+            <a href="#" class="sidebar-item" title="Resumen A.G.C." onclick="window.showWrapped(); window.switchDashboardSection('wrappedModal', this);">
+                <i class='bx bx-bar-chart-alt-2'></i> <span>Resumen A.G.C.</span>
+            </a>
+            <a href="#" class="sidebar-item" title="Novedades" onclick="window.openNewsModal()" style="position: relative;">
+                <i class='bx bxs-envelope'></i> <span>Novedades</span>
+                <span id="newsBadgeSidebar" style="display:none; background:#FF2D55; width:8px; height:8px; border-radius:50%; margin-left:auto;"></span>
+            </a>
+            <div style="margin: 15px 0; border-top: 1px dashed var(--mac-border);"></div>
+            <a href="#" class="sidebar-item" title="Mi Perfil & Bot" onclick="window.openProfileModal()">
+                <i class='bx bx-user-circle'></i> <span>Mi Perfil & Bot</span>
+            </a>
+            <a href="#" class="sidebar-item" title="Cambiar Tema" onclick="window.toggleTheme()">
+                <i class='bx bx-moon' id="themeIconSidebar"></i> <span>Cambiar Tema</span>
+            </a>
+            <a href="#" class="sidebar-item" title="Cerrar Sesión" style="color: var(--mac-red);" onclick="window.doLogout()">
+                <i class='bx bx-log-out'></i> <span>Cerrar Sesión</span>
+            </a>
+        </div>
     </div>
 
     <!-- ÁREA DE CONTENIDO CENTRAL -->
