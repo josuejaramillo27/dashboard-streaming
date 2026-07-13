@@ -179,6 +179,8 @@ onAuthStateChanged(auth, async (user) => {
                 globalCurrency = currentUserData.currency || "S/";
 
                 if(document.getElementById('brandName')) document.getElementById('brandName').innerText = currentUserData.name || 'Mi Panel';
+                if(document.getElementById('brandNameSidebar')) document.getElementById('brandNameSidebar').innerText = currentUserData.name || 'Mi Panel';
+if(document.getElementById('brandLogoSidebar') && currentUserData.logoUrl) document.getElementById('brandLogoSidebar').src = currentUserData.logoUrl;
                 
                 const planBadge = document.getElementById('userPlanBadge');
                 if (planBadge && currentUserData.role !== 'admin') {
@@ -267,7 +269,55 @@ window.closeModals = (resetTab = true) => {
         if(btnClientes) btnClientes.classList.add('active');
     }
 };
+/* --- CONTROLADOR DE SECCIONES DASHBOARD (PC) --- */
+window.switchDashboardSection = (sectionId, menuElement) => {
+    // 1. Verificamos si estamos en PC o celular midiendo la pantalla
+    const isDesktop = window.innerWidth >= 769;
 
+    if (isDesktop) {
+        // En PC: Apagamos todas las secciones
+        document.querySelectorAll('.dashboard-section').forEach(sec => {
+            sec.classList.remove('active-section');
+        });
+        document.getElementById('homeSection').classList.remove('active-section');
+
+        // Encendemos la solicitada
+        if (sectionId === 'homeSection') {
+            document.getElementById('homeSection').classList.add('active-section');
+        } else {
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) targetSection.classList.add('active-section');
+        }
+
+        // Actualizamos los colores del menú lateral (estado activo)
+        if (menuElement) {
+            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+            menuElement.classList.add('active');
+        }
+    } else {
+        // En Celular: Se sigue comportando como modales flotantes.
+        // Las funciones como openInventoryModal() ya tienen su propio código que cambia los display, 
+        // así que el celular lo ignorará y abrirá la cajita negra sobre la pantalla como siempre.
+    }
+};
+
+// Modificamos closeModals levemente para que en PC al darle a una X de un modal devuelva a la vista Home
+const originalCloseModals = window.closeModals;
+window.closeModals = (resetTab = true) => {
+    originalCloseModals(resetTab);
+    
+    // Si estamos en PC, "Cerrar Modales" significa volver a Home
+    if (window.innerWidth >= 769) {
+        document.querySelectorAll('.dashboard-section').forEach(sec => sec.classList.remove('active-section'));
+        const home = document.getElementById('homeSection');
+        if (home) home.classList.add('active-section');
+        
+        // Retornamos el color activo al menú "Dashboard Central"
+        document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+        const homeBtn = document.querySelector('.sidebar-item[onclick*="homeSection"]');
+        if(homeBtn) homeBtn.classList.add('active');
+    }
+};
 /* --- CONFIGURACIÓN DE WHATSAPP Y PAGOS --- */
 window.openWaModal = () => { 
     const defaultMsg = "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*. Para renovar, usa estos datos:\n\n{pago}"; 
