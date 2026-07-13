@@ -1132,16 +1132,29 @@ document.addEventListener('click', (e) => { if (!document.getElementById('checkb
 document.querySelectorAll('#checkboxDropdown input').forEach(cb => { cb.addEventListener('change', () => { const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value); const el = document.getElementById('selectText'); if(checked.length) { el.textContent = checked.join(', '); el.classList.add('has-selection'); } else { el.textContent = 'Plataforma(s)...'; el.classList.remove('has-selection'); } }); });
 
 window.toggleStats = (forceUpdate = false) => {
-    const p = document.getElementById('statsPanel'); if (!forceUpdate) p.style.display = p.style.display === 'grid' ? 'none' : 'grid';
+    const p = document.getElementById('statsPanel'); 
+    const a = document.getElementById('analyticsSection');
+    
+    if (!forceUpdate) {
+        const isVisible = p.style.display === 'grid';
+        p.style.display = isVisible ? 'none' : 'grid';
+        a.style.display = isVisible ? 'none' : 'flex';
+    }
+    
     if (p.style.display === 'grid') {
-        let a=0, w=0, e=0, profit=0, income=0, cost=0; const t = new Date(); t.setHours(0,0,0,0);
+        let act=0, w=0, e=0, profit=0, income=0, cost=0; const t = new Date(); t.setHours(0,0,0,0);
         clients.forEach(c => {
             const x = new Date(c.date); x.setMinutes(x.getMinutes() + x.getTimezoneOffset()); x.setHours(0,0,0,0);
             const d = Math.ceil((x-t)/86400000);
-            if(d>=0) { if(d>3) a++; else w++; const uCount = c.accountUnits || 1; profit += ((c.price || 0) - (c.cost || 0)) * uCount; income += (c.price || 0) * uCount; cost += (c.cost || 0) * uCount; } else e++;
+            if(d>=0) { if(d>3) act++; else w++; const uCount = c.accountUnits || 1; profit += ((c.price || 0) - (c.cost || 0)) * uCount; income += (c.price || 0) * uCount; cost += (c.cost || 0) * uCount; } else e++;
         });
-        document.getElementById('statActive').innerText=a; document.getElementById('statWarning').innerText=w; document.getElementById('statExpired').innerText=e;
+        document.getElementById('statActive').innerText=act; document.getElementById('statWarning').innerText=w; document.getElementById('statExpired').innerText=e;
         document.getElementById('statProfit').innerText = `${globalCurrency}${profit.toFixed(2)}`; document.getElementById('bdIncome').innerText = `${globalCurrency}${income.toFixed(2)}`; document.getElementById('bdCost').innerText = `${globalCurrency}${cost.toFixed(2)}`; document.getElementById('bdProfit').innerText = `${globalCurrency}${profit.toFixed(2)}`;
+        
+        // ¡Magia! Renderizamos los gráficos si la librería ya cargó
+        if(typeof ApexCharts !== 'undefined') {
+            window.renderCharts(income, cost, profit);
+        }
     }
 };
 
@@ -1155,7 +1168,16 @@ const updateThemeIcon = () => {
     }); 
 };
 if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode'); updateThemeIcon(); 
-window.toggleTheme = () => { document.body.classList.toggle('dark-mode'); localStorage.setItem('darkMode', document.body.classList.contains('dark-mode')); updateThemeIcon(); };
+window.toggleTheme = () => { 
+    document.body.classList.toggle('dark-mode'); 
+    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode')); 
+    updateThemeIcon(); 
+    
+    // Si los gráficos están abiertos, los repintamos con el nuevo tema
+    if (document.getElementById('analyticsSection').style.display === 'flex') {
+        window.toggleStats(true); 
+    }
+};
 
 /* --- GENERADOR DE RECIBOS EN IMAGEN (VERSIÓN DEFINITIVA ANTI-CACHÉ CONTAMINADA) --- */
 window.downloadTicket = async (clientId, event) => {
@@ -3129,4 +3151,106 @@ window.sendFreeProfilesToInventory = async (masterId) => {
     } catch (e) {
         window.showNotification("Error: " + e.message);
     }
+};
+/* ==========================================================================
+   MOTOR DE GRÁFICOS ANALÍTICOS (APEXCHARTS)
+   ========================================================================== */
+let revenueChartInst = null;
+let platformChartInst = null;
+let funnelChartInst = null;
+
+window.renderCharts = (totalIncome, totalCost, totalProfit) => {
+    const isDark = document.body.classList.contains('dark-mode');
+    const textColor = isDark ? '#ebebf5' : '#1d1d1f';
+    const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+
+    // --- 1. DATOS: Curva de Proyección de Renovaciones ---
+    const today = new Date(); today.setHours(0,0,0,0);
+    let daysLabels = [];
+    let renewalsData = [];
+    
+    for(let i=0; i<14; i++) {
+        let d = new Date(today);
+        d.setDate(today.getDate() + i);
+        daysLabels.push(d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }));
+        
+        let sum = 0;
+        clients.forEach(c => {
+            const exp = new Date(c.date);
+            exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
+            exp.setHours(0,0,0,0);
+            if (exp.getTime() === d.getTime()) sum += (c.price || 0) * (c.accountUnits || 1);
+        });
+        renewalsData.push(sum);
+    }
+
+    // --- 2. DATOS: Top Plataformas ---
+    let platCounts = {};
+    clients.forEach(c => {
+        const u = c.accountUnits || 1;
+        c.platform.split(', ').forEach(p => { platCounts[p] = (platCounts[p] || 0) + u; });
+    });
+    const sortedPlats = Object.entries(platCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
+    const platLabels = sortedPlats.length ? sortedPlats.map(x => x[0]) : ['Sin Datos'];
+    const platData = sortedPlats.length ? sortedPlats.map(x => x[1]) : [1];
+
+    const commonOptions = {
+        chart: { background: 'transparent', toolbar: { show: false }, animations: { enabled: true, easing: 'easeinout', speed: 800 } },
+        theme: { mode: isDark ? 'dark' : 'light' },
+        tooltip: { theme: isDark ? 'dark' : 'light' }
+    };
+
+    // --- RENDER 1: Gráfico de Curva Suave (Área) ---
+    if(revenueChartInst) revenueChartInst.destroy();
+    revenueChartInst = new ApexCharts(document.querySelector("#revenueChart"), {
+        ...commonOptions,
+        series: [{ name: `Por Cobrar (${globalCurrency})`, data: renewalsData }],
+        chart: { type: 'area', height: 250, toolbar: { show: false } },
+        colors: ['#0a84ff'],
+        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.45, opacityTo: 0.05, stops: [0, 90, 100] } },
+        dataLabels: { enabled: false },
+        stroke: { curve: 'smooth', width: 3 },
+        xaxis: { categories: daysLabels, labels: { style: { colors: textColor } }, axisBorder: { show: false }, axisTicks: { show: false } },
+        yaxis: { labels: { style: { colors: textColor }, formatter: (val) => globalCurrency + val.toFixed(0) } },
+        grid: { borderColor: gridColor, strokeDashArray: 4 }
+    });
+    revenueChartInst.render();
+
+    // --- RENDER 2: Gráfico de Anillo (Donut) ---
+    if(platformChartInst) platformChartInst.destroy();
+    platformChartInst = new ApexCharts(document.querySelector("#platformChart"), {
+        ...commonOptions,
+        series: platData,
+        labels: platLabels,
+        chart: { type: 'donut', height: 260 },
+        colors: ['#0a84ff', '#30d158', '#ff9f0a', '#bf5af2', '#ff453a'],
+        plotOptions: { 
+            pie: { donut: { size: '72%', labels: { show: true, name: { color: textColor }, value: { color: textColor, fontSize: '20px', fontWeight: 'bold', formatter: (val) => val + " ud" }, total: { show: true, showAlways: true, label: 'Cuentas', color: textColor } } } } 
+        },
+        dataLabels: { enabled: false },
+        stroke: { show: true, colors: [isDark ? '#1c1c1e' : '#ffffff'], width: 2 },
+        legend: { position: 'right', labels: { colors: textColor } }
+    });
+    platformChartInst.render();
+
+    // --- RENDER 3: Embudo Financiero (Barras Horizontales Premium) ---
+    if(funnelChartInst) funnelChartInst.destroy();
+    funnelChartInst = new ApexCharts(document.querySelector("#funnelChart"), {
+        ...commonOptions,
+        series: [{ name: 'Monto', data: [totalIncome, totalCost, totalProfit] }],
+        chart: { type: 'bar', height: 180, toolbar: { show: false } },
+        plotOptions: { bar: { borderRadius: 6, horizontal: true, distributed: true, dataLabels: { position: 'bottom' } } },
+        colors: ['#0a84ff', '#ff453a', '#30d158'],
+        dataLabels: { 
+            enabled: true, textAnchor: 'start', 
+            style: { colors: ['#fff'], fontSize: '13px', fontWeight: 'bold' }, 
+            formatter: function (val, opt) { return opt.w.globals.labels[opt.dataPointIndex] + ": " + globalCurrency + val.toFixed(2); }, 
+            offsetX: 10, dropShadow: { enabled: true, top: 1, left: 1, blur: 1, opacity: 0.5 } 
+        },
+        stroke: { width: 0 },
+        xaxis: { categories: ['1. Ingresos Brutos', '2. Inversión Total', '3. Ganancia Neta'], labels: { show: false }, axisBorder: { show: false }, axisTicks: { show: false } },
+        yaxis: { labels: { show: false } },
+        grid: { show: false }
+    });
+    funnelChartInst.render();
 };
