@@ -50,7 +50,9 @@
            NUEVA ARQUITECTURA DASHBOARD (SOLO PC) - TRANSICIÓN DE MODALES A SECCIONES
            ========================================================================== */
         @media (min-width: 769px) {
-            body.logged-in { display: flex; overflow: hidden; height: 100vh; margin: 0; }
+            /* 1. ESTO ES LO QUE ARREGLA QUE SE VEA VACÍO (Pone el contenido al lado del menú) */
+            #appView { display: flex !important; height: 100vh; width: 100%; overflow: hidden; }
+            body.logged-in { margin: 0; overflow: hidden; }
             body.logged-in > .container { display: none !important; }
             
             .dashboard-sidebar {
