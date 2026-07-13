@@ -316,12 +316,19 @@
                         <label><input type="checkbox" value="Disney+"> Disney+</label>
                         <label><input type="checkbox" value="Spotify Premium"> Spotify Premium</label>
                         <label><input type="checkbox" value="HBO Max"> HBO Max</label>
+                        <label><input type="checkbox" value="Paramount"> Paramount</label>
                         <label><input type="checkbox" value="Amazon Prime"> Amazon Prime</label>
                         <label><input type="checkbox" value="YouTube Premium"> YouTube Premium</label>
                         <label><input type="checkbox" value="Crunchyroll"> Crunchyroll</label>
                         <label><input type="checkbox" value="IPTV"> IPTV</label>
+                        <label><input type="checkbox" value="Flujo TV"> Flujo TV</label>
                         <label><input type="checkbox" value="Apple TV"> Apple TV</label>
-                        <!-- (Agrega las demás si lo necesitas) -->
+                        <label><input type="checkbox" value="Gemini Pro"> Gemini Pro</label>
+                        <label><input type="checkbox" value="ChatGPT"> ChatGPT</label>
+                        <label><input type="checkbox" value="Canva Pro"> Canva Pro</label>
+                        <label><input type="checkbox" value="CapCut Pro"> CapCut Pro</label>
+                        <label><input type="checkbox" value="Directv GO"> Directv GO</label>
+                        <label><input type="checkbox" value="Movistar"> Movistar</label>
                     </div>
                 </div>
                 <button type="button" id="btnAccountData" class="btn-secondary" onclick="window.openAccountModal()"><i class='bx bx-key'></i> Datos de Cuenta</button>
@@ -406,7 +413,17 @@
                                     <option value="Disney+">Disney+</option>
                                     <option value="Spotify Premium">Spotify Premium</option>
                                     <option value="Amazon Prime">Amazon Prime</option>
+                                    <option value="Paramount">Paramount</option>
                                     <option value="HBO Max">HBO Max</option>
+                                    <option value="IPTV">IPTV</option>
+                                    <option value="Flujo TV"> Flujo TV</option>
+                                    <option value="Apple TV"> Apple TV</option>
+                                    <option value="Gemini Pro"> Gemini Pro</option>
+                                    <option value="ChatGPT"> ChatGPT</option>
+                                    <option value="Canva Pro"> Canva Pro</option>
+                                    <option value="CapCut Pro"> CapCut Pro</option>
+                                    <option value="Directv GO"> Directv GO</option>
+                                    <option value="Movistar"> Movistar</option>
                                 </select>
                                 <select id="invType" style="flex: 1.5; padding: 10px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
                                     <option value="Perfil">👤 Perfil</option>
@@ -740,7 +757,21 @@
             <div>
                 <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Selecciona Plataforma:</label>
                 <select id="matPlatform" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
-                    <option value="Netflix">Netflix</option><option value="Disney+">Disney+</option><option value="Spotify Premium">Spotify</option>
+                                    <option value="Netflix">Netflix</option>
+                                    <option value="Disney+">Disney+</option>
+                                    <option value="Spotify Premium">Spotify Premium</option>
+                                    <option value="Amazon Prime">Amazon Prime</option>
+                                    <option value="Paramount">Paramount</option>
+                                    <option value="HBO Max">HBO Max</option>
+                                    <option value="IPTV">IPTV</option>
+                                    <option value="Flujo TV"> Flujo TV</option>
+                                    <option value="Apple TV"> Apple TV</option>
+                                    <option value="Gemini Pro"> Gemini Pro</option>
+                                    <option value="ChatGPT"> ChatGPT</option>
+                                    <option value="Canva Pro"> Canva Pro</option>
+                                    <option value="CapCut Pro"> CapCut Pro</option>
+                                    <option value="Directv GO"> Directv GO</option>
+                                    <option value="Movistar"> Movistar</option>
                 </select>
             </div>
             <div style="display: flex; gap: 10px;">
@@ -778,7 +809,21 @@
         <h3 style="margin-bottom: 5px;"><i class='bx bx-list-check'></i> Reglas por Plataforma</h3>
         <p style="color:var(--mac-text-secondary); font-size:12px; margin-bottom:15px; margin-top:0;">El bot enviará esta regla automáticamente según la plataforma de la cuenta.</p>
         <select id="rulePlatformSelect" style="width: 100%; margin-bottom: 10px; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);" onchange="window.loadPlatformRule()">
-            <option value="Netflix">Netflix</option><option value="Disney+">Disney+</option><option value="Spotify Premium">Spotify Premium</option>
+                                    <option value="Netflix">Netflix</option>
+                                    <option value="Disney+">Disney+</option>
+                                    <option value="Spotify Premium">Spotify Premium</option>
+                                    <option value="Amazon Prime">Amazon Prime</option>
+                                    <option value="Paramount">Paramount</option>
+                                    <option value="HBO Max">HBO Max</option>
+                                    <option value="IPTV">IPTV</option>
+                                    <option value="Flujo TV"> Flujo TV</option>
+                                    <option value="Apple TV"> Apple TV</option>
+                                    <option value="Gemini Pro"> Gemini Pro</option>
+                                    <option value="ChatGPT"> ChatGPT</option>
+                                    <option value="Canva Pro"> Canva Pro</option>
+                                    <option value="CapCut Pro"> CapCut Pro</option>
+                                    <option value="Directv GO"> Directv GO</option>
+                                    <option value="Movistar"> Movistar</option>
         </select>
         <textarea id="ruleText" rows="4" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none;"></textarea>
         <div style="display: flex; gap: 10px; margin-top: 15px;">
