@@ -302,42 +302,45 @@ window.closeModals = (resetTab = true) => {
 /* --- CONTROLADOR DE SECCIONES DASHBOARD (PC) --- */
 window.switchDashboardSection = (sectionId, menuElement) => {
     if (window.innerWidth >= 769) {
-        // Un micro-retraso para asegurar que la base de datos descargue la info antes de mostrar la pantalla
+        // Retraso de 60ms para evadir el conflicto con las funciones antiguas
         setTimeout(() => {
-            // 1. Apagamos todas las secciones y limpiamos estilos
+            // 1. Apagamos TODAS las secciones de forma forzada
             document.querySelectorAll('.dashboard-section').forEach(sec => {
                 sec.classList.remove('active-section');
-                sec.style.display = ''; 
+                sec.style.setProperty('display', 'none', 'important'); 
             });
             
-            // 2. Encendemos la sección solicitada
+            // 2. Encendemos SOLO la sección a la que le hiciste clic
             const targetSection = document.getElementById(sectionId);
             if (targetSection) {
                 targetSection.classList.add('active-section');
+                targetSection.style.setProperty('display', 'block', 'important'); 
             }
 
-            // 3. Pintamos de azul el botón presionado
+            // 3. Pintamos de color azul brillante el botón seleccionado
             if (menuElement) {
                 document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
                 menuElement.classList.add('active');
             }
-        }, 50); // 50 milisegundos de delay son imperceptibles para el humano pero salvan el código
+        }, 60); 
     }
 };
 
-// Sobrescribimos el cierre de modales original para que NO interrumpa el nuevo menú
+// Blindaje del botón "Cerrar" para que regrese correctamente al Home
 const originalCloseModals = window.closeModals;
 window.closeModals = (resetTab = true) => {
     originalCloseModals(resetTab);
     
-    // IMPORTANTE: Solo regresar a "Home" si el usuario cerró algo usando la "X" (resetTab === true)
     if (window.innerWidth >= 769 && resetTab === true) {
         document.querySelectorAll('.dashboard-section').forEach(sec => {
             sec.classList.remove('active-section');
-            sec.style.display = '';
+            sec.style.setProperty('display', 'none', 'important');
         });
         const home = document.getElementById('homeSection');
-        if (home) home.classList.add('active-section');
+        if (home) {
+            home.classList.add('active-section');
+            home.style.setProperty('display', 'block', 'important');
+        }
         
         document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
         const homeBtn = document.querySelector('.sidebar-item[onclick*="homeSection"]');
