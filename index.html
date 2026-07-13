@@ -10,234 +10,114 @@
     <meta name="theme-color" content="#1d1d1f">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         /* Ajuste fino para que los íconos se alineen perfecto con el texto */
         .bx { vertical-align: middle; margin-right: 4px; font-size: 1.15em; }
-        .action-btn .bx { margin-right: 0; } /* Para botones que solo tienen el ícono */
+        .action-btn .bx { margin-right: 0; } 
         
-        /* --- DISEÑO DEL PANEL DE NOVEDADES (PANTALLA DIVIDIDA) --- */
-        .modal-large {
-            width: 90%;
-            max-width: 850px; 
-            height: 80vh;
-            max-height: 600px;
-            display: flex;
-            flex-direction: column;
-        }
+        /* --- DISEÑO DEL PANEL DE NOVEDADES --- */
+        .modal-large { width: 90%; max-width: 850px; height: 80vh; max-height: 600px; display: flex; flex-direction: column; }
+        .news-layout { display: flex; flex-direction: row; flex: 1; overflow: hidden; border-top: 1px solid var(--mac-border); margin-top: 10px; padding-top: 15px; gap: 20px; }
+        .news-sidebar { flex: 0 0 35%; overflow-y: auto; border-right: 1px solid var(--mac-border); padding-right: 10px; }
+        .news-content-area { flex: 1; overflow-y: auto; padding-left: 10px; }
+        .news-item-title { padding: 12px 15px; margin-bottom: 8px; border: 1px solid transparent; cursor: pointer; border-radius: 8px; background: var(--mac-surface); transition: all 0.2s ease; }
+        .news-item-title:hover { border-color: var(--mac-border); }
+        .news-item-title.active { background: rgba(0, 122, 255, 0.1); border: 1px solid var(--mac-blue); border-left: 4px solid var(--mac-blue); }
+        .news-content-img { width: 100%; max-height: 300px; object-fit: contain; border-radius: 12px; margin-bottom: 20px; background: rgba(0,0,0,0.2); }
 
-        .news-layout {
-            display: flex;
-            flex-direction: row; 
-            flex: 1;
-            overflow: hidden;
-            border-top: 1px solid var(--mac-border);
-            margin-top: 10px;
-            padding-top: 15px;
-            gap: 20px;
-        }
+        /* --- MENÚ INFERIOR CELULAR --- */
+        .bottom-nav { display: flex; justify-content: space-between !important; align-items: center; padding: 0 !important; }
+        .bottom-nav .nav-item { flex: 1; text-align: center; padding: 12px 0 !important; margin: 0 !important; display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; border: none; }
 
-        .news-sidebar {
-            flex: 0 0 35%; 
-            overflow-y: auto;
-            border-right: 1px solid var(--mac-border);
-            padding-right: 10px;
-        }
-
-        .news-content-area {
-            flex: 1; 
-            overflow-y: auto;
-            padding-left: 10px;
-        }
-
-        .news-item-title {
-            padding: 12px 15px;
-            margin-bottom: 8px;
-            border: 1px solid transparent;
-            cursor: pointer;
-            border-radius: 8px;
-            background: var(--mac-surface);
-            transition: all 0.2s ease;
-        }
-
-        .news-item-title:hover {
-            border-color: var(--mac-border);
-        }
-
-        .news-item-title.active {
-            background: rgba(0, 122, 255, 0.1);
-            border: 1px solid var(--mac-blue);
-            border-left: 4px solid var(--mac-blue);
-        }
-
-        .news-content-img {
-            width: 100%;
-            max-height: 300px; 
-            object-fit: contain; 
-            border-radius: 12px;
-            margin-bottom: 20px;
-            background: rgba(0,0,0,0.2); 
-        }
-
-        @media (max-width: 768px) {
-            .news-layout {
-                flex-direction: column; 
-            }
-            .news-sidebar {
-                flex: 0 0 auto;
-                max-height: 160px; 
-                border-right: none;
-                border-bottom: 1px solid var(--mac-border);
-                padding-right: 0;
-                padding-bottom: 10px;
-            }
-            .news-content-area {
-                padding-left: 0;
-                padding-top: 10px;
-            }
-        }
-        
-        /* 1. FIX: Distribución perfecta del menú inferior */
-        .bottom-nav {
-            display: flex;
-            justify-content: space-between !important;
-            align-items: center;
-            padding: 0 !important;
-        }
-        .bottom-nav .nav-item {
-            flex: 1; 
-            text-align: center;
-            padding: 12px 0 !important;
-            margin: 0 !important;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: transparent;
-            border: none;
-        }
-
-        /* 2. FIX: Inventario como SECCIÓN INDIVIDUAL en celular */
-        @media (max-width: 768px) {
-            #inventoryModal.modal-overlay, #pedidosModal.modal-overlay {
-                background-color: var(--mac-bg) !important;
-                align-items: flex-start !important; 
-            }
-            
-            #inventoryModal .modal-card, #pedidosModal .modal-card {
-                width: 100% !important;
-                height: 100dvh !important; 
-                max-width: 100% !important;
-                border: none !important; 
-                border-radius: 0 !important; 
-                margin: 0 !important;
-                padding: 30px 20px 20px 20px !important;
-                box-sizing: border-box !important;
-                background-color: var(--mac-bg) !important;
-                box-shadow: none !important; 
-                display: flex;
-                flex-direction: column;
-            }
-
-            #inventoryList, #pedidosList {
-                flex-grow: 1 !important;
-                overflow-y: auto !important;
-                min-height: 0 !important; 
-                padding-bottom: 10px;
-                margin-bottom: 10px;
-            }
-            /* 🔥 NUEVO: OCULTAR LOS BOTONES DE CERRAR EN INVENTARIO Y VENTAS (SOLO MÓVIL) */
-            #inventoryModal .modal-card > div:last-child,
-            #pedidosModal .modal-card > div:last-child {
-                display: none !important;
-            }
-        }
-
-        /* =========================================
-           3. DISEÑO DE TIENDITA PARA PC (PANTALLA ANCHA)
-           ========================================= */
+        /* --- DISEÑO TIENDITA PC --- */
         @media (min-width: 768px) {
-            /* Ensanchamos el contenedor principal */
-            #publicStoreView {
-                max-width: 900px !important;
-            }
-            
-            /* Convertimos la lista en una cuadrícula (Grid) de 2 columnas */
-            #publicStoreCatalog {
-                display: grid !important;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
-            }
-            
-            /* Limpiamos los márgenes individuales para que el Grid haga su trabajo */
-            #publicStoreCatalog > div {
-                margin-bottom: 0 !important;
-                height: 100%; /* Hace que todas las tarjetas midan lo mismo */
-            }
+            #publicStoreView { max-width: 900px !important; }
+            #publicStoreCatalog { display: grid !important; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+            #publicStoreCatalog > div { margin-bottom: 0 !important; height: 100%; }
         }
-        /* =========================================
-   HACER MÁS ANCHO EL MODAL DE "MI TIENDITA" EN PC
-   ========================================= */
-@media (min-width: 768px) {
-    #storeModal .modal-card {
-        max-width: 750px !important; /* Ancho máximo para PC */
-        width: 90% !important;
-    }
-}
-/* =========================================
-   FORZAR ALERTAS SIEMPRE AL FRENTE
-   ========================================= */
-#toast {
-    z-index: 999999 !important;
-    position: fixed !important;
-}
 
-.swal2-container {
-    z-index: 999999 !important;
-}
+        /* ALERTAS AL FRENTE */
+        #toast { z-index: 999999 !important; position: fixed !important; }
+        .swal2-container { z-index: 999999 !important; }
 
-/* --- LUCES DE ESTADO DE DISPOSITIVO --- */
-.device-dot-green {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    background-color: #34C759;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #34C759;
-    margin-left: 6px;
-    vertical-align: middle;
-}
-.device-dot-red {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    background-color: #FF3B30;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #FF3B30;
-    margin-left: 6px;
-    vertical-align: middle;
-}
-        
+        /* LUCES ESTADO DISPOSITIVO */
+        .device-dot-green { display: inline-block; width: 10px; height: 10px; background-color: #34C759; border-radius: 50%; box-shadow: 0 0 8px #34C759; margin-left: 6px; vertical-align: middle; }
+        .device-dot-red { display: inline-block; width: 10px; height: 10px; background-color: #FF3B30; border-radius: 50%; box-shadow: 0 0 8px #FF3B30; margin-left: 6px; vertical-align: middle; }
+
+        /* ==========================================================================
+           NUEVA ARQUITECTURA DASHBOARD (SOLO PC) - TRANSICIÓN DE MODALES A SECCIONES
+           ========================================================================== */
+        @media (min-width: 769px) {
+            body.logged-in { display: flex; overflow: hidden; height: 100vh; margin: 0; }
+            body.logged-in > .container { display: none !important; }
+            
+            .dashboard-sidebar {
+                display: flex !important; flex-direction: column; width: 250px; min-width: 250px; height: 100vh;
+                background: var(--mac-surface); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+                border-right: 1px solid var(--mac-border); box-shadow: 4px 0 24px rgba(0,0,0,0.05);
+                padding: 20px; box-sizing: border-box; z-index: 100; transition: background 0.3s, border-color 0.3s;
+            }
+            .sidebar-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--mac-border); }
+            .sidebar-brand img { width: 45px; height: 45px; border-radius: 12px; object-fit: cover; }
+            .sidebar-brand-info h2 { margin: 0; font-size: 16px; color: var(--mac-text-main); font-weight: 800; }
+            .sidebar-brand-info span { font-size: 11px; color: var(--mac-text-secondary); font-weight: 500; }
+
+            .sidebar-menu { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+            .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 12px; color: var(--mac-text-secondary); font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s ease; text-decoration: none; background: transparent; border: 1px solid transparent; }
+            .sidebar-item i { font-size: 20px; transition: transform 0.2s; }
+            .sidebar-item:hover { background: var(--mac-gray); color: var(--mac-text-main); }
+            .sidebar-item.active { background: var(--mac-blue); color: white !important; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25); }
+            .sidebar-item.active i { transform: scale(1.1); }
+
+            .dashboard-main { flex-grow: 1; height: 100vh; overflow-y: auto; overflow-x: hidden; position: relative; padding: 30px 40px; box-sizing: border-box; }
+
+            .dashboard-section.modal-overlay { position: relative !important; background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; height: auto !important; display: none; align-items: stretch !important; justify-content: flex-start !important; z-index: 1; }
+            .dashboard-section.modal-overlay.active-section { display: block !important; animation: fadeSlideUp 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); }
+            .dashboard-section .modal-card { width: 100% !important; max-width: 100% !important; max-height: none !important; box-shadow: none !important; border: none !important; background: transparent !important; padding: 0 !important; animation: none !important; }
+            
+            #homeSection { display: none; }
+            #homeSection.active-section { display: block; animation: fadeSlideUp 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); }
+            
+            .mobile-only-btn { display: none !important; }
+            @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        }
+
+        /* Comportamiento en Celulares */
+        @media (max-width: 768px) {
+            .dashboard-sidebar { display: none !important; }
+            .dashboard-main { padding: 0 !important; overflow: visible !important; height: auto !important; }
+            body.logged-in { overflow: auto; }
+            body.logged-in > .container { display: block !important; }
+            .dashboard-section.modal-overlay { display: none; }
+            #homeSection { display: none !important; }
+            
+            #inventoryModal.modal-overlay, #pedidosModal.modal-overlay { background-color: var(--mac-bg) !important; align-items: flex-start !important; }
+            #inventoryModal .modal-card, #pedidosModal .modal-card { width: 100% !important; height: 100dvh !important; max-width: 100% !important; border: none !important; border-radius: 0 !important; margin: 0 !important; padding: 30px 20px 20px 20px !important; box-sizing: border-box !important; background-color: var(--mac-bg) !important; box-shadow: none !important; display: flex; flex-direction: column; }
+            #inventoryList, #pedidosList { flex-grow: 1 !important; overflow-y: auto !important; min-height: 0 !important; padding-bottom: 10px; margin-bottom: 10px; }
+            .news-layout { flex-direction: column; }
+            .news-sidebar { flex: 0 0 auto; max-height: 160px; border-right: none; border-bottom: 1px solid var(--mac-border); padding-right: 0; padding-bottom: 10px; }
+            .news-content-area { padding-left: 0; padding-top: 10px; }
+        }
     </style>
 </head>
 <body>
 
 <div id="toast">Acción completada</div>
 
+<!-- VISTA DE LOGIN/REGISTRO -->
 <div class="container login-container" id="authView" style="display: block;">
     <div class="header-top" style="justify-content: flex-end;">
         <button class="theme-toggle" onclick="window.toggleTheme()"><i class='bx bx-moon'></i> Modo oscuro</button>
     </div>
-    
     <div style="text-align: center; margin-bottom: 20px;">
         <img src="AGC.png" alt="A.G.C. Logo" style="height: 120px; width: 120px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 15px; object-fit: contain;">
-        
         <h1 style="margin: 0;">A.G.C.</h1>
         <h3 id="authSubtitle" style="margin: 5px 0 0 0;">Área de Gestión y Control</h3>
     </div>
 
+    <!-- Login -->
     <div id="loginForm" class="auth-form">
         <button type="button" class="btn-google" onclick="window.loginWithGoogle()">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="18px" height="18px" style="vertical-align: middle; margin-right: 5px;">
@@ -249,7 +129,6 @@
             Continuar con Google
         </button>
         <div class="divider"><span>O ingresa con tu correo</span></div>
-
         <input type="email" id="loginEmail" placeholder="Correo Electrónico" required>
         <div class="pwd-wrapper">
             <input type="password" id="loginPassword" placeholder="Contraseña" required>
@@ -260,30 +139,15 @@
         <span class="auth-link" onclick="window.showReset()">¿Olvidaste tu contraseña?</span>
     </div>
 
+    <!-- Registro -->
     <div id="registerForm" class="auth-form" style="display: none;">
         <input type="text" id="regName" placeholder="Nombre Completo" required>
         <select id="regCountry" required>
             <option value="">Selecciona tu país...</option>
-            <option value="Argentina">Argentina</option>
-            <option value="Bolivia">Bolivia</option>
-            <option value="Chile">Chile</option>
-            <option value="Colombia">Colombia</option>
-            <option value="Costa Rica">Costa Rica</option>
-            <option value="Cuba">Cuba</option>
-            <option value="Ecuador">Ecuador</option>
-            <option value="El Salvador">El Salvador</option>
-            <option value="España">España</option>
-            <option value="Guatemala">Guatemala</option>
-            <option value="Honduras">Honduras</option>
-            <option value="México">México</option>
-            <option value="Nicaragua">Nicaragua</option>
-            <option value="Panamá">Panamá</option>
-            <option value="Paraguay">Paraguay</option>
             <option value="Perú">Perú</option>
-            <option value="República Dominicana">República Dominicana</option>
-            <option value="Uruguay">Uruguay</option>
-            <option value="Venezuela">Venezuela</option>
-            <option value="Otro País">Otro País</option>
+            <option value="Colombia">Colombia</option>
+            <option value="México">México</option>
+            <option value="Otro País">Otro País...</option>
         </select>
         <input type="tel" id="regPhone" placeholder="WhatsApp (Ej: +51...)" required>
         <input type="email" id="regEmail" placeholder="Correo Electrónico" required>
@@ -295,6 +159,7 @@
         <span class="auth-link" onclick="window.showLogin()">Ya tengo cuenta. Iniciar sesión</span>
     </div>
 
+    <!-- Reset -->
     <div id="resetForm" class="auth-form" style="display: none;">
         <input type="email" id="resetEmail" placeholder="Correo Electrónico" required>
         <button class="btn-primary" onclick="window.doResetPassword()">Enviar Link</button>
@@ -302,164 +167,311 @@
     </div>
 </div>
 
+<!-- ==============================================
+     VISTA PRINCIPAL DE LA APP (DASHBOARD)
+=================================================== -->
 <div id="appView" style="display: none; width: 100%;">
-    <div class="container">
     
-    <div class="header-top">
-        <div class="mac-controls">
-            <div class="mac-dot close" onclick="window.openWaModal()" title="Editar Mensaje WhatsApp"></div>
-            <div class="mac-dot minimize" onclick="window.toggleStats()" title="Mostrar Resumen"></div>
-            <div class="mac-dot maximize" onclick="window.openProfileModal()" title="Editar Perfil"></div>
-            <div class="mac-dot" style="background-color: #0000FF;" onclick="window.openSuggestionModal()" title="Buzón de Sugerencias"></div>
+    <!-- BARRA LATERAL (SOLO PC) -->
+    <div class="dashboard-sidebar">
+        <div class="sidebar-brand">
+            <img id="brandLogoSidebar" src="AGC.png" alt="Logo">
+            <div class="sidebar-brand-info">
+                <h2 id="brandNameSidebar">Mi Panel</h2>
+                <span id="userPlanBadgeSidebar" style="color: var(--mac-blue);">Plan PRO</span>
+            </div>
         </div>
+
+        <div class="sidebar-menu">
+            <a href="#" class="sidebar-item active" onclick="window.switchDashboardSection('homeSection', this)">
+                <i class='bx bx-home-alt-2'></i> <span>Dashboard Central</span>
+            </a>
+            <a href="#" class="sidebar-item" onclick="window.switchDashboardSection('storeModal', this); window.renderStoreItems();">
+                <i class='bx bx-store-alt'></i> <span>Mi Tiendita Web</span>
+            </a>
+            <a href="#" class="sidebar-item" onclick="window.switchDashboardSection('inventoryModal', this); window.renderInventory();">
+                <i class='bx bx-box'></i> <span>Gestión de Inventario</span>
+            </a>
+            <a href="#" class="sidebar-item" onclick="window.switchDashboardSection('pedidosModal', this); window.openPedidosModal();">
+                <i class='bx bx-bell'></i> <span>Ventas Pendientes</span>
+            </a>
+            <div style="margin: 15px 0; border-top: 1px dashed var(--mac-border);"></div>
+            <a href="#" class="sidebar-item" onclick="window.switchDashboardSection('wrappedModal', this); window.showWrapped();">
+                <i class='bx bx-bar-chart-alt-2'></i> <span>Resumen A.G.C.</span>
+            </a>
+            <a href="#" class="sidebar-item" onclick="window.openNewsModal()">
+                <i class='bx bxs-envelope'></i> <span>Novedades</span>
+                <span id="newsBadgeSidebar" style="display:none; background:#FF2D55; width:8px; height:8px; border-radius:50%; margin-left:auto;"></span>
+            </a>
+            <div style="margin: 15px 0; border-top: 1px dashed var(--mac-border);"></div>
+            <a href="#" class="sidebar-item" onclick="window.openProfileModal()">
+                <i class='bx bx-user-circle'></i> <span>Mi Perfil & Bot</span>
+            </a>
+            <a href="#" class="sidebar-item" onclick="window.toggleTheme()">
+                <i class='bx bx-moon' id="themeIconSidebar"></i> <span>Cambiar Tema</span>
+            </a>
+            <a href="#" class="sidebar-item" style="color: var(--mac-red);" onclick="window.doLogout()">
+                <i class='bx bx-log-out'></i> <span>Cerrar Sesión</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- ÁREA DE CONTENIDO CENTRAL -->
+    <div class="dashboard-main">
         
-<div style="display: flex; gap: 10px; align-items: center; position: relative;">
-    <button id="btnInstallApp" class="action-btn" style="display: none; background: rgba(52, 199, 89, 0.15); color: var(--mac-green); font-weight: bold;" onclick="window.installApp()"><i class='bx bx-mobile-alt'></i> Instalar</button>
-    <button class="btn-desktop-only" style="background: linear-gradient(45deg, #FF3B30, #FF2D55); box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3); border: none; color: var(--mac-text-main);" onclick="window.openInventoryModal()">
-        <i class='bx bx-box'></i> Mi Inventario
-    </button>
-    <button class="btn-desktop-only" style="background: linear-gradient(45deg, #FF9500, #FFCC00); color: white; padding: 8px 16px; border-radius: 20px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3); border: none;" onclick="window.openPedidosModal()">
-    <i class='bx bx-bell' style="color: white;"></i> Ventas Pendientes
-</button>
-    <button class="btn-desktop-only" style="background: linear-gradient(45deg, #AF52DE, #FF2D55); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 10px rgba(175, 82, 222, 0.3);" onclick="window.showWrapped()"><i class='bx bxs-trophy' style="color: white;"></i> Mi Resumen</button>
-    <button class="btn-desktop-only" style="background: linear-gradient(45deg, #007AFF, #34C759); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);" onclick="window.openStoreModal()">
-        <i class='bx bx-store-alt' style="color: white;"></i> Mi Tiendita
-    </button>
-    <button class="btn-news-shiny" onclick="window.openNewsModal()" style="position: relative;">
-    <i class='bx bxs-envelope'></i> Novedades
-    <span id="newsBadge" style="display: none; position: absolute; top: -2px; right: -2px; background: #FF2D55; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--mac-surface); box-shadow: 0 0 5px rgba(255,45,85,0.5);"></span>
-</button>
-            
-            <div style="position: relative;">
-<button class="action-btn" style="flex: 0 0 38px; width: 38px; height: 38px; min-width: 38px; max-width: 38px; display: flex; align-items: center; justify-content: center; font-size: 20px; border-radius: 50%; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); padding: 0;" onclick="window.toggleSettingsMenu(event)"><i class='bx bx-cog'></i></button>
-                
-                <div id="settingsDropdown" class="settings-dropdown">
-                    <button class="dropdown-item theme-toggle" onclick="window.toggleTheme(); window.toggleSettingsMenu(event);"><i class='bx bx-moon'></i> Modo oscuro</button>
-                    <div style="height: 1px; background: var(--mac-border); margin: 4px 0;"></div>
-                    <button class="dropdown-item text-danger" onclick="window.doLogout()"><i class='bx bx-log-out'></i> Salir</button>
+        <!-- SECCIÓN 1: HOME (Dashboard Principal) -->
+        <div id="homeSection" class="active-section dashboard-section">
+            <div class="header-top" style="margin-bottom: 30px;">
+                <div>
+                    <h1 style="text-align: left; font-size: 28px; margin: 0; color: var(--mac-text-main);">Gestión Operativa</h1>
+                    <p style="margin: 5px 0 0 0; color: var(--mac-text-secondary); font-size: 14px;">Controla a tus clientes, cuentas matrices y finanzas.</p>
+                </div>
+                <div class="mac-controls">
+                    <button class="action-btn" style="background: var(--mac-surface); border: 1px solid var(--mac-border); padding: 8px 15px; font-size: 14px;" onclick="window.toggleStats()"><i class='bx bx-line-chart'></i> Ver Finanzas</button>
+                    <button class="action-btn" style="background: rgba(52, 199, 89, 0.15); color: var(--mac-green); font-weight: bold; padding: 8px 15px; font-size: 14px;" onclick="window.openWaModal()"><i class='bx bxl-whatsapp'></i> Textos Auto.</button>
+                </div>
+            </div>
+
+            <div class="stats-panel" id="statsPanel">
+                <div class="stat-card stat-active"><h4>Activos</h4><p id="statActive">0</p></div>
+                <div class="stat-card stat-warning"><h4>Por vencer</h4><p id="statWarning">0</p></div>
+                <div class="stat-card stat-expired"><h4>Vencidos</h4><p id="statExpired">0</p></div>
+                <div class="stat-card profit-card">
+                    <h4>Utilidad Neta</h4><p style="color: var(--mac-blue);" id="statProfit">0.00</p>
+                    <div class="profit-breakdown">
+                        <div style="color: var(--mac-text-main); margin-bottom: 5px;"><strong>Ingresos:</strong> <span id="bdIncome">0.00</span></div>
+                        <div style="color: var(--mac-red); margin-bottom: 5px;"><strong>Inversión:</strong> <span id="bdCost">0.00</span></div>
+                        <hr style="border: 0; border-top: 1px solid var(--mac-border); margin: 5px 0;">
+                        <div style="color: var(--mac-blue);"><strong>Ganancia:</strong> <span id="bdProfit">0.00</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <form id="clientForm" class="form-grid" style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border); box-shadow: var(--glass-shadow);">
+                <input type="text" id="clientName" placeholder="Nombre del Cliente" required>
+                <div class="custom-select" id="customSelect">
+                    <div class="select-box" id="selectBox" onclick="window.togglePlatformDropdown(event)">
+                        <span id="selectText">Plataforma(s)...</span><span>▼</span>
+                    </div>
+                    <div class="checkbox-dropdown" id="checkboxDropdown">
+                        <label><input type="checkbox" value="Netflix"> Netflix</label>
+                        <label><input type="checkbox" value="Disney+"> Disney+</label>
+                        <label><input type="checkbox" value="Spotify Premium"> Spotify Premium</label>
+                        <label><input type="checkbox" value="HBO Max"> HBO Max</label>
+                        <label><input type="checkbox" value="Amazon Prime"> Amazon Prime</label>
+                        <label><input type="checkbox" value="YouTube Premium"> YouTube Premium</label>
+                        <label><input type="checkbox" value="Crunchyroll"> Crunchyroll</label>
+                        <label><input type="checkbox" value="IPTV"> IPTV</label>
+                        <label><input type="checkbox" value="Apple TV"> Apple TV</label>
+                        <!-- (Agrega las demás si lo necesitas) -->
+                    </div>
+                </div>
+                <button type="button" id="btnAccountData" class="btn-secondary" onclick="window.openAccountModal()"><i class='bx bx-key'></i> Datos de Cuenta</button>
+                <input type="text" id="phone" placeholder="WhatsApp (Ej: +51...)" required>
+                <input type="number" id="clientCost" placeholder="Costo" step="0.1" required>
+                <input type="text" id="clientProviderName" placeholder="Nombre Proveedor">
+                <input type="number" id="clientPrice" placeholder="Precio" step="0.1" required>
+                <input type="date" id="expirationDate" required>
+                <div id="actionButtonsContainer" style="grid-column: 1 / -1;">
+                    <button type="button" class="btn-primary" style="padding: 12px; font-size: 15px;" onclick="window.saveClientData()">Guardar Cliente</button>
+                </div>
+            </form>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;" id="topControlsBar">
+                <div class="expandable-search">
+                    <input type="text" id="searchInput" placeholder="Buscar..." oninput="if(document.getElementById('btnTabClientes').style.background !== 'transparent') { window.renderTable(); } else { window.renderMasterAccounts(); }">
+                    <i class='bx bx-search'></i>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-left: auto;">
+                    <select id="filterSelect" onchange="window.renderTable()" style="width: auto; padding: 12px 14px; border-radius: 10px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); outline: none; transition: all 0.25s; cursor: pointer;">
+                        <option value="all">Todos los estados</option>
+                        <option value="active">🟢 Activos</option>
+                        <option value="warning">🟠 Por vencer</option>
+                        <option value="expired">🔴 Vencidos</option>
+                    </select>
+
+                    <div style="display: flex; background: var(--mac-bg); padding: 4px; border-radius: 10px; border: 1px solid var(--mac-border);">
+                        <button id="btnTabClientes" onclick="window.switchMainTab('clientes')" style="padding: 8px 20px; border-radius: 8px; border: none; background: var(--mac-blue); color: white; font-weight: bold; cursor: pointer; transition: 0.3s;">
+                            <i class='bx bx-user'></i> Mis Clientes
+                        </button>
+                        <button id="btnTabCuentas" onclick="window.switchMainTab('cuentas')" style="padding: 8px 20px; border-radius: 8px; border: none; background: transparent; color: var(--mac-text-secondary); font-weight: bold; cursor: pointer; transition: 0.3s;">
+                            <i class='bx bx-box'></i> Mis Cuentas
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="accountsTableContainer" style="display: none; width: 100%; margin-bottom: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: var(--mac-gray); padding: 15px; border-radius: 12px; border: 1px solid var(--mac-border);">
+                    <p style="margin: 0; color: var(--mac-text-secondary); font-size: 14px;">Gestiona tus cuentas matrices, su rentabilidad y la disponibilidad de perfiles.</p>
+                    <button class="btn-primary" style="width: auto; padding: 0 15px;" onclick="window.openNewMasterAccountModal()"><i class='bx bx-plus'></i> Nueva Cuenta Matriz</button>
+                </div>
+                <div id="masterAccountsList" style="display: flex; flex-direction: column; gap: 15px;"></div>
+            </div>
+
+            <div style="width: 100%; position: relative;">
+                <div id="tableLoader"><i class='bx bx-loader-alt bx-spin'></i> Cargando datos...</div>
+                <table id="mainTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th><th>Plataformas</th><th>Cuenta</th><th>WhatsApp</th>
+                            <th>Utilidad</th><th>Vencimiento</th><th>Estado</th><th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+                <div style="text-align: center; margin-top: 20px; display: none;" id="loadMoreContainer">
+                    <button class="btn-secondary" style="width: auto; padding: 10px 30px;" onclick="window.loadMoreClients()"><i class='bx bx-chevron-down'></i> Cargar más clientes</button>
+                </div>
+            </div> 
+        </div>
+
+        <!-- SECCIÓN 2: INVENTARIO -->
+        <div id="inventoryModal" class="dashboard-section modal-overlay" style="display: none;">
+            <div class="modal-card" style="max-width: 800px; margin: 0 auto; height: 100%; display: flex; flex-direction: column;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--mac-border); padding-bottom: 15px;">
+                    <div>
+                        <h2 style="margin: 0; font-size: 24px; color: var(--mac-text-main);"><i class='bx bx-box'></i> Gestión de Inventario</h2>
+                        <p style="color:var(--mac-text-secondary); font-size:14px; margin:5px 0 0 0;">Cuentas listas para ser entregadas.</p>
+                    </div>
+                    <button class="action-btn" style="background: rgba(0, 122, 255, 0.1); color: var(--mac-blue); border: 1px solid var(--mac-blue); padding: 8px 15px; border-radius: 8px; font-weight: bold; font-size: 14px;" onclick="window.openRulesModal()"><i class='bx bx-list-check'></i> Reglas Bot</button>
+                </div>
+
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 300px; background: var(--mac-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--mac-border); height: fit-content;">
+                        <h4 style="margin: 0 0 15px 0; color: var(--mac-text-main);">Ingresar Nueva</h4>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="display: flex; gap: 10px;">
+                                <select id="invPlatform" style="flex: 2; padding: 10px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                                    <option value="">Plataforma...</option>
+                                    <option value="Netflix">Netflix</option>
+                                    <option value="Disney+">Disney+</option>
+                                    <option value="Spotify Premium">Spotify Premium</option>
+                                    <option value="Amazon Prime">Amazon Prime</option>
+                                    <option value="HBO Max">HBO Max</option>
+                                </select>
+                                <select id="invType" style="flex: 1.5; padding: 10px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                                    <option value="Perfil">👤 Perfil</option>
+                                    <option value="Completa">⭐ Completa</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="email" id="invEmail" placeholder="Correo" style="flex: 2;">
+                                <input type="text" id="invPass" placeholder="Contraseña" style="flex: 1.5;">
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="invProfile" placeholder="N° Perfil" style="flex: 1;">
+                                <input type="text" id="invPin" placeholder="PIN" style="flex: 1;">
+                            </div>
+                            <button class="btn-primary" style="padding: 12px; font-size: 15px; margin-top: 5px;" onclick="window.addInventoryAccount()"><i class='bx bx-save'></i> Guardar en stock</button>
+                        </div>
+                    </div>
+                    
+                    <div style="flex: 2; min-width: 350px; display: flex; flex-direction: column;">
+                        <h4 style="margin: 0 0 15px 0; color: var(--mac-text-main);">Cuentas Disponibles</h4>
+                        <div id="inventoryList" style="flex-grow: 1; display: flex; flex-direction: column; gap: 10px; max-height: 60vh; overflow-y: auto; padding-right: 10px;"></div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px;">
+                    <button class="btn-secondary mobile-only-btn" style="width: 100%; padding: 12px;" onclick="window.closeModals()">Cerrar Inventario</button>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="user-profile-compact">
-        <img id="brandLogo" src="data:image/svg+xml;charset=UTF-8,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='g2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23AF52DE' /%3E%3Cstop offset='100%25' stop-color='%235856D6' /%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 90 C 20 75 15 40 15 20 L 50 10 L 85 20 C 85 40 80 75 50 90 Z' fill='url(%23g2)'/%3E%3Crect x='28' y='45' width='10' height='25' rx='5' fill='%23ffffff'/%3E%3Crect x='45' y='30' width='10' height='40' rx='5' fill='%23ffffff'/%3E%3Crect x='62' y='50' width='10' height='20' rx='5' fill='%2334C759'/%3E%3C/svg%3E" alt="Mi Marca">
-        
-        <div class="profile-info-compact">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <h1 id="brandName" style="margin: 0;">Mi Panel</h1>
-                <span id="userPlanBadge" style="display: none; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; text-transform: uppercase; border: 1px solid currentColor;"></span>
-            </div>
-            <h3 id="userGreeting" style="margin-top: 5px;">Cargando...</h3>
-        </div>
-    </div>
-
-    <div class="stats-panel" id="statsPanel">
-        <div class="stat-card stat-active"><h4>Activos</h4><p id="statActive">0</p></div>
-        <div class="stat-card stat-warning"><h4>Por vencer</h4><p id="statWarning">0</p></div>
-        <div class="stat-card stat-expired"><h4>Vencidos</h4><p id="statExpired">0</p></div>
-        <div class="stat-card profit-card">
-            <h4>Utilidad Neta</h4><p style="color: var(--mac-blue);" id="statProfit">0.00</p>
-            <div class="profit-breakdown">
-                <div style="color: var(--mac-text-main); margin-bottom: 5px;"><strong>Ingresos:</strong> <span id="bdIncome">0.00</span></div>
-                <div style="color: var(--mac-red); margin-bottom: 5px;"><strong>Inversión:</strong> <span id="bdCost">0.00</span></div>
-                <hr style="border: 0; border-top: 1px solid var(--mac-border); margin: 5px 0;">
-                <div style="color: var(--mac-blue);"><strong>Ganancia:</strong> <span id="bdProfit">0.00</span></div>
+        <!-- SECCIÓN 3: PEDIDOS -->
+        <div id="pedidosModal" class="dashboard-section modal-overlay" style="display: none;">
+            <div class="modal-card" style="max-width: 700px; margin: 0 auto; height: 100%; display: flex; flex-direction: column;">
+                <div style="margin-bottom: 20px; border-bottom: 1px solid var(--mac-border); padding-bottom: 15px;">
+                    <h2 style="margin: 0; font-size: 24px; color: var(--mac-text-main);"><i class='bx bx-bell'></i> Ventas Pendientes</h2>
+                    <p style="color:var(--mac-text-secondary); font-size:14px; margin:5px 0 0 0;">Aprueba comprobantes y despacha desde el stock.</p>
+                </div>
+                <div id="pedidosList" style="display: flex; flex-direction: column; gap: 15px; flex-grow: 1; overflow-y: auto;"></div>
+                <div style="margin-top: 20px;">
+                    <button class="btn-secondary mobile-only-btn" style="width: 100%; padding: 12px;" onclick="window.closeModals()">Cerrar Ventas</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <form id="clientForm" class="form-grid">
-        <input type="text" id="clientName" placeholder="Nombre del Cliente" required>
-        <div class="custom-select" id="customSelect">
-            <div class="select-box" id="selectBox" onclick="window.togglePlatformDropdown(event)">
-                <span id="selectText">Plataforma(s)...</span><span>▼</span>
+        <!-- SECCIÓN 4: MI TIENDITA -->
+        <div id="storeModal" class="dashboard-section modal-overlay" style="display: none;">
+             <div class="modal-card" style="max-width: 800px; margin: 0 auto; height: 100%; display: flex; flex-direction: column;">
+                <div style="margin-bottom: 20px; border-bottom: 1px solid var(--mac-border); padding-bottom: 15px;">
+                    <h2 style="margin: 0; font-size: 24px; color: var(--mac-text-main);"><i class='bx bx-store-alt'></i> Mi Tiendita Web</h2>
+                    <p style="color:var(--mac-text-secondary); font-size:14px; margin:5px 0 0 0;">Tu catálogo público y automatizado de ventas.</p>
+                </div>
+                
+                <div style="flex-grow: 1; overflow-y: auto; padding-right: 10px;">
+                    <div id="externalCatalogSetup" style="background: rgba(0, 122, 255, 0.1); border: 1px dashed var(--mac-blue); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                        <label style="font-size: 12px; font-weight: bold; color: var(--mac-blue);">¿Ya tienes un catálogo propio? Ingrésalo aquí:</label>
+                        <div style="display: flex; gap: 10px; margin-top: 8px;">
+                            <input type="url" id="storeExternalInput" placeholder="Ej: https://misitio.com/catalogo" style="flex: 1; background: var(--mac-surface);">
+                            <button class="btn-primary" style="width: auto; padding: 0 15px;" onclick="window.saveExternalStore()"><i class='bx bx-save'></i></button>
+                        </div>
+                        <p style="font-size: 11px; color: var(--mac-text-secondary); margin-top: 5px; margin-bottom: 0;">Al guardar, la tiendita interna se desactivará.</p>
+                    </div>
+
+                    <div id="externalCatalogActive" style="display: none; background: rgba(52, 199, 89, 0.1); border: 1px solid var(--mac-green); padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: center;">
+                        <h4 style="color: var(--mac-green); margin: 0 0 10px 0;"><i class='bx bx-check-circle'></i> Catálogo Externo Activado</h4>
+                        <p style="font-size: 13px; color: var(--mac-text-main); margin-bottom: 15px; word-break: break-all;" id="activeExternalLinkText"></p>
+                        <button class="btn-secondary" style="width: 100%; border: 1px solid var(--mac-red); color: var(--mac-red); background: transparent;" onclick="window.removeExternalStore()">
+                            <i class='bx bx-trash'></i> Eliminar y usar Tiendita Interna
+                        </button>
+                    </div>
+
+                    <div id="internalCatalogSection">
+                        <div style="background: var(--mac-bg); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Añadir un producto o combo:</label>
+                            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
+                                <div style="display: flex; gap: 10px;">
+                                    <select id="storeType" style="flex: 1; padding: 8px; border-radius: 6px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                                        <option value="Servicio">Servicio Único</option>
+                                        <option value="Combo">🎁 Combo</option>
+                                    </select>
+                                    <input type="text" id="storePlatform" placeholder="Ej: Combo Disney+Max" style="flex: 2;">
+                                    <input type="number" id="storePrice" placeholder="Precio" style="flex: 1;">
+                                </div>
+                                <div>
+                                    <label style="font-size: 11px; color: var(--mac-text-secondary); display: block; margin-bottom: 4px;">Imagen de portada (Opcional):</label>
+                                    <input type="file" id="storeImg" accept="image/*" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 12px;">
+                                </div>
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="text" id="storeDesc" placeholder="Descripción (Ej: 1 Perfil de cada uno)" style="flex: 1;">
+                                    <button class="btn-primary" style="width: auto; padding: 0 20px;" onclick="window.addStoreItem()"><i class='bx bx-plus'></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="storeItemsList" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; margin-bottom: 15px;"></div>
+
+                        <div style="border-top: 1px dashed var(--mac-border); padding-top: 15px;">
+                            <label style="font-size: 12px; font-weight: bold; color: var(--mac-blue);">Tu Link Público:</label>
+                            <input type="text" id="storeLinkInput" readonly style="color: var(--mac-text-secondary); background: var(--mac-surface);">
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn-primary" id="btnCopyInternalLink" style="padding: 12px; font-size: 14px;" onclick="window.copyStoreLink()"><i class='bx bx-copy'></i> Copiar Link de Tienda</button>
+                    <button class="btn-secondary mobile-only-btn" style="padding: 12px; font-size: 14px;" onclick="window.closeModals()">Cerrar</button>
+                </div>
             </div>
-            <div class="checkbox-dropdown" id="checkboxDropdown">
-                <label><input type="checkbox" value="Netflix"> Netflix</label>
-                <label><input type="checkbox" value="Spotify Premium"> Spotify Premium</label>
-                <label><input type="checkbox" value="YouTube Premium"> YouTube Premium</label>
-                <label><input type="checkbox" value="Crunchyroll"> Crunchyroll</label>
-                <label><input type="checkbox" value="Viki"> Viki</label>
-                <label><input type="checkbox" value="Disney+"> Disney+</label>
-                <label><input type="checkbox" value="Amazon Prime"> Amazon Prime</label>
-                <label><input type="checkbox" value="HBO Max"> HBO Max</label>
-                <label><input type="checkbox" value="Apple TV"> Apple TV</label>
-                <label><input type="checkbox" value="Directv GO"> Directv GO</label>
-                <label><input type="checkbox" value="Movistar"> Movistar</label>
-                <label><input type="checkbox" value="IPTV"> IPTV</label>
-                <label><input type="checkbox" value="Vix"> Vix</label>
-                <label><input type="checkbox" value="Paramount"> Paramount</label>
-                <label><input type="checkbox" value="Gemini Pro"> Gemini Pro</label>
-                <label><input type="checkbox" value="ChatGPT"> ChatGPT</label>
-                <label><input type="checkbox" value="Canva Pro"> Canva Pro</label>
-                <label><input type="checkbox" value="Capcut Pro"> Capcut Pro</label>
+        </div>
+
+        <!-- SECCIÓN 5: WRAPPED -->
+        <div id="wrappedModal" class="dashboard-section modal-overlay" style="display: none;">
+            <div class="modal-card" style="max-width: 500px; margin: 0 auto; padding: 40px 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--mac-border); padding-bottom: 15px; margin-bottom: 30px;">
+                    <h2 style="margin: 0; display: flex; align-items: center; gap: 10px; font-size: 24px;"><i class='bx bx-bar-chart-alt-2'></i> Análisis Mensual</h2>
+                    <button class="action-btn mobile-only-btn" style="background: var(--mac-surface); border: 1px solid var(--mac-border); padding: 8px 15px;" onclick="window.closeModals()">Cerrar</button>
+                </div>
+                <div id="wrappedContentArea"></div>
             </div>
         </div>
-        <button type="button" id="btnAccountData" class="btn-secondary" onclick="window.openAccountModal()"><i class='bx bx-key'></i> Datos de Cuenta</button>
-        <input type="text" id="phone" placeholder="WhatsApp (Ej: +51...)" required>
-        <input type="number" id="clientCost" placeholder="Costo" step="0.1" required>
-        <input type="text" id="clientProviderName" placeholder="Nombre Proveedor">
-        <input type="number" id="clientPrice" placeholder="Precio" step="0.1" required>
-        <input type="date" id="expirationDate" required>
-        <div id="actionButtonsContainer" style="grid-column: 1 / -1;">
-            <button type="button" class="btn-primary" onclick="window.saveClientData()">Guardar Cliente</button>
-        </div>
-    </form>
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;" id="topControlsBar">
-        
-        <div class="expandable-search">
-            <input type="text" id="searchInput" placeholder="Buscar..." oninput="if(document.getElementById('btnTabClientes').style.background !== 'transparent') { window.renderTable(); } else { window.renderMasterAccounts(); }">
-            <i class='bx bx-search'></i>
-        </div>
-        
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-left: auto;">
-            
-            <select id="filterSelect" onchange="window.renderTable()" style="width: auto; padding: 12px 14px; border-radius: 10px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); outline: none; transition: all 0.25s; cursor: pointer;">
-                <option value="all">Todos los estados</option>
-                <option value="active">🟢 Activos</option>
-                <option value="warning">🟠 Por vencer</option>
-                <option value="expired">🔴 Vencidos</option>
-            </select>
-
-            <div style="display: flex; background: var(--mac-bg); padding: 4px; border-radius: 10px; border: 1px solid var(--mac-border);">
-                <button id="btnTabClientes" onclick="window.switchMainTab('clientes')" style="padding: 8px 20px; border-radius: 8px; border: none; background: var(--mac-blue); color: white; font-weight: bold; cursor: pointer; transition: 0.3s;">
-                    <i class='bx bx-user'></i> Mis Clientes
-                </button>
-                <button id="btnTabCuentas" onclick="window.switchMainTab('cuentas')" style="padding: 8px 20px; border-radius: 8px; border: none; background: transparent; color: var(--mac-text-secondary); font-weight: bold; cursor: pointer; transition: 0.3s;">
-                    <i class='bx bx-box'></i> Mis Cuentas
-                </button>
-            </div>
-            
-        </div>
-    </div>
-
-    <div id="accountsTableContainer" style="display: none; width: 100%; margin-bottom: 30px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: var(--mac-gray); padding: 15px; border-radius: 12px; border: 1px solid var(--mac-border);">
-            <p style="margin: 0; color: var(--mac-text-secondary); font-size: 14px;">Gestiona tus cuentas matrices, su rentabilidad y la disponibilidad de perfiles.</p>
-            <button class="btn-primary" style="width: auto; padding: 0 15px;" onclick="window.openNewMasterAccountModal()"><i class='bx bx-plus'></i> Nueva Cuenta Matriz</button>
-        </div>
-        
-        <div id="masterAccountsList" style="display: flex; flex-direction: column; gap: 15px;"></div>
-    </div>
-
-    <div style="width: 100%; position: relative;">
-        <div id="tableLoader"><i class='bx bx-loader-alt bx-spin'></i> Cargando datos...</div>
-        <table id="mainTable" style="display: none;">
-            <thead>
-                <tr>
-                    <th>Cliente</th><th>Plataformas</th><th>Cuenta</th><th>WhatsApp</th>
-                    <th>Utilidad</th><th>Vencimiento</th><th>Estado</th><th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-        </table>
-        
-        <div style="text-align: center; margin-top: 20px; display: none;" id="loadMoreContainer">
-            <button class="btn-secondary" style="width: auto; padding: 10px 30px;" onclick="window.loadMoreClients()"><i class='bx bx-chevron-down'></i> Cargar más clientes</button>
-        </div>
-    </div> </div> <nav class="bottom-nav">
+    </div> <!-- Fin del dashboard-main -->
+    
+    <!-- BARRA NAVEGACIÓN INFERIOR (SOLO MÓVIL) -->
+    <nav class="bottom-nav">
         <a href="#" id="navClientes" class="nav-item active" onclick="window.closeModals(true)">
             <i class='bx bx-group'></i>
             <span>Clientes</span>
@@ -481,156 +493,121 @@
             <span>Resumen</span>
         </a>
     </nav>
+</div> 
 
-</div> <div class="container" id="adminView" style="display: none;">
+<!-- ==============================================
+     VISTA DEL ADMINISTRADOR GLOBAL (A.G.C)
+=================================================== -->
+<div class="container" id="adminView" style="display: none;">
     <div class="header-top">
         <h2>Panel Global A.G.C.</h2>
         <div style="display: flex; gap: 10px;">
             <button class="btn-primary" style="background: rgba(52, 199, 89, 0.15); color: var(--mac-green); border: 1px solid var(--mac-green); padding: 5px 15px;" onclick="window.abrirModalAdminBot()"><i class='bx bxl-whatsapp'></i> Conectar Mi Bot</button>
-            
             <button class="btn-logout" onclick="window.doLogout()"><i class='bx bx-log-out'></i> Salir</button>
             <button class="theme-toggle" onclick="window.toggleTheme()"><i class='bx bx-moon'></i></button>
         </div>
     </div>
     
     <h3><i class='bx bx-group'></i> Gestión de Distribuidores</h3>
-        <div style="overflow-x:auto; margin-bottom: 40px;">
-            <table>
-                <thead><tr><th>Nombre</th><th>País</th><th>Correo</th><th>Teléfono</th><th>Plan</th><th>Estado</th><th>Acción</th></tr></thead>
-                <tbody id="adminTableBody"></tbody>
-            </table>
-        </div>
+    <div style="overflow-x:auto; margin-bottom: 40px;">
+        <table>
+            <thead><tr><th>Nombre</th><th>País</th><th>Correo</th><th>Teléfono</th><th>Plan</th><th>Estado</th><th>Acción</th></tr></thead>
+            <tbody id="adminTableBody"></tbody>
+        </table>
+    </div>
 
-        <h3><i class='bx bxs-megaphone'></i> Gestión de Noticias / Novedades</h3>
-        <div class="form-grid" style="margin-bottom: 20px; background: var(--mac-gray); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border);">
-            <input type="text" id="newsInputTitle" placeholder="Título de la noticia" style="background: var(--mac-surface);" required>
-            <textarea id="newsInputDesc" placeholder="Descripción de la noticia, oferta o sorteo..." rows="3" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-family: inherit; grid-column: 1 / -1; resize: none;" required></textarea>
-            <div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 5px;">
-                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Subir Imagen (Opcional):</label>
-                <input type="file" id="newsInputImg" accept="image/*" style="background: var(--mac-surface); padding: 5px; font-size: 12px;">
-            </div>
-            <button id="btnSubmitNews" class="btn-primary" onclick="window.saveNews()" style="grid-column: 1 / -1;"><i class='bx bx-send'></i> Publicar Noticia a Todos</button>
-            <button id="btnCancelEditNews" class="btn-secondary" onclick="window.cancelEditNews()" style="grid-column: 1 / -1; display: none;">Cancelar Edición</button>
+    <h3><i class='bx bxs-megaphone'></i> Gestión de Noticias / Novedades</h3>
+    <div class="form-grid" style="margin-bottom: 20px; background: var(--mac-gray); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border);">
+        <input type="text" id="newsInputTitle" placeholder="Título de la noticia" style="background: var(--mac-surface);" required>
+        <textarea id="newsInputDesc" placeholder="Descripción de la noticia, oferta o sorteo..." rows="3" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-family: inherit; resize: none;" required></textarea>
+        <div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 5px;">
+            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Subir Imagen (Opcional):</label>
+            <input type="file" id="newsInputImg" accept="image/*" style="background: var(--mac-surface); padding: 5px; font-size: 12px;">
         </div>
+        <button id="btnSubmitNews" class="btn-primary" onclick="window.saveNews()" style="grid-column: 1 / -1;"><i class='bx bx-send'></i> Publicar Noticia a Todos</button>
+        <button id="btnCancelEditNews" class="btn-secondary" onclick="window.cancelEditNews()" style="grid-column: 1 / -1; display: none;">Cancelar Edición</button>
+    </div>
 
-        <div style="overflow-x:auto; margin-bottom: 40px;">
-            <table>
-                <thead><tr><th>Fecha</th><th>Título</th><th>Imagen</th><th>Acciones</th></tr></thead>
-                <tbody id="adminNewsBody"></tbody>
-            </table>
-        </div>
+    <div style="overflow-x:auto; margin-bottom: 40px;">
+        <table>
+            <thead><tr><th>Fecha</th><th>Título</th><th>Imagen</th><th>Acciones</th></tr></thead>
+            <tbody id="adminNewsBody"></tbody>
+        </table>
+    </div>
         
-        <h3><i class='bx bx-bulb'></i> Buzón de Sugerencias</h3>
-        <div style="overflow-x:auto;">
-            <table>
-                <thead><tr><th>Fecha</th><th>Distribuidor</th><th>Sugerencia / Idea</th><th>Estado</th><th>Acciones</th></tr></thead>
-                <tbody id="adminSuggestionsBody"></tbody>
-            </table>
-        </div>
+    <h3><i class='bx bx-bulb'></i> Buzón de Sugerencias</h3>
+    <div style="overflow-x:auto;">
+        <table>
+            <thead><tr><th>Fecha</th><th>Distribuidor</th><th>Sugerencia / Idea</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="adminSuggestionsBody"></tbody>
+        </table>
     </div>
 </div>
 
-<!-- MODAL DE CONFIGURACIÓN DE WHATSAPP -->
+<!-- ==============================================
+     MODALES GLOBALES FLOTANTES (ESTOS QUEDAN IGUAL)
+=================================================== -->
+<!-- WA CONFIG -->
 <div id="waModal" class="modal-overlay" style="display: none;">
     <div class="modal-card" style="max-width: 500px;">
         <h3 style="margin-bottom: 5px;"><i class='bx bxl-whatsapp'></i> Mensajes de WhatsApp</h3>
-        
         <p style="font-size: 12px; color: var(--mac-text-secondary); margin-bottom: 10px; margin-top: 0;">
             Variables de Recordatorio: <strong style="color: var(--mac-blue);">{nombre}</strong> | <strong style="color: var(--mac-blue);">{plataforma}</strong> | <strong style="color: var(--mac-blue);">{fecha}</strong> | <strong style="color: var(--mac-green);">{pago}</strong><br>
             Variables de Entrega: <strong style="color: var(--mac-orange);">{correo}</strong> | <strong style="color: var(--mac-orange);">{pass}</strong> | <strong style="color: var(--mac-orange);">{profile}</strong> | <strong style="color: var(--mac-orange);">{pin}</strong> | <strong style="color: var(--mac-orange);">{reglas}</strong>
         </p>
-        
         <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Tus datos de pago (Yape, Plin, Binance):</label>
         <input type="text" id="editWaPayment" placeholder="Ej: Yape: 999... / Binance Pay: 123..." style="margin-bottom: 15px; background: var(--mac-bg);">
-        
-        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Mensaje de Bienvenida Automático (Se envía 1 vez por hora):</label>
+        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Mensaje de Bienvenida Automático:</label>
         <textarea id="editWaWelcome" rows="3" style="width: 100%; margin-bottom: 15px; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none;"></textarea>
-        
         <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Mensaje de Renovación Automática:</label>
         <textarea id="editWaMessage" rows="4" style="width: 100%; margin-bottom: 15px; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none;"></textarea>
-
         <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Mensaje de Entrega de Cuenta Nueva:</label>
         <textarea id="editWaDeliveryMessage" rows="5" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none;"></textarea>
-        
         <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button class="btn-primary" onclick="window.saveWaMessage()">Guardar Configuración</button>
+            <button class="btn-primary" onclick="window.saveWaMessage()">Guardar</button>
             <button class="btn-secondary" onclick="window.closeModals()">Cerrar</button>
         </div>
     </div>
 </div>
 
+<!-- PERFIL -->
 <div id="profileModal" class="modal-overlay" style="display: none;">
     <div class="modal-card">
         <h3 style="margin-bottom: 15px;"><i class='bx bx-user-circle'></i> Mi Perfil y Marca Blanca</h3>
         <div style="display: flex; flex-direction: column; gap: 12px;">
-            
-            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Logo de tu empresa (Recomendado: Cuadrado 500x500px, PNG):</label>
+            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Logo de tu empresa (500x500px):</label>
             <input type="file" id="editLogoUpload" accept="image/*" style="padding: 5px; font-size: 12px;">
-            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 5px;">Banner de la tienda (Opcional, formato Horizontal):</label>
+            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 5px;">Banner de la tienda (Horizontal):</label>
             <input type="file" id="editBannerUpload" accept="image/*" style="padding: 5px; font-size: 12px;">
-            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Link de Referencias (Telegram, Instagram, Drive...):</label>
-            <input type="url" id="editReferencesLink" placeholder="https://..." style="padding: 5px; font-size: 12px; margin-bottom: 5px; width: 100%; border: 1px solid var(--mac-border); border-radius: 6px; background: var(--mac-bg);">
+            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Link de Referencias:</label>
+            <input type="url" id="editReferencesLink" placeholder="https://..." style="padding: 5px; font-size: 12px; border-radius: 6px; background: var(--mac-bg);">
             
             <input type="text" id="editProfileName" placeholder="Nombre Comercial / Marca">
             <label style="font-size: 11px; font-weight: bold; color: var(--mac-blue); margin-top: 5px;">Link personalizado de tu tienda:</label>
-<input type="text" id="editProfileAlias" placeholder="Ej: mariano-store (Sin espacios)">
+            <input type="text" id="editProfileAlias" placeholder="Ej: mariano-store (Sin espacios)">
             <select id="editProfileCountry">
-                <option value="Argentina">Argentina</option>
-                <option value="Bolivia">Bolivia</option>
-                <option value="Chile">Chile</option>
-                <option value="Colombia">Colombia</option>
-                <option value="Costa Rica">Costa Rica</option>
-                <option value="Cuba">Cuba</option>
-                <option value="Ecuador">Ecuador</option>
-                <option value="El Salvador">El Salvador</option>
-                <option value="España">España</option>
-                <option value="Guatemala">Guatemala</option>
-                <option value="Honduras">Honduras</option>
-                <option value="México">México</option>
-                <option value="Nicaragua">Nicaragua</option>
-                <option value="Panamá">Panamá</option>
-                <option value="Paraguay">Paraguay</option>
-                <option value="Perú">Perú</option>
-                <option value="República Dominicana">República Dominicana</option>
-                <option value="Uruguay">Uruguay</option>
-                <option value="Venezuela">Venezuela</option>
-                <option value="Otro País">Otro País</option>
+                <option value="Perú">Perú</option><option value="México">México</option><option value="Colombia">Colombia</option>
             </select>
             <input type="tel" id="editProfilePhone" placeholder="Teléfono (+51...)">
-            <input type="email" id="editProfileEmail" placeholder="Correo" disabled style="opacity: 0.6; margin-top: 10px;">
         </div>
         <div style="margin-top: 15px; border-top: 1px dashed var(--mac-border); padding-top: 15px;">
             <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Automatización de WhatsApp (Bot):</label>
             <button class="btn-secondary" style="width: 100%; margin-top: 5px; background: rgba(52, 199, 89, 0.1); color: var(--mac-green); border: 1px solid var(--mac-green);" onclick="window.vincularBot()">
                 <i class='bx bx-bot'></i> Activar Mensajes Automáticos
             </button>
-            
             <div id="qrContainer" style="text-align: center; margin-top: 10px; display: none;">
                 <img id="botQrImage" src="" style="width: 180px; height: 180px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
                 <p id="botStatus" style="font-size: 12px; color: var(--mac-text-secondary); margin-top: 8px; font-weight: bold;">Cargando...</p>
             </div>
         </div>
         <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button class="btn-primary" onclick="window.saveProfile()">Guardar y Actualizar</button>
+            <button class="btn-primary" onclick="window.saveProfile()">Guardar</button>
             <button class="btn-secondary" onclick="window.closeModals()">Cerrar</button>
         </div>
     </div>
 </div>
 
-<div id="suggestionModal" class="modal-overlay" style="display: none;">
-    <div class="modal-card">
-        <h3 style="margin-bottom: 5px;"><i class='bx bx-bulb'></i> Buzón de Sugerencias</h3>
-        <p style="font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 15px; margin-top: 0;">
-            ¿Qué nueva plataforma te gustaría ver o qué mejora le harías al panel? ¡Te leemos!
-        </p>
-        <textarea id="suggestionText" rows="4" placeholder="Escribe tu idea aquí..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none;"></textarea>
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button class="btn-primary" onclick="window.sendSuggestion()"><i class='bx bx-send'></i> Enviar Idea</button>
-            <button class="btn-secondary" onclick="window.closeModals()">Cancelar</button>
-        </div>
-    </div>
-</div>
-
+<!-- DATOS DE CUENTA AL REGISTRAR CLIENTE -->
 <div id="accountModal" class="modal-overlay" style="display: none;">
     <div class="modal-card">
         <h3 style="margin-bottom: 15px;"><i class='bx bx-key'></i> Datos de la Cuenta</h3>
@@ -642,34 +619,34 @@
             </div>
             <input type="text" id="accProfile" placeholder="Nombre del Perfil (Ej: Perfil 1)">
             <input type="text" id="accPin" placeholder="PIN del Perfil (Ej: 1234)">
+            
             <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 5px;">
-    <label style="font-size: 12px; font-weight: 600; color: var(--mac-text-secondary);">Tipo de Venta:</label>
-    <select id="accSaleType" style="width:100%; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
-        <option value="Perfil">👤 Perfil</option>
-        <option value="Cuenta Completa">⭐ Cuenta Completa</option>
-    </select>
-</div>
+                <label style="font-size: 12px; font-weight: 600; color: var(--mac-text-secondary);">Tipo de Venta:</label>
+                <select id="accSaleType" style="width:100%; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                    <option value="Perfil">👤 Perfil</option>
+                    <option value="Cuenta Completa">⭐ Cuenta Completa</option>
+                </select>
+            </div>
+            
             <div style="display: flex; flex-direction: column; gap: 4px;">
-                <label style="font-size: 12px; font-weight: 600; color: var(--mac-text-secondary);">Unidades / Pantallas vendidas:</label>
+                <label style="font-size: 12px; font-weight: 600; color: var(--mac-text-secondary);">Unidades / Pantallas:</label>
                 <input type="number" id="accUnits" value="1" min="1" placeholder="Cantidad de unidades" required>
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 5px;">
                 <div style="flex: 1;">
-                    <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Dispositivo (Opcional):</label>
+                    <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Dispositivo:</label>
                     <input type="text" id="accDeviceName" placeholder="Ej: TV Sala" style="width:100%;">
                 </div>
                 <div style="flex: 1;">
                     <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Tipo:</label>
                     <select id="accDeviceType" style="width:100%; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
                         <option value="">No definido</option>
-                        <option value="TV">TV</option>
-                        <option value="PC">PC / Laptop</option>
-                        <option value="Celular">Celular</option>
+                        <option value="TV">TV</option><option value="PC">PC</option><option value="Celular">Celular</option>
                     </select>
                 </div>
             </div>
-            </div>
+        </div>
         <div style="display: flex; gap: 10px; margin-top: 15px;">
             <button class="btn-primary" onclick="window.confirmAccountData()">Confirmar Datos</button>
             <button class="btn-secondary" onclick="window.closeModals()">Cancelar</button>
@@ -677,6 +654,7 @@
     </div>
 </div>
 
+<!-- VER DATOS GUARDADOS DE UNA CUENTA -->
 <div id="viewAccountModal" class="modal-overlay" style="display: none;">
     <div class="modal-card">
         <h3 style="margin-bottom: 15px;"><i class='bx bx-key'></i> Detalles de la Cuenta</h3>
@@ -694,64 +672,65 @@
     </div>
 </div>
 
-<div id="adminManageModal" class="modal-overlay" style="display: none;">
-    <div class="modal-card">
-        <h3 style="margin-bottom: 5px;"><i class='bx bx-cog'></i> Gestionar Acceso</h3>
-        <p style="margin-top:0; margin-bottom: 15px; font-size: 14px; color: var(--mac-text-secondary);">Usuario: <strong id="manageUserName" style="color:var(--mac-blue);"></strong></p>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-            <div>
-                <label style="font-size:12px; font-weight:bold; color:var(--mac-text-secondary);">Acción a realizar:</label>
-                <select id="manageAction" style="margin-top: 5px;">
-                    <option value="true">🟢 Activar / Mantener Activa</option>
-                    <option value="false">🔴 Suspender Cuenta</option>
-                </select>
-            </div>
-            <div>
-                <label style="font-size:12px; font-weight:bold; color:var(--mac-text-secondary);">Duración de la acción:</label>
-                <select id="manageDuration" style="margin-top: 5px;" onchange="window.toggleDurationFields()">
-                    <option value="permanent">Permanentemente</option>
-                    <option value="temporary">Temporalmente</option>
-                </select>
-            </div>
-            <div id="temporaryFields" style="display:none; flex-direction: column; gap: 10px;">
-                <label style="font-size:12px; font-weight:bold; color:var(--mac-text-secondary);">Tiempo de aplicación:</label>
-                <select id="manageTempType" onchange="window.toggleTempType()">
-                    <option value="hours">3 Horas (Demo rápido)</option>
-                    <option value="days">Ingresar cantidad de Días</option>
-                </select>
-                <input type="number" id="manageDays" placeholder="Ejemplo: 30" style="display:none;" min="1">
-            </div>
-        </div>
-        <div style="display: flex; gap: 10px; margin-top: 20px;">
-            <button class="btn-primary" onclick="window.saveManageStatus()">Guardar y Aplicar</button>
-            <button class="btn-secondary" onclick="window.closeModals()">Cancelar</button>
-        </div>
-    </div>
-</div>
-<div id="planModal" class="modal-overlay" style="display: none;">
-    <div class="modal-card">
-        <h3 style="margin-bottom: 5px;"><i class='bx bx-diamond'></i> Gestionar Plan</h3>
-        <p style="margin-top:0; margin-bottom: 15px; font-size: 14px; color: var(--mac-text-secondary);">
-            Distribuidor: <strong id="planUserName" style="color:var(--mac-blue);"></strong>
-        </p>
+<!-- NUEVA MATRIZ -->
+<div id="masterAccountModal" class="modal-overlay" style="display: none; z-index: 2000;">
+    <div class="modal-card" style="max-width: 450px;">
+        <h3 style="margin-bottom: 5px;"><i class='bx bx-plus-circle'></i> Nueva Cuenta Matriz</h3>
+        <p style="color:var(--mac-text-secondary); font-size:12px; margin-bottom:15px; margin-top:0;">Registra una cuenta completa para controlar la distribución de sus perfiles.</p>
         
         <div style="display: flex; flex-direction: column; gap: 12px;">
             <div>
-                <label style="font-size:12px; font-weight:bold; color:var(--mac-text-secondary);">Seleccionar Nuevo Plan:</label>
-                <select id="newPlanSelect" style="margin-top: 5px;">
-                    <option value="demo">Prueba Gratuita (3 Días - 20 Clientes)</option>
-                    <option value="basico">Plan Básico (30 Días - 100 Clientes)</option>
-                    <option value="pro">Plan Pro / Bot Propio (30 Días - Ilimitado)</option>
+                <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Selecciona Plataforma:</label>
+                <select id="matPlatform" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                    <option value="Netflix">Netflix</option><option value="Disney+">Disney+</option><option value="Spotify Premium">Spotify</option>
                 </select>
             </div>
-        </div>
-        
-        <div style="display: flex; gap: 10px; margin-top: 20px;">
-            <button class="btn-primary" onclick="window.savePlan()">Guardar y Aplicar</button>
-            <button class="btn-secondary" onclick="window.closeModals()">Cancelar</button>
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;"><label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Correo:</label><input type="email" id="matEmail" style="width:100%;"></div>
+                <div style="flex: 1;"><label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Contraseña:</label><input type="text" id="matPass" style="width:100%;"></div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;"><label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">¿Cuántos perfiles tiene?:</label><input type="number" id="matProfiles" value="5" min="1" style="width:100%;"></div>
+                <div style="flex: 1;"><label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Costo (Inversión):</label><input type="number" id="matCost" value="0" style="width:100%;"></div>
+            </div>
+            <div>
+                <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Proveedor / Origen:</label>
+                <select id="matProvider" onchange="window.toggleMatProviderFields()" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                    <option value="Propia">Mia (Cuenta Propia)</option>
+                    <option value="Proveedor Externo">Proveedor Externo</option>
+                </select>
+            </div>
+            <div id="externalProviderFields" style="display: none; flex-direction: column; gap: 12px;">
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;"><label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Vence el:</label><input type="date" id="matExpiryDate" style="width:100%;"></div>
+                    <div style="flex: 1;"><label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Nombre Prov:</label><input type="text" id="matProviderName" style="width:100%;"></div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="btn-primary" onclick="window.saveMasterAccount()">Guardar Cuenta</button>
+                <button class="btn-secondary" onclick="document.getElementById('masterAccountModal').style.display='none'">Cancelar</button>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- REGLAS DE PLATAFORMAS (Inventario) -->
+<div id="rulesModal" class="modal-overlay" style="display: none; z-index: 1000;">
+    <div class="modal-card" style="max-width: 400px;">
+        <h3 style="margin-bottom: 5px;"><i class='bx bx-list-check'></i> Reglas por Plataforma</h3>
+        <p style="color:var(--mac-text-secondary); font-size:12px; margin-bottom:15px; margin-top:0;">El bot enviará esta regla automáticamente según la plataforma de la cuenta.</p>
+        <select id="rulePlatformSelect" style="width: 100%; margin-bottom: 10px; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);" onchange="window.loadPlatformRule()">
+            <option value="Netflix">Netflix</option><option value="Disney+">Disney+</option><option value="Spotify Premium">Spotify Premium</option>
+        </select>
+        <textarea id="ruleText" rows="4" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none;"></textarea>
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button class="btn-primary" onclick="window.savePlatformRule()">Guardar</button>
+            <button class="btn-secondary" onclick="document.getElementById('rulesModal').style.display='none'; window.openInventoryModal(false)">Volver</button>
+        </div>
+    </div>
+</div>
+
+<!-- NOVEDADES (DASHBOARD) -->
 <div id="newsModal" class="modal-overlay" style="display: none;">
     <div class="modal-card modal-large">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -759,322 +738,109 @@
             <button class="btn-secondary" style="width: auto; padding: 5px 12px; font-weight: bold;" onclick="window.closeModals()"><i class='bx bx-x'></i> Cerrar</button>
         </div>
         <div class="news-layout">
-            <div class="news-sidebar" id="newsSidebar">
-            </div>
+            <div class="news-sidebar" id="newsSidebar"></div>
             <div class="news-content-area" id="newsContentArea">
                 <div style="display:flex; height:100%; align-items:center; justify-content:center;">
-                    <p style="color: var(--mac-text-secondary); text-align: center;"><i class='bx bx-left-arrow-alt'></i> Selecciona una noticia de la izquierda para ver los detalles.</p>
+                    <p style="color: var(--mac-text-secondary); text-align: center;">👈 Selecciona una noticia.</p>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- SUGERENCIAS -->
+<div id="suggestionModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <h3 style="margin-bottom: 5px;"><i class='bx bx-bulb'></i> Buzón de Sugerencias</h3>
+        <textarea id="suggestionText" rows="4" placeholder="Escribe tu idea aquí..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); resize: none;"></textarea>
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button class="btn-primary" onclick="window.sendSuggestion()"><i class='bx bx-send'></i> Enviar</button>
+            <button class="btn-secondary" onclick="window.closeModals()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- DETALLES CLIENTE (SOLO MÓVIL) -->
 <div id="mobileClientModal" class="modal-overlay" style="display: none;">
     <div class="modal-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <h3 style="margin: 0; font-size: 18px;" id="mcName">Cargando...</h3>
             <span id="mcStatus" class="status">...</span>
         </div>
-        
         <div style="background: var(--mac-bg); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
             <p style="margin: 5px 0; font-size: 14px;"><strong><i class='bx bxl-whatsapp'></i> WhatsApp:</strong> <span id="mcPhone"></span></p>
             <p style="margin: 5px 0; font-size: 14px;"><strong><i class='bx bx-wallet'></i> Pagó:</strong> <span id="mcPrice" style="color: var(--mac-green); font-weight: bold;"></span></p>
             <p style="margin: 5px 0; font-size: 14px;"><strong><i class='bx bx-calendar-x'></i> Vence:</strong> <span id="mcDate"></span></p>
         </div>
-        
         <p style="font-size: 11px; color: var(--mac-text-secondary); margin-bottom: 10px; font-weight: bold; text-align: center; letter-spacing: 1px;">ACCIONES RÁPIDAS</p>
-        
-        <div id="mcActions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        </div>
-        
+        <div id="mcActions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
         <div style="margin-top: 15px;">
             <button class="btn-secondary" style="width: 100%; padding: 12px;" onclick="window.closeModals()">Cerrar Detalles</button>
         </div>
     </div>
 </div>
 
+<!-- ==============================================
+     PLANTILLAS OCULTAS (RECIBO Y WRAPPED)
+=================================================== -->
 <div id="ticketTemplate" style="position: fixed; left: -9999px; top: -9999px; background: #1c1c1e; color: #ffffff; width: 380px; padding: 30px; border-radius: 16px; font-family: -apple-system, sans-serif; box-sizing: border-box; border: 1px solid #38383a; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: -9999;">
     <div style="text-align: center; border-bottom: 1px dashed #38383a; padding-bottom: 20px; margin-bottom: 20px;">
-        
-        <!-- NUEVO: Contenedor del Logo del Distribuidor -->
         <img id="ticketLogo" src="" style="width: 70px; height: 70px; border-radius: 12px; object-fit: cover; margin-bottom: 10px; display: none;">
-        
         <h2 id="ticketBrand" style="margin: 0; font-size: 24px; color: #ffffff; font-weight: 800;">A.G.C.</h2>
         <p style="margin: 5px 0 0 0; color: #86868b; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Comprobante de Suscripción</p>
     </div>
-    
     <div style="margin-bottom: 20px;">
         <p style="margin: 5px 0; font-size: 13px; color: #86868b; text-transform: uppercase;">A nombre de:</p>
         <p id="ticketClient" style="margin: 0; font-size: 18px; font-weight: bold;"></p>
     </div>
-    
     <div style="margin-bottom: 20px;">
         <p style="margin: 5px 0; font-size: 13px; color: #86868b; text-transform: uppercase;">Servicio Contratado:</p>
         <p id="ticketPlatform" style="margin: 0; font-size: 18px; font-weight: bold; color: #0a84ff;"></p>
     </div>
-    
     <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #38383a; padding-bottom: 20px; margin-bottom: 20px;">
-        <div>
-            <p style="margin: 5px 0; font-size: 13px; color: #86868b; text-transform: uppercase;">Válido hasta:</p>
-            <p id="ticketDate" style="margin: 0; font-size: 16px; font-weight: bold;"></p>
-        </div>
-        <div style="text-align: right;">
-            <p style="margin: 5px 0; font-size: 13px; color: #86868b; text-transform: uppercase;">Total Abonado:</p>
-            <p id="ticketPrice" style="margin: 0; font-size: 22px; font-weight: bold; color: #30d158;"></p>
-        </div>
+        <div><p style="margin: 5px 0; font-size: 13px; color: #86868b; text-transform: uppercase;">Válido hasta:</p><p id="ticketDate" style="margin: 0; font-size: 16px; font-weight: bold;"></p></div>
+        <div style="text-align: right;"><p style="margin: 5px 0; font-size: 13px; color: #86868b; text-transform: uppercase;">Total Abonado:</p><p id="ticketPrice" style="margin: 0; font-size: 22px; font-weight: bold; color: #30d158;"></p></div>
     </div>
-    
-    <div style="text-align: center;">
-        <p style="margin: 0; font-size: 13px; color: #86868b;">¡Gracias por tu preferencia y confianza!</p>
-        <p style="margin: 8px 0 0 0; font-size: 10px; color: #38383a; text-transform: uppercase;">Generado automáticamente por Panel A.G.C.</p>
-    </div>
+    <div style="text-align: center;"><p style="margin: 0; font-size: 13px; color: #86868b;">¡Gracias por tu preferencia y confianza!</p><p style="margin: 8px 0 0 0; font-size: 10px; color: #38383a; text-transform: uppercase;">Generado automáticamente por Panel A.G.C.</p></div>
 </div>  
 
 <div id="wrapupTemplate" style="position: fixed; left: -9999px; top: -9999px; background: linear-gradient(160deg, #000000 0%, #2b0005 50%, #590011 100%); color: #ffffff; width: 450px; height: 800px; padding: 50px 30px; border-radius: 30px; font-family: -apple-system, sans-serif; box-sizing: border-box; text-align: center; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 20px 50px rgba(0,0,0,0.8); z-index: -9999; overflow: hidden; border: 4px solid #ff2d55;">
-    
     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
         <div style="font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 800; letter-spacing: 3px;">A.G.C. WRAPPED</div>
         <div style="font-size: 13px; color: #ff2d55; font-weight: 800; text-transform: uppercase;" id="wrapupMonth">MES</div>
     </div>
-
     <div style="margin-top: 10px;">
         <h2 id="wrapupBrand" style="margin: 0 0 5px 0; font-size: 34px; font-weight: 900; text-transform: uppercase; color: #ffffff; letter-spacing: 1px;">Mi Marca</h2>
         <p id="wrapupPhrase" style="margin: 0; font-size: 15px; color: #ff9500; font-style: italic; font-weight: bold; padding: 0 10px;">"¡Demostraste tu verdadero poder!"</p>
     </div>
-    
     <div style="display: flex; flex-direction: column; gap: 14px; margin: 20px 0; flex-grow: 1; justify-content: center;">
-        
         <div style="background: rgba(255,255,255,0.04); backdrop-filter: blur(15px); padding: 14px 20px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.08); text-align: left;">
-            <p style="margin: 0 0 2px 0; font-size: 11px; color: #ebebf599; text-transform: uppercase; letter-spacing: 1px;">Cuentas Registradas</p>
-            <p id="wrapupAccounts" style="margin: 0; font-size: 24px; font-weight: 900; color: #30d158;">0</p>
+            <p style="margin: 0 0 2px 0; font-size: 11px; color: #ebebf599; text-transform: uppercase; letter-spacing: 1px;">Cuentas Registradas</p><p id="wrapupAccounts" style="margin: 0; font-size: 24px; font-weight: 900; color: #30d158;">0</p>
         </div>
-
         <div style="background: rgba(255,255,255,0.04); backdrop-filter: blur(15px); padding: 14px 20px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.08); text-align: left;">
-            <p style="margin: 0 0 2px 0; font-size: 11px; color: #ebebf599; text-transform: uppercase; letter-spacing: 1px;">Plataforma Más Vendida</p>
-            <p id="wrapupTopPlatform" style="margin: 0; font-size: 24px; font-weight: 900; color: #0a84ff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</p>
+            <p style="margin: 0 0 2px 0; font-size: 11px; color: #ebebf599; text-transform: uppercase; letter-spacing: 1px;">Plataforma Más Vendida</p><p id="wrapupTopPlatform" style="margin: 0; font-size: 24px; font-weight: 900; color: #0a84ff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</p>
         </div>
-        
         <div style="background: rgba(255,255,255,0.04); backdrop-filter: blur(15px); padding: 14px 20px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.08); text-align: left;">
-            <p style="margin: 0 0 2px 0; font-size: 11px; color: #ebebf599; text-transform: uppercase; letter-spacing: 1px;">Día Con Más Ventas</p>
-            <p id="wrapupTopDay" style="margin: 0; font-size: 24px; font-weight: 900; color: #ff9f0a;">-</p>
+            <p style="margin: 0 0 2px 0; font-size: 11px; color: #ebebf599; text-transform: uppercase; letter-spacing: 1px;">Día Con Más Ventas</p><p id="wrapupTopDay" style="margin: 0; font-size: 24px; font-weight: 900; color: #ff9f0a;">-</p>
         </div>
-
         <div style="background: rgba(255,255,255,0.04); backdrop-filter: blur(15px); padding: 14px 20px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.08); text-align: left;">
-            <p style="margin: 0 0 2px 0; font-size: 11px; color: #ebebf599; text-transform: uppercase; letter-spacing: 1px;">Distribuidor / Cliente Más Fiel</p>
-            <p id="wrapupTopClient" style="margin: 0; font-size: 24px; font-weight: 900; color: #bf5af2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</p>
-            <p id="wrapupClientAccounts" style="margin: 3px 0 0 0; font-size: 13px; color: #ebebf599; font-weight: 500;">0 cuentas registradas en el mes</p>
+            <p style="margin: 0 0 2px 0; font-size: 11px; color: #ebebf599; text-transform: uppercase; letter-spacing: 1px;">Distribuidor / Cliente Más Fiel</p><p id="wrapupTopClient" style="margin: 0; font-size: 24px; font-weight: 900; color: #bf5af2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</p><p id="wrapupClientAccounts" style="margin: 3px 0 0 0; font-size: 13px; color: #ebebf599; font-weight: 500;">0 cuentas registradas en el mes</p>
         </div>
-
     </div>
-    
-    <div style="margin-top: auto;">
-        <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.3); letter-spacing: 1px;">POTENCIADO POR PANEL A.G.C.</p>
-    </div>
+    <div style="margin-top: auto;"><p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.3); letter-spacing: 1px;">POTENCIADO POR PANEL A.G.C.</p></div>
 </div>
-    <!-- MODAL A.G.C. WRAPPED (EXCLUSIVO) -->
-<div id="wrappedModal" class="modal-overlay" style="display: none;">
-    <div class="modal-card" style="max-width: 450px; padding: 25px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px; margin-bottom: 20px;">
-            <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;"><i class='bx bx-bar-chart-alt-2'></i> Mi Resumen</h3>
-            <button class="action-btn" style="background: var(--mac-surface); border: 1px solid var(--mac-border);" onclick="window.closeModals()"><i class='bx bx-x'></i> Cerrar</button>
-        </div>
-        
-        <!-- Aquí se inyectarán los datos del Wrapped -->
-        <div id="wrappedContentArea"></div>
-    </div>
-</div>
-   <!-- MODAL DE INVENTARIO (CUENTAS LIBRES) -->
-    <div id="inventoryModal" class="modal-overlay" style="display: none;">
-        <div class="modal-card" style="max-width: 500px;">
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 style="margin: 0;"><i class='bx bx-box'></i> Mi Inventario</h3>
-                <button class="action-btn" style="background: rgba(0, 122, 255, 0.1); color: var(--mac-blue); border: 1px solid var(--mac-blue); padding: 5px 10px; border-radius: 8px; font-weight: bold;" onclick="window.openRulesModal()"><i class='bx bx-cog'></i> Reglas</button>
-            </div>
-            
-            <p style="color:var(--mac-text-secondary); font-size:13px; margin-bottom:15px; margin-top:0;">Guarda aquí las cuentas que tienes listas para vender.</p>
 
-            <div style="display: flex; flex-direction: column; gap: 8px; background: var(--mac-bg); padding: 15px; border-radius: 10px; border: 1px solid var(--mac-border);">
-                
-                <div style="display: flex; gap: 10px;">
-                    <select id="invPlatform" style="flex: 2; padding: 8px; border-radius: 6px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
-                        <option value="">Plataforma...</option>
-                        <option value="Netflix">Netflix</option>
-                        <option value="Disney+">Disney+</option>
-                        <option value="Amazon Prime">Amazon Prime</option>
-                        <option value="HBO Max">HBO Max</option>
-                        <option value="Spotify Premium">Spotify Premium</option>
-                        <option value="YouTube Premium">YouTube Premium</option>
-                        <option value="Crunchyroll">Crunchyroll</option>
-                        <option value="Paramount">Paramount</option>
-                        <option value="Apple TV">Apple TV</option>
-                        <option value="IPTV">IPTV</option>
-                        <option value="Canva Pro">Canva Pro</option>
-                        <option value="Gemini Pro">Gemini Pro</option>
-                        <option value="ChatGPT">ChatGPT</option>
-                        <option value="Vix">Vix</option>
-                        <option value="DirectvGO">DirectvGO</option>
-                        <option value="Movistar">Movistar</option>
-                        <option value="Viki">Viki</option>
-                        <option value="CapCut Pro">CapCut Pro</option>
-                    </select>
-                    
-                    <select id="invType" style="flex: 1.5; padding: 8px; border-radius: 6px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
-                        <option value="Perfil">👤 Perfil</option>
-                        <option value="Completa">⭐ Completa</option>
-                    </select>
-                </div>
-                
-                <div style="display: flex; gap: 10px;">
-                    <input type="email" id="invEmail" placeholder="Correo de la cuenta" style="flex: 2;">
-                    <input type="text" id="invPass" placeholder="Contraseña" style="flex: 1.5;">
-                </div>
-                
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="invProfile" placeholder="N° Perfil" style="flex: 1;">
-                    <input type="text" id="invPin" placeholder="PIN" style="flex: 1;">
-                </div>
-                
-                <button class="btn-primary" onclick="window.addInventoryAccount()"><i class='bx bx-save'></i> Guardar en stock</button>
-            </div>
-
-            <div id="inventoryList" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto;"></div>
-
-            <div style="display: flex; gap: 10px; margin-top: auto; padding-bottom: 20px;">
-                <button class="btn-secondary" style="width: 100%;" onclick="window.closeModals()">Cerrar Inventario</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL DE REGLAS POR PLATAFORMA -->
-    <div id="rulesModal" class="modal-overlay" style="display: none; z-index: 1000;">
-        <div class="modal-card" style="max-width: 400px;">
-            <h3 style="margin-bottom: 5px;"><i class='bx bx-list-check'></i> Reglas por Plataforma</h3>
-            <p style="color:var(--mac-text-secondary); font-size:12px; margin-bottom:15px; margin-top:0;">El bot enviará esta regla automáticamente según la plataforma de la cuenta.</p>
-            
-            <select id="rulePlatformSelect" style="width: 100%; margin-bottom: 10px; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);" onchange="window.loadPlatformRule()">
-                <option value="Netflix">Netflix</option>
-                <option value="Disney+">Disney+</option>
-                <option value="Amazon Prime">Amazon Prime</option>
-                <option value="Max">Max</option>
-                <option value="Spotify Premium">Spotify Premium</option>
-                <option value="YouTube Premium">YouTube Premium</option>
-                <option value="Crunchyroll">Crunchyroll</option>
-                <option value="Paramount">Paramount</option>
-                <option value="Apple TV">Apple TV</option>
-                <option value="IPTV">IPTV</option>
-                <option value="Canva Pro">Canva Pro</option>
-                <option value="Gemini Pro">Gemini Pro</option>
-                <option value="ChatGPT">ChatGPT</option>
-                <option value="Vix">Vix</option>
-                <option value="DirectvGO">DirectvGO</option>
-                <option value="Movistar">Movistar</option>
-                <option value="Viki">Viki</option>
-                <option value="CapCut Pro">CapCut Pro</option>
-            </select>
-            
-            <textarea id="ruleText" rows="4" placeholder="Ej: Prohibido cambiar contraseña o crear perfiles nuevos..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none;"></textarea>
-            
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button class="btn-primary" onclick="window.savePlatformRule()">Guardar Regla</button>
-                <button class="btn-secondary" onclick="document.getElementById('rulesModal').style.display='none'; document.getElementById('inventoryModal').style.display='flex'">Volver</button>
-            </div>
-        </div>
-    </div>
-    <div id="pedidosModal" class="modal-overlay" style="display: none;">
-        <div class="modal-card" style="max-width: 550px;">
-            <h3 style="margin-bottom: 5px;"><i class='bx bx-bell'></i> Ventas por Aprobar</h3>
-            <p style="color:var(--mac-text-secondary); font-size:13px; margin-bottom:15px; margin-top:0;">Clientes que enviaron el comprobante esperando su cuenta.</p>
-
-            <div id="pedidosList" style="display: flex; flex-direction: column; gap: 10px; max-height: 350px; overflow-y: auto;">
-                </div>
-
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button class="btn-secondary" style="width: 100%;" onclick="window.closeModals()">Cerrar</button>
-            </div>
-        </div>
-    </div>
-<div id="storeModal" class="modal-overlay" style="display: none;">
-    <div class="modal-card">
-        <h3 style="margin-bottom: 5px;"><i class='bx bx-store-alt'></i> Mi Tiendita Web</h3>
-        <p style="font-size: 13px; color: var(--mac-text-secondary); margin-top: 0;">Configura tu catálogo público. Tus clientes verán esto y comprarán directo a tu WhatsApp.</p>
-        
-        <div id="externalCatalogSetup" style="background: rgba(0, 122, 255, 0.1); border: 1px dashed var(--mac-blue); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-            <label style="font-size: 12px; font-weight: bold; color: var(--mac-blue);">¿Ya tienes un catálogo propio? Ingrésalo aquí:</label>
-            <div style="display: flex; gap: 10px; margin-top: 8px;">
-                <input type="url" id="storeExternalInput" placeholder="Ej: https://misitio.com/catalogo" style="flex: 1; background: var(--mac-surface);">
-                <button class="btn-primary" style="width: auto; padding: 0 15px;" onclick="window.saveExternalStore()"><i class='bx bx-save'></i></button>
-            </div>
-            <p style="font-size: 11px; color: var(--mac-text-secondary); margin-top: 5px; margin-bottom: 0;">Al guardar, la tiendita interna se desactivará.</p>
-        </div>
-
-        <div id="externalCatalogActive" style="display: none; background: rgba(52, 199, 89, 0.1); border: 1px solid var(--mac-green); padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: center;">
-            <h4 style="color: var(--mac-green); margin: 0 0 10px 0;"><i class='bx bx-check-circle'></i> Catálogo Externo Activado</h4>
-            <p style="font-size: 13px; color: var(--mac-text-main); margin-bottom: 15px; word-break: break-all;" id="activeExternalLinkText"></p>
-            <button class="btn-secondary" style="width: 100%; border: 1px solid var(--mac-red); color: var(--mac-red); background: transparent;" onclick="window.removeExternalStore()">
-                <i class='bx bx-trash'></i> Eliminar y usar Tiendita Interna
-            </button>
-        </div>
-
-<div id="internalCatalogSection">
-            <div style="background: var(--mac-bg); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Añadir un producto o combo:</label>
-                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
-                    
-                    <div style="display: flex; gap: 10px;">
-                        <select id="storeType" style="flex: 1; padding: 8px; border-radius: 6px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
-                            <option value="Servicio">Servicio Único</option>
-                            <option value="Combo">🎁 Combo</option>
-                        </select>
-                        <input type="text" id="storePlatform" placeholder="Ej: Combo Disney+Max" style="flex: 2;">
-                        <input type="number" id="storePrice" placeholder="Precio" style="flex: 1;">
-                    </div>
-                    
-                    <div>
-                        <label style="font-size: 11px; color: var(--mac-text-secondary); display: block; margin-bottom: 4px;">Imagen de portada (Opcional):</label>
-                        <input type="file" id="storeImg" accept="image/*" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 12px;">
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="storeDesc" placeholder="Descripción (Ej: 1 Perfil de cada uno)" style="flex: 1;">
-                        <button class="btn-primary" style="width: auto; padding: 0 20px;" onclick="window.addStoreItem()"><i class='bx bx-plus'></i></button>
-                    </div>
-                    
-                </div>
-            </div>
-
-            <div id="storeItemsList" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; margin-bottom: 15px;">
-            </div>
-
-            <div style="border-top: 1px dashed var(--mac-border); padding-top: 15px;">
-                <label style="font-size: 12px; font-weight: bold; color: var(--mac-blue);">Tu Link Público:</label>
-                <input type="text" id="storeLinkInput" readonly style="color: var(--mac-text-secondary); background: var(--mac-surface);">
-            </div>
-        </div>
-
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button class="btn-primary" id="btnCopyInternalLink" onclick="window.copyStoreLink()"><i class='bx bx-copy'></i> Copiar Link</button>
-            <button class="btn-secondary" onclick="window.closeModals()">Cerrar</button>
-        </div>
-    </div>
-</div>
-    
+<!-- ==============================================
+     VISTA DEL CATÁLOGO PÚBLICO (TIENDITA CLIENTE)
+=================================================== -->
 <div id="publicStoreView" style="display: none; width: 100%; max-width: 1000px; margin: 0 auto; padding: 0 0 50px 0;">
-    
     <div class="store-cover-banner" id="publicStoreBanner" style="display: none;"></div>
-    
     <div id="publicStoreHeaderProfile" style="text-align: center; margin-bottom: 30px; padding: 0 20px; position: relative; transition: all 0.3s;">
-        
         <img id="publicStoreLogo" src="" style="width: 100px; height: 100px; border-radius: 24px; object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.3); display: none; margin: 0 auto 15px auto; border: 4px solid var(--mac-surface); position: relative; z-index: 2; background: var(--mac-bg);">
-        
         <h1 style="margin: 0; font-size: 28px; color: var(--mac-text-main); display: flex; align-items: center; justify-content: center; gap: 8px;">
             <span id="publicStoreName">Cargando...</span>
-            <div class="premium-verified-badge" id="publicStoreVerified" style="display: none;" title="Tienda Oficial Verificada">
-                <i class='bx bxs-badge-check'></i>
-                <div class="shimmer"></div>
-            </div>
+            <div class="premium-verified-badge" id="publicStoreVerified" style="display: none;" title="Tienda Oficial Verificada"><i class='bx bxs-badge-check'></i><div class="shimmer"></div></div>
         </h1>
-        
         <p style="color: var(--mac-text-secondary); margin-top: 5px; font-weight: 500;">Catálogo Oficial de Servicios</p>
     </div>
     
@@ -1090,130 +856,22 @@
         <a id="publicStoreReferencesBtn" href="#" target="_blank" class="references-btn" style="display: none;">
             <i class='bx bxs-star'></i> Ver Referencias de Clientes
         </a>
-        
         <p style="font-size: 12px; color: var(--mac-text-secondary); margin: 20px 0 10px 0; font-weight: 700;">MÉTODOS DE PAGO ACEPTADOS</p>
         <div class="payment-methods">
-            <span class="pay-badge yape">Yape</span>
-            <span class="pay-badge plin">Plin</span>
-            <span class="pay-badge binance"><i class='bx bxl-bitcoin'></i> USDT</span>
-            <span class="pay-badge bank"><i class='bx bxs-bank'></i> Transferencia</span>
+            <span class="pay-badge yape">Yape</span><span class="pay-badge plin">Plin</span><span class="pay-badge binance"><i class='bx bxl-bitcoin'></i> USDT</span><span class="pay-badge bank"><i class='bx bxs-bank'></i> Transf.</span>
         </div>
-        
         <p class="guarantee-text"><i class='bx bx-shield-quarter'></i> Pagos 100% seguros. Soporte garantizado durante tu suscripción.</p>
     </div>
     
     <a id="publicStoreSupportBtn" href="#" target="_blank" class="store-floating-support" style="display: none;">
-        <i class='bx bxl-whatsapp'></i>
-        <span>Chatear</span>
+        <i class='bx bxl-whatsapp'></i><span>Chatear</span>
     </a>
 
     <div style="text-align: center; margin-top: 40px;">
         <p style="font-size: 11px; color: var(--mac-text-secondary); opacity: 0.6;">POTENCIADO POR PANEL A.G.C.</p>
     </div>
 </div>
-<script type="module" src="app.js?v=3"></script>
-    <div id="masterAccountModal" class="modal-overlay" style="display: none; z-index: 2000;">
-    <div class="modal-card" style="max-width: 450px;">
-        <h3 style="margin-bottom: 5px;"><i class='bx bx-plus-circle'></i> Nueva Cuenta Matriz</h3>
-        <p style="color:var(--mac-text-secondary); font-size:12px; margin-bottom:15px; margin-top:0;">Registra una cuenta completa para controlar la distribución de sus perfiles.</p>
-        
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-            <div>
-                <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Selecciona Plataforma:</label>
-                <select id="matPlatform" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
-                    <option value="Netflix">Netflix</option>
-                    <option value="Disney+">Disney+</option>
-                    <option value="Amazon Prime">Amazon Prime</option>
-                    <option value="HBO Max">HBO Max</option>
-                    <option value="Spotify Premium">Spotify Premium</option>
-                    <option value="YouTube Premium">YouTube Premium</option>
-                    <option value="Crunchyroll">Crunchyroll</option>
-                    <option value="Paramount">Paramount</option>
-                    <option value="Apple TV">Apple TV</option>
-                    <option value="IPTV">IPTV</option>
-                    <option value="Canva Pro">Canva Pro</option>
-                    <option value="Gemini Pro">Gemini Pro</option>
-                    <option value="ChatGPT">ChatGPT</option>
-                    <option value="Vix">Vix</option>
-                    <option value="DirectvGO">DirectvGO</option>
-                    <option value="Movistar">Movistar</option>
-                    <option value="Viki">Viki</option>
-                    <option value="CapCut Pro">CapCut Pro</option>
-                </select>
-            </div>
 
-            <div style="display: flex; gap: 10px;">
-                <div style="flex: 1;">
-                    <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Correo:</label>
-                    <input type="email" id="matEmail" placeholder="correo@cuenta.com" style="width:100%;">
-                </div>
-                <div style="flex: 1;">
-                    <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Contraseña:</label>
-                    <input type="text" id="matPass" placeholder="Clave123" style="width:100%;">
-                </div>
-            </div>
-
-            <div style="display: flex; gap: 10px;">
-                <div style="flex: 1;">
-                    <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">¿Cuántos perfiles tiene?:</label>
-                    <input type="number" id="matProfiles" value="5" min="1" max="10" style="width:100%;">
-                </div>
-                <div style="flex: 1;">
-                    <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Costo de la Cuenta (Inversión):</label>
-                    <input type="number" id="matCost" value="0" min="0" placeholder="Ej: 30" style="width:100%;">
-                </div>
-            </div>
-
-<div>
-                <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Proveedor / Origen:</label>
-                <select id="matProvider" onchange="window.toggleMatProviderFields()" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
-                    <option value="Propia">Mia (Cuenta Propia)</option>
-                    <option value="Proveedor Externo">Proveedor Externo</option>
-                </select>
-            </div>
-
-            <div id="externalProviderFields" style="display: none; flex-direction: column; gap: 12px;">
-                <div style="display: flex; gap: 10px;">
-                    <div style="flex: 1;">
-                        <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">¿Cuándo vence esta cuenta?:</label>
-                        <input type="date" id="matExpiryDate" style="width:100%;">
-                    </div>
-                    <div style="flex: 1;">
-                        <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Nombre del Proveedor (Opcional):</label>
-                        <input type="text" id="matProviderName" placeholder="Ej: Proveedor Juan" style="width:100%;">
-                    </div>
-                </div>
-            </div>
-            
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button class="btn-primary" onclick="window.saveMasterAccount()">Guardar Cuenta</button>
-                <button class="btn-secondary" onclick="document.getElementById('masterAccountModal').style.display='none'">Cancelar</button>
-            </div>
-        </div>
-    </div>
-</div>
-    <div id="adminBotModal" class="modal-overlay" style="display: none; z-index: 3000;">
-    <div class="modal-card" style="max-width: 400px; text-align: center;">
-        <h3 style="margin-bottom: 10px;"><i class='bx bxl-whatsapp'></i> Conectar Bot Global</h3>
-        <p style="font-size: 13px; color: var(--mac-text-secondary);">Escanea el QR para vincular el número desde el cual se enviarán todos los recordatorios automáticos de cobranza.</p>
-        
-        <div id="adminQrContainer" style="margin-top: 15px; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-            <img id="adminBotQrImage" src="" style="width: 200px; height: 200px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: none;">
-            <p id="adminBotStatus" style="font-size: 13px; font-weight: bold; color: var(--mac-text-secondary);">Haz clic en Generar QR para empezar.</p>
-        </div>
-
-        <div style="display: flex; gap: 10px; margin-top: 20px;">
-            <button class="btn-primary" onclick="window.generarQrAdmin()">Generar QR</button>
-            <button class="btn-secondary" onclick="document.getElementById('adminBotModal').style.display='none'">Cerrar</button>
-        </div>
-    </div>
-</div>
-    <div id="productDescModal" class="modal-overlay" style="display: none; z-index: 999999;" onclick="if(event.target === this) this.style.display='none'">
-    <div class="modal-card" style="max-width: 400px; text-align: center; padding: 30px;">
-        <h3 id="descModalTitle" style="margin-bottom: 15px; color: var(--mac-blue); font-size: 22px;">Título</h3>
-        <p id="descModalText" style="color: var(--mac-text-main); font-size: 14px; line-height: 1.6; white-space: pre-wrap; margin-bottom: 25px;"></p>
-        <button class="btn-secondary" style="width: 100%;" onclick="document.getElementById('productDescModal').style.display='none'">Cerrar</button>
-    </div>
-</div>
+<script type="module" src="app.js?v=4"></script>
 </body>
 </html>
