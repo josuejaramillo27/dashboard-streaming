@@ -3254,3 +3254,33 @@ window.renderCharts = (totalIncome, totalCost, totalProfit) => {
     });
     funnelChartInst.render();
 };
+
+/* ==========================================================================
+   MÓDULO DE COMPRESIÓN DEL PANEL LATERAL
+   ========================================================================== */
+window.toggleSidebar = () => {
+    const sidebar = document.getElementById('mainSidebar');
+    if (sidebar) {
+        sidebar.classList.toggle('collapsed');
+        
+        // Guardamos su estado en la memoria local del navegador
+        const isCollapsed = sidebar.classList.contains('collapsed');
+        localStorage.setItem('agc_sidebar_collapsed', isCollapsed);
+        
+        // 🪄 MAGIA: Disparamos un evento "falso" de redimensionamiento de ventana
+        // Esto obliga a tus gráficos ApexCharts a recalcular su tamaño al instante
+        // y adaptarse suavemente al nuevo espacio gigante que se liberó.
+        setTimeout(() => { 
+            window.dispatchEvent(new Event('resize')); 
+        }, 350); 
+    }
+};
+
+// Se ejecuta automáticamente al arrancar la página para recordar la preferencia
+document.addEventListener("DOMContentLoaded", () => {
+    const isCollapsed = localStorage.getItem('agc_sidebar_collapsed') === 'true';
+    if (isCollapsed) {
+        const sidebar = document.getElementById('mainSidebar');
+        if(sidebar) sidebar.classList.add('collapsed');
+    }
+});
