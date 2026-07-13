@@ -94,9 +94,12 @@
             .dashboard-sidebar { display: none !important; }
             .dashboard-main { padding: 0 !important; overflow: visible !important; height: auto !important; }
             body.logged-in { overflow: auto; }
-            body.logged-in > .container { display: block !important; }
+            
+            /* 🔥 CORRECCIÓN 1: Eliminamos la línea que forzaba a los modales a mostrarse juntos */
             .dashboard-section.modal-overlay { display: none; }
-            #homeSection { display: none !important; }
+            
+            /* 🔥 CORRECCIÓN 2: Encendemos tu vista principal (Dashboard) para que se vea en el celular */
+            #homeSection { display: block !important; padding: 15px; padding-bottom: 90px; }
             
             #inventoryModal.modal-overlay, #pedidosModal.modal-overlay { background-color: var(--mac-bg) !important; align-items: flex-start !important; }
             #inventoryModal .modal-card, #pedidosModal .modal-card { width: 100% !important; height: 100dvh !important; max-width: 100% !important; border: none !important; border-radius: 0 !important; margin: 0 !important; padding: 30px 20px 20px 20px !important; box-sizing: border-box !important; background-color: var(--mac-bg) !important; box-shadow: none !important; display: flex; flex-direction: column; }
