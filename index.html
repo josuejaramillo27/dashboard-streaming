@@ -85,21 +85,40 @@
             .sidebar-brand-info h2 { margin: 0; font-size: 16px; color: var(--mac-text-main); font-weight: 800; }
             .sidebar-brand-info span { font-size: 11px; color: var(--mac-text-secondary); font-weight: 500; }
 
-            /* Botón de Hamburguesa */
+            /* Botón de Hamburguesa (Siempre visible y adaptativo al tema) */
             .sidebar-toggle-btn {
-                background: transparent; border: none; color: var(--mac-text-secondary);
-                font-size: 26px; cursor: pointer; padding: 4px; border-radius: 8px;
-                display: flex; align-items: center; justify-content: center; transition: 0.2s;
+                background: var(--mac-gray); 
+                border: 1px solid var(--mac-border); 
+                color: var(--mac-text-main);
+                font-size: 22px; 
+                cursor: pointer; 
+                padding: 6px 8px; 
+                border-radius: 8px;
+                display: flex; align-items: center; justify-content: center; 
+                transition: all 0.3s ease;
                 flex-shrink: 0;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             }
-            .sidebar-toggle-btn:hover { background: var(--mac-gray); color: var(--mac-text-main); }
+            .sidebar-toggle-btn:hover { 
+                background: var(--mac-border-solid); 
+                color: var(--mac-blue);
+                border-color: var(--mac-blue);
+            }
 
             /* Efectos al Comprimir la Cabecera */
             .dashboard-sidebar.collapsed .sidebar-brand { display: none; }
             .dashboard-sidebar.collapsed .sidebar-header { justify-content: center; }
 
-            /* Íconos del menú */
-            .sidebar-menu { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; overflow-x: hidden; }
+            /* Íconos del menú (Sin barra de scroll visible) */
+            .sidebar-menu { 
+                display: flex; flex-direction: column; gap: 8px; flex-grow: 1; 
+                overflow-x: hidden; 
+                overflow-y: auto; 
+                scrollbar-width: none; /* Oculta el scroll en Firefox */
+            }
+            .sidebar-menu::-webkit-scrollbar {
+                display: none; /* Oculta el scroll en Chrome, Safari, Edge y Opera */
+            }
             .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 12px; color: var(--mac-text-secondary); font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s ease; text-decoration: none; background: transparent; border: 1px solid transparent; white-space: nowrap; }
             .sidebar-item i { font-size: 20px; transition: transform 0.2s; flex-shrink: 0; }
             .sidebar-item:hover { background: var(--mac-gray); color: var(--mac-text-main); }
