@@ -271,48 +271,44 @@ window.closeModals = (resetTab = true) => {
 };
 /* --- CONTROLADOR DE SECCIONES DASHBOARD (PC) --- */
 window.switchDashboardSection = (sectionId, menuElement) => {
-    // 1. Verificamos si estamos en PC o celular midiendo la pantalla
-    const isDesktop = window.innerWidth >= 769;
-
-    if (isDesktop) {
-        // En PC: Apagamos todas las secciones
-        document.querySelectorAll('.dashboard-section').forEach(sec => {
-            sec.classList.remove('active-section');
-        });
-        document.getElementById('homeSection').classList.remove('active-section');
-
-        // Encendemos la solicitada
-        if (sectionId === 'homeSection') {
-            document.getElementById('homeSection').classList.add('active-section');
-        } else {
+    if (window.innerWidth >= 769) {
+        // Un micro-retraso para asegurar que la base de datos descargue la info antes de mostrar la pantalla
+        setTimeout(() => {
+            // 1. Apagamos todas las secciones y limpiamos estilos
+            document.querySelectorAll('.dashboard-section').forEach(sec => {
+                sec.classList.remove('active-section');
+                sec.style.display = ''; 
+            });
+            
+            // 2. Encendemos la sección solicitada
             const targetSection = document.getElementById(sectionId);
-            if (targetSection) targetSection.classList.add('active-section');
-        }
+            if (targetSection) {
+                targetSection.classList.add('active-section');
+            }
 
-        // Actualizamos los colores del menú lateral (estado activo)
-        if (menuElement) {
-            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
-            menuElement.classList.add('active');
-        }
-    } else {
-        // En Celular: Se sigue comportando como modales flotantes.
-        // Las funciones como openInventoryModal() ya tienen su propio código que cambia los display, 
-        // así que el celular lo ignorará y abrirá la cajita negra sobre la pantalla como siempre.
+            // 3. Pintamos de azul el botón presionado
+            if (menuElement) {
+                document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+                menuElement.classList.add('active');
+            }
+        }, 50); // 50 milisegundos de delay son imperceptibles para el humano pero salvan el código
     }
 };
 
-// Modificamos closeModals levemente para que en PC al darle a una X de un modal devuelva a la vista Home
+// Sobrescribimos el cierre de modales original para que NO interrumpa el nuevo menú
 const originalCloseModals = window.closeModals;
 window.closeModals = (resetTab = true) => {
     originalCloseModals(resetTab);
     
-    // Si estamos en PC, "Cerrar Modales" significa volver a Home
-    if (window.innerWidth >= 769) {
-        document.querySelectorAll('.dashboard-section').forEach(sec => sec.classList.remove('active-section'));
+    // IMPORTANTE: Solo regresar a "Home" si el usuario cerró algo usando la "X" (resetTab === true)
+    if (window.innerWidth >= 769 && resetTab === true) {
+        document.querySelectorAll('.dashboard-section').forEach(sec => {
+            sec.classList.remove('active-section');
+            sec.style.display = '';
+        });
         const home = document.getElementById('homeSection');
         if (home) home.classList.add('active-section');
         
-        // Retornamos el color activo al menú "Dashboard Central"
         document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
         const homeBtn = document.querySelector('.sidebar-item[onclick*="homeSection"]');
         if(homeBtn) homeBtn.classList.add('active');
