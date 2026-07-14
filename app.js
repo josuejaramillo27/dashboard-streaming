@@ -3290,7 +3290,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 /* ==========================================================================
-   PORTAL DE AUTOGESTIÓN DEL CLIENTE (ETAPA 2 - BLINDADA)
+   PORTAL DE AUTOGESTIÓN DEL CLIENTE (ETAPA 2 - 100% BLINDADA)
    ========================================================================== */
 let portalStoreData = null;
 let portalMatchedClients = [];
@@ -3301,13 +3301,13 @@ window.checkClientPortal = async () => {
     
     if (!portalAlias) return false;
 
-    // Ocultamos todos los paneles del distribuidor (Login, App, Admin, Tiendita)
+    // Ocultamos todos los paneles
     document.getElementById('authView').style.display = 'none';
     document.getElementById('appView').style.display = 'none';
     document.getElementById('adminView').style.display = 'none';
     if (document.getElementById('publicStoreView')) document.getElementById('publicStoreView').style.display = 'none';
     
-    // Encendemos el Portal del Cliente
+    // Encendemos el Portal del Cliente con prioridad máxima
     const portalView = document.getElementById('clientPortalView');
     if (portalView) portalView.style.display = 'flex';
 
@@ -3340,9 +3340,9 @@ window.checkClientPortal = async () => {
             logo.style.display = 'block';
         }
 
-        // Configuramos el botón de soporte
+        // Configuramos el botón de soporte de forma súper segura
         if (portalStoreData.phone) {
-            const numLimpio = portalStoreData.phone.replace(/[^\d+]/g, '');
+            const numLimpio = String(portalStoreData.phone).replace(/[^\d+]/g, '');
             const supportBtn = document.getElementById('portalSupportBtn');
             if (supportBtn) supportBtn.href = `https://wa.me/${numLimpio}?text=${encodeURIComponent('Hola, necesito ayuda con mis servicios del portal.')}`;
         }
@@ -3370,11 +3370,14 @@ window.loginClientPortal = async () => {
 
     if (!phone || !code) return window.showNotification("Ingresa tu teléfono y el código de 4 dígitos.");
 
-    // 🛡️ RE-VALIDACIÓN FORZADA (Si no cargó bien al inicio, lo obliga a cargar ahora)
+    // 🛡️ RE-VALIDACIÓN FORZADA
     if (!portalStoreData || !portalStoreData.uid) {
         const cargado = await window.checkClientPortal();
         if (!cargado) return window.showNotification("⚠️ Error de conexión. Revisa el link que te dio tu proveedor.");
     }
+
+    // Doble candado por si acaso
+    if (!portalStoreData || !portalStoreData.uid) return window.showNotification("No se pudo conectar a la base de datos.");
 
     const btn = document.querySelector('#portalLoginScreen .btn-primary');
     const origText = btn.innerText;
@@ -3382,16 +3385,18 @@ window.loginClientPortal = async () => {
     btn.disabled = true;
 
     try {
-        // Traemos todos los clientes de este distribuidor para filtrarlos en memoria (100% seguro)
+        // Traemos todos los clientes de este distribuidor para filtrarlos en memoria (Seguridad Antifallos)
         const q = query(collection(db, "clients"), where("userId", "==", portalStoreData.uid));
         const snap = await getDocs(q);
 
         portalMatchedClients = [];
-        const cleanInputPhone = phone.replace(/[^\d]/g, '');
+        
+        // 🧹 Limpiamos el número que escribió el cliente para que sea 100% compatible
+        const cleanInputPhone = String(phone).replace(/[^\d]/g, '');
 
         snap.forEach(d => {
             const c = d.data();
-            const cleanDbPhone = c.phone ? c.phone.replace(/[^\d]/g, '') : '';
+            const cleanDbPhone = c.phone ? String(c.phone).replace(/[^\d]/g, '') : '';
             
             // Si el CÓDIGO es igual, Y el TELÉFONO coincide (limpiando espacios o +51)
             if (c.portalCode === code && (cleanDbPhone === cleanInputPhone || cleanDbPhone.endsWith(cleanInputPhone))) {
@@ -3432,7 +3437,7 @@ const renderClientPortalDashboard = () => {
     list.innerHTML = '';
 
     const today = new Date(); today.setHours(0,0,0,0);
-    const storePhone = portalStoreData.phone.replace(/[^\d+]/g, '');
+    const storePhone = portalStoreData.phone ? String(portalStoreData.phone).replace(/[^\d+]/g, '') : '';
 
     portalMatchedClients.forEach((c, index) => {
         const exp = new Date(c.date);
