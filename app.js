@@ -159,9 +159,9 @@ window.doLogout = async () => {
 };
 
 onAuthStateChanged(auth, async (user) => {
-    // 🛑 Candado de tienda
+    // 🛑 Candado de Tienda y Portal (Evita que el Login se superponga a las webs públicas)
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('tienda')) return;
+    if (urlParams.get('tienda') || urlParams.get('portal')) return;
 
     if (user) {
         currentUser = user;
@@ -3368,6 +3368,11 @@ window.loginClientPortal = async () => {
 
     if (!phone || !code) return window.showNotification("Ingresa tu teléfono y el código de 4 dígitos.");
 
+    // 🛡️ BARRERA DE SEGURIDAD: Evita el error 'uid of null' si el link estaba roto
+    if (!portalStoreData || !portalStoreData.uid) {
+        return window.showNotification("⚠️ Error de conexión. Por favor usa el enlace exacto que te dio tu proveedor.");
+    }
+
     const btn = document.querySelector('#portalLoginScreen .btn-primary');
     const origText = btn.innerText;
     btn.innerText = "Buscando... ⏳";
@@ -3385,16 +3390,23 @@ window.loginClientPortal = async () => {
         }
 
         portalMatchedClients = [];
-        // Filtramos para asegurar que el número de teléfono coincida (quitando espacios por seguridad)
+        
+        // 🧹 LIMPIEZA DE NÚMERO: Le quita espacios y el '+' al número que ingresó el cliente
+        const cleanInputPhone = phone.replace(/[^\d]/g, '');
+
         snap.forEach(d => {
             const c = d.data();
-            if (c.phone.replace(/\s/g, '') === phone.replace(/\s/g, '') || c.phone.includes(phone)) {
+            // Limpiamos el número de la base de datos de la misma forma
+            const cleanDbPhone = c.phone.replace(/[^\d]/g, '');
+            
+            // Si el número de la BD es igual al que ingresó, o termina con él (Ej: 51953066853 termina en 953066853)
+            if (cleanDbPhone === cleanInputPhone || cleanDbPhone.endsWith(cleanInputPhone)) {
                 portalMatchedClients.push({ id: d.id, ...c });
             }
         });
 
         if (portalMatchedClients.length === 0) {
-            window.showNotification("El teléfono no coincide con este código de acceso.");
+            window.showNotification("El número de WhatsApp no coincide con este código de acceso.");
             btn.innerText = origText; btn.disabled = false;
             return;
         }
