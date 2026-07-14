@@ -108,15 +108,17 @@
             .dashboard-sidebar.collapsed .sidebar-brand { display: none; }
             .dashboard-sidebar.collapsed .sidebar-header { justify-content: center; }
 
-            /* Íconos del menú (Apretados levemente para que entren TODOS sin scroll) */
+            /* Íconos del menú (Distribución inteligente que se adapta a tu monitor) */
             .sidebar-menu { 
-                display: flex; flex-direction: column; gap: 4px; /* Espacio reducido */
+                display: flex; flex-direction: column; 
+                justify-content: space-evenly; /* Reparte el espacio equitativamente */
                 flex-grow: 1; 
-                overflow: hidden; /* Cortamos la posibilidad de hacer scroll */
+                overflow: hidden; 
+                padding-bottom: 20px;
             }
             .sidebar-item { 
                 display: flex; align-items: center; gap: 12px; 
-                padding: 10px 15px; /* Botones ligeramente más delgados */
+                padding: 12px 15px; 
                 border-radius: 12px; color: var(--mac-text-secondary); 
                 font-weight: 600; font-size: 14px; cursor: pointer; 
                 transition: all 0.2s ease; text-decoration: none; 
@@ -128,9 +130,10 @@
             .sidebar-item.active { background: var(--mac-blue); color: white !important; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25); }
             .sidebar-item.active i { transform: scale(1.1); }
 
-            /* Forzar a las líneas separadoras a ocupar menos espacio vertical */
+            /* Forzar a las líneas separadoras a ser discretas */
             .sidebar-menu > div[style*="border-top"] {
-                margin: 8px 0 !important; 
+                margin: 0 15px !important; 
+                opacity: 0.5;
             }
 
             /* Efectos al Comprimir los Íconos */
@@ -818,6 +821,7 @@
         <p style="margin: 5px 0;"><strong>Dispositivo:</strong> <span id="viewAccDevice" style="color: var(--mac-text-secondary);"></span></p>
         <p style="margin: 5px 0;"><strong>Unidades Totales:</strong> <span id="viewAccUnits" style="color: var(--mac-blue); font-weight: bold;"></span></p>
         <p style="margin: 5px 0;"><strong>Proveedor:</strong> <span id="viewAccProvider" style="color: var(--mac-text-secondary);"></span></p>
+        <p style="margin: 5px 0; padding-top: 10px; border-top: 1px dashed var(--mac-border);"><strong>🔑 Código Portal Web:</strong> <span id="viewAccPortalCode" style="color: var(--mac-orange); font-weight: bold; font-size: 16px; letter-spacing: 2px;"></span></p>
         <div style="margin-top: 20px;">
             <button class="btn-secondary" style="width: 100%;" onclick="window.closeModals()">Cerrar</button>
         </div>
@@ -1051,7 +1055,47 @@
         <p style="font-size: 11px; color: var(--mac-text-secondary); opacity: 0.6;">POTENCIADO POR PANEL A.G.C.</p>
     </div>
 </div>
+<!-- ==============================================
+     VISTA DEL PORTAL DE AUTOGESTIÓN (CLIENTE FINAL)
+=================================================== -->
+<div id="clientPortalView" style="display: none; width: 100%; min-height: 100vh; background: #000000; color: #ffffff; align-items: center; justify-content: center; flex-direction: column;">
+    
+    <!-- PANTALLA DE LOGIN (ESTILO NETFLIX) -->
+    <div id="portalLoginScreen" style="width: 100%; max-width: 400px; padding: 40px 20px; box-sizing: border-box; text-align: center;">
+        <img id="portalLogo" src="AGC.png" alt="Logo" style="width: 80px; height: 80px; border-radius: 16px; margin-bottom: 20px; display: none; margin-left: auto; margin-right: auto; object-fit: cover;">
+        <h2 id="portalStoreName" style="margin: 0 0 5px 0; font-size: 24px; font-weight: 800;">Mi Portal</h2>
+        <p style="color: #86868b; font-size: 14px; margin-bottom: 30px;">Ingresa para ver las credenciales de tus servicios activos.</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <input type="tel" id="portalPhoneInput" placeholder="Tu número de WhatsApp (Ej: +51...)" style="width: 100%; padding: 16px; border-radius: 8px; border: none; background: #1c1c1e; color: #ffffff; font-size: 16px; outline: none;">
+            <input type="password" id="portalCodeInput" placeholder="Código de Acceso (4 dígitos)" style="width: 100%; padding: 16px; border-radius: 8px; border: none; background: #1c1c1e; color: #ffffff; font-size: 16px; outline: none; text-transform: uppercase;">
+            
+            <label style="display: flex; align-items: center; gap: 10px; color: #86868b; font-size: 13px; cursor: pointer; text-align: left; margin-top: 5px;">
+                <input type="checkbox" id="portalRememberMe" style="width: 18px; height: 18px; margin: 0; cursor: pointer;"> Recordar mi sesión en este dispositivo
+            </label>
+            
+            <button class="btn-primary" style="padding: 16px; font-size: 16px; font-weight: bold; margin-top: 10px; background: #e50914;" onclick="window.loginClientPortal()">Ingresar a mi cuenta</button>
+        </div>
+        <p style="color: #86868b; font-size: 12px; margin-top: 30px;">Si no conoces tu código, escribe el comando <strong>/info</strong> en el chat de WhatsApp.</p>
+    </div>
 
+    <!-- PANTALLA DEL DASHBOARD DEL CLIENTE (DONDE VEN SUS CUENTAS) -->
+    <div id="portalDashboardScreen" style="display: none; width: 100%; max-width: 600px; padding: 30px 20px; box-sizing: border-box;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #1c1c1e; padding-bottom: 20px;">
+            <h2 style="margin: 0; font-size: 22px;">Mis Servicios</h2>
+            <button style="background: transparent; border: 1px solid #38383a; color: #ffffff; padding: 8px 15px; border-radius: 20px; font-size: 12px; cursor: pointer;" onclick="window.logoutClientPortal()">Cerrar Sesión</button>
+        </div>
+        
+        <div id="portalServicesList" style="display: flex; flex-direction: column; gap: 15px;">
+            <!-- Aquí se inyectarán las tarjetas de los servicios desde Firebase -->
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px; border-top: 1px solid #1c1c1e; padding-top: 20px;">
+            <a id="portalSupportBtn" href="#" target="_blank" style="color: #86868b; text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; gap: 5px;"><i class='bx bxl-whatsapp'></i> Contactar Soporte</a>
+        </div>
+    </div>
+
+</div>
 <script type="module" src="app.js?v=4"></script>
 </body>
 </html>
