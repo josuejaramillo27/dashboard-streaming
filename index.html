@@ -74,10 +74,10 @@
                 padding: 20px 10px;
             }
 
-            /* Cabecera del Menú */
+            /* Cabecera del Menú (Ajustada para ganar espacio) */
             .sidebar-header {
                 display: flex; justify-content: space-between; align-items: center; 
-                margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid var(--mac-border);
+                margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--mac-border);
                 white-space: nowrap; overflow: hidden;
             }
             .sidebar-brand { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
@@ -85,53 +85,61 @@
             .sidebar-brand-info h2 { margin: 0; font-size: 16px; color: var(--mac-text-main); font-weight: 800; }
             .sidebar-brand-info span { font-size: 11px; color: var(--mac-text-secondary); font-weight: 500; }
 
-            /* Botón de Hamburguesa (Siempre visible y adaptativo al tema) */
+            /* Botón de Hamburguesa (Puro ícono, sin caja gris) */
             .sidebar-toggle-btn {
-                background: var(--mac-gray); 
-                border: 1px solid var(--mac-border); 
-                color: var(--mac-text-main);
-                font-size: 22px; 
+                background: transparent; 
+                border: none; 
+                color: var(--mac-text-secondary);
+                font-size: 26px; 
                 cursor: pointer; 
-                padding: 6px 8px; 
-                border-radius: 8px;
+                padding: 0; 
                 display: flex; align-items: center; justify-content: center; 
-                transition: all 0.3s ease;
+                transition: color 0.2s ease, transform 0.2s ease;
                 flex-shrink: 0;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                box-shadow: none;
             }
             .sidebar-toggle-btn:hover { 
-                background: var(--mac-border-solid); 
-                color: var(--mac-blue);
-                border-color: var(--mac-blue);
+                background: transparent; 
+                color: var(--mac-text-main);
+                transform: scale(1.1);
             }
 
             /* Efectos al Comprimir la Cabecera */
             .dashboard-sidebar.collapsed .sidebar-brand { display: none; }
             .dashboard-sidebar.collapsed .sidebar-header { justify-content: center; }
 
-            /* Íconos del menú (Sin barra de scroll visible) */
+            /* Íconos del menú (Apretados levemente para que entren TODOS sin scroll) */
             .sidebar-menu { 
-                display: flex; flex-direction: column; gap: 8px; flex-grow: 1; 
-                overflow-x: hidden; 
-                overflow-y: auto; 
-                scrollbar-width: none; /* Oculta el scroll en Firefox */
+                display: flex; flex-direction: column; gap: 4px; /* Espacio reducido */
+                flex-grow: 1; 
+                overflow: hidden; /* Cortamos la posibilidad de hacer scroll */
             }
-            .sidebar-menu::-webkit-scrollbar {
-                display: none; /* Oculta el scroll en Chrome, Safari, Edge y Opera */
+            .sidebar-item { 
+                display: flex; align-items: center; gap: 12px; 
+                padding: 10px 15px; /* Botones ligeramente más delgados */
+                border-radius: 12px; color: var(--mac-text-secondary); 
+                font-weight: 600; font-size: 14px; cursor: pointer; 
+                transition: all 0.2s ease; text-decoration: none; 
+                background: transparent; border: 1px solid transparent; 
+                white-space: nowrap; 
             }
-            .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 12px; color: var(--mac-text-secondary); font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s ease; text-decoration: none; background: transparent; border: 1px solid transparent; white-space: nowrap; }
             .sidebar-item i { font-size: 20px; transition: transform 0.2s; flex-shrink: 0; }
             .sidebar-item:hover { background: var(--mac-gray); color: var(--mac-text-main); }
             .sidebar-item.active { background: var(--mac-blue); color: white !important; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25); }
             .sidebar-item.active i { transform: scale(1.1); }
 
+            /* Forzar a las líneas separadoras a ocupar menos espacio vertical */
+            .sidebar-menu > div[style*="border-top"] {
+                margin: 8px 0 !important; 
+            }
+
             /* Efectos al Comprimir los Íconos */
-            .dashboard-sidebar.collapsed .sidebar-item { justify-content: center; padding: 12px 0; }
+            .dashboard-sidebar.collapsed .sidebar-item { justify-content: center; padding: 10px 0; }
             .dashboard-sidebar.collapsed .sidebar-item span { display: none; }
             .dashboard-sidebar.collapsed .sidebar-item i { font-size: 24px; margin: 0; }
             
             /* Ajuste del punto rojo de novedades */
-            .dashboard-sidebar.collapsed #newsBadgeSidebar { position: absolute; top: 10px; right: 22px; margin: 0 !important; }
+            .dashboard-sidebar.collapsed #newsBadgeSidebar { position: absolute; top: 8px; right: 22px; margin: 0 !important; }
 
             .dashboard-main { flex-grow: 1; height: 100vh; overflow-y: auto; overflow-x: hidden; position: relative; padding: 30px 40px; box-sizing: border-box; }
 
