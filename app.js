@@ -497,7 +497,8 @@ window.viewAccountData = (id) => {
     document.getElementById('viewAccEmail').innerText = c.accountEmail || '-'; 
     document.getElementById('viewAccPassword').innerText = c.accountPassword || '-'; 
     document.getElementById('viewAccProfile').innerText = c.accountProfile || '-'; 
-    document.getElementById('viewAccPin').innerText = c.accountPin || '-'; 
+    document.getElementById('viewAccPin').innerText = c.accountPin || '-';
+    document.getElementById('viewAccPortalCode').innerText = c.portalCode || 'Sin Código';
     
 // Lógica para mostrar el dispositivo en "Ver Datos" usando Boxicons
     let deviceText = 'Sin configurar';
@@ -900,7 +901,7 @@ window.saveClientData = async () => {
         if (!finalLinkedMasterId && typeof variablesEnlaceMatriz !== 'undefined' && variablesEnlaceMatriz.masterId && !editingClientId) {
             finalLinkedMasterId = variablesEnlaceMatriz.masterId;
         }
-
+        let generatedPortalCode = Math.random().toString(36).substring(2, 6).toUpperCase();
         const data = { 
             userId: currentUser.uid, 
             name: document.getElementById('clientName').value, 
@@ -918,12 +919,16 @@ window.saveClientData = async () => {
             accountUnits: tempAccountData.units || 1,
             linkedMasterId: finalLinkedMasterId, // <--- CORREGIDO: Inyecta el ID dinámico detectado
             accountDeviceName: tempAccountData.deviceName, // NUEVO
-            accountDeviceType: tempAccountData.deviceType  // NUEVO
+            accountDeviceType: tempAccountData.deviceType,
+            portalCode: generatedPortalCode
         };
 
         if (editingClientId) { 
             const clienteAEditar = clients.find(c => c.id === editingClientId);
-            data.color = clienteAEditar.color || macPalette[Math.floor(Math.random() * macPalette.length)]; 
+            data.color = clienteAEditar.color || macPalette[Math.floor(Math.random() * macPalette.length)];
+            if (clienteAEditar.portalCode) {
+                data.portalCode = clienteAEditar.portalCode;
+            }
             
             await updateDoc(doc(db, "clients", editingClientId), data); 
             window.showNotification("Actualizado"); 
