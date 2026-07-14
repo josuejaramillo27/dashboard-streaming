@@ -3290,74 +3290,76 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 /* ==========================================================================
-   PORTAL DE AUTOGESTIÓN DEL CLIENTE (ETAPA 2)
+   PORTAL DE AUTOGESTIÓN DEL CLIENTE (ETAPA 2 - BLINDADA)
    ========================================================================== */
 let portalStoreData = null;
 let portalMatchedClients = [];
 
-const checkClientPortal = async () => {
-    // Leemos si en el enlace dice ?portal=tu-tienda
+window.checkClientPortal = async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const portalAlias = urlParams.get('portal');
     
-    if (portalAlias) {
-        // Ocultamos todos los paneles del distribuidor (Login, App, Admin, Tiendita)
-        document.getElementById('authView').style.display = 'none';
-        document.getElementById('appView').style.display = 'none';
-        document.getElementById('adminView').style.display = 'none';
-        document.getElementById('publicStoreView').style.display = 'none';
+    if (!portalAlias) return false;
+
+    // Ocultamos todos los paneles del distribuidor (Login, App, Admin, Tiendita)
+    document.getElementById('authView').style.display = 'none';
+    document.getElementById('appView').style.display = 'none';
+    document.getElementById('adminView').style.display = 'none';
+    if (document.getElementById('publicStoreView')) document.getElementById('publicStoreView').style.display = 'none';
+    
+    // Encendemos el Portal del Cliente
+    const portalView = document.getElementById('clientPortalView');
+    if (portalView) portalView.style.display = 'flex';
+
+    try {
+        // Buscamos a qué distribuidor le pertenece este link
+        const q = query(collection(db, "users"), where("storeAlias", "==", portalAlias));
+        const snap = await getDocs(q);
         
-        // Encendemos el Portal del Cliente
-        const portalView = document.getElementById('clientPortalView');
-        if(portalView) portalView.style.display = 'flex';
-
-        try {
-            // Buscamos a qué distribuidor le pertenece este link
-            const q = query(collection(db, "users"), where("storeAlias", "==", portalAlias));
-            const snap = await getDocs(q);
-            
-            if (!snap.empty) { 
-                portalStoreData = snap.docs[0].data(); 
-                portalStoreData.uid = snap.docs[0].id;
-            } else {
-                const docRef = await getDoc(doc(db, "users", portalAlias));
-                if (docRef.exists()) {
-                    portalStoreData = docRef.data();
-                    portalStoreData.uid = portalAlias;
-                }
+        if (!snap.empty) { 
+            portalStoreData = snap.docs[0].data(); 
+            portalStoreData.uid = snap.docs[0].id;
+        } else {
+            const docRef = await getDoc(doc(db, "users", portalAlias));
+            if (docRef.exists()) {
+                portalStoreData = docRef.data();
+                portalStoreData.uid = portalAlias;
             }
+        }
 
-            if (!portalStoreData) {
-                document.getElementById('portalStoreName').innerText = "Portal no encontrado";
-                return;
-            }
+        if (!portalStoreData) {
+            document.getElementById('portalStoreName').innerText = "Portal no encontrado";
+            return false;
+        }
 
-            // Personalizamos la pantalla de Login con el logo del distribuidor
-            document.getElementById('portalStoreName').innerText = portalStoreData.name || "Mi Portal";
-            if (portalStoreData.logoUrl) {
-                const logo = document.getElementById('portalLogo');
-                logo.src = portalStoreData.logoUrl;
-                logo.style.display = 'block';
-            }
+        // 🎨 Actualizar la Interfaz Visual con los datos de TU TIENDA
+        document.getElementById('portalStoreName').innerText = portalStoreData.name || "Mi Portal";
+        if (portalStoreData.logoUrl) {
+            const logo = document.getElementById('portalLogo');
+            logo.src = portalStoreData.logoUrl;
+            logo.style.display = 'block';
+        }
 
-            // Configuramos el botón de soporte
+        // Configuramos el botón de soporte
+        if (portalStoreData.phone) {
             const numLimpio = portalStoreData.phone.replace(/[^\d+]/g, '');
             const supportBtn = document.getElementById('portalSupportBtn');
-            if(supportBtn) supportBtn.href = `https://wa.me/${numLimpio}?text=${encodeURIComponent('Hola, necesito ayuda con mis servicios del portal.')}`;
-
-            // 🪄 MAGIA: Verificamos si el cliente le dio a "Recordar Sesión" antes
-            const savedPhone = localStorage.getItem(`portal_phone_${portalStoreData.uid}`);
-            const savedCode = localStorage.getItem(`portal_code_${portalStoreData.uid}`);
-            
-            if (savedPhone && savedCode) {
-                document.getElementById('portalPhoneInput').value = savedPhone;
-                document.getElementById('portalCodeInput').value = savedCode;
-                window.loginClientPortal(); // Hacemos login automático
-            }
-
-        } catch (e) {
-            console.error("Error cargando portal:", e);
+            if (supportBtn) supportBtn.href = `https://wa.me/${numLimpio}?text=${encodeURIComponent('Hola, necesito ayuda con mis servicios del portal.')}`;
         }
+
+        // 🪄 MAGIA: Verificamos si el cliente le dio a "Recordar Sesión" antes
+        const savedPhone = localStorage.getItem(`portal_phone_${portalStoreData.uid}`);
+        const savedCode = localStorage.getItem(`portal_code_${portalStoreData.uid}`);
+        
+        if (savedPhone && savedCode) {
+            document.getElementById('portalPhoneInput').value = savedPhone;
+            document.getElementById('portalCodeInput').value = savedCode;
+            window.loginClientPortal(); // Hacemos login automático
+        }
+        return true;
+    } catch (e) {
+        console.error("Error cargando portal:", e);
+        return false;
     }
 };
 
@@ -3368,9 +3370,10 @@ window.loginClientPortal = async () => {
 
     if (!phone || !code) return window.showNotification("Ingresa tu teléfono y el código de 4 dígitos.");
 
-    // 🛡️ BARRERA DE SEGURIDAD: Evita el error 'uid of null' si el link estaba roto
+    // 🛡️ RE-VALIDACIÓN FORZADA (Si no cargó bien al inicio, lo obliga a cargar ahora)
     if (!portalStoreData || !portalStoreData.uid) {
-        return window.showNotification("⚠️ Error de conexión. Por favor usa el enlace exacto que te dio tu proveedor.");
+        const cargado = await window.checkClientPortal();
+        if (!cargado) return window.showNotification("⚠️ Error de conexión. Revisa el link que te dio tu proveedor.");
     }
 
     const btn = document.querySelector('#portalLoginScreen .btn-primary');
@@ -3379,39 +3382,30 @@ window.loginClientPortal = async () => {
     btn.disabled = true;
 
     try {
-        // Buscamos clientes que pertenezcan a esta tienda y tengan ese código exacto
-        const q = query(collection(db, "clients"), where("userId", "==", portalStoreData.uid), where("portalCode", "==", code));
+        // Traemos todos los clientes de este distribuidor para filtrarlos en memoria (100% seguro)
+        const q = query(collection(db, "clients"), where("userId", "==", portalStoreData.uid));
         const snap = await getDocs(q);
 
-        if (snap.empty) {
-            window.showNotification("Código incorrecto o no tienes servicios activos.");
-            btn.innerText = origText; btn.disabled = false;
-            return;
-        }
-
         portalMatchedClients = [];
-        
-        // 🧹 LIMPIEZA DE NÚMERO: Le quita espacios y el '+' al número que ingresó el cliente
         const cleanInputPhone = phone.replace(/[^\d]/g, '');
 
         snap.forEach(d => {
             const c = d.data();
-            // Limpiamos el número de la base de datos de la misma forma
-            const cleanDbPhone = c.phone.replace(/[^\d]/g, '');
+            const cleanDbPhone = c.phone ? c.phone.replace(/[^\d]/g, '') : '';
             
-            // Si el número de la BD es igual al que ingresó, o termina con él (Ej: 51953066853 termina en 953066853)
-            if (cleanDbPhone === cleanInputPhone || cleanDbPhone.endsWith(cleanInputPhone)) {
+            // Si el CÓDIGO es igual, Y el TELÉFONO coincide (limpiando espacios o +51)
+            if (c.portalCode === code && (cleanDbPhone === cleanInputPhone || cleanDbPhone.endsWith(cleanInputPhone))) {
                 portalMatchedClients.push({ id: d.id, ...c });
             }
         });
 
         if (portalMatchedClients.length === 0) {
-            window.showNotification("El número de WhatsApp no coincide con este código de acceso.");
+            window.showNotification("Datos incorrectos. Revisa tu número o pide tu código de acceso.");
             btn.innerText = origText; btn.disabled = false;
             return;
         }
 
-        // Si marcó la casilla, guardamos los datos en la memoria del navegador
+        // Guardar o borrar sesión
         if (remember) {
             localStorage.setItem(`portal_phone_${portalStoreData.uid}`, phone);
             localStorage.setItem(`portal_code_${portalStoreData.uid}`, code);
@@ -3526,5 +3520,6 @@ window.logoutClientPortal = () => {
     document.getElementById('portalLoginScreen').style.display = 'block';
 };
 
-// Arrancar el detector del portal
-checkClientPortal();
+// 🔥 DETONADORES PRINCIPALES (Ejecutan el código al entrar al link automáticamente)
+document.addEventListener('DOMContentLoaded', () => { window.checkClientPortal(); });
+window.checkClientPortal();
