@@ -22,7 +22,9 @@ const googleProvider = new GoogleAuthProvider();
 
 let currentUser = null; let currentUserData = null; let clients = []; let editingClientId = null;
 let currentManageUserId = null; 
-let tempAccountData = { email: '', password: '', profile: '', pin: '', units: 1, deviceName: '', deviceType: '', saleType: 'Perfil' };
+let multiAccData = {};
+let currentActiveTab = '';
+window.getDefaultAccData = () => ({ email: '', password: '', profile: '', pin: '', units: 1, deviceName: '', deviceType: '', saleType: 'Perfil', inventoryId: null });
 let globalCurrency = "S/";
 let lastVisibleDoc = null;
 let editingNewsId = null;
@@ -466,57 +468,102 @@ window.openSuggestionModal = () => { document.getElementById('suggestionText').v
 window.sendSuggestion = async () => { const text = document.getElementById('suggestionText').value; if (!text) return window.showNotification("Escribe algo primero."); const btn = document.querySelector('#suggestionModal .btn-primary'); btn.innerText = "Enviando..."; btn.disabled = true; try { await addDoc(collection(db, "suggestions"), { userId: currentUser.uid, userName: currentUserData.name, text: text, date: new Date().toISOString(), approved: false }); window.showNotification("¡Gracias! 🚀"); window.closeModals(); } catch(e) { window.showNotification("Error: " + e.message); } finally { btn.innerText = "Enviar Idea 🚀"; btn.disabled = false; } };
 
 window.openAccountModal = () => { 
-    document.getElementById('accEmail').value = tempAccountData.email; 
-    document.getElementById('accPassword').value = tempAccountData.password; 
-    document.getElementById('accProfile').value = tempAccountData.profile; 
-    document.getElementById('accPin').value = tempAccountData.pin;
-    document.getElementById('accSaleType').value = tempAccountData.saleType || 'Perfil';
-    document.getElementById('accUnits').value = tempAccountData.units || 1; 
-    document.getElementById('accDeviceName').value = tempAccountData.deviceName || ''; 
-    document.getElementById('accDeviceType').value = tempAccountData.deviceType || ''; 
+    const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(cb => cb.value); 
+    if(checked.length === 0) return window.showNotification("⚠️ Primero selecciona las plataformas en el menú desplegable.");
+
+    // Creamos/Mantenemos las pestañas según las plataformas elegidas
+    const newMultiAccData = {};
+    checked.forEach(plat => { newMultiAccData[plat] = multiAccData[plat] || window.getDefaultAccData(); });
+    multiAccData = newMultiAccData;
+
+    window.renderAccTabs(checked, 'accountModal');
     document.getElementById('accountModal').style.display = 'flex'; 
 };
 
+// 🪄 Creador de Pestañas
+window.renderAccTabs = (platforms, modalType) => {
+    const containerId = modalType === 'accountModal' ? 'accTabsContainer' : 'viewAccTabsContainer';
+    const container = document.getElementById(containerId);
+    container.style.display = platforms.length > 1 ? 'flex' : 'none';
+    container.innerHTML = '';
+
+    platforms.forEach((plat, index) => {
+        const tab = document.createElement('div');
+        tab.className = `chrome-tab ${index === 0 ? 'active' : ''}`;
+        tab.innerText = plat; tab.title = plat;
+        tab.onclick = () => window.switchAccTab(plat, modalType);
+        container.appendChild(tab);
+    });
+
+    if (platforms.length > 0) window.switchAccTab(platforms[0], modalType);
+};
+
+// 🪄 Cambiador de Pestañas
+window.switchAccTab = (platform, modalType) => {
+    currentActiveTab = platform;
+    const containerId = modalType === 'accountModal' ? 'accTabsContainer' : 'viewAccTabsContainer';
+    document.querySelectorAll(`#${containerId} .chrome-tab`).forEach(t => t.classList.toggle('active', t.innerText === platform));
+
+    const data = multiAccData[platform] || window.getDefaultAccData();
+
+    if (modalType === 'accountModal') {
+        document.getElementById('accEmail').value = data.email || '';
+        document.getElementById('accPassword').value = data.password || '';
+        document.getElementById('accProfile').value = data.profile || '';
+        document.getElementById('accPin').value = data.pin || '';
+        document.getElementById('accSaleType').value = data.saleType || 'Perfil';
+        document.getElementById('accUnits').value = data.units || 1;
+        document.getElementById('accDeviceName').value = data.deviceName || '';
+        document.getElementById('accDeviceType').value = data.deviceType || '';
+    } else {
+        document.getElementById('viewAccSaleType').innerText = data.saleType || 'Perfil';
+        document.getElementById('viewAccEmail').innerText = data.email || '-';
+        document.getElementById('viewAccPassword').innerText = data.password || '-';
+        document.getElementById('viewAccProfile').innerText = data.profile || '-';
+        document.getElementById('viewAccPin').innerText = data.pin || '-';
+        
+        let deviceText = 'Sin configurar';
+        if (data.deviceType) {
+            let iconHtml = data.deviceType === 'TV' ? "<i class='bx bx-tv'></i>" : (data.deviceType === 'PC' ? "<i class='bx bx-laptop'></i>" : "<i class='bx bx-mobile-alt'></i>");
+            deviceText = `${iconHtml} ${data.deviceType} ${data.deviceName ? '(' + data.deviceName + ')' : ''}`;
+        }
+        document.getElementById('viewAccDevice').innerHTML = deviceText;
+        document.getElementById('viewAccUnits').innerText = data.units || '1';
+    }
+};
+
+// 🪄 Auto-guardado al escribir en cada pestaña
+window.updateActiveTab = (field, value) => {
+    if (currentActiveTab && multiAccData[currentActiveTab]) multiAccData[currentActiveTab][field] = value;
+};
+
 window.confirmAccountData = () => { 
-    tempAccountData.email = document.getElementById('accEmail').value; 
-    tempAccountData.password = document.getElementById('accPassword').value; 
-    tempAccountData.profile = document.getElementById('accProfile').value; 
-    tempAccountData.pin = document.getElementById('accPin').value;
-    tempAccountData.saleType = document.getElementById('accSaleType').value;
-    tempAccountData.units = parseInt(document.getElementById('accUnits').value) || 1; 
-    tempAccountData.deviceName = document.getElementById('accDeviceName').value; 
-    tempAccountData.deviceType = document.getElementById('accDeviceType').value; 
     window.closeModals(); 
+    const totalUnits = Object.values(multiAccData).reduce((sum, acc) => sum + (parseInt(acc.units) || 1), 0);
     const btn = document.getElementById('btnAccountData'); 
-    btn.innerText = `✅ Datos Ingresados (${tempAccountData.units} ud)`; 
+    btn.innerText = `✅ Datos Ingresados (${totalUnits} ud)`; 
     btn.style.backgroundColor = "var(--mac-green)"; btn.style.color = "white"; 
 };
+
 window.viewAccountData = (id) => { 
     const c = clients.find(x => x.id === id);
-    document.getElementById('viewAccSaleType').innerText = c.accountSaleType || 'Perfil';
-    document.getElementById('viewAccEmail').innerText = c.accountEmail || '-'; 
-    document.getElementById('viewAccPassword').innerText = c.accountPassword || '-'; 
-    document.getElementById('viewAccProfile').innerText = c.accountProfile || '-'; 
-    document.getElementById('viewAccPin').innerText = c.accountPin || '-';
-    document.getElementById('viewAccPortalCode').innerText = c.portalCode || 'Sin Código';
     
-// Lógica para mostrar el dispositivo en "Ver Datos" usando Boxicons
-    let deviceText = 'Sin configurar';
-    if (c.accountDeviceType) {
-        let iconHtml = '';
-        if (c.accountDeviceType === 'TV') iconHtml = "<i class='bx bx-tv'></i>";
-        if (c.accountDeviceType === 'PC') iconHtml = "<i class='bx bx-laptop'></i>";
-        if (c.accountDeviceType === 'Celular') iconHtml = "<i class='bx bx-mobile-alt'></i>";
-        
-        deviceText = `${iconHtml} ${c.accountDeviceType} ${c.accountDeviceName ? '(' + c.accountDeviceName + ')' : ''}`;
+    // Adaptabilidad para leer clientes con pestañas o clientes viejos sin pestañas
+    if (c.multiAccounts) {
+        multiAccData = c.multiAccounts;
+    } else {
+        const platforms = c.platform.split(', ');
+        multiAccData = {};
+        platforms.forEach(p => {
+            multiAccData[p] = { email: c.accountEmail, password: c.accountPassword, profile: c.accountProfile, pin: c.accountPin, saleType: c.accountSaleType, units: c.accountUnits, deviceName: c.accountDeviceName, deviceType: c.accountDeviceType };
+        });
     }
-    const deviceEl = document.getElementById('viewAccDevice');
-    // Como ahora usamos HTML (la etiqueta <i>), debemos usar innerHTML
-    if(deviceEl) deviceEl.innerHTML = deviceText;
 
-    document.getElementById('viewAccUnits').innerText = c.accountUnits || '1';
-    const providerEl = document.getElementById('viewAccProvider');
-    if(providerEl) providerEl.innerText = c.providerName || 'Sin especificar';
+    const platformsKeys = Object.keys(multiAccData);
+    window.renderAccTabs(platformsKeys, 'viewModal');
+
+    document.getElementById('viewAccProvider').innerText = c.providerName || 'Sin especificar';
+    document.getElementById('viewAccPortalCode').innerText = c.portalCode || 'Sin Código';
     document.getElementById('viewAccountModal').style.display = 'flex'; 
 };
 
@@ -831,11 +878,9 @@ window.loadMoreClients = async () => {
 };
 
 const resetAccountButton = () => { 
-    tempAccountData = { email: '', password: '', profile: '', pin: '', units: 1, deviceName: '', deviceType: '', saleType: 'Perfil', inventoryId: null }; 
+    multiAccData = {}; currentActiveTab = '';
     const btn = document.getElementById('btnAccountData'); 
-    btn.innerText = "🔑 Ingresar Datos de Cuenta"; 
-    btn.style.backgroundColor = "var(--mac-gray)"; 
-    btn.style.color = "var(--mac-text-main)"; 
+    btn.innerText = "🔑 Ingresar Datos de Cuenta"; btn.style.backgroundColor = "var(--mac-gray)"; btn.style.color = "var(--mac-text-main)"; 
 };
 /* --- GUARDAR CLIENTE (CON HERENCIA DE COLOR INTELIGENTE) --- */
 /* --- GUARDAR CLIENTE (CON LÍMITES, HERENCIA DE COLOR Y MATRIZ) --- */
@@ -901,6 +946,7 @@ window.saveClientData = async () => {
         if (!finalLinkedMasterId && typeof variablesEnlaceMatriz !== 'undefined' && variablesEnlaceMatriz.masterId && !editingClientId) {
             finalLinkedMasterId = variablesEnlaceMatriz.masterId;
         }
+        let primaryData = multiAccData[checked[0]] || window.getDefaultAccData();
         let generatedPortalCode = Math.random().toString(36).substring(2, 6).toUpperCase();
         const data = { 
             userId: currentUser.uid, 
@@ -911,6 +957,7 @@ window.saveClientData = async () => {
             cost: cost,
             providerName: document.getElementById('clientProviderName').value,
             price: price,
+            multiAccounts: multiAccData,    
             accountSaleType: tempAccountData.saleType,
             accountEmail: tempAccountData.email, 
             accountPassword: tempAccountData.password, 
@@ -920,6 +967,7 @@ window.saveClientData = async () => {
             linkedMasterId: finalLinkedMasterId, // <--- CORREGIDO: Inyecta el ID dinámico detectado
             accountDeviceName: tempAccountData.deviceName, // NUEVO
             accountDeviceType: tempAccountData.deviceType,
+            accountSaleType: primaryData.saleType, accountEmail: primaryData.email, accountPassword: primaryData.password, accountProfile: primaryData.profile, accountPin: primaryData.pin, accountUnits: primaryData.units || 1, linkedMasterId: finalLinkedMasterId, accountDeviceName: primaryData.deviceName, accountDeviceType: primaryData.deviceType,
             portalCode: generatedPortalCode
         };
 
@@ -944,9 +992,15 @@ window.saveClientData = async () => {
             window.showNotification("Agregado"); 
         }
         // 🗑️ MAGIA AUTOMÁTICA: Si la cuenta venía del inventario, la eliminamos del stock
-        if (tempAccountData.inventoryId) {
-            let stock = currentUserData.inventory || [];
-            stock = stock.filter(item => item.id !== tempAccountData.inventoryId);
+        let stock = currentUserData.inventory || [];
+        let updatedStock = false;
+        Object.values(multiAccData).forEach(acc => {
+            if (acc.inventoryId) {
+                stock = stock.filter(item => item.id !== acc.inventoryId);
+                updatedStock = true;
+            }
+        });
+        if (updatedStock) {
             await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
             currentUserData.inventory = stock;
         }
@@ -3398,9 +3452,21 @@ window.loginClientPortal = async () => {
             const c = d.data();
             const cleanDbPhone = c.phone ? String(c.phone).replace(/[^\d]/g, '') : '';
             
-            // Si el CÓDIGO es igual, Y el TELÉFONO coincide (limpiando espacios o +51)
             if (c.portalCode === code && (cleanDbPhone === cleanInputPhone || cleanDbPhone.endsWith(cleanInputPhone))) {
-                portalMatchedClients.push({ id: d.id, ...c });
+                if (c.multiAccounts) {
+                    // Desarmamos las pestañas y las convertimos en tarjetas independientes para el portal
+                    Object.entries(c.multiAccounts).forEach(([platName, accData]) => {
+                        portalMatchedClients.push({ 
+                            id: d.id + '_' + platName, date: c.date, platform: platName, 
+                            accountEmail: accData.email, accountPassword: accData.password, 
+                            accountProfile: accData.profile, accountPin: accData.pin, accountSaleType: accData.saleType 
+                        });
+                    });
+                } else {
+                    c.platform.split(', ').forEach(platName => {
+                        portalMatchedClients.push({ ...c, platform: platName });
+                    });
+                }
             }
         });
 
