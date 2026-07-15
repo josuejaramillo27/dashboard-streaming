@@ -939,23 +939,25 @@ window.saveClientData = async () => {
             }
         }
 
-        // 🛠️ VINCULACIÓN DINÁMICA INTELIGENTE (AUTO-DETECCIÓN POR CORREO)
+        // Sacamos la data principal de la primera plataforma seleccionada
+        let primaryData = multiAccData[checked[0]] || window.getDefaultAccData();
+
+        // 🛠️ VINCULACIÓN DINÁMICA INTELIGENTE
         let finalLinkedMasterId = null;
-        if (tempAccountData.email) {
-            const qMatriz = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid), where("email", "==", tempAccountData.email));
+        if (primaryData.email) {
+            const qMatriz = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid), where("email", "==", primaryData.email));
             const snapMatriz = await getDocs(qMatriz);
             if (!snapMatriz.empty) {
-                // Si el correo actual coincide con alguna cuenta matriz (ya sea nueva o existente), se vincula a ella automáticamente
                 finalLinkedMasterId = snapMatriz.docs[0].id;
             }
         }
         
-        // Si por algún motivo quedó en null pero venía de un flujo forzado del botón verde "Asignar"
         if (!finalLinkedMasterId && typeof variablesEnlaceMatriz !== 'undefined' && variablesEnlaceMatriz.masterId && !editingClientId) {
             finalLinkedMasterId = variablesEnlaceMatriz.masterId;
         }
-        let primaryData = multiAccData[checked[0]] || window.getDefaultAccData();
+
         let generatedPortalCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+        
         const data = { 
             userId: currentUser.uid, 
             name: document.getElementById('clientName').value, 
@@ -965,17 +967,17 @@ window.saveClientData = async () => {
             cost: cost,
             providerName: document.getElementById('clientProviderName').value,
             price: price,
-            multiAccounts: multiAccData,    
-            accountSaleType: tempAccountData.saleType,
-            accountEmail: tempAccountData.email, 
-            accountPassword: tempAccountData.password, 
-            accountProfile: tempAccountData.profile, 
-            accountPin: tempAccountData.pin,
-            accountUnits: tempAccountData.units || 1,
-            linkedMasterId: finalLinkedMasterId, // <--- CORREGIDO: Inyecta el ID dinámico detectado
-            accountDeviceName: tempAccountData.deviceName, // NUEVO
-            accountDeviceType: tempAccountData.deviceType,
-            accountSaleType: primaryData.saleType, accountEmail: primaryData.email, accountPassword: primaryData.password, accountProfile: primaryData.profile, accountPin: primaryData.pin, accountUnits: primaryData.units || 1, linkedMasterId: finalLinkedMasterId, accountDeviceName: primaryData.deviceName, accountDeviceType: primaryData.deviceType,
+            multiAccounts: multiAccData, // GUARDADO MULTI-PESTAÑA
+            // Legacy fallbacks para que no se rompan las demás vistas
+            accountSaleType: primaryData.saleType,
+            accountEmail: primaryData.email, 
+            accountPassword: primaryData.password, 
+            accountProfile: primaryData.profile, 
+            accountPin: primaryData.pin, 
+            accountUnits: primaryData.units || 1, 
+            linkedMasterId: finalLinkedMasterId, 
+            accountDeviceName: primaryData.deviceName, 
+            accountDeviceType: primaryData.deviceType,
             portalCode: generatedPortalCode
         };
 
@@ -999,7 +1001,8 @@ window.saveClientData = async () => {
             await addDoc(collection(db, "clients"), data); 
             window.showNotification("Agregado"); 
         }
-        // 🗑️ MAGIA AUTOMÁTICA: Si la cuenta venía del inventario, la eliminamos del stock
+
+        // 🗑️ MAGIA AUTOMÁTICA: Eliminamos del stock lo que hayamos entregado en las pestañas
         let stock = currentUserData.inventory || [];
         let updatedStock = false;
         Object.values(multiAccData).forEach(acc => {
@@ -1081,15 +1084,36 @@ window.renewClient = async (id) => {
 };
 
 window.startEdit = (id) => {
-    editingClientId = id; const c = clients.find(x => x.id === id);
-    document.getElementById('clientName').value = c.name; document.getElementById('phone').value = c.phone; document.getElementById('expirationDate').value = c.date;
-    document.getElementById('clientCost').value = c.cost || ''; document.getElementById('clientPrice').value = c.price || ''; document.getElementById('clientProviderName').value = c.providerName || '';
-    tempAccountData.saleType = c.accountSaleType || 'Perfil'; tempAccountData.email = c.accountEmail || ''; tempAccountData.password = c.accountPassword || ''; tempAccountData.profile = c.accountProfile || ''; tempAccountData.pin = c.accountPin || ''; tempAccountData.units = c.accountUnits || 1;
-    tempAccountData.deviceName = c.accountDeviceName || ''; // NUEVO
-    tempAccountData.deviceType = c.accountDeviceType || ''; // NUEVO
+    editingClientId = id; 
+    const c = clients.find(x => x.id === id);
+    document.getElementById('clientName').value = c.name; 
+    document.getElementById('phone').value = c.phone; 
+    document.getElementById('expirationDate').value = c.date;
+    document.getElementById('clientCost').value = c.cost || ''; 
+    document.getElementById('clientPrice').value = c.price || ''; 
+    document.getElementById('clientProviderName').value = c.providerName || '';
     
+    // 🔥 RECONSTRUIR multiAccData DESDE LA BASE DE DATOS
+    if (c.multiAccounts) {
+        multiAccData = c.multiAccounts;
+    } else {
+        // Soporte para clientes antiguos que no tenían pestañas
+        const platforms = c.platform.split(', ');
+        multiAccData = {};
+        platforms.forEach(p => {
+            multiAccData[p] = { 
+                email: c.accountEmail || '', 
+                password: c.accountPassword || '', 
+                profile: c.accountProfile || '', 
+                pin: c.accountPin || '', 
+                saleType: c.accountSaleType || 'Perfil', 
+                units: c.accountUnits || 1, 
+                deviceName: c.accountDeviceName || '', 
+                deviceType: c.accountDeviceType || '' 
+            };
+        });
+    }
     
-    // 🔥 FIX: Mantener la memoria de la matriz al editar y guardar correo original
     if (typeof variablesEnlaceMatriz !== 'undefined') {
         variablesEnlaceMatriz.masterId = c.linkedMasterId || null;
         variablesEnlaceMatriz.profileNum = c.accountProfile || null;
@@ -1097,9 +1121,17 @@ window.startEdit = (id) => {
         variablesEnlaceMatriz.originalPass = c.accountPassword || '';
     }
     
-    const btn = document.getElementById('btnAccountData'); btn.innerText = `✅ Datos de Cuenta (${tempAccountData.units} ud)`; btn.style.backgroundColor = "var(--mac-green)"; btn.style.color = "white";
-    const cbs = document.querySelectorAll('#checkboxDropdown input'); cbs.forEach(cb => cb.checked = false); c.platform.split(', ').forEach(p => { cbs.forEach(cb => { if(cb.value === p) cb.checked = true; }); });
-    document.getElementById('selectText').textContent = c.platform; document.getElementById('selectText').classList.add('has-selection');
+    const totalUnits = Object.values(multiAccData).reduce((sum, acc) => sum + (parseInt(acc.units) || 1), 0);
+    const btn = document.getElementById('btnAccountData'); 
+    btn.innerText = `✅ Datos de Cuenta (${totalUnits} ud)`; 
+    btn.style.backgroundColor = "var(--mac-green)"; 
+    btn.style.color = "white";
+    
+    const cbs = document.querySelectorAll('#checkboxDropdown input'); 
+    cbs.forEach(cb => cb.checked = false); 
+    c.platform.split(', ').forEach(p => { cbs.forEach(cb => { if(cb.value === p) cb.checked = true; }); });
+    document.getElementById('selectText').textContent = c.platform; 
+    document.getElementById('selectText').classList.add('has-selection');
     document.getElementById('actionButtonsContainer').innerHTML = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button type="button" class="btn-primary" onclick="window.saveClientData()">Guardar</button><button type="button" class="btn-secondary" onclick="window.cancelEdit()">Cancelar</button></div>`;
     document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
 };
