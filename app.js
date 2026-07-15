@@ -392,8 +392,16 @@ window.openProfileModal = () => {
     document.getElementById('editProfileCountry').value = currentUserData.country || ''; 
     document.getElementById('editProfilePhone').value = currentUserData.phone || ''; 
     document.getElementById('editProfileAlias').value = currentUserData.storeAlias || ''; 
-    document.getElementById('profileModal').style.display = 'flex';
     document.getElementById('editReferencesLink').value = currentUserData.referencesLink || '';
+    
+    const profileModal = document.getElementById('profileModal');
+    
+    // Aseguramos que se abra correctamente independientemente del CSS del PC
+    if (window.innerWidth <= 768) {
+        profileModal.style.setProperty('display', 'flex', 'important');
+    } else {
+        profileModal.style.display = 'flex';
+    }
 };
 
 window.saveProfile = async () => { 
@@ -3009,7 +3017,7 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) =>
         selectText.classList.add('has-selection');
     }
 
-    // 🔥 NUEVA LÓGICA DE PESTAÑAS (MULTI-ACC)
+    // 🔥 NUEVA LÓGICA DE PESTAÑAS (MULTI-ACC) APLICADA AQUÍ 🔥
     multiAccData = {}; 
     multiAccData[platform] = window.getDefaultAccData();
     multiAccData[platform].email = email;
