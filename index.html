@@ -198,6 +198,36 @@
         @keyframes shineGold {
             to { background-position: 200% center; }
         }
+
+        /* ==========================================================================
+           TABS ESTILO CHROME PARA DATOS DE CUENTA MULTIPLATAFORMA
+           ========================================================================== */
+        .chrome-tabs-container {
+            display: flex; overflow-x: auto; overflow-y: hidden;
+            background: rgba(0,0,0,0.1); border-radius: 12px 12px 0 0;
+            padding: 8px 8px 0 8px; gap: 4px; border-bottom: 1px solid var(--mac-border);
+            margin-bottom: 15px; scrollbar-width: none;
+        }
+        .chrome-tabs-container::-webkit-scrollbar { display: none; }
+        
+        .chrome-tab {
+            flex: 1; min-width: 70px; max-width: 140px; padding: 8px 12px;
+            background: rgba(134, 134, 139, 0.15); color: var(--mac-text-secondary);
+            border-radius: 10px 10px 0 0; font-size: 12px; font-weight: bold;
+            text-align: center; cursor: pointer; white-space: nowrap; overflow: hidden;
+            text-overflow: ellipsis; border: 1px solid transparent; border-bottom: none;
+            transition: all 0.2s; position: relative;
+        }
+        .chrome-tab:hover { background: rgba(134, 134, 139, 0.3); }
+        .chrome-tab.active {
+            background: var(--mac-surface); color: var(--mac-blue);
+            border-color: var(--mac-border); box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 2;
+        }
+        .chrome-tab.active::after {
+            content: ''; position: absolute; bottom: -1px; left: 0;
+            width: 100%; height: 2px; background: var(--mac-surface);
+        }
     </style>
 </head>
 <body>
@@ -762,22 +792,26 @@
     </div>
 </div>
 
-<!-- DATOS DE CUENTA AL REGISTRAR CLIENTE -->
+<!-- DATOS DE CUENTA AL REGISTRAR CLIENTE (MULTI-PESTAÑA) -->
 <div id="accountModal" class="modal-overlay" style="display: none;">
     <div class="modal-card">
-        <h3 style="margin-bottom: 15px;"><i class='bx bx-key'></i> Datos de la Cuenta</h3>
+        <h3 style="margin-bottom: 10px;"><i class='bx bx-key'></i> Datos de la Cuenta</h3>
+        
+        <!-- CONTENEDOR DE PESTAÑAS TIPO CHROME -->
+        <div id="accTabsContainer" class="chrome-tabs-container" style="display: none;"></div>
+        
         <div style="display: flex; flex-direction: column; gap: 12px;">
-            <input type="email" id="accEmail" placeholder="Correo de la cuenta">
+            <input type="email" id="accEmail" placeholder="Correo de la cuenta" oninput="window.updateActiveTab('email', this.value)">
             <div class="pwd-wrapper">
-                <input type="password" id="accPassword" placeholder="Contraseña">
+                <input type="password" id="accPassword" placeholder="Contraseña" oninput="window.updateActiveTab('password', this.value)">
                 <button type="button" class="pwd-toggle" onclick="window.togglePassword('accPassword', this)"><i class='bx bx-show'></i></button>
             </div>
-            <input type="text" id="accProfile" placeholder="Nombre del Perfil (Ej: Perfil 1)">
-            <input type="text" id="accPin" placeholder="PIN del Perfil (Ej: 1234)">
+            <input type="text" id="accProfile" placeholder="Nombre del Perfil (Ej: Perfil 1)" oninput="window.updateActiveTab('profile', this.value)">
+            <input type="text" id="accPin" placeholder="PIN del Perfil (Ej: 1234)" oninput="window.updateActiveTab('pin', this.value)">
             
             <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 5px;">
                 <label style="font-size: 12px; font-weight: 600; color: var(--mac-text-secondary);">Tipo de Venta:</label>
-                <select id="accSaleType" style="width:100%; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                <select id="accSaleType" style="width:100%; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);" onchange="window.updateActiveTab('saleType', this.value)">
                     <option value="Perfil">👤 Perfil</option>
                     <option value="Cuenta Completa">⭐ Cuenta Completa</option>
                 </select>
@@ -785,17 +819,17 @@
             
             <div style="display: flex; flex-direction: column; gap: 4px;">
                 <label style="font-size: 12px; font-weight: 600; color: var(--mac-text-secondary);">Unidades / Pantallas:</label>
-                <input type="number" id="accUnits" value="1" min="1" placeholder="Cantidad de unidades" required>
+                <input type="number" id="accUnits" value="1" min="1" placeholder="Cantidad de unidades" oninput="window.updateActiveTab('units', this.value)">
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 5px;">
                 <div style="flex: 1;">
                     <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Dispositivo:</label>
-                    <input type="text" id="accDeviceName" placeholder="Ej: TV Sala" style="width:100%;">
+                    <input type="text" id="accDeviceName" placeholder="Ej: TV Sala" style="width:100%;" oninput="window.updateActiveTab('deviceName', this.value)">
                 </div>
                 <div style="flex: 1;">
                     <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Tipo:</label>
-                    <select id="accDeviceType" style="width:100%; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                    <select id="accDeviceType" style="width:100%; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);" onchange="window.updateActiveTab('deviceType', this.value)">
                         <option value="">No definido</option>
                         <option value="TV">TV</option><option value="PC">PC</option><option value="Celular">Celular</option>
                     </select>
@@ -812,7 +846,11 @@
 <!-- VER DATOS GUARDADOS DE UNA CUENTA -->
 <div id="viewAccountModal" class="modal-overlay" style="display: none;">
     <div class="modal-card">
-        <h3 style="margin-bottom: 15px;"><i class='bx bx-key'></i> Detalles de la Cuenta</h3>
+        <h3 style="margin-bottom: 10px;"><i class='bx bx-key'></i> Detalles de la Cuenta</h3>
+        
+        <!-- CONTENEDOR DE PESTAÑAS TIPO CHROME -->
+        <div id="viewAccTabsContainer" class="chrome-tabs-container" style="display: none;"></div>
+
         <p style="margin: 5px 0;"><strong>Correo:</strong> <span id="viewAccEmail" style="color: var(--mac-text-secondary);"></span></p>
         <p style="margin: 5px 0;"><strong>Contraseña:</strong> <span id="viewAccPassword" style="color: var(--mac-text-secondary);"></span></p>
         <p style="margin: 5px 0;"><strong>Perfil:</strong> <span id="viewAccProfile" style="color: var(--mac-text-secondary);"></span></p>
