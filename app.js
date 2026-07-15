@@ -2434,14 +2434,16 @@ window.deliverFromInventory = (id) => {
     window.closeModals(true);
     window.switchMainTab('clientes');
     
-    // 2. Rellenar los datos de cuenta
-    tempAccountData.email = item.email || '';
-    tempAccountData.password = item.pass || '';
-    tempAccountData.profile = item.profile || '';
-    tempAccountData.pin = item.pin || '';
-    tempAccountData.units = 1;
-    tempAccountData.saleType = item.type === 'Completa' ? 'Cuenta Completa' : 'Perfil';
-    tempAccountData.inventoryId = item.id;
+    // 🔥 NUEVA LÓGICA DE PESTAÑAS (MULTI-ACC)
+    multiAccData = {};
+    multiAccData[item.platform] = window.getDefaultAccData();
+    multiAccData[item.platform].email = item.email || '';
+    multiAccData[item.platform].password = item.pass || '';
+    multiAccData[item.platform].profile = item.profile || '';
+    multiAccData[item.platform].pin = item.pin || '';
+    multiAccData[item.platform].units = 1;
+    multiAccData[item.platform].saleType = item.type === 'Completa' ? 'Cuenta Completa' : 'Perfil';
+    multiAccData[item.platform].inventoryId = item.id;
 
     // 3. Seleccionar la plataforma en el multiselect
     const cbs = document.querySelectorAll('#checkboxDropdown input');
@@ -2989,7 +2991,7 @@ window.renderMasterAccounts = async () => {
     }
 };
 
-// 7. ACCIÓN PARA SALTAR AL FORMULARIO DE CLIENTE
+// 7. ACCIÓN PARA SALTAR AL FORMULARIO DE CLIENTE DESDE LA MATRIZ
 window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) => {
     variablesEnlaceMatriz.masterId = masterId;
     variablesEnlaceMatriz.profileNum = profileNum;
@@ -3007,11 +3009,15 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) =>
         selectText.classList.add('has-selection');
     }
 
-    tempAccountData.email = email;
-    tempAccountData.password = pass;
-    tempAccountData.profile = profileNum.toString();
-    tempAccountData.pin = '';
-    tempAccountData.units = 1;
+    // 🔥 NUEVA LÓGICA DE PESTAÑAS (MULTI-ACC)
+    multiAccData = {}; 
+    multiAccData[platform] = window.getDefaultAccData();
+    multiAccData[platform].email = email;
+    multiAccData[platform].password = pass;
+    multiAccData[platform].profile = profileNum.toString();
+    multiAccData[platform].pin = '';
+    multiAccData[platform].units = 1;
+    multiAccData[platform].saleType = 'Perfil';
 
     const btnAcc = document.getElementById('btnAccountData');
     if (btnAcc) {
