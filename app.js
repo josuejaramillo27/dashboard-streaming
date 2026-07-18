@@ -337,12 +337,13 @@ window.switchDashboardSection = (sectionId, menuElement) => {
     }, 60); 
 };
 
-// Blindaje del botón "Cerrar" para que regrese correctamente al Home
+// Blindaje del botón "Cerrar" para que regrese correctamente al Home en PC y CELULAR
 const originalCloseModals = window.closeModals;
 window.closeModals = (resetTab = true) => {
     originalCloseModals(resetTab);
     
-    if (window.innerWidth >= 769 && resetTab === true) {
+    // Le quitamos la validación de PC para que en celular también restaure el inicio
+    if (resetTab === true) {
         document.querySelectorAll('.dashboard-section').forEach(sec => {
             sec.classList.remove('active-section');
             sec.style.setProperty('display', 'none', 'important');
@@ -358,6 +359,7 @@ window.closeModals = (resetTab = true) => {
         if(homeBtn) homeBtn.classList.add('active');
     }
 };
+
 /* --- CONFIGURACIÓN DE WHATSAPP Y PAGOS --- */
 window.openWaModal = () => { 
     const defaultMsg = "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*. Para renovar, usa estos datos:\n\n{pago}"; 
