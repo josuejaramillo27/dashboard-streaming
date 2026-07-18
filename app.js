@@ -175,7 +175,7 @@ onAuthStateChanged(auth, async (user) => {
         }
 
         try {
-            const docSnap = await getDoc(doc(db, "users", user.uid));
+            const docSnap = await getDoc(doc(db, "us    ers", user.uid));
             if (docSnap.exists()) {
                 currentUserData = docSnap.data();
                 globalCurrency = currentUserData.currency || "S/";
@@ -200,9 +200,9 @@ onAuthStateChanged(auth, async (user) => {
                     planBadge.style.display = 'none';
                 }
 
-                // --- 2. LÓGICA DE LA BARRA LATERAL EN PC (INSIGNIA VIP ANIMADA) ---
+                // --- 2. LÓGICA DE LA BARRA LATERAL EN PC Y CELULAR ---
                 if(document.getElementById('brandNameSidebar')) document.getElementById('brandNameSidebar').innerText = currentUserData.name || 'Mi Panel';
-                if(document.getElementById('brandLogoSidebar') && currentUserData.logoUrl) document.getElementById('brandLogoSidebar').src = currentUserData.logoUrl;
+                if(document.getElementById('mobileBrandName')) document.getElementById('mobileBrandName').innerText = currentUserData.name || 'Mi Panel';    
                 
                 const planBadgeSide = document.getElementById('userPlanBadgeSidebar');
                 if (planBadgeSide && currentUserData.role !== 'admin') {
@@ -231,9 +231,10 @@ onAuthStateChanged(auth, async (user) => {
                     planBadgeSide.style.display = 'none';
                 }
 
-                if(currentUserData.logoUrl && document.getElementById('brandLogo')) {
-                    document.getElementById('brandLogo').src = currentUserData.logoUrl;
-                    document.getElementById('brandLogo').style.display = 'block';
+                // Inyección del logo
+                if(currentUserData.logoUrl) {
+                    if(document.getElementById('brandLogoSidebar')) { document.getElementById('brandLogoSidebar').src = currentUserData.logoUrl; document.getElementById('brandLogoSidebar').style.display = 'block'; }
+                    if(document.getElementById('mobileBrandLogo')) { document.getElementById('mobileBrandLogo').src = currentUserData.logoUrl; document.getElementById('mobileBrandLogo').style.display = 'block'; }
                 }
 
                 if(document.getElementById('clientCost')) document.getElementById('clientCost').placeholder = `Costo Proveedor (${globalCurrency})`;
@@ -459,8 +460,16 @@ window.saveProfile = async () => {
         globalCurrency = getCurrencyForCountry(country);
         currentUserData.currency = globalCurrency;
 
-        document.getElementById('brandName').innerText = name || 'Mi Panel';
-        if (logoUrl) { document.getElementById('brandLogo').src = logoUrl; document.getElementById('brandLogo').style.display = 'block'; }
+        // 🔥 CORRECCIÓN APrUEBA DE ERRORES: Buscamos ambos textos (PC y Móvil)
+        if (document.getElementById('brandNameSidebar')) document.getElementById('brandNameSidebar').innerText = name || 'Mi Panel';
+        if (document.getElementById('mobileBrandName')) document.getElementById('mobileBrandName').innerText = name || 'Mi Panel';
+        
+        // 🔥 CORRECCIÓN: Buscamos ambos logos (PC y Móvil)
+        if (logoUrl) { 
+            if (document.getElementById('brandLogoSidebar')) { document.getElementById('brandLogoSidebar').src = logoUrl; document.getElementById('brandLogoSidebar').style.display = 'block'; }
+            if (document.getElementById('mobileBrandLogo')) { document.getElementById('mobileBrandLogo').src = logoUrl; document.getElementById('mobileBrandLogo').style.display = 'block'; }
+        }
+
         if (document.getElementById('clientCost')) document.getElementById('clientCost').placeholder = `Costo Proveedor (${globalCurrency})`;
         if (document.getElementById('clientPrice')) document.getElementById('clientPrice').placeholder = `Precio de Venta (${globalCurrency})`;
 
@@ -3640,3 +3649,30 @@ window.logoutClientPortal = () => {
 // 🔥 DETONADORES PRINCIPALES (Ejecutan el código al entrar al link automáticamente)
 document.addEventListener('DOMContentLoaded', () => { window.checkClientPortal(); });
 window.checkClientPortal();
+
+        // 📱 CONTROLADOR DEL MENÚ LATERAL EN MÓVIL ESTILO SPOTIFY
+window.toggleMobileMenu = () => {
+    const sidebar = document.getElementById('mainSidebar');
+    const overlay = document.getElementById('mobileSidebarOverlay');
+    if (sidebar) sidebar.classList.toggle('mobile-open');
+    if (overlay) {
+        if (overlay.classList.contains('active')) {
+            overlay.classList.remove('active');
+            setTimeout(() => overlay.style.display = 'none', 300);
+        } else {
+            overlay.style.display = 'block';
+            setTimeout(() => overlay.classList.add('active'), 10);
+        }
+    }
+};
+
+// Auto-Cerrar menú móvil al hacer clic en cualquier opción
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 768) window.toggleMobileMenu();
+            });
+        });
+    }, 1000);
+});
