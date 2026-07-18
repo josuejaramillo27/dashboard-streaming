@@ -302,31 +302,39 @@ window.closeModals = (resetTab = true) => {
         if(btnClientes) btnClientes.classList.add('active');
     }
 };
-/* --- CONTROLADOR DE SECCIONES DASHBOARD (PC) --- */
+/* --- CONTROLADOR DE SECCIONES DASHBOARD (PC Y MÓVIL) --- */
 window.switchDashboardSection = (sectionId, menuElement) => {
-    if (window.innerWidth >= 769) {
-        // Retraso de 60ms para evadir el conflicto con las funciones antiguas
-        setTimeout(() => {
-            // 1. Apagamos TODAS las secciones de forma forzada
-            document.querySelectorAll('.dashboard-section').forEach(sec => {
-                sec.classList.remove('active-section');
-                sec.style.setProperty('display', 'none', 'important'); 
-            });
-            
-            // 2. Encendemos SOLO la sección a la que le hiciste clic
-            const targetSection = document.getElementById(sectionId);
-            if (targetSection) {
-                targetSection.classList.add('active-section');
-                targetSection.style.setProperty('display', 'block', 'important'); 
-            }
+    setTimeout(() => {
+        // 1. Apagamos TODAS las secciones
+        document.querySelectorAll('.dashboard-section').forEach(sec => {
+            sec.classList.remove('active-section');
+            sec.style.setProperty('display', 'none', 'important'); 
+        });
+        
+        // 2. Encendemos SOLO la seleccionada
+        const targetSection = document.getElementById(sectionId);
+        if (targetSection) {
+            targetSection.classList.add('active-section');
+            targetSection.style.setProperty('display', 'block', 'important'); 
+        }
 
-            // 3. Pintamos de color azul brillante el botón seleccionado
-            if (menuElement) {
-                document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
-                menuElement.classList.add('active');
+        // 3. Pintamos de azul el botón
+        if (menuElement) {
+            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+            menuElement.classList.add('active');
+        }
+        
+        // 4. SI ESTAMOS EN CELULAR: Ocultamos el menú automáticamente
+        if (window.innerWidth <= 768) {
+            const sidebar = document.getElementById('mainSidebar');
+            const overlay = document.getElementById('mobileSidebarOverlay');
+            if (sidebar) sidebar.classList.remove('mobile-open');
+            if (overlay) {
+                overlay.classList.remove('active');
+                setTimeout(() => overlay.style.display = 'none', 300);
             }
-        }, 60); 
-    }
+        }
+    }, 60); 
 };
 
 // Blindaje del botón "Cerrar" para que regrese correctamente al Home
