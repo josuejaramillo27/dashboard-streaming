@@ -250,6 +250,22 @@
             .sidebar-header { margin-bottom: 5px; padding-bottom: 10px; }
             .sidebar-item { padding: 14px 15px; font-size: 15px; }
         }
+        /* 📱 CORRECCIÓN: Forzar tamaño estricto del logo en celular */
+#mobileBrandLogo {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    object-fit: cover !important;
+    border-radius: 12px !important;
+    flex-shrink: 0 !important; /* Evita que el contenedor lo estire */
+}
+
+/* Blindaje extra para que la cabecera no se deforme */
+.mobile-header-profile {
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
     </style>
 </head>
 <body>
