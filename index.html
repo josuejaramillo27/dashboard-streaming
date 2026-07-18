@@ -51,6 +51,8 @@
            NUEVA ARQUITECTURA DASHBOARD (SOLO PC) - TRANSICIÓN DE MODALES A SECCIONES
            ========================================================================== */
         @media (min-width: 769px) {
+            .mobile-header-profile { display: none !important; }
+    #homeSection .header-top { justify-content: flex-end; }
             /* ESTA ES LA LÍNEA CORREGIDA PARA QUE NO CHOQUEN LAS PANTALLAS */
             body.logged-in #appView { display: flex !important; height: 100vh; width: 100%; overflow: hidden; }
             #appView { display: none !important; } /* Oculto obligatoriamente hasta loguearse */
@@ -380,8 +382,9 @@
         <!-- SECCIÓN 1: HOME (Dashboard Principal) -->
         <div id="homeSection" class="active-section dashboard-section">
             <div class="header-top" style="margin-bottom: 30px; align-items: center;">
-                <!-- CABECERA ADAPTATIVA TIPO SPOTIFY -->
-                <div style="display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 5px;" onclick="window.toggleMobileMenu()">
+                
+                <!-- CABECERA ADAPTATIVA TIPO SPOTIFY (SOLO CELULAR) -->
+                <div class="mobile-header-profile" style="display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 5px;" onclick="window.toggleMobileMenu()">
                     <img id="mobileBrandLogo" src="AGC.png" style="width: 48px; height: 48px; border-radius: 12px; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
                     <div>
                         <h1 id="mobileBrandName" style="margin: 0; font-size: 22px; color: var(--mac-text-main); font-weight: 800;">Mi Panel</h1>
@@ -389,18 +392,14 @@
                     </div>
                 </div>
                 
+                <!-- BOTONES DE PC -->
                 <div class="mac-controls">
                     <button class="action-btn" style="background: var(--mac-surface); border: 1px solid var(--mac-border); padding: 8px 15px; font-size: 14px;" onclick="window.toggleStats()"><i class='bx bx-line-chart'></i> Finanzas</button>
                     <button class="action-btn" style="background: rgba(52, 199, 89, 0.15); color: var(--mac-green); font-weight: bold; padding: 8px 15px; font-size: 14px;" onclick="window.openWaModal()"><i class='bx bxl-whatsapp'></i> Auto-WA</button>
                 </div>
             </div>
-                <div class="mac-controls">
-                    <button class="action-btn" style="background: var(--mac-surface); border: 1px solid var(--mac-border); padding: 8px 15px; font-size: 14px;" onclick="window.toggleStats()"><i class='bx bx-line-chart'></i> Ver Finanzas</button>
-                    <button class="action-btn" style="background: rgba(52, 199, 89, 0.15); color: var(--mac-green); font-weight: bold; padding: 8px 15px; font-size: 14px;" onclick="window.openWaModal()"><i class='bx bxl-whatsapp'></i> Textos Auto.</button>
-                </div>
-            </div>
 
-            <div class="stats-panel" id="statsPanel">
+            <div class="stats-panel" id="statsPanel">    
                 <div class="stat-card stat-active"><h4>Activos</h4><p id="statActive">0</p></div>
                 <div class="stat-card stat-warning"><h4>Por vencer</h4><p id="statWarning">0</p></div>
                 <div class="stat-card stat-expired"><h4>Vencidos</h4><p id="statExpired">0</p></div>
