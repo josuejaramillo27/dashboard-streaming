@@ -412,7 +412,7 @@ window.saveProfile = async () => {
     if(!phone.startsWith('+')) return window.showNotification("⚠️ El teléfono DEBE incluir el código de país"); 
     
     const btn = document.querySelector('#profileModal .btn-primary');
-    btn.innerText = "Subiendo... ⏳"; btn.disabled = true;
+    if(btn) { btn.innerText = "Subiendo... ⏳"; btn.disabled = true; }
 
     try {
         let logoUrl = currentUserData.logoUrl || null;
@@ -424,7 +424,6 @@ window.saveProfile = async () => {
             logoUrl = await getDownloadURL(storageRef);
         }
 
-        // 🪄 NUEVO: Lógica para subir el Banner
         let bannerUrl = currentUserData.bannerUrl || null;
         const bannerInput = document.getElementById('editBannerUpload');
         if (bannerInput && bannerInput.files.length > 0) {
@@ -434,23 +433,19 @@ window.saveProfile = async () => {
             bannerUrl = await getDownloadURL(storageRefBanner);
         }
 
-        // Limpiamos el alias
         let rawAlias = document.getElementById('editProfileAlias').value;
         let finalAlias = rawAlias.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
-        // 🪄 NUEVO: Capturamos el link de referencias
         let refInput = document.getElementById('editReferencesLink');
         let referencesLink = refInput ? refInput.value.trim() : '';
 
-        // 🪄 NUEVO: Agregamos referencesLink a Firebase
         await updateDoc(doc(db, "users", currentUser.uid), { 
             name: name, country: country, currency: getCurrencyForCountry(country), 
             phone: phone, logoUrl: logoUrl, bannerUrl: bannerUrl, storeAlias: finalAlias,
-            referencesLink: referencesLink // Guardado en la nube
+            referencesLink: referencesLink
         });
         
-        currentUserData.storeAlias = finalAlias; // Actualizamos en memoria 
-        
+        currentUserData.storeAlias = finalAlias; 
         currentUserData.name = name;
         currentUserData.country = country;
         currentUserData.phone = phone;
@@ -460,25 +455,36 @@ window.saveProfile = async () => {
         globalCurrency = getCurrencyForCountry(country);
         currentUserData.currency = globalCurrency;
 
-        // 🔥 CORRECCIÓN APrUEBA DE ERRORES: Buscamos ambos textos (PC y Móvil)
-        if (document.getElementById('brandNameSidebar')) document.getElementById('brandNameSidebar').innerText = name || 'Mi Panel';
-        if (document.getElementById('mobileBrandName')) document.getElementById('mobileBrandName').innerText = name || 'Mi Panel';
+        // Actualización DOM blindada
+        const brandSidebar = document.getElementById('brandNameSidebar');
+        if (brandSidebar) brandSidebar.innerText = name || 'Mi Panel';
         
-        // 🔥 CORRECCIÓN: Buscamos ambos logos (PC y Móvil)
-        if (logoUrl) { 
-            if (document.getElementById('brandLogoSidebar')) { document.getElementById('brandLogoSidebar').src = logoUrl; document.getElementById('brandLogoSidebar').style.display = 'block'; }
-            if (document.getElementById('mobileBrandLogo')) { document.getElementById('mobileBrandLogo').src = logoUrl; document.getElementById('mobileBrandLogo').style.display = 'block'; }
-        }
+        const mobileBrand = document.getElementById('mobileBrandName');
+        if (mobileBrand) mobileBrand.innerText = name || 'Mi Panel';
+        
+        const logoSidebar = document.getElementById('brandLogoSidebar');
+        if (logoSidebar && logoUrl) { logoSidebar.src = logoUrl; logoSidebar.style.display = 'block'; }
+        
+        const mobileLogo = document.getElementById('mobileBrandLogo');
+        if (mobileLogo && logoUrl) { mobileLogo.src = logoUrl; mobileLogo.style.display = 'block'; }
 
-        if (document.getElementById('clientCost')) document.getElementById('clientCost').placeholder = `Costo Proveedor (${globalCurrency})`;
-        if (document.getElementById('clientPrice')) document.getElementById('clientPrice').placeholder = `Precio de Venta (${globalCurrency})`;
+        const costInput = document.getElementById('clientCost');
+        if (costInput) costInput.placeholder = `Costo Proveedor (${globalCurrency})`;
+        
+        const priceInput = document.getElementById('clientPrice');
+        if (priceInput) priceInput.placeholder = `Precio de Venta (${globalCurrency})`;
 
         window.showNotification("Perfil y Logo guardados."); 
         window.closeModals();
-        window.renderTable();
-        window.toggleStats(true);
-        btn.innerText = "Guardar y Actualizar"; btn.disabled = false;
-    } catch(e) { window.showNotification("Error: " + e.message); btn.innerText = "Guardar y Actualizar"; btn.disabled = false; } 
+        
+        if (document.getElementById('tableBody')) window.renderTable();
+        if (document.getElementById('statsPanel')) window.toggleStats(true);
+        
+    } catch(e) { 
+        window.showNotification("Error: " + e.message); 
+    } finally {
+        if(btn) { btn.innerText = "Guardar y Actualizar"; btn.disabled = false; }
+    }
 };
 
 window.openSuggestionModal = () => { document.getElementById('suggestionText').value = ''; document.getElementById('suggestionModal').style.display = 'flex'; };
@@ -667,7 +673,7 @@ async function loadAdminData() {
         
         const planDisplay = (data.plan_actual || 'demo').toUpperCase();
         const planColor = planDisplay === 'PRO' ? 'var(--mac-blue)' : (planDisplay === 'BASICO' ? 'var(--mac-green)' : 'var(--mac-text-secondary)');
-        
+        const safeName = (data.name || 'Usuario').replace(/'/g, "\\'");
         const tr = document.createElement('tr'); 
         tr.innerHTML = `
             <td data-label="Nombre"><strong>${data.name}</strong></td>
