@@ -175,7 +175,7 @@ onAuthStateChanged(auth, async (user) => {
         }
 
         try {
-            const docSnap = await getDoc(doc(db, "us    ers", user.uid));
+            const docSnap = await getDoc(doc(db, "users", user.uid));
             if (docSnap.exists()) {
                 currentUserData = docSnap.data();
                 globalCurrency = currentUserData.currency || "S/";
