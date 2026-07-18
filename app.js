@@ -305,26 +305,26 @@ window.closeModals = (resetTab = true) => {
 /* --- CONTROLADOR DE SECCIONES DASHBOARD (PC Y MÓVIL) --- */
 window.switchDashboardSection = (sectionId, menuElement) => {
     setTimeout(() => {
-        // 1. Apagamos TODAS las secciones
+        // 1. Apagamos TODAS las secciones de forma forzada
         document.querySelectorAll('.dashboard-section').forEach(sec => {
             sec.classList.remove('active-section');
             sec.style.setProperty('display', 'none', 'important'); 
         });
         
-        // 2. Encendemos SOLO la seleccionada
+        // 2. Encendemos SOLO la sección a la que le hiciste clic
         const targetSection = document.getElementById(sectionId);
         if (targetSection) {
             targetSection.classList.add('active-section');
             targetSection.style.setProperty('display', 'block', 'important'); 
         }
 
-        // 3. Pintamos de azul el botón
+        // 3. Pintamos de color azul brillante el botón seleccionado
         if (menuElement) {
             document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
             menuElement.classList.add('active');
         }
         
-        // 4. SI ESTAMOS EN CELULAR: Ocultamos el menú automáticamente
+        // 4. SI ESTAMOS EN CELULAR: Ocultamos el menú automáticamente al hacer clic
         if (window.innerWidth <= 768) {
             const sidebar = document.getElementById('mainSidebar');
             const overlay = document.getElementById('mobileSidebarOverlay');
