@@ -234,38 +234,62 @@
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 9998; backdrop-filter: blur(2px); transition: opacity 0.3s; opacity: 0; }
         .mobile-overlay.active { display: block; opacity: 1; }
 
+        /* ==========================================================================
+           📱 COMPORTAMIENTO EN CELULARES (DISEÑO TIPO SPOTIFY)
+           ========================================================================== */
         @media (max-width: 768px) {
-            /* Transformamos el sidebar de PC en un menú deslizable estilo Spotify para móvil */
+            .dashboard-main { padding: 0 !important; overflow: visible !important; height: auto !important; }
+            body.logged-in { overflow: auto; }
+            
+            /* 1. Ocultar la barra inferior antigua por seguridad */
+            .bottom-nav { display: none !important; }
+            
+            /* 2. Activar Dashboard y quitar el espacio hueco de abajo */
+            .dashboard-section.modal-overlay { display: none; }
+            #homeSection { display: block !important; padding: 15px; padding-bottom: 20px !important; }
+            
+            /* 3. MENÚ LATERAL DESLIZABLE TIPO SPOTIFY */
             .dashboard-sidebar { 
                 display: flex !important; 
-                position: fixed; left: -100%; top: 0; height: 100vh; width: 270px; z-index: 9999;
+                position: fixed; left: -100%; top: 0; height: 100vh; width: 280px; z-index: 99999;
                 transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
                 box-shadow: 4px 0 24px rgba(0,0,0,0.5);
                 border-right: none;
+                background: var(--mac-surface) !important;
             }
             .dashboard-sidebar.mobile-open { left: 0; }
-            .sidebar-toggle-btn { display: none !important; } /* Ocultamos el botón de comprimir en móvil */
-            
-            /* Ajustes estéticos para móvil */
-            .sidebar-header { margin-bottom: 5px; padding-bottom: 10px; }
+            .sidebar-toggle-btn { display: none !important; } /* Ocultar botón de PC */
+            .sidebar-header { margin-bottom: 5px; padding-bottom: 10px; display: flex !important; }
             .sidebar-item { padding: 14px 15px; font-size: 15px; }
-        }
-        /* 📱 CORRECCIÓN: Forzar tamaño estricto del logo en celular */
-#mobileBrandLogo {
-    width: 48px !important;
-    height: 48px !important;
-    min-width: 48px !important;
-    max-width: 48px !important;
-    object-fit: cover !important;
-    border-radius: 12px !important;
-    flex-shrink: 0 !important; /* Evita que el contenedor lo estire */
-}
 
-/* Blindaje extra para que la cabecera no se deforme */
-.mobile-header-profile {
-    max-width: 100% !important;
-    overflow: hidden !important;
-}
+            /* 4. CABECERA Y LOGO BLINDADO CONTRA DEFORMACIONES */
+            .mobile-header-profile {
+                display: flex !important;
+                align-items: center; gap: 12px; cursor: pointer; padding: 5px;
+                max-width: 100%; overflow: hidden;
+            }
+            #mobileBrandLogo {
+                width: 50px !important;
+                height: 50px !important;
+                min-width: 50px !important;
+                max-width: 50px !important;
+                object-fit: cover !important;
+                border-radius: 12px !important;
+                flex-shrink: 0 !important; /* Evita que la foto se estire */
+                box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+            }
+            .mobile-header-text { display: flex; flex-direction: column; overflow: hidden; }
+            .mobile-header-text h1 { margin: 0; font-size: 22px; color: var(--mac-text-main); font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .mobile-header-text span { font-size: 12px; color: var(--mac-blue); font-weight: 600; }
+
+            /* Ajustes de Modales en Móvil */
+            #inventoryModal.modal-overlay, #pedidosModal.modal-overlay { background-color: var(--mac-bg) !important; align-items: flex-start !important; }
+            #inventoryModal .modal-card, #pedidosModal .modal-card { width: 100% !important; height: 100dvh !important; max-width: 100% !important; border: none !important; border-radius: 0 !important; margin: 0 !important; padding: 30px 20px 20px 20px !important; box-sizing: border-box !important; background-color: var(--mac-bg) !important; box-shadow: none !important; display: flex; flex-direction: column; }
+            #inventoryList, #pedidosList { flex-grow: 1 !important; overflow-y: auto !important; min-height: 0 !important; padding-bottom: 10px; margin-bottom: 10px; }
+            .news-layout { flex-direction: column; }
+            .news-sidebar { flex: 0 0 auto; max-height: 160px; border-right: none; border-bottom: 1px solid var(--mac-border); padding-right: 0; padding-bottom: 10px; }
+            .news-content-area { padding-left: 0; padding-top: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -400,11 +424,11 @@
             <div class="header-top" style="margin-bottom: 30px; align-items: center;">
                 
                 <!-- CABECERA ADAPTATIVA TIPO SPOTIFY (SOLO CELULAR) -->
-                <div class="mobile-header-profile" style="display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 5px;" onclick="window.toggleMobileMenu()">
-                    <img id="mobileBrandLogo" src="AGC.png" style="width: 48px; height: 48px; border-radius: 12px; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-                    <div>
-                        <h1 id="mobileBrandName" style="margin: 0; font-size: 22px; color: var(--mac-text-main); font-weight: 800;">Mi Panel</h1>
-                        <span style="font-size: 12px; color: var(--mac-blue); font-weight: 600;"><i class='bx bx-menu'></i> Ver Menú</span>
+                <div class="mobile-header-profile" onclick="window.toggleMobileMenu()">
+                    <img id="mobileBrandLogo" src="AGC.png" alt="Logo">
+                    <div class="mobile-header-text">
+                        <h1 id="mobileBrandName">Mi Marca</h1>
+                        <span><i class='bx bx-menu'></i> Menú Principal</span>
                     </div>
                 </div>
                 
@@ -700,30 +724,6 @@
         </div>
 
     </div> <!-- Fin del dashboard-main -->
-    
-    <!-- BARRA NAVEGACIÓN INFERIOR (SOLO MÓVIL) -->
-    <nav class="bottom-nav">
-        <a href="#" id="navClientes" class="nav-item active" onclick="window.closeModals(true)">
-            <i class='bx bx-group'></i>
-            <span>Clientes</span>
-        </a>
-        <a href="#" class="nav-item" onclick="window.openStoreModal(); document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active')); this.classList.add('active');">
-            <i class='bx bx-store-alt'></i>
-            <span>Tiendita</span>
-        </a>
-        <a href="#" class="nav-item" onclick="window.openInventoryModal(); document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active')); this.classList.add('active');">
-            <i class='bx bx-box'></i>
-            <span>Inventario</span>
-        </a>
-        <a href="#" class="nav-item" onclick="window.openPedidosModal(); document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active')); this.classList.add('active');">
-            <i class='bx bx-bell'></i>
-            <span>Ventas</span>
-        </a>
-        <a href="#" class="nav-item" onclick="window.showWrapped(); document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active')); this.classList.add('active');">
-            <i class='bx bx-bar-chart-alt-2'></i>
-            <span>Resumen</span>
-        </a>
-    </nav>
 </div> 
 
 <!-- ==============================================
