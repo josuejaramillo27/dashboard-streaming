@@ -159,6 +159,39 @@
             @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         }
 
+        /* ==========================================================================
+           🛑 CONVERTIR SECCIONES EN PÁGINAS (ADIÓS VENTANAS FLOTANTES)
+           ========================================================================== */
+        .dashboard-section {
+            display: none !important;
+            width: 100% !important;
+            height: auto !important;
+            position: relative !important; 
+            background: transparent !important;
+            padding: 15px !important;
+            box-sizing: border-box !important;
+        }
+        .dashboard-section.active-section {
+            display: block !important;
+            animation: fadeSlideUp 0.4s ease;
+        }
+        .dashboard-section.modal-overlay {
+            background: transparent !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            z-index: 1 !important;
+        }
+        .dashboard-section .modal-card {
+            width: 100% !important;
+            max-width: 100% !important;
+            height: auto !important;
+            box-shadow: none !important;
+            border: none !important;
+            background: transparent !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        
         /* Comportamiento en Celulares */
         @media (max-width: 768px) {
             .dashboard-sidebar { display: none !important; }
@@ -248,43 +281,76 @@
         }
 
         /* ==========================================================================
-           📱 COMPORTAMIENTO EN CELULARES (DISEÑO TIPO SPOTIFY)
+           📱 COMPORTAMIENTO EN CELULARES (MENÚ SÓLIDO Y PÁGINAS)
            ========================================================================== */
         @media (max-width: 768px) {
             .dashboard-main { padding: 0 !important; overflow: visible !important; height: auto !important; }
             body.logged-in { overflow: auto; }
             
-            /* 1. Ocultar barra inferior y controles de PC */
+            /* Ocultar botones obsoletos */
             .bottom-nav { display: none !important; }
             #homeSection .header-top .mac-controls { display: none !important; }
             
-            /* 2. Activar Dashboard Principal */
-            .dashboard-section.modal-overlay { display: none; }
-            #homeSection { display: block !important; padding: 15px; padding-bottom: 30px !important; }
-            
-            /* 3. MENÚ LATERAL DESLIZABLE (Corta cualquier desborde de imagen) */
+            /* MENÚ LATERAL TIPO SPOTIFY - SÓLIDO Y ORDENADO */
             .dashboard-sidebar { 
                 display: flex !important; 
-                position: fixed; left: -100%; top: 0; height: 100vh; width: 280px; z-index: 99999;
-                transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
-                box-shadow: 4px 0 24px rgba(0,0,0,0.5);
-                border-right: none;
-                background: var(--mac-surface) !important;
-                overflow-x: hidden !important; /* ESTO MATA AL ERROR FANTASMA */
+                flex-direction: column !important; /* CRUCIAL PARA EL ORDEN */
+                position: fixed !important; 
+                left: -100%; top: 0; 
+                height: 100dvh !important; 
+                width: 280px !important; 
+                z-index: 999999 !important;
+                transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important; 
+                box-shadow: 4px 0 24px rgba(0,0,0,0.8) !important;
+                border-right: none !important;
+                background: #1c1c1e !important; /* FONDO SÓLIDO OSCURO */
+                padding: 20px !important;
+                box-sizing: border-box !important;
                 overflow-y: auto !important;
+                overflow-x: hidden !important;
             }
-            .dashboard-sidebar.mobile-open { left: 0; }
+            .dashboard-sidebar.mobile-open { left: 0 !important; }
             .sidebar-toggle-btn { display: none !important; }
             
-            /* Ajustes del interior del menú */
-            .sidebar-header { margin-bottom: 15px; padding-bottom: 15px; display: flex !important; align-items: center; }
-            .sidebar-item { padding: 14px 15px; font-size: 16px; margin-bottom: 5px; justify-content: flex-start !important; }
-            .sidebar-item span { display: inline-block !important; }
+            /* Formato de la cabecera dentro del menú lateral */
+            .sidebar-header { 
+                display: flex !important; 
+                flex-direction: row !important;
+                align-items: center !important; 
+                margin-bottom: 20px !important; 
+                padding-bottom: 15px !important;
+                border-bottom: 1px solid #38383a !important;
+                width: 100% !important;
+            }
+            
+            /* Formato de los botones del menú lateral */
+            .sidebar-menu {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 8px !important;
+                width: 100% !important;
+            }
+            .sidebar-item { 
+                display: flex !important; 
+                align-items: center !important;
+                justify-content: flex-start !important;
+                gap: 12px !important;
+                padding: 14px 15px !important; 
+                font-size: 16px !important; 
+                color: #ebebf5 !important;
+                background: transparent !important;
+                border-radius: 12px !important;
+                text-decoration: none !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .sidebar-item.active { background: #007AFF !important; color: white !important; }
 
-            /* Ajustes de Modales para que se vean bien en celular */
-            #inventoryModal.modal-overlay, #pedidosModal.modal-overlay { background-color: var(--mac-bg) !important; align-items: flex-start !important; }
-            #inventoryModal .modal-card, #pedidosModal .modal-card { width: 100% !important; height: 100dvh !important; max-width: 100% !important; border: none !important; border-radius: 0 !important; margin: 0 !important; padding: 30px 20px 20px 20px !important; box-sizing: border-box !important; background-color: var(--mac-bg) !important; box-shadow: none !important; display: flex; flex-direction: column; }
-            #inventoryList, #pedidosList { flex-grow: 1 !important; overflow-y: auto !important; min-height: 0 !important; padding-bottom: 10px; margin-bottom: 10px; }
+            /* Ajustes para que la cabecera principal se vea bien */
+            .mobile-header-profile { display: flex !important; align-items: center; gap: 12px; cursor: pointer; padding: 5px; max-width: 100%; overflow: hidden; }
+
+            /* Ajustes de diseño interior para móviles */
+            #inventoryList, #pedidosList { flex-grow: 1 !important; overflow-y: visible !important; min-height: 0 !important; padding-bottom: 10px; margin-bottom: 10px; }
             .news-layout { flex-direction: column; }
             .news-sidebar { flex: 0 0 auto; max-height: 160px; border-right: none; border-bottom: 1px solid var(--mac-border); padding-right: 0; padding-bottom: 10px; }
             .news-content-area { padding-left: 0; padding-top: 10px; }
