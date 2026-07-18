@@ -201,9 +201,13 @@
             /* 🔥 CORRECCIÓN 1: Eliminamos la línea que forzaba a los modales a mostrarse juntos */
             .dashboard-section.modal-overlay { display: none; }
             
-            /* 🔥 CORRECCIÓN 2: Encendemos tu vista principal (Dashboard) para que se vea en el celular */
-            #homeSection { display: block !important; padding: 15px; padding-bottom: 90px; }
-            
+            /* 🔥 CORRECCIÓN: Dejamos que el sistema decida cuándo mostrar el Dashboard */
+            #homeSection { padding: 15px; padding-bottom: 90px; }
+            .dashboard-section.modal-overlay {
+    background-color: var(--mac-bg) !important;
+    z-index: 9999 !important;
+    height: 100dvh !important;
+}
             #inventoryModal.modal-overlay, #pedidosModal.modal-overlay { background-color: var(--mac-bg) !important; align-items: flex-start !important; }
             #inventoryModal .modal-card, #pedidosModal .modal-card { width: 100% !important; height: 100dvh !important; max-width: 100% !important; border: none !important; border-radius: 0 !important; margin: 0 !important; padding: 30px 20px 20px 20px !important; box-sizing: border-box !important; background-color: var(--mac-bg) !important; box-shadow: none !important; display: flex; flex-direction: column; }
             #inventoryList, #pedidosList { flex-grow: 1 !important; overflow-y: auto !important; min-height: 0 !important; padding-bottom: 10px; margin-bottom: 10px; }
@@ -496,13 +500,6 @@
                         <span style="font-size: 12px; color: var(--mac-blue); font-weight: 600;"><i class='bx bx-menu'></i> Menú Principal</span>
                     </div>
                 </div>
-                
-                <!-- BOTONES DE PC -->
-                <div class="mac-controls">
-                    <button class="action-btn" style="background: var(--mac-surface); border: 1px solid var(--mac-border); padding: 8px 15px; font-size: 14px;" onclick="window.toggleStats()"><i class='bx bx-line-chart'></i> Finanzas</button>
-                    <button class="action-btn" style="background: rgba(52, 199, 89, 0.15); color: var(--mac-green); font-weight: bold; padding: 8px 15px; font-size: 14px;" onclick="window.openWaModal()"><i class='bx bxl-whatsapp'></i> Auto-WA</button>
-                </div>
-            </div>
                 
                 <!-- BOTONES DE PC -->
                 <div class="mac-controls">
