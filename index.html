@@ -298,7 +298,7 @@
             /* MENÚ LATERAL TIPO SPOTIFY - SÓLIDO Y ORDENADO */
             .dashboard-sidebar { 
                 display: flex !important; 
-                flex-direction: column !important; /* CRUCIAL PARA EL ORDEN */
+                flex-direction: column !important; 
                 position: fixed !important; 
                 left: -100%; top: 0; 
                 height: 100dvh !important; 
@@ -307,7 +307,12 @@
                 transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important; 
                 box-shadow: 4px 0 24px rgba(0,0,0,0.8) !important;
                 border-right: none !important;
-                background: #1c1c1e !important; /* FONDO SÓLIDO OSCURO */
+                
+                /* AQUÍ ASEGURAMOS EL FONDO SÓLIDO Y OPACIDAD */
+                background-color: #1c1c1e !important; 
+                backdrop-filter: none !important;
+                opacity: 1 !important;
+                
                 padding: 20px !important;
                 box-sizing: border-box !important;
                 overflow-y: auto !important;
@@ -334,6 +339,7 @@
                 gap: 8px !important;
                 width: 100% !important;
             }
+            /* AQUÍ FORZAMOS EL COLOR BLANCO/GRIS PARA EVITAR EL MORADO/VERDE POR DEFECTO */
             .sidebar-item { 
                 display: flex !important; 
                 align-items: center !important;
@@ -341,14 +347,27 @@
                 gap: 12px !important;
                 padding: 14px 15px !important; 
                 font-size: 16px !important; 
-                color: #ebebf5 !important;
+                
+                color: #ebebf5 !important; /* Fuerza color de texto */
+                text-decoration: none !important; /* Quita subrayado de enlace */
+                
                 background: transparent !important;
                 border-radius: 12px !important;
-                text-decoration: none !important;
                 width: 100% !important;
                 box-sizing: border-box !important;
             }
-            .sidebar-item.active { background: #007AFF !important; color: white !important; }
+            .sidebar-item i {
+                display: inline-block !important;
+                color: #86868b !important; /* Fuerza color de ícono */
+            }
+            
+            .sidebar-item.active { 
+                background: #007AFF !important; 
+                color: #ffffff !important; 
+            }
+            .sidebar-item.active i {
+                color: #ffffff !important;
+            }
 
             /* Ajustes para que la cabecera principal se vea bien */
             .mobile-header-profile { display: flex !important; align-items: center; gap: 12px; cursor: pointer; padding: 5px; max-width: 100%; overflow: hidden; }
