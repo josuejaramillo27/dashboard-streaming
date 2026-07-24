@@ -1870,33 +1870,22 @@ window.checkNewNews = async () => {
 window.openStoreModal = () => {
     const plan = currentUserData.plan_actual || 'demo';
     
-    // 🔓 AHORA EL PLAN BÁSICO TAMBIÉN TIENE ACCESO A LA TIENDITA
+    // 🔓 BÁSICO TAMBIÉN ENTRA
     if (plan !== 'basico' && plan !== 'pro' && plan !== 'elite') {
         window.closeModals(true); 
         Swal.fire({
-            icon: 'lock',
-            title: 'Función de Suscripción',
-            text: 'Tener tu propio Catálogo Web para vender en automático requiere el Plan Básico o PRO.',
-            confirmButtonText: '💎 Ver Planes',
-            confirmButtonColor: '#007AFF',
-            showCancelButton: true,
-            cancelButtonText: 'Cancelar',
-            background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
-            color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
-        }).then((result) => {
-            if (result.isConfirmed) window.mostrarPlanesSuscripcion();
-        });
+            icon: 'lock', title: 'Función de Suscripción', text: 'Tener tu propio Catálogo Web para vender en automático requiere el Plan Básico o PRO.',
+            confirmButtonText: '💎 Ver Planes', confirmButtonColor: '#007AFF', showCancelButton: true, cancelButtonText: 'Cancelar',
+            background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff', color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+        }).then((result) => { if (result.isConfirmed) window.mostrarPlanesSuscripcion(); });
         return;
     }
 
     window.closeModals(false); 
-
     const aliasOrUid = currentUserData.storeAlias || currentUser.uid;
-    const myUrl = window.location.origin + window.location.pathname + "?tienda=" + aliasOrUid;
-    document.getElementById('storeLinkInput').value = myUrl;
+    document.getElementById('storeLinkInput').value = window.location.origin + window.location.pathname + "?tienda=" + aliasOrUid;
     
     const externalUrl = currentUserData.externalStoreUrl;
-    
     if (externalUrl && externalUrl.trim() !== '') {
         document.getElementById('externalCatalogSetup').style.display = 'none';
         document.getElementById('internalCatalogSection').style.display = 'none';
@@ -1910,7 +1899,6 @@ window.openStoreModal = () => {
         document.getElementById('externalCatalogActive').style.display = 'none';
         window.renderStoreItems();
     }
-
     document.getElementById('storeModal').style.display = 'flex';
 };
 
@@ -2327,8 +2315,7 @@ const checkPublicStore = async () => {
 
 // --- SISTEMA DE REGLAS POR PLATAFORMA ---
 window.openRulesModal = () => {
-    document.getElementById('inventoryModal').style.display = 'none'; // Ocultamos el inventario para que no choque
-    document.getElementById('rulesModal').style.display = 'flex';     // Abrimos las reglas
+    document.getElementById('rulesModal').style.display = 'flex';
     window.loadPlatformRule();
 };
 
@@ -2829,44 +2816,33 @@ window.saveMasterAccount = async () => {
     const maxProfiles = parseInt(document.getElementById('matProfiles').value) || 5;
     const cost = parseFloat(document.getElementById('matCost').value) || 0;
     const provider = document.getElementById('matProvider').value;
-    
     const expiryDate = provider === 'Proveedor Externo' ? document.getElementById('matExpiryDate').value : '';
     const providerName = provider === 'Proveedor Externo' ? document.getElementById('matProviderName').value.trim() : '';
 
     if (!email || !pass) return window.showNotification("⚠️ Escribe el correo y clave de la cuenta.");
 
     try {
-        // 🔒 VALIDACIÓN DE LÍMITE DE CUENTAS MATRICES (20 para Básico)
+        // 🔒 LÍMITE DE 20 PARA PLAN BÁSICO
         if (!editingMasterId) {
             const plan = currentUserData.plan_actual || 'demo';
             const qMatCount = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
             const snapMatCount = await getDocs(qMatCount);
-            
             if (snapMatCount.size >= 20 && plan === 'basico') {
-                return window.showNotification("⚠️ El Plan Básico te permite registrar hasta 20 Cuentas Matrices. Actualiza a PRO para ilimitadas.");
+                return window.showNotification("⚠️ El Plan Básico te permite hasta 20 Cuentas Matrices. Actualiza a PRO para ilimitadas.");
             }
         }
 
         if (editingMasterId) {
-            await updateDoc(doc(db, "masterAccounts", editingMasterId), {
-                platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName
-            });
+            await updateDoc(doc(db, "masterAccounts", editingMasterId), { platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName });
             window.showNotification("✅ Cuenta Matriz actualizada");
         } else {
-            await addDoc(collection(db, "masterAccounts"), {
-                userId: currentUser.uid,
-                platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName,
-                timestamp: Date.now()
-            });
+            await addDoc(collection(db, "masterAccounts"), { userId: currentUser.uid, platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName, timestamp: Date.now() });
             window.showNotification("✅ Cuenta Matriz registrada con éxito");
         }
-
         document.getElementById('masterAccountModal').style.display = 'none';
         editingMasterId = null;
         window.renderMasterAccounts();
-    } catch(e) {
-        window.showNotification("Error: " + e.message);
-    }
+    } catch(e) { window.showNotification("Error: " + e.message); }
 };
 
 // 5. RENDERIZAR LAS TARJETAS CON BUSCADOR Y ALERTAS OPTIMIZADAS
