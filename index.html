@@ -224,24 +224,28 @@
            📱 COMPORTAMIENTO EN CELULARES MAESTRO
            ========================================================================== */
         @media (max-width: 768px) {
-    /* Fondo sólido y bloqueos */
-    body { overflow-x: hidden !important; }
-    /* MODIFICACIÓN: Se cambió el background a transparent para igualar a PC */
-    .dashboard-main { padding: 0 !important; overflow-x: hidden !important; overflow-y: auto !important; height: 100vh !important; background: transparent !important; width: 100vw !important; }
-    body.logged-in { overflow: hidden; }
-    
-    /* MODIFICACIÓN: Se activa el header-top para ver el logo/menú, pero se ocultan los botones de PC */
-    #homeSection .header-top { display: flex !important; padding: 15px !important; }
-    .mac-controls { display: none !important; }
-    
-    /* Secciones independientes - Se cambia el fondo a transparente */
-    .dashboard-section.active-section { padding: 0px 15px 90px 15px !important; background: transparent !important; min-height: 100vh !important; }
-    .dashboard-section.modal-overlay { position: relative !important; background: transparent !important; z-index: 1 !important; }
-    .dashboard-section .mobile-only-btn { display: none !important; }
+            /* Fondo sólido y bloqueos */
+            body { overflow-x: hidden !important; }
+            .dashboard-main { padding: 0 !important; overflow-x: hidden !important; overflow-y: auto !important; height: 100vh !important; background: transparent !important; width: 100vw !important; }
+            body.logged-in { overflow: hidden; }
+            
+            #homeSection .header-top { display: flex !important; padding: 15px 0 !important; margin-bottom: 20px !important;}
+            .mac-controls { display: none !important; }
+            
+            /* Secciones independientes - Se restauró el padding superior a 25px para que bajen los títulos */
+            .dashboard-section.active-section { padding: 25px 15px 90px 15px !important; background: transparent !important; min-height: 100vh !important; }
+            .dashboard-section.modal-overlay { position: relative !important; background: transparent !important; z-index: 1 !important; }
+            
+            /* MODIFICACIÓN: Mostrar los botones de "Cerrar" en celular */
+            .dashboard-section .mobile-only-btn { display: block !important; margin-top: 15px !important; font-weight: bold; background: var(--mac-surface) !important; border: 1px solid var(--mac-border) !important; color: var(--mac-text-main) !important; }
 
-            /* Ajustes Inventario y Reglas */
-            #inventoryModal > div > div:nth-child(2) > div { min-width: 100% !important; }
-            #rulesModal, .swal2-container { z-index: 9999999 !important; }
+            /* Ajustes Inventario y Reglas - ELIMINA EL DESBORDE HORIZONTAL */
+            #inventoryModal .modal-card > div:nth-child(2) > div { min-width: 100% !important; box-sizing: border-box !important; margin-bottom: 15px; }
+            #inventoryList { padding-right: 0 !important; }
+            #inventoryList > div { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
+            #inventoryList > div > div { width: 100% !important; word-break: break-word; }
+            #inventoryList > div > div:last-child { display: flex !important; justify-content: space-between !important; gap: 10px !important; }
+            #inventoryList > div > div:last-child button { flex: 1; padding: 10px !important; }
 
             /* MENÚ LATERAL TIPO SPOTIFY */
             .dashboard-sidebar { 
@@ -767,6 +771,7 @@
                 
                 <div style="margin-top: 20px;">
                     <button class="btn-primary" style="width: 100%; padding: 14px; font-size: 15px;" onclick="window.saveProfile()">Guardar Perfil</button>
+                    <button class="btn-secondary mobile-only-btn" style="width: 100%; padding: 14px; font-size: 15px; margin-top: 10px;" onclick="window.closeModals()">Cerrar Perfil</button>
                 </div>
             </div>
         </div>
