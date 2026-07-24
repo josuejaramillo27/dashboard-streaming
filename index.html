@@ -287,87 +287,76 @@
         /* ==========================================================================
            📱 COMPORTAMIENTO EN CELULARES (MENÚ SÓLIDO Y PÁGINAS)
            ========================================================================== */
-        @media (max-width: 768px) {
-            .dashboard-main { padding: 0 !important; overflow: visible !important; height: auto !important; }
-            body.logged-in { overflow: auto; }
+       @media (max-width: 768px) {
+            /* 1. Fondo Sólido y Bloqueo de Scroll Horizontal */
+            body { overflow-x: hidden !important; }
+            .dashboard-main { 
+                padding: 0 !important; 
+                overflow-x: hidden !important; 
+                overflow-y: auto !important; 
+                height: 100vh !important; 
+                background: var(--mac-bg) !important; /* Tapa el fondo animado */
+                width: 100vw !important;
+            }
+            body.logged-in { overflow: hidden; }
             
-            /* Ocultar botones obsoletos */
-            .bottom-nav { display: none !important; }
-            #homeSection .header-top .mac-controls { display: none !important; }
+            #homeSection .header-top { display: none !important; }
             
-            /* MENÚ LATERAL TIPO SPOTIFY - SÓLIDO Y ORDENADO */
-            .dashboard-sidebar { 
-                display: flex !important; 
-                flex-direction: column !important; 
-                position: fixed !important; 
-                left: -100%; top: 0; 
-                height: 100dvh !important; 
-                width: 280px !important; 
-                z-index: 999999 !important;
-                transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important; 
-                box-shadow: 4px 0 24px rgba(0,0,0,0.8) !important;
-                border-right: none !important;
-                
-                /* AQUÍ ASEGURAMOS EL FONDO SÓLIDO Y OPACIDAD */
-                background-color: #1c1c1e !important; 
+            /* 2. SECCIONES 100% INDEPENDIENTES */
+            .dashboard-section { display: none !important; }
+            .dashboard-section.active-section { 
+                display: block !important; 
+                padding: 20px 15px 90px 15px !important; /* Padding ajustado */
+                background: var(--mac-bg) !important; 
+                min-height: 100vh !important;
+            }
+            .dashboard-section.modal-overlay { 
+                position: relative !important; 
+                background: var(--mac-bg) !important; 
                 backdrop-filter: none !important;
-                opacity: 1 !important;
-                
-                padding: 20px !important;
-                box-sizing: border-box !important;
-                overflow-y: auto !important;
-                overflow-x: hidden !important;
+                z-index: 1 !important; 
+            }
+            .dashboard-section .modal-card { 
+                width: 100% !important; max-width: 100% !important; height: auto !important; 
+                box-shadow: none !important; border: none !important; background: transparent !important; 
+                padding: 0 !important; margin: 0 !important;
+            }
+            .dashboard-section .mobile-only-btn { display: none !important; }
+
+            /* 3. CORRECCIÓN DEL INVENTARIO (Desborde Horizontal) */
+            #inventoryModal > div > div:nth-child(2) > div {
+                min-width: 100% !important; /* Fuerza a las cajas a no salirse de la pantalla */
+            }
+
+            /* 4. CORRECCIÓN MODAL DE REGLAS (Siempre al frente) */
+            #rulesModal, .swal2-container { z-index: 9999999 !important; }
+
+            /* MENÚ LATERAL TIPO SPOTIFY */
+            .dashboard-sidebar { 
+                display: flex !important; flex-direction: column !important;
+                position: fixed !important; left: -100%; top: 0; height: 100vh; width: 280px; 
+                z-index: 999999 !important; 
+                transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
+                box-shadow: 4px 0 24px rgba(0,0,0,0.8) !important;
+                background: var(--mac-surface) !important;
+                border-right: 1px solid var(--mac-border) !important;
+                overflow-y: auto !important; overflow-x: hidden !important;
+                padding: 20px 15px !important; box-sizing: border-box !important;
             }
             .dashboard-sidebar.mobile-open { left: 0 !important; }
             .sidebar-toggle-btn { display: none !important; }
             
-            /* Formato de la cabecera dentro del menú lateral */
-            .sidebar-header { 
-                display: flex !important; 
-                flex-direction: row !important;
-                align-items: center !important; 
-                margin-bottom: 20px !important; 
-                padding-bottom: 15px !important;
-                border-bottom: 1px solid #38383a !important;
-                width: 100% !important;
-            }
-            
-            /* Formato de los botones del menú lateral */
-            .sidebar-menu {
-                display: flex !important;
-                flex-direction: column !important;
-                gap: 8px !important;
-                width: 100% !important;
-            }
-            /* AQUÍ FORZAMOS EL COLOR BLANCO/GRIS PARA EVITAR EL MORADO/VERDE POR DEFECTO */
+            .sidebar-header { margin-bottom: 25px !important; padding-bottom: 20px !important; border-bottom: 1px solid var(--mac-border) !important; display: flex !important; flex-direction: row !important; align-items: center !important; gap: 15px !important; }
+            .sidebar-menu { display: flex !important; flex-direction: column !important; gap: 5px !important; }
             .sidebar-item { 
-                display: flex !important; 
-                align-items: center !important;
-                justify-content: flex-start !important;
-                gap: 12px !important;
-                padding: 14px 15px !important; 
-                font-size: 16px !important; 
-                
-                color: #ebebf5 !important; /* Fuerza color de texto */
-                text-decoration: none !important; /* Quita subrayado de enlace */
-                
-                background: transparent !important;
-                border-radius: 12px !important;
-                width: 100% !important;
-                box-sizing: border-box !important;
+                display: flex !important; flex-direction: row !important; align-items: center !important; gap: 12px !important; 
+                padding: 14px 15px !important; font-size: 16px !important; font-weight: 600 !important;
+                border-radius: 12px !important; color: var(--mac-text-main) !important; 
+                background: transparent !important; text-decoration: none !important; border: 1px solid transparent !important;
             }
-            .sidebar-item i {
-                display: inline-block !important;
-                color: #86868b !important; /* Fuerza color de ícono */
-            }
-            
-            .sidebar-item.active { 
-                background: #007AFF !important; 
-                color: #ffffff !important; 
-            }
-            .sidebar-item.active i {
-                color: #ffffff !important;
-            }
+            .sidebar-item.active, .sidebar-item:active { background: var(--mac-blue) !important; color: white !important; }
+            .sidebar-item i { font-size: 22px !important; margin: 0 !important; }
+        }
 
             /* Ajustes para que la cabecera principal se vea bien */
             .mobile-header-profile { display: flex !important; align-items: center; gap: 12px; cursor: pointer; padding: 5px; max-width: 100%; overflow: hidden; }
@@ -492,9 +481,9 @@
                 <span id="newsBadgeSidebar" style="display:none; background:#FF2D55; width:8px; height:8px; border-radius:50%; margin-left:auto;"></span>
             </a>
             <div style="margin: 15px 0; border-top: 1px dashed var(--mac-border);"></div>
-            <a href="#" class="sidebar-item" title="Mi Perfil & Bot" onclick="window.openProfileModal()">
-                <i class='bx bx-user-circle'></i> <span>Mi Perfil & Bot</span>
-            </a>
+            <a href="#" class="sidebar-item" title="Mi Perfil & Bot" onclick="window.openProfileModal(); window.switchDashboardSection('profileSection', this);">
+    <i class='bx bx-user-circle'></i> <span>Mi Perfil & Bot</span>
+</a>
             <a href="#" class="sidebar-item" title="Cambiar Tema" onclick="window.toggleTheme()">
                 <i class='bx bx-moon' id="themeIconSidebar"></i> <span>Cambiar Tema</span>
             </a>
@@ -810,7 +799,69 @@
                 <div id="wrappedContentArea"></div>
             </div>
         </div>
+<!-- SECCIÓN 6: MI PERFIL & BOT -->
+        <div id="profileSection" class="dashboard-section" style="display: none;">
+            <div style="margin-bottom: 20px; border-bottom: 1px solid var(--mac-border); padding-bottom: 15px;">
+                <h2 style="margin: 0; font-size: 24px; color: var(--mac-text-main);"><i class='bx bx-user-circle'></i> Mi Perfil y Marca Blanca</h2>
+                <p style="color:var(--mac-text-secondary); font-size:14px; margin:5px 0 0 0;">Personaliza tu marca, tus servicios y conecta tu bot de WhatsApp.</p>
+            </div>
+            
+            <div style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border); box-shadow: var(--glass-shadow);">
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Logo de tu empresa (500x500px):</label>
+                    <input type="file" id="editLogoUpload" accept="image/*" style="padding: 5px; font-size: 12px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main);">
+                    
+                    <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 5px;">Banner de la tienda (Horizontal):</label>
+                    <input type="file" id="editBannerUpload" accept="image/*" style="padding: 5px; font-size: 12px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main);">
+                    
+                    <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Link de Referencias (Instagram, TikTok, etc):</label>
+                    <input type="url" id="editReferencesLink" placeholder="https://..." style="padding: 10px; font-size: 13px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                    
+                    <input type="text" id="editProfileName" placeholder="Nombre Comercial / Marca" style="padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                    <label style="font-size: 11px; font-weight: bold; color: var(--mac-blue); margin-top: 5px;">Link personalizado de tu tienda (Sin espacios):</label>
+                    <input type="text" id="editProfileAlias" placeholder="Ej: mariano-store" style="padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <select id="editProfileCountry" style="flex: 1; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                            <option value="Perú">Perú</option><option value="México">México</option><option value="Colombia">Colombia</option>
+                        </select>
+                        <input type="tel" id="editProfilePhone" placeholder="Teléfono (+51...)" style="flex: 2; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                    </div>
+                </div>
 
+                <!-- NUEVA SECCIÓN: MIS SERVICIOS -->
+                <div style="margin-top: 20px; border-top: 1px dashed var(--mac-border); padding-top: 15px;">
+                    <label style="font-size: 14px; font-weight: bold; color: var(--mac-blue); display: block; margin-bottom: 5px;">
+                        <i class='bx bx-list-plus'></i> Mis Servicios / Plataformas
+                    </label>
+                    <p style="font-size: 12px; color: var(--mac-text-secondary); margin-top: 0; margin-bottom: 10px;">
+                        Agrega solo las plataformas que tú vendes. Se actualizarán automáticamente en todo tu panel.
+                    </p>
+                    <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                        <input type="text" id="newCustomServiceInput" placeholder="Ej: Magis TV, Canva Pro..." style="flex: 1; padding: 10px; font-size: 13px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                        <button type="button" class="btn-primary" style="width: auto; padding: 0 15px; border-radius: 8px;" onclick="window.addCustomService()"><i class='bx bx-plus'></i></button>
+                    </div>
+                    <div id="customServicesChips" style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 150px; overflow-y: auto; background: var(--mac-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border);">
+                        <!-- Se inyectan dinámicamente -->
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; border-top: 1px dashed var(--mac-border); padding-top: 15px;">
+                    <label style="font-size: 13px; font-weight: bold; color: var(--mac-text-secondary);">Automatización de WhatsApp (Bot):</label>
+                    <button class="btn-secondary" style="width: 100%; margin-top: 5px; padding: 12px; background: rgba(52, 199, 89, 0.1); color: var(--mac-green); border: 1px solid var(--mac-green);" onclick="window.vincularBot()">
+                        <i class='bx bx-bot'></i> Activar Mensajes Automáticos
+                    </button>
+                    <div id="qrContainer" style="text-align: center; margin-top: 10px; display: none;">
+                        <img id="botQrImage" src="" style="width: 180px; height: 180px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                        <p id="botStatus" style="font-size: 12px; color: var(--mac-text-secondary); margin-top: 8px; font-weight: bold;">Cargando...</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button class="btn-primary" style="width: 100%; padding: 14px; font-size: 15px;" onclick="window.saveProfile()">Guardar Perfil</button>
+                </div>
+            </div>
+        </div>
     </div> <!-- Fin del dashboard-main -->
 </div> 
 
@@ -890,61 +941,6 @@
 </div>
 
 <!-- PERFIL -->
-<!-- PERFIL & CONFIGURACIÓN DE SERVICIOS -->
-<div id="profileModal" class="modal-overlay" style="display: none;">
-    <div class="modal-card" style="max-height: 85vh; overflow-y: auto;">
-        <h3 style="margin-bottom: 15px;"><i class='bx bx-user-circle'></i> Mi Perfil y Marca Blanca</h3>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Logo de tu empresa (500x500px):</label>
-            <input type="file" id="editLogoUpload" accept="image/*" style="padding: 5px; font-size: 12px;">
-            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 5px;">Banner de la tienda (Horizontal):</label>
-            <input type="file" id="editBannerUpload" accept="image/*" style="padding: 5px; font-size: 12px;">
-            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Link de Referencias:</label>
-            <input type="url" id="editReferencesLink" placeholder="https://..." style="padding: 5px; font-size: 12px; border-radius: 6px; background: var(--mac-bg);">
-            
-            <input type="text" id="editProfileName" placeholder="Nombre Comercial / Marca">
-            <label style="font-size: 11px; font-weight: bold; color: var(--mac-blue); margin-top: 5px;">Link personalizado de tu tienda:</label>
-            <input type="text" id="editProfileAlias" placeholder="Ej: mariano-store (Sin espacios)">
-            <select id="editProfileCountry">
-                <option value="Perú">Perú</option><option value="México">México</option><option value="Colombia">Colombia</option>
-            </select>
-            <input type="tel" id="editProfilePhone" placeholder="Teléfono (+51...)">
-        </div>
-
-        <!-- 🚀 NUEVA SECCIÓN: MIS SERVICIOS PERSONALIZADOS -->
-        <div style="margin-top: 20px; border-top: 1px dashed var(--mac-border); padding-top: 15px;">
-            <label style="font-size: 13px; font-weight: bold; color: var(--mac-blue); display: block; margin-bottom: 5px;">
-                <i class='bx bx-list-plus'></i> Mis Servicios / Plataformas
-            </label>
-            <p style="font-size: 11px; color: var(--mac-text-secondary); margin-top: 0; margin-bottom: 10px;">
-                Agrega solo las plataformas que tú vendes. Se actualizarán automáticamente en todo tu panel.
-            </p>
-            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                <input type="text" id="newCustomServiceInput" placeholder="Ej: Magis TV, Canva Pro..." style="flex: 1; padding: 8px; font-size: 13px;">
-                <button type="button" class="btn-primary" style="width: auto; padding: 0 15px;" onclick="window.addCustomService()"><i class='bx bx-plus'></i></button>
-            </div>
-            <div id="customServicesChips" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 120px; overflow-y: auto; background: var(--mac-bg); padding: 8px; border-radius: 8px; border: 1px solid var(--mac-border);">
-                <!-- Se inyectan dinámicamente -->
-            </div>
-        </div>
-
-        <div style="margin-top: 15px; border-top: 1px dashed var(--mac-border); padding-top: 15px;">
-            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Automatización de WhatsApp (Bot):</label>
-            <button class="btn-secondary" style="width: 100%; margin-top: 5px; background: rgba(52, 199, 89, 0.1); color: var(--mac-green); border: 1px solid var(--mac-green);" onclick="window.vincularBot()">
-                <i class='bx bx-bot'></i> Activar Mensajes Automáticos
-            </button>
-            <div id="qrContainer" style="text-align: center; margin-top: 10px; display: none;">
-                <img id="botQrImage" src="" style="width: 180px; height: 180px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                <p id="botStatus" style="font-size: 12px; color: var(--mac-text-secondary); margin-top: 8px; font-weight: bold;">Cargando...</p>
-            </div>
-        </div>
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button class="btn-primary" onclick="window.saveProfile()">Guardar</button>
-            <button class="btn-secondary" onclick="window.closeModals()">Cerrar</button>
-        </div>
-    </div>
-</div>
-
 <!-- DATOS DE CUENTA AL REGISTRAR CLIENTE (MULTI-PESTAÑA) -->
 <div id="accountModal" class="modal-overlay" style="display: none;">
     <div class="modal-card">
