@@ -890,8 +890,9 @@
 </div>
 
 <!-- PERFIL -->
+<!-- PERFIL & CONFIGURACIÓN DE SERVICIOS -->
 <div id="profileModal" class="modal-overlay" style="display: none;">
-    <div class="modal-card">
+    <div class="modal-card" style="max-height: 85vh; overflow-y: auto;">
         <h3 style="margin-bottom: 15px;"><i class='bx bx-user-circle'></i> Mi Perfil y Marca Blanca</h3>
         <div style="display: flex; flex-direction: column; gap: 12px;">
             <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Logo de tu empresa (500x500px):</label>
@@ -909,6 +910,24 @@
             </select>
             <input type="tel" id="editProfilePhone" placeholder="Teléfono (+51...)">
         </div>
+
+        <!-- 🚀 NUEVA SECCIÓN: MIS SERVICIOS PERSONALIZADOS -->
+        <div style="margin-top: 20px; border-top: 1px dashed var(--mac-border); padding-top: 15px;">
+            <label style="font-size: 13px; font-weight: bold; color: var(--mac-blue); display: block; margin-bottom: 5px;">
+                <i class='bx bx-list-plus'></i> Mis Servicios / Plataformas
+            </label>
+            <p style="font-size: 11px; color: var(--mac-text-secondary); margin-top: 0; margin-bottom: 10px;">
+                Agrega solo las plataformas que tú vendes. Se actualizarán automáticamente en todo tu panel.
+            </p>
+            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                <input type="text" id="newCustomServiceInput" placeholder="Ej: Magis TV, Canva Pro..." style="flex: 1; padding: 8px; font-size: 13px;">
+                <button type="button" class="btn-primary" style="width: auto; padding: 0 15px;" onclick="window.addCustomService()"><i class='bx bx-plus'></i></button>
+            </div>
+            <div id="customServicesChips" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 120px; overflow-y: auto; background: var(--mac-bg); padding: 8px; border-radius: 8px; border: 1px solid var(--mac-border);">
+                <!-- Se inyectan dinámicamente -->
+            </div>
+        </div>
+
         <div style="margin-top: 15px; border-top: 1px dashed var(--mac-border); padding-top: 15px;">
             <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Automatización de WhatsApp (Bot):</label>
             <button class="btn-secondary" style="width: 100%; margin-top: 5px; background: rgba(52, 199, 89, 0.1); color: var(--mac-green); border: 1px solid var(--mac-green);" onclick="window.vincularBot()">
