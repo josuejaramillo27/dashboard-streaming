@@ -32,7 +32,23 @@ let editingNewsOldImg = null;
 
 const macPalette = ['#FF2D55', '#5856D6', '#FF9500', '#34C759', '#007AFF', '#AF52DE', '#FF3B30', '#FFCC00', '#5AC8FA'];
 const getCurrencyForCountry = (country) => { const dict = { "Perú": "S/", "España": "€", "México": "$" }; return dict[country] || "$"; };
-
+const updateThemeIcon = () => { 
+    const isDark = document.body.classList.contains('dark-mode'); 
+    document.querySelectorAll('.theme-toggle').forEach(btn => { 
+        btn.innerHTML = isDark ? "<i class='bx bx-sun'></i> Modo claro" : "<i class='bx bx-moon'></i> Modo oscuro"; 
+    }); 
+};
+if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode'); updateThemeIcon(); 
+window.toggleTheme = () => { 
+    document.body.classList.toggle('dark-mode'); 
+    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode')); 
+    updateThemeIcon(); 
+    
+    // Si los gráficos están abiertos, los repintamos con el nuevo tema
+    if (document.getElementById('analyticsSection') && document.getElementById('analyticsSection').style.display === 'flex') {
+        if(typeof window.toggleStats === 'function') window.toggleStats(true); 
+    }
+};
 window.showNotification = (msg) => { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 5000); }
 function showView(viewId) { 
     document.getElementById('authView').style.display = 'none'; 
@@ -1286,23 +1302,6 @@ window.toggleStats = (forceUpdate = false) => {
 window.exportToExcel = () => { if (!clients.length) return window.showNotification("No hay datos"); let csv = `data:text/csv;charset=utf-8,Cliente,Plataformas,WhatsApp,Unidades,Costo Total(${globalCurrency}),Precio Total(${globalCurrency}),Vencimiento\n`; clients.forEach(c => { const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); const u = c.accountUnits||1; csv += `${c.name},"${c.platform}",${c.phone},${u},${(c.cost||0)*u},${(c.price||0)*u},${exp.toLocaleDateString('es-ES')}\n`; }); const link = document.createElement("a"); link.setAttribute("href", encodeURI(csv)); link.setAttribute("download", `Clientes_${new Date().toLocaleDateString('es-ES').replace(/\//g, '-')}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); }
 window.copyExpiredList = () => { const t = new Date(); t.setHours(0,0,0,0); let exp = []; clients.forEach(c => { const x = new Date(c.date); x.setMinutes(x.getMinutes() + x.getTimezoneOffset()); x.setHours(0,0,0,0); if (x < t) exp.push(`- ${c.name} | ${c.platform} | ${c.phone}`); }); if (!exp.length) return window.showNotification("Sin vencidos"); navigator.clipboard.writeText("🚨 VENCEDORES:\n\n" + exp.join('\n')).then(() => window.showNotification("Lista copiada")); }
 
-const updateThemeIcon = () => { 
-    const isDark = document.body.classList.contains('dark-mode'); 
-    document.querySelectorAll('.theme-toggle').forEach(btn => { 
-        btn.innerHTML = isDark ? "<i class='bx bx-sun'></i> Modo claro" : "<i class='bx bx-moon'></i> Modo oscuro"; 
-    }); 
-};
-if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode'); updateThemeIcon(); 
-window.toggleTheme = () => { 
-    document.body.classList.toggle('dark-mode'); 
-    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode')); 
-    updateThemeIcon(); 
-    
-    // Si los gráficos están abiertos, los repintamos con el nuevo tema
-    if (document.getElementById('analyticsSection').style.display === 'flex') {
-        window.toggleStats(true); 
-    }
-};
 
 /* --- GENERADOR DE RECIBOS EN IMAGEN (VERSIÓN DEFINITIVA ANTI-CACHÉ CONTAMINADA) --- */
 window.downloadTicket = async (clientId, event) => {
@@ -3677,138 +3676,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, 1000);
 });
-
-/* ==========================================================================
-   ⚙️ MÓDULO: GESTIÓN DE SERVICIOS PERSONALIZADOS & MIGRACIÓN TRANSPARENTE
-   ========================================================================== */
-
-// Lista predeterminada si el usuario no tiene ninguna cargada
-const DEFAULT_SERVICES = ["Netflix", "Disney+", "Spotify Premium", "HBO Max", "Paramount", "Amazon Prime", "YouTube Premium", "Crunchyroll", "IPTV", "Flujo TV", "Apple TV", "Gemini Pro", "ChatGPT", "Canva Pro", "CapCut Pro", "Directv GO", "Movistar"];
-
-// 1. Cargar y Migrar Servicios al iniciar sesión
-window.syncUserServices = async () => {
-    if (!currentUserData) return;
-
-    let userServices = currentUserData.customServices || [];
-
-    // 🚀 MIGRACIÓN AUTO-DETECTABLE PARA USUARIOS ANTIGUOS
-    if (userServices.length === 0) {
-        const foundServices = new Set(DEFAULT_SERVICES);
-
-        // Extraer de clientes existentes
-        if (typeof clients !== 'undefined') {
-            clients.forEach(c => {
-                if (c.platform) c.platform.split(', ').forEach(p => foundServices.add(p.trim()));
-            });
-        }
-
-        // Extraer de inventario
-        if (currentUserData.inventory) {
-            currentUserData.inventory.forEach(i => { if (i.platform) foundServices.add(i.platform.trim()); });
-        }
-
-        userServices = Array.from(foundServices);
-        currentUserData.customServices = userServices;
-
-        // Guardar migración silenciosamente en Firebase
-        await updateDoc(doc(db, "users", currentUser.uid), { customServices: userServices });
-    }
-
-    window.populateAllServiceSelects();
-    window.renderCustomServicesChips();
-};
-
-// 2. Rellenar dinámicamente todos los menús desplegables del sistema
-window.populateAllServiceSelects = () => {
-    const services = currentUserData.customServices || DEFAULT_SERVICES;
-
-    // A) Desplegable del Formulario de Clientes (Checkbox Dropdown)
-    const chkDropdown = document.getElementById('checkboxDropdown');
-    if (chkDropdown) {
-        chkDropdown.innerHTML = '';
-        services.forEach(s => {
-            const label = document.createElement('label');
-            label.innerHTML = `<input type="checkbox" value="${s}"> ${s}`;
-            chkDropdown.appendChild(label);
-        });
-        
-        // Re-vincular eventos de cambio a los nuevos checkboxes
-        document.querySelectorAll('#checkboxDropdown input').forEach(cb => { 
-            cb.addEventListener('change', () => { 
-                const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value); 
-                const el = document.getElementById('selectText'); 
-                if(checked.length) { el.textContent = checked.join(', '); el.classList.add('has-selection'); } 
-                else { el.textContent = 'Plataforma(s)...'; el.classList.remove('has-selection'); } 
-            }); 
-        });
-    }
-
-    // B) Llenar Selects Simples (Inventario, Cuentas Matrices, Reglas de Bot)
-    const selectIds = [
-        { id: 'invPlatform', defaultOpt: 'Plataforma...' },
-        { id: 'matPlatform', defaultOpt: null },
-        { id: 'rulePlatformSelect', defaultOpt: null }
-    ];
-
-    selectIds.forEach(item => {
-        const select = document.getElementById(item.id);
-        if (select) {
-            select.innerHTML = item.defaultOpt ? `<option value="">${item.defaultOpt}</option>` : '';
-            services.forEach(s => {
-                select.innerHTML += `<option value="${s}">${s}</option>`;
-            });
-        }
-    });
-};
-
-// 3. Renderizar las etiquetas (Chips) en el modal de perfil
-window.renderCustomServicesChips = () => {
-    const container = document.getElementById('customServicesChips');
-    if (!container) return;
-    container.innerHTML = '';
-
-    const services = currentUserData.customServices || DEFAULT_SERVICES;
-
-    services.forEach((s, index) => {
-        const chip = document.createElement('div');
-        chip.style.cssText = "background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 15px; display: flex; align-items: center; gap: 6px;";
-        chip.innerHTML = `<span>${s}</span> <i class='bx bx-x' style='cursor:pointer; color:var(--mac-red); font-size:14px;' onclick="window.removeCustomService(${index})"></i>`;
-        container.appendChild(chip);
-    });
-};
-
-// 4. Agregar un nuevo servicio
-window.addCustomService = async () => {
-    const input = document.getElementById('newCustomServiceInput');
-    const name = input.value.trim();
-    if (!name) return window.showNotification("Escribe el nombre del servicio");
-
-    let services = currentUserData.customServices || DEFAULT_SERVICES;
-    if (services.some(s => s.toLowerCase() === name.toLowerCase())) {
-        return window.showNotification("Ese servicio ya está en tu lista.");
-    }
-
-    services.push(name);
-    currentUserData.customServices = services;
-    input.value = '';
-
-    await updateDoc(doc(db, "users", currentUser.uid), { customServices: services });
-    window.populateAllServiceSelects();
-    window.renderCustomServicesChips();
-    window.showNotification("✅ Servicio añadido");
-};
-
-// 5. Eliminar un servicio
-window.removeCustomService = async (index) => {
-    let services = currentUserData.customServices || DEFAULT_SERVICES;
-    services.splice(index, 1);
-    currentUserData.customServices = services;
-
-    await updateDoc(doc(db, "users", currentUser.uid), { customServices: services });
-    window.populateAllServiceSelects();
-    window.renderCustomServicesChips();
-    window.showNotification("🗑️ Servicio eliminado de tu lista");
-};
 
 /* ==========================================================================
    ⚙️ MÓDULO: GESTIÓN DE SERVICIOS PERSONALIZADOS & MIGRACIÓN TRANSPARENTE
