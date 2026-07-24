@@ -269,6 +269,7 @@ onAuthStateChanged(auth, async (user) => {
                         window.checkNewNews();
                         window.requestNotificationPermission(); 
                         window.renderInventory();
+                        window.syncUserServices();
                     } else { 
                         await signOut(auth); 
                         window.showNotification("Tu cuenta está suspendida o pendiente."); 
@@ -1869,14 +1870,15 @@ window.checkNewNews = async () => {
 window.openStoreModal = () => {
     const plan = currentUserData.plan_actual || 'demo';
     
-    if (plan !== 'pro' && plan !== 'elite') {
-        window.closeModals(true); // Vuelve a clientes porque falló la validación
+    // 🔓 AHORA EL PLAN BÁSICO TAMBIÉN TIENE ACCESO A LA TIENDITA
+    if (plan !== 'basico' && plan !== 'pro' && plan !== 'elite') {
+        window.closeModals(true); 
         Swal.fire({
             icon: 'lock',
-            title: 'Función Premium',
-            text: 'Tener tu propio Catálogo Web para vender en automático es exclusivo del Plan PRO.',
-            confirmButtonText: '💎 Mejorar a PRO',
-            confirmButtonColor: '#FFD700',
+            title: 'Función de Suscripción',
+            text: 'Tener tu propio Catálogo Web para vender en automático requiere el Plan Básico o PRO.',
+            confirmButtonText: '💎 Ver Planes',
+            confirmButtonColor: '#007AFF',
             showCancelButton: true,
             cancelButtonText: 'Cancelar',
             background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
@@ -1887,28 +1889,24 @@ window.openStoreModal = () => {
         return;
     }
 
-    window.closeModals(false); // 🧹 LIMPIEZA SILENCIOSA ANTES DE ABRIR
+    window.closeModals(false); 
 
-    // Configurar el link interno por si lo necesita
     const aliasOrUid = currentUserData.storeAlias || currentUser.uid;
     const myUrl = window.location.origin + window.location.pathname + "?tienda=" + aliasOrUid;
     document.getElementById('storeLinkInput').value = myUrl;
     
-    // LÓGICA PARA OCULTAR/MOSTRAR SEGÚN EL CATÁLOGO EXTERNO
     const externalUrl = currentUserData.externalStoreUrl;
     
     if (externalUrl && externalUrl.trim() !== '') {
         document.getElementById('externalCatalogSetup').style.display = 'none';
         document.getElementById('internalCatalogSection').style.display = 'none';
         document.getElementById('btnCopyInternalLink').style.display = 'none';
-        
         document.getElementById('externalCatalogActive').style.display = 'block';
         document.getElementById('activeExternalLinkText').innerText = externalUrl;
     } else {
         document.getElementById('externalCatalogSetup').style.display = 'block';
         document.getElementById('internalCatalogSection').style.display = 'block';
         document.getElementById('btnCopyInternalLink').style.display = 'block';
-        
         document.getElementById('externalCatalogActive').style.display = 'none';
         window.renderStoreItems();
     }
@@ -2838,6 +2836,17 @@ window.saveMasterAccount = async () => {
     if (!email || !pass) return window.showNotification("⚠️ Escribe el correo y clave de la cuenta.");
 
     try {
+        // 🔒 VALIDACIÓN DE LÍMITE DE CUENTAS MATRICES (20 para Básico)
+        if (!editingMasterId) {
+            const plan = currentUserData.plan_actual || 'demo';
+            const qMatCount = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
+            const snapMatCount = await getDocs(qMatCount);
+            
+            if (snapMatCount.size >= 20 && plan === 'basico') {
+                return window.showNotification("⚠️ El Plan Básico te permite registrar hasta 20 Cuentas Matrices. Actualiza a PRO para ilimitadas.");
+            }
+        }
+
         if (editingMasterId) {
             await updateDoc(doc(db, "masterAccounts", editingMasterId), {
                 platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName
@@ -3692,3 +3701,135 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, 1000);
 });
+
+/* ==========================================================================
+   ⚙️ MÓDULO: GESTIÓN DE SERVICIOS PERSONALIZADOS & MIGRACIÓN TRANSPARENTE
+   ========================================================================== */
+
+// Lista predeterminada si el usuario no tiene ninguna cargada
+const DEFAULT_SERVICES = ["Netflix", "Disney+", "Spotify Premium", "HBO Max", "Paramount", "Amazon Prime", "YouTube Premium", "Crunchyroll", "IPTV", "Flujo TV", "Apple TV", "Gemini Pro", "ChatGPT", "Canva Pro", "CapCut Pro", "Directv GO", "Movistar"];
+
+// 1. Cargar y Migrar Servicios al iniciar sesión
+window.syncUserServices = async () => {
+    if (!currentUserData) return;
+
+    let userServices = currentUserData.customServices || [];
+
+    // 🚀 MIGRACIÓN AUTO-DETECTABLE PARA USUARIOS ANTIGUOS
+    if (userServices.length === 0) {
+        const foundServices = new Set(DEFAULT_SERVICES);
+
+        // Extraer de clientes existentes
+        if (typeof clients !== 'undefined') {
+            clients.forEach(c => {
+                if (c.platform) c.platform.split(', ').forEach(p => foundServices.add(p.trim()));
+            });
+        }
+
+        // Extraer de inventario
+        if (currentUserData.inventory) {
+            currentUserData.inventory.forEach(i => { if (i.platform) foundServices.add(i.platform.trim()); });
+        }
+
+        userServices = Array.from(foundServices);
+        currentUserData.customServices = userServices;
+
+        // Guardar migración silenciosamente en Firebase
+        await updateDoc(doc(db, "users", currentUser.uid), { customServices: userServices });
+    }
+
+    window.populateAllServiceSelects();
+    window.renderCustomServicesChips();
+};
+
+// 2. Rellenar dinámicamente todos los menús desplegables del sistema
+window.populateAllServiceSelects = () => {
+    const services = currentUserData.customServices || DEFAULT_SERVICES;
+
+    // A) Desplegable del Formulario de Clientes (Checkbox Dropdown)
+    const chkDropdown = document.getElementById('checkboxDropdown');
+    if (chkDropdown) {
+        chkDropdown.innerHTML = '';
+        services.forEach(s => {
+            const label = document.createElement('label');
+            label.innerHTML = `<input type="checkbox" value="${s}"> ${s}`;
+            chkDropdown.appendChild(label);
+        });
+        
+        // Re-vincular eventos de cambio a los nuevos checkboxes
+        document.querySelectorAll('#checkboxDropdown input').forEach(cb => { 
+            cb.addEventListener('change', () => { 
+                const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value); 
+                const el = document.getElementById('selectText'); 
+                if(checked.length) { el.textContent = checked.join(', '); el.classList.add('has-selection'); } 
+                else { el.textContent = 'Plataforma(s)...'; el.classList.remove('has-selection'); } 
+            }); 
+        });
+    }
+
+    // B) Llenar Selects Simples (Inventario, Cuentas Matrices, Reglas de Bot)
+    const selectIds = [
+        { id: 'invPlatform', defaultOpt: 'Plataforma...' },
+        { id: 'matPlatform', defaultOpt: null },
+        { id: 'rulePlatformSelect', defaultOpt: null }
+    ];
+
+    selectIds.forEach(item => {
+        const select = document.getElementById(item.id);
+        if (select) {
+            select.innerHTML = item.defaultOpt ? `<option value="">${item.defaultOpt}</option>` : '';
+            services.forEach(s => {
+                select.innerHTML += `<option value="${s}">${s}</option>`;
+            });
+        }
+    });
+};
+
+// 3. Renderizar las etiquetas (Chips) en el modal de perfil
+window.renderCustomServicesChips = () => {
+    const container = document.getElementById('customServicesChips');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const services = currentUserData.customServices || DEFAULT_SERVICES;
+
+    services.forEach((s, index) => {
+        const chip = document.createElement('div');
+        chip.style.cssText = "background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 15px; display: flex; align-items: center; gap: 6px;";
+        chip.innerHTML = `<span>${s}</span> <i class='bx bx-x' style='cursor:pointer; color:var(--mac-red); font-size:14px;' onclick="window.removeCustomService(${index})"></i>`;
+        container.appendChild(chip);
+    });
+};
+
+// 4. Agregar un nuevo servicio
+window.addCustomService = async () => {
+    const input = document.getElementById('newCustomServiceInput');
+    const name = input.value.trim();
+    if (!name) return window.showNotification("Escribe el nombre del servicio");
+
+    let services = currentUserData.customServices || DEFAULT_SERVICES;
+    if (services.some(s => s.toLowerCase() === name.toLowerCase())) {
+        return window.showNotification("Ese servicio ya está en tu lista.");
+    }
+
+    services.push(name);
+    currentUserData.customServices = services;
+    input.value = '';
+
+    await updateDoc(doc(db, "users", currentUser.uid), { customServices: services });
+    window.populateAllServiceSelects();
+    window.renderCustomServicesChips();
+    window.showNotification("✅ Servicio añadido");
+};
+
+// 5. Eliminar un servicio
+window.removeCustomService = async (index) => {
+    let services = currentUserData.customServices || DEFAULT_SERVICES;
+    services.splice(index, 1);
+    currentUserData.customServices = services;
+
+    await updateDoc(doc(db, "users", currentUser.uid), { customServices: services });
+    window.populateAllServiceSelects();
+    window.renderCustomServicesChips();
+    window.showNotification("🗑️ Servicio eliminado de tu lista");
+};
