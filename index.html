@@ -159,7 +159,7 @@
             @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         }
 
-        /* ==========================================================================
+       /* ==========================================================================
            🛑 CONVERTIR SECCIONES EN PÁGINAS (ADIÓS VENTANAS FLOTANTES)
            ========================================================================== */
         .dashboard-section {
@@ -182,186 +182,82 @@
             z-index: 1 !important;
         }
         .dashboard-section .modal-card {
-            width: 100% !important;
-            max-width: 100% !important;
-            height: auto !important;
-            box-shadow: none !important;
-            border: none !important;
-            background: transparent !important;
-            padding: 0 !important;
-            margin: 0 !important;
+            width: 100% !important; max-width: 100% !important; height: auto !important;
+            box-shadow: none !important; border: none !important; background: transparent !important;
+            padding: 0 !important; margin: 0 !important;
         }
-        
-        /* Comportamiento en Celulares */
-        @media (max-width: 768px) {
-            .dashboard-sidebar { display: none !important; }
-            .dashboard-main { padding: 0 !important; overflow: visible !important; height: auto !important; }
-            body.logged-in { overflow: auto; }
-            
-            /* 🔥 CORRECCIÓN 1: Eliminamos la línea que forzaba a los modales a mostrarse juntos */
-            .dashboard-section.modal-overlay { display: none; }
-            
-            /* 🔥 CORRECCIÓN: Dejamos que el sistema decida cuándo mostrar el Dashboard */
-            #homeSection { padding: 15px; padding-bottom: 90px; }
-            .dashboard-section.modal-overlay {
-    background-color: var(--mac-bg) !important;
-    z-index: 9999 !important;
-    height: 100dvh !important;
-}
-            #inventoryModal.modal-overlay, #pedidosModal.modal-overlay { background-color: var(--mac-bg) !important; align-items: flex-start !important; }
-            #inventoryModal .modal-card, #pedidosModal .modal-card { width: 100% !important; height: 100dvh !important; max-width: 100% !important; border: none !important; border-radius: 0 !important; margin: 0 !important; padding: 30px 20px 20px 20px !important; box-sizing: border-box !important; background-color: var(--mac-bg) !important; box-shadow: none !important; display: flex; flex-direction: column; }
-            #inventoryList, #pedidosList { flex-grow: 1 !important; overflow-y: auto !important; min-height: 0 !important; padding-bottom: 10px; margin-bottom: 10px; }
-            .news-layout { flex-direction: column; }
-            .news-sidebar { flex: 0 0 auto; max-height: 160px; border-right: none; border-bottom: 1px solid var(--mac-border); padding-right: 0; padding-bottom: 10px; }
-            .news-content-area { padding-left: 0; padding-top: 10px; }
-        }
+
         /* ==========================================================================
            ANIMACIÓN VIP DORADA ESTILO PASS ROYALE
            ========================================================================== */
         .badge-pro-animated {
             background: linear-gradient(110deg, #FFD700 0%, #FFF8DC 25%, #FFD700 50%, #B8860B 75%, #FFD700 100%);
-            background-size: 200% auto;
-            color: #5c4000 !important;
-            font-weight: 900;
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 11px;
-            text-transform: uppercase;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
-            animation: shineGold 3s linear infinite;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            display: inline-block;
-            letter-spacing: 0.5px;
+            background-size: 200% auto; color: #5c4000 !important; font-weight: 900;
+            padding: 4px 10px; border-radius: 8px; font-size: 11px; text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); animation: shineGold 3s linear infinite;
+            border: 1px solid rgba(255, 255, 255, 0.6); display: inline-block; letter-spacing: 0.5px;
         }
-
-        @keyframes shineGold {
-            to { background-position: 200% center; }
-        }
+        @keyframes shineGold { to { background-position: 200% center; } }
 
         /* ==========================================================================
-           TABS ESTILO CHROME PARA DATOS DE CUENTA MULTIPLATAFORMA
+           TABS CHROME Y OVERLAY
            ========================================================================== */
-        .chrome-tabs-container {
-            display: flex; overflow-x: auto; overflow-y: hidden;
-            background: rgba(0,0,0,0.1); border-radius: 12px 12px 0 0;
-            padding: 8px 8px 0 8px; gap: 4px; border-bottom: 1px solid var(--mac-border);
-            margin-bottom: 15px; scrollbar-width: none;
-        }
+        .chrome-tabs-container { display: flex; overflow-x: auto; overflow-y: hidden; background: rgba(0,0,0,0.1); border-radius: 12px 12px 0 0; padding: 8px 8px 0 8px; gap: 4px; border-bottom: 1px solid var(--mac-border); margin-bottom: 15px; scrollbar-width: none; }
         .chrome-tabs-container::-webkit-scrollbar { display: none; }
-        
-        .chrome-tab {
-            flex: 1; min-width: 70px; max-width: 140px; padding: 8px 12px;
-            background: rgba(134, 134, 139, 0.15); color: var(--mac-text-secondary);
-            border-radius: 10px 10px 0 0; font-size: 12px; font-weight: bold;
-            text-align: center; cursor: pointer; white-space: nowrap; overflow: hidden;
-            text-overflow: ellipsis; border: 1px solid transparent; border-bottom: none;
-            transition: all 0.2s; position: relative;
-        }
+        .chrome-tab { flex: 1; min-width: 70px; max-width: 140px; padding: 8px 12px; background: rgba(134, 134, 139, 0.15); color: var(--mac-text-secondary); border-radius: 10px 10px 0 0; font-size: 12px; font-weight: bold; text-align: center; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; border-bottom: none; transition: all 0.2s; position: relative; }
         .chrome-tab:hover { background: rgba(134, 134, 139, 0.3); }
-        .chrome-tab.active {
-            background: var(--mac-surface); color: var(--mac-blue);
-            border-color: var(--mac-border); box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            z-index: 2;
-        }
-        .chrome-tab.active::after {
-            content: ''; position: absolute; bottom: -1px; left: 0;
-            width: 100%; height: 2px; background: var(--mac-surface);
-        }
-        /* OVERLAY PARA MÓVIL */
+        .chrome-tab.active { background: var(--mac-surface); color: var(--mac-blue); border-color: var(--mac-border); box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 2; }
+        .chrome-tab.active::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--mac-surface); }
+        
         .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 9998; backdrop-filter: blur(2px); transition: opacity 0.3s; opacity: 0; }
         .mobile-overlay.active { display: block; opacity: 1; }
 
         /* ==========================================================================
-           🛡️ BLINDAJE GLOBAL CONTRA IMÁGENES GIGANTES (PC Y CELULAR)
+           🛡️ BLINDAJE GLOBAL CONTRA IMÁGENES GIGANTES
            ========================================================================== */
         #brandLogoSidebar, #mobileBrandLogo {
-            width: 45px !important;
-            height: 45px !important;
-            min-width: 45px !important;
-            max-width: 45px !important;
-            object-fit: cover !important;
-            border-radius: 10px !important;
-            flex-shrink: 0 !important;
+            width: 45px !important; height: 45px !important; min-width: 45px !important; max-width: 45px !important;
+            object-fit: cover !important; border-radius: 10px !important; flex-shrink: 0 !important;
         }
 
         /* ==========================================================================
-           📱 COMPORTAMIENTO EN CELULARES (MENÚ SÓLIDO Y PÁGINAS)
+           📱 COMPORTAMIENTO EN CELULARES MAESTRO
            ========================================================================== */
-       @media (max-width: 768px) {
-            /* 1. Fondo Sólido y Bloqueo de Scroll Horizontal */
+        @media (max-width: 768px) {
+            /* Fondo sólido y bloqueos */
             body { overflow-x: hidden !important; }
-            .dashboard-main { 
-                padding: 0 !important; 
-                overflow-x: hidden !important; 
-                overflow-y: auto !important; 
-                height: 100vh !important; 
-                background: var(--mac-bg) !important; /* Tapa el fondo animado */
-                width: 100vw !important;
-            }
+            .dashboard-main { padding: 0 !important; overflow-x: hidden !important; overflow-y: auto !important; height: 100vh !important; background: var(--mac-bg) !important; width: 100vw !important; }
             body.logged-in { overflow: hidden; }
             
             #homeSection .header-top { display: none !important; }
             
-            /* 2. SECCIONES 100% INDEPENDIENTES */
-            .dashboard-section { display: none !important; }
-            .dashboard-section.active-section { 
-                display: block !important; 
-                padding: 20px 15px 90px 15px !important; /* Padding ajustado */
-                background: var(--mac-bg) !important; 
-                min-height: 100vh !important;
-            }
-            .dashboard-section.modal-overlay { 
-                position: relative !important; 
-                background: var(--mac-bg) !important; 
-                backdrop-filter: none !important;
-                z-index: 1 !important; 
-            }
-            .dashboard-section .modal-card { 
-                width: 100% !important; max-width: 100% !important; height: auto !important; 
-                box-shadow: none !important; border: none !important; background: transparent !important; 
-                padding: 0 !important; margin: 0 !important;
-            }
+            /* Secciones independientes */
+            .dashboard-section.active-section { padding: 20px 15px 90px 15px !important; background: var(--mac-bg) !important; min-height: 100vh !important; }
+            .dashboard-section.modal-overlay { position: relative !important; background: var(--mac-bg) !important; z-index: 1 !important; }
             .dashboard-section .mobile-only-btn { display: none !important; }
 
-            /* 3. CORRECCIÓN DEL INVENTARIO (Desborde Horizontal) */
-            #inventoryModal > div > div:nth-child(2) > div {
-                min-width: 100% !important; /* Fuerza a las cajas a no salirse de la pantalla */
-            }
-
-            /* 4. CORRECCIÓN MODAL DE REGLAS (Siempre al frente) */
+            /* Ajustes Inventario y Reglas */
+            #inventoryModal > div > div:nth-child(2) > div { min-width: 100% !important; }
             #rulesModal, .swal2-container { z-index: 9999999 !important; }
 
             /* MENÚ LATERAL TIPO SPOTIFY */
             .dashboard-sidebar { 
-                display: flex !important; flex-direction: column !important;
-                position: fixed !important; left: -100%; top: 0; height: 100vh; width: 280px; 
-                z-index: 999999 !important; 
-                transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
-                box-shadow: 4px 0 24px rgba(0,0,0,0.8) !important;
-                background: var(--mac-surface) !important;
-                border-right: 1px solid var(--mac-border) !important;
-                overflow-y: auto !important; overflow-x: hidden !important;
-                padding: 20px 15px !important; box-sizing: border-box !important;
+                display: flex !important; flex-direction: column !important; position: fixed !important; left: -100%; top: 0; height: 100vh; width: 280px; 
+                z-index: 999999 !important; transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 4px 0 24px rgba(0,0,0,0.8) !important;
+                background: var(--mac-surface) !important; border-right: 1px solid var(--mac-border) !important;
+                overflow-y: auto !important; overflow-x: hidden !important; padding: 20px 15px !important; box-sizing: border-box !important;
             }
             .dashboard-sidebar.mobile-open { left: 0 !important; }
             .sidebar-toggle-btn { display: none !important; }
             
             .sidebar-header { margin-bottom: 25px !important; padding-bottom: 20px !important; border-bottom: 1px solid var(--mac-border) !important; display: flex !important; flex-direction: row !important; align-items: center !important; gap: 15px !important; }
             .sidebar-menu { display: flex !important; flex-direction: column !important; gap: 5px !important; }
-            .sidebar-item { 
-                display: flex !important; flex-direction: row !important; align-items: center !important; gap: 12px !important; 
-                padding: 14px 15px !important; font-size: 16px !important; font-weight: 600 !important;
-                border-radius: 12px !important; color: var(--mac-text-main) !important; 
-                background: transparent !important; text-decoration: none !important; border: 1px solid transparent !important;
-            }
+            .sidebar-item { display: flex !important; flex-direction: row !important; align-items: center !important; gap: 12px !important; padding: 14px 15px !important; font-size: 16px !important; font-weight: 600 !important; border-radius: 12px !important; color: var(--mac-text-main) !important; background: transparent !important; text-decoration: none !important; border: 1px solid transparent !important; }
             .sidebar-item.active, .sidebar-item:active { background: var(--mac-blue) !important; color: white !important; }
             .sidebar-item i { font-size: 22px !important; margin: 0 !important; }
-        }
 
-            /* Ajustes para que la cabecera principal se vea bien */
+            /* Cabecera y listas interiores */
             .mobile-header-profile { display: flex !important; align-items: center; gap: 12px; cursor: pointer; padding: 5px; max-width: 100%; overflow: hidden; }
-
-            /* Ajustes de diseño interior para móviles */
             #inventoryList, #pedidosList { flex-grow: 1 !important; overflow-y: visible !important; min-height: 0 !important; padding-bottom: 10px; margin-bottom: 10px; }
             .news-layout { flex-direction: column; }
             .news-sidebar { flex: 0 0 auto; max-height: 160px; border-right: none; border-bottom: 1px solid var(--mac-border); padding-right: 0; padding-bottom: 10px; }
