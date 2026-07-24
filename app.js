@@ -3833,3 +3833,112 @@ window.removeCustomService = async (index) => {
     window.renderCustomServicesChips();
     window.showNotification("🗑️ Servicio eliminado de tu lista");
 };
+
+/* ==========================================================================
+   ⚙️ MÓDULO: GESTIÓN DE SERVICIOS PERSONALIZADOS & MIGRACIÓN TRANSPARENTE
+   ========================================================================== */
+const DEFAULT_SERVICES = ["Netflix", "Disney+", "Spotify Premium", "HBO Max", "Paramount", "Amazon Prime", "YouTube Premium", "Crunchyroll", "IPTV", "Flujo TV", "Apple TV", "Gemini Pro", "ChatGPT", "Canva Pro", "CapCut Pro", "Directv GO", "Movistar"];
+
+window.syncUserServices = async () => {
+    if (!currentUserData) return;
+    let userServices = currentUserData.customServices || [];
+
+    // 🚀 AUTO-DETECTABLE: Si es su primera vez, jalamos sus servicios viejos
+    if (userServices.length === 0) {
+        const foundServices = new Set(DEFAULT_SERVICES);
+        if (typeof clients !== 'undefined') { clients.forEach(c => { if (c.platform) c.platform.split(', ').forEach(p => foundServices.add(p.trim())); }); }
+        if (currentUserData.inventory) { currentUserData.inventory.forEach(i => { if (i.platform) foundServices.add(i.platform.trim()); }); }
+        userServices = Array.from(foundServices);
+        currentUserData.customServices = userServices;
+        await updateDoc(doc(db, "users", currentUser.uid), { customServices: userServices });
+    }
+
+    window.populateAllServiceSelects();
+    window.renderCustomServicesChips();
+};
+
+window.populateAllServiceSelects = () => {
+    const services = currentUserData.customServices || DEFAULT_SERVICES;
+
+    // A) Checkboxes en Nuevo Cliente
+    const chkDropdown = document.getElementById('checkboxDropdown');
+    if (chkDropdown) {
+        chkDropdown.innerHTML = '';
+        services.forEach(s => {
+            const label = document.createElement('label');
+            label.innerHTML = `<input type="checkbox" value="${s}"> ${s}`;
+            chkDropdown.appendChild(label);
+        });
+        document.querySelectorAll('#checkboxDropdown input').forEach(cb => { 
+            cb.addEventListener('change', () => { 
+                const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value); 
+                const el = document.getElementById('selectText'); 
+                if(checked.length) { el.textContent = checked.join(', '); el.classList.add('has-selection'); } 
+                else { el.textContent = 'Plataforma(s)...'; el.classList.remove('has-selection'); } 
+            }); 
+        });
+    }
+
+    // B) Selects Simples (Inventario, Matrices, Reglas)
+    const selectIds = [{ id: 'invPlatform', defaultOpt: 'Plataforma...' }, { id: 'matPlatform', defaultOpt: null }, { id: 'rulePlatformSelect', defaultOpt: null }];
+    selectIds.forEach(item => {
+        const select = document.getElementById(item.id);
+        if (select) {
+            select.innerHTML = item.defaultOpt ? `<option value="">${item.defaultOpt}</option>` : '';
+            services.forEach(s => { select.innerHTML += `<option value="${s}">${s}</option>`; });
+        }
+    });
+};
+
+window.renderCustomServicesChips = () => {
+    const container = document.getElementById('customServicesChips');
+    if (!container) return;
+    container.innerHTML = '';
+    const services = currentUserData.customServices || DEFAULT_SERVICES;
+
+    services.forEach((s, index) => {
+        const chip = document.createElement('div');
+        chip.style.cssText = "background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 20px; display: flex; align-items: center; gap: 8px;";
+        chip.innerHTML = `<span>${s}</span> <i class='bx bx-x' style='cursor:pointer; color:var(--mac-red); font-size:18px;' onclick="window.removeCustomService(${index})"></i>`;
+        container.appendChild(chip);
+    });
+};
+
+window.addCustomService = async () => {
+    const input = document.getElementById('newCustomServiceInput');
+    const name = input.value.trim();
+    if (!name) return window.showNotification("Escribe el nombre del servicio");
+
+    let services = currentUserData.customServices || DEFAULT_SERVICES;
+    if (services.some(s => s.toLowerCase() === name.toLowerCase())) return window.showNotification("Ese servicio ya está en tu lista.");
+
+    services.push(name);
+    currentUserData.customServices = services;
+    input.value = '';
+
+    await updateDoc(doc(db, "users", currentUser.uid), { customServices: services });
+    window.populateAllServiceSelects();
+    window.renderCustomServicesChips();
+    window.showNotification("✅ Servicio añadido");
+};
+
+window.removeCustomService = async (index) => {
+    let services = currentUserData.customServices || DEFAULT_SERVICES;
+    services.splice(index, 1);
+    currentUserData.customServices = services;
+
+    await updateDoc(doc(db, "users", currentUser.uid), { customServices: services });
+    window.populateAllServiceSelects();
+    window.renderCustomServicesChips();
+    window.showNotification("🗑️ Servicio eliminado de tu lista");
+};
+
+// Modificamos el perfil para que pinte los chips al entrar
+window.openProfileModal = () => { 
+    document.getElementById('editProfileName').value = currentUserData.name || ''; 
+    document.getElementById('editProfileCountry').value = currentUserData.country || ''; 
+    document.getElementById('editProfilePhone').value = currentUserData.phone || ''; 
+    document.getElementById('editProfileAlias').value = currentUserData.storeAlias || ''; 
+    document.getElementById('editReferencesLink').value = currentUserData.referencesLink || '';
+    if (typeof window.renderCustomServicesChips === 'function') window.renderCustomServicesChips();
+};
