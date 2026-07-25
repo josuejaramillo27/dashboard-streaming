@@ -451,8 +451,14 @@
         
         <!-- SECCIÓN 1: HOME (Dashboard Principal) -->
         <div id="homeSection" class="active-section dashboard-section">
-            <div class="header-top" style="margin-bottom: 20px; align-items: center; justify-content: space-between;">
+            <div class="header-top" style="margin-bottom: 20px; align-items: center; justify-content: space-between; display: flex; width: 100%;">
                 
+                <!-- NUEVO: LOGO ANIMADO (SOLO PC) -->
+                <div class="desktop-main-logo">
+                    <!-- Asegúrate de que "AGC.png" sea el nombre exacto de tu logo dorado -->
+                    <img src="AGCC.png" alt="A.G.C. Logo" class="agc-glow-logo">
+                </div>
+
                 <!-- CABECERA ADAPTATIVA TIPO SPOTIFY (SOLO CELULAR) -->
                 <div class="mobile-header-profile" onclick="window.toggleMobileMenu()" style="display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 5px; max-width: 100%; overflow: hidden;">
                     <img id="mobileBrandLogo" src="AGC.png" alt="Logo">
@@ -463,7 +469,7 @@
                 </div>
                 
                 <!-- BOTONES DE PC -->
-                <div class="mac-controls">
+                <div class="mac-controls" style="display: flex; gap: 10px;">
                     <button class="action-btn" style="background: var(--mac-surface); border: 1px solid var(--mac-border); padding: 8px 15px; font-size: 14px;" onclick="window.toggleStats()"><i class='bx bx-line-chart'></i> Finanzas</button>
                     <button class="action-btn" style="background: rgba(52, 199, 89, 0.15); color: var(--mac-green); font-weight: bold; padding: 8px 15px; font-size: 14px;" onclick="window.openWaModal()"><i class='bx bxl-whatsapp'></i> Auto-WA</button>
                 </div>
