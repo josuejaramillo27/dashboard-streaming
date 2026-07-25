@@ -24,28 +24,41 @@
 }
 
 body.dark-mode {
-    --mac-bg: #000000; 
-    --mac-surface: rgba(28, 28, 30, 0.65); /* Cristal oscuro */
-    --mac-text-main: #f5f5f7;
-    --mac-text-secondary: #ebebf599; 
-    --mac-border: rgba(255, 255, 255, 0.08); 
-    --mac-border-solid: rgba(255, 255, 255, 0.15);
+    /* Fondo base: Azul abisal (Casi negro, pero con alma azul) */
+    --mac-bg: #050b14; 
+    
+    /* Paneles y Rectángulos: Cristal azul noche (Adiós al gris sucio) */
+    --mac-surface: rgba(16, 26, 43, 0.65); 
+    
+    /* Textos: Blanco azulado y gris platinado para que resalten suavemente */
+    --mac-text-main: #f0f4f8;
+    --mac-text-secondary: #8b9bb4; 
+    
+    /* Bordes: Sutiles destellos de azul metálico */
+    --mac-border: rgba(43, 65, 98, 0.5); 
+    --mac-border-solid: rgba(43, 65, 98, 0.8);
+    
+    /* Acentos vibrantes (Se mantienen para resaltar botones) */
     --mac-blue: #0a84ff;
     --mac-blue-hover: #0070e0; 
     --mac-red: #ff453a; 
     --mac-green: #30d158;
     --mac-orange: #ff9f0a; 
-    --mac-gray: rgba(44, 44, 46, 0.5); 
-    --mac-table-hover: rgba(255, 255, 255, 0.05);
-    --mac-dropdown-bg: rgba(28, 28, 30, 0.75);
     
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    /* Cajas interiores (Inputs, Tarjetas de Inventario, etc.) */
+    --mac-gray: rgba(26, 40, 65, 0.6); 
+    
+    --mac-table-hover: rgba(255, 255, 255, 0.05);
+    --mac-dropdown-bg: rgba(16, 26, 43, 0.85);
+    
+    /* Sombra con un levísimo resplandor azul cibernético */
+    --glass-shadow: 0 10px 40px -10px rgba(10, 132, 255, 0.1), 0 8px 32px 0 rgba(0, 0, 0, 0.5);
     --glass-blur: blur(20px);
 
-/* Olas profundas en azul oscuro para MODO OSCURO */
-    --wave-1: #0a1930; /* Azul marino profundo */
-    --wave-2: #112240; /* Azul nocturno vibrante pero oscuro */
-    --wave-3: #020c1b; /* Azul casi negro para fusionarse con el fondo */
+    /* Olas perfectamente calibradas con los paneles */
+    --wave-1: #0a192f; 
+    --wave-2: #112240; 
+    --wave-3: #020c1b; 
 }
 
 /* =========================================================
