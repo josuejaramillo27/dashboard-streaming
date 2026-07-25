@@ -939,6 +939,9 @@ const resetAccountButton = () => {
 window.saveClientData = async () => {
     const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(cb => cb.value); 
     const phone = document.getElementById('phone').value.trim();
+    const tag = document.getElementById('clientTag').value.trim();
+    const tagColor = document.getElementById('clientTagColor').value;
+    const notes = document.getElementById('clientNotes').value.trim();
     
     if (!checked.length) return window.showNotification("Selecciona plataforma");
     if(!phone.startsWith('+')) return window.showNotification("⚠️ El teléfono DEBE empezar con +");
@@ -1023,7 +1026,11 @@ window.saveClientData = async () => {
             linkedMasterId: finalLinkedMasterId, 
             accountDeviceName: primaryData.deviceName, 
             accountDeviceType: primaryData.deviceType,
-            portalCode: generatedPortalCode
+            portalCode: generatedPortalCode,
+            tag: tag,             // NUEVO
+            tagColor: tagColor,   // NUEVO
+            notes: notes,         // NUEVO
+            renovations: editingClientId ? undefined : 0
         };
 
         if (editingClientId) { 
@@ -1152,7 +1159,12 @@ window.renewClient = async (id) => {
     }).then(async (result) => {
         if (result.isConfirmed) {
             try {
-                await updateDoc(doc(db, "clients", id), { date: strFirebase }); 
+                // NUEVO: Sumamos 1 al historial de renovaciones
+                const nuevasRenovaciones = (c.renovations || 0) + 1;
+                await updateDoc(doc(db, "clients", id), { 
+                    date: strFirebase, 
+                    renovations: nuevasRenovaciones 
+                }); 
                 window.showNotification("Servicio renovado ✅"); 
                 loadUserClients(); 
 
@@ -1175,6 +1187,9 @@ window.startEdit = (id) => {
     document.getElementById('clientCost').value = c.cost || ''; 
     document.getElementById('clientPrice').value = c.price || ''; 
     document.getElementById('clientProviderName').value = c.providerName || '';
+    document.getElementById('clientTag').value = c.tag || ''; 
+    document.getElementById('clientTagColor').value = c.tagColor || '#0a84ff'; 
+    document.getElementById('clientNotes').value = c.notes || '';
     
     // 🔥 RECONSTRUIR multiAccData DESDE LA BASE DE DATOS
     if (c.multiAccounts) {
@@ -1226,7 +1241,10 @@ window.cancelEdit = () => {
     if (typeof variablesEnlaceMatriz !== 'undefined') { variablesEnlaceMatriz = { masterId: null, profileNum: null }; }
     document.getElementById('selectText').textContent = 'Plataforma(s)...'; 
     document.getElementById('selectText').classList.remove('has-selection'); 
-    document.getElementById('actionButtonsContainer').innerHTML = `<button type="button" class="btn-primary" onclick="window.saveClientData()">Agregar Cliente</button>`; 
+    document.getElementById('actionButtonsContainer').innerHTML = `<button type="button" class="btn-primary" onclick="window.saveClientData()">Agregar Cliente</button>`;
+    document.getElementById('clientTag').value = ''; 
+    document.getElementById('clientTagColor').value = '#0a84ff'; 
+    document.getElementById('clientNotes').value = '';
 };
 /* --- RENDERIZAR TABLA (NOMBRES DE COLORES) --- */
 window.renderTable = () => {
@@ -1239,6 +1257,10 @@ window.renderTable = () => {
         if (search && !c.name.toLowerCase().includes(search) && !c.phone.toLowerCase().includes(search) && !c.platform.toLowerCase().includes(search)) return;
         const stText = c.diffDays > 0 ? `Faltan ${c.diffDays} d` : (c.diffDays === 0 ? 'Hoy' : 'Vencido');
         const uCount = c.accountUnits || 1; const prof = ((c.price || 0) - (c.cost || 0)) * uCount; const dispUnits = uCount > 1 ? `<span style="font-size:11px;color:var(--mac-text-secondary);display:block;">(${uCount} unidades)</span>` : '';
+        // UI de Etiquetas, Notas y Lealtad
+        let tagHtml = c.tag ? `<span style="background: ${c.tagColor}15; color: ${c.tagColor}; font-size: 10px; padding: 2px 6px; border-radius: 6px; border: 1px solid ${c.tagColor}50; display:inline-block; margin-top:4px; font-weight:bold;">${c.tag}</span>` : '';
+        let notesIcon = c.notes ? `<i class='bx bx-note' title="Nota: ${c.notes}" style="color:var(--mac-orange); cursor:help; margin-left:5px;"></i>` : '';
+        let loyatyHtml = (c.renovations > 0) ? `<span title="${c.renovations} renovaciones continuas" style="font-size: 12px; color: #FFD700; margin-left: 5px;"><i class='bx bxs-star'></i>${c.renovations}</span>` : '';
 // LOGICA DE DISPOSITIVOS CON BOXICONS
         let deviceIndicator = '';
         if (c.accountDeviceType) {
@@ -1253,7 +1275,11 @@ window.renderTable = () => {
             deviceIndicator = `<span title="Sin dispositivo configurado" class="device-dot-red"></span>`;
         }
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td data-label="Cliente" onclick="if(window.innerWidth <= 768) window.openMobileClientModal('${c.id}')"><div class="client-profile"><span style="color:${c.color || 'var(--mac-text-main)'}; font-weight: 800; font-size: 15px; letter-spacing: 0.5px;">${c.name}</span></div></td>
+        tr.innerHTML = <td data-label="Cliente" onclick="if(window.innerWidth <= 768) window.openMobileClientModal('${c.id}')">
+            <div class="client-profile">
+                <span style="color:${c.color || 'var(--mac-text-main)'}; font-weight: 800; font-size: 15px; letter-spacing: 0.5px;">${c.name}</span>${loyatyHtml}${notesIcon}<br>${tagHtml}
+            </div>
+        </td>
         <td data-label="Plataformas" style="font-weight: 500;">${c.platform}${deviceIndicator}</td>
         <td data-label="Cuenta"><button class="action-btn" style="color:var(--mac-text-main); font-weight:bold; border: 1px solid var(--mac-border);" onclick="window.viewAccountData('${c.id}')"><i class='bx bx-key'></i> Ver Datos</button></td>
         <td data-label="WhatsApp">${c.phone}</td>
@@ -1702,7 +1728,21 @@ window.openMobileClientModal = (id) => {
     const diffDays = Math.ceil((exp - today) / 86400000);
     const statusCat = diffDays > 3 ? 'active' : (diffDays >= 0 ? 'warning' : 'expired');
     const stText = diffDays > 0 ? `Faltan ${diffDays} d` : (diffDays === 0 ? 'Hoy' : 'Vencido');
+    // Inyección de Novedades (CRM)
+    const badgesContainer = document.getElementById('mcBadges');
+    badgesContainer.innerHTML = '';
     
+    if (c.tag) badgesContainer.innerHTML += `<span style="background: ${c.tagColor}15; color: ${c.tagColor}; font-size: 11px; padding: 4px 8px; border-radius: 6px; border: 1px solid ${c.tagColor}50; font-weight:bold;">${c.tag}</span>`;
+    
+    if (c.renovations > 0) badgesContainer.innerHTML += `<span style="font-size: 11px; color: #5c4000; background: linear-gradient(110deg, #FFD700 0%, #FFF8DC 50%, #FFD700 100%); padding: 4px 8px; border-radius: 6px; font-weight: bold; border: 1px solid #FFD700;"><i class='bx bxs-star'></i> Cliente Fiel (${c.renovations})</span>`;
+
+    const notesContainer = document.getElementById('mcNotesContainer');
+    if (c.notes) {
+        document.getElementById('mcNotes').innerText = c.notes;
+        notesContainer.style.display = 'block';
+    } else {
+        notesContainer.style.display = 'none';
+    }
     const statusBadge = document.getElementById('mcStatus');
     statusBadge.className = `status ${statusCat}`;
     statusBadge.innerText = stText;
