@@ -1261,7 +1261,7 @@ window.renderTable = () => {
             deviceIndicator = `<span title="Sin dispositivo configurado" class="device-dot-red"></span>`;
         }
         const tr = document.createElement('tr');
-        tr.innerHTML = <td data-label="Cliente" onclick="if(window.innerWidth <= 768) window.openMobileClientModal('${c.id}')">
+        tr.innerHTML = `<td data-label="Cliente" onclick="if(window.innerWidth <= 768) window.openMobileClientModal('${c.id}')">
             <div class="client-profile">
                 <span style="color:${c.color || 'var(--mac-text-main)'}; font-weight: 800; font-size: 15px; letter-spacing: 0.5px;">${c.name}</span>${loyatyHtml}${notesIcon}<br>${tagHtml}
             </div>
