@@ -879,9 +879,15 @@
                 </select>
             </div>
             
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-                <label style="font-size: 12px; font-weight: 600; color: var(--mac-text-secondary);">Unidades / Pantallas:</label>
-                <input type="number" id="accUnits" value="1" min="1" placeholder="Cantidad de unidades" oninput="window.updateActiveTab('units', this.value)">
+            <div style="display: flex; gap: 10px; margin-bottom: 5px;">
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 12px; font-weight: 600; color: var(--mac-text-secondary);">Unidades / Pantallas:</label>
+                    <input type="number" id="accUnits" value="1" min="1" placeholder="Cantidad" oninput="window.updateActiveTab('units', this.value)" style="width:100%;">
+                </div>
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 12px; font-weight: 600; color: var(--mac-text-secondary);">Meses de Servicio:</label>
+                    <input type="number" id="accMonths" value="1" min="1" placeholder="Meses" oninput="window.updateActiveTab('months', this.value)" style="width:100%;">
+                </div>
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 5px;">
@@ -920,6 +926,7 @@
         <p style="margin: 5px 0;"><strong>Tipo de Venta:</strong> <span id="viewAccSaleType" style="color: var(--mac-blue); font-weight: bold;"></span></p>
         <p style="margin: 5px 0;"><strong>Dispositivo:</strong> <span id="viewAccDevice" style="color: var(--mac-text-secondary);"></span></p>
         <p style="margin: 5px 0;"><strong>Unidades Totales:</strong> <span id="viewAccUnits" style="color: var(--mac-blue); font-weight: bold;"></span></p>
+        <p style="margin: 5px 0;"><strong>Meses Contratados:</strong> <span id="viewAccMonths" style="color: var(--mac-text-secondary);"></span></p>
         <p style="margin: 5px 0;"><strong>Proveedor:</strong> <span id="viewAccProvider" style="color: var(--mac-text-secondary);"></span></p>
         <p style="margin: 5px 0; padding-top: 10px; border-top: 1px dashed var(--mac-border);"><strong>🔑 Código Portal Web:</strong> <span id="viewAccPortalCode" style="color: var(--mac-orange); font-weight: bold; font-size: 16px; letter-spacing: 2px;"></span></p>
         <div style="margin-top: 20px;">
