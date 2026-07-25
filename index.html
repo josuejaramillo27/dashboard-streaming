@@ -224,39 +224,52 @@
            📱 COMPORTAMIENTO EN CELULARES MAESTRO
            ========================================================================== */
         @media (max-width: 768px) {
-            /* Fondo sólido y bloqueos - SE CORRIGE EL ANCHO DESBORDADO (Cortes) */
-            body { overflow-x: hidden !important; width: 100% !important; box-sizing: border-box !important; }
-            .dashboard-main { padding: 0 !important; overflow-x: hidden !important; overflow-y: auto !important; height: 100vh !important; background: transparent !important; width: 100% !important; box-sizing: border-box !important; }
+            /* 1. ANTI-DESBORDE Y CENTRADO PERFECTO (Cero cortes a la derecha) */
+            html, body { overflow-x: hidden !important; width: 100vw !important; max-width: 100vw !important; margin: 0 !important; padding: 0 !important; }
+            * { box-sizing: border-box !important; }
+
+            /* El Login Centrado y sin desbordes */
+            .login-container { display: flex !important; flex-direction: column; justify-content: center; min-height: 100vh; padding: 20px !important; width: 100% !important; align-items: center; }
+            .auth-form { width: 100% !important; max-width: 100% !important; }
+
+            /* Estructura Base de la App */
+            .dashboard-main { padding: 0 !important; overflow-x: hidden !important; overflow-y: auto !important; height: 100vh !important; background: transparent !important; width: 100% !important; }
             body.logged-in { overflow: hidden; }
             
-            #homeSection .header-top { display: flex !important; padding: 15px 0 !important; margin-bottom: 20px !important;}
+            #homeSection .header-top { display: flex !important; padding: 15px 15px 0 15px !important; margin-bottom: 20px !important; width: 100% !important; }
             .mac-controls { display: none !important; }
             
-            /* Secciones independientes - Padding inferior extra-grande para que el botón fijo no tape las listas */
-            .dashboard-section.active-section { padding: 25px 15px 100px 15px !important; background: transparent !important; min-height: 100vh !important; box-sizing: border-box !important; max-width: 100% !important; }
-            .dashboard-section.modal-overlay { position: relative !important; background: transparent !important; z-index: 1 !important; box-sizing: border-box !important; max-width: 100% !important; }
+            /* 2. ESPACIO RESERVADO PARA EL BOTÓN DE CERRAR (Evita que se mezclen) */
+            .dashboard-section.active-section { padding: 20px 15px 20px 15px !important; background: transparent !important; min-height: 100vh !important; width: 100% !important; }
+            .dashboard-section.modal-overlay { position: relative !important; background: transparent !important; z-index: 1 !important; width: 100% !important; }
             
-            /* MODIFICACIÓN ESTRELLA: Botones de Cerrar FIJOS ABAJO siempre visibles */
+            /* Esta es la magia: Agrega 90px de espacio vacío al final de la tarjeta para que el botón entre perfecto */
+            .dashboard-section .modal-card { width: 100% !important; max-width: 100% !important; padding-bottom: 90px !important; border: none !important; box-shadow: none !important; background: transparent !important; }
+
+            /* 3. EL BOTÓN DE CERRAR: Fijo, perfectamente centrado matemáticamente */
             .dashboard-section .mobile-only-btn { 
                 display: block !important; 
-                margin: 0 !important; 
+                position: fixed !important;
+                bottom: 20px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important; /* Centrado estricto */
+                width: calc(100vw - 30px) !important;
+                z-index: 99999 !important;
+                margin: 0 !important;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.8) !important;
+                border-radius: 12px !important;
                 font-weight: bold; 
                 background: var(--mac-surface) !important; 
                 border: 1px solid var(--mac-border) !important; 
                 color: var(--mac-text-main) !important; 
-                position: fixed !important;
-                bottom: 20px !important;
-                left: 15px !important;
-                width: calc(100% - 30px) !important;
-                z-index: 9999 !important;
-                box-shadow: 0 4px 25px rgba(0,0,0,0.6) !important;
-                border-radius: 12px !important;
             }
 
-            /* Ajustes Inventario y Reglas - ELIMINA EL DESBORDE HORIZONTAL */
-            #inventoryModal .modal-card > div:nth-child(2) > div { min-width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; margin-bottom: 15px; }
-            #inventoryList { padding-right: 0 !important; }
-            #inventoryList > div { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; width: 100% !important; box-sizing: border-box !important; }
+            /* 4. PERMITIR SCROLL NATURAL (Las listas ahora se adaptan sin cruzarse) */
+            #inventoryModal .modal-card > div:nth-child(2) > div { min-width: 100% !important; max-width: 100% !important; margin-bottom: 15px; }
+            #inventoryList, #pedidosList, #storeItemsList { overflow: visible !important; max-height: none !important; padding-right: 0 !important; }
+            
+            /* Ajustes estéticos de Inventario en celular */
+            #inventoryList > div { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; width: 100% !important; }
             #inventoryList > div > div { width: 100% !important; word-break: break-word; }
             #inventoryList > div > div:last-child { display: flex !important; justify-content: space-between !important; gap: 10px !important; }
             #inventoryList > div > div:last-child button { flex: 1; padding: 10px !important; }
@@ -266,7 +279,7 @@
                 display: flex !important; flex-direction: column !important; position: fixed !important; left: -100%; top: 0; height: 100vh; width: 280px; 
                 z-index: 999999 !important; transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 4px 0 24px rgba(0,0,0,0.8) !important;
                 background: var(--mac-surface) !important; border-right: 1px solid var(--mac-border) !important;
-                overflow-y: auto !important; overflow-x: hidden !important; padding: 20px 15px !important; box-sizing: border-box !important;
+                overflow-y: auto !important; overflow-x: hidden !important; padding: 20px 15px !important; 
             }
             .dashboard-sidebar.mobile-open { left: 0 !important; }
             .sidebar-toggle-btn { display: none !important; }
@@ -277,12 +290,8 @@
             .sidebar-item.active, .sidebar-item:active { background: var(--mac-blue) !important; color: white !important; }
             .sidebar-item i { font-size: 22px !important; margin: 0 !important; }
 
-            /* Cabecera y listas interiores - CORRECCIÓN DEL CRUCE CON EL BOTÓN */
+            /* Cabecera y Novedades */
             .mobile-header-profile { display: flex !important; align-items: center; gap: 12px; cursor: pointer; padding: 5px; max-width: 100%; overflow: hidden; }
-            
-            /* AQUÍ SE ELIMINÓ EL LÍMITE DE ALTURA QUE CAUSABA EL CRUCE */
-            #inventoryList, #pedidosList { flex-grow: 1 !important; overflow-y: visible !important; min-height: 0 !important; max-height: none !important; padding-bottom: 10px; margin-bottom: 10px; }
-            
             .news-layout { flex-direction: column; }
             .news-sidebar { flex: 0 0 auto; max-height: 160px; border-right: none; border-bottom: 1px solid var(--mac-border); padding-right: 0; padding-bottom: 10px; }
             .news-content-area { padding-left: 0; padding-top: 10px; }
