@@ -1050,3 +1050,53 @@ body.dark-mode .bottom-nav { background: linear-gradient(to top, rgba(0, 0, 0, 1
     color: var(--mac-green);
 }
 .guarantee-text i { font-size: 18px; }
+
+/* =========================================================
+   LOGO ANIMADO DEL DASHBOARD (EFECTO RESPLANDOR DORADO)
+========================================================= */
+.desktop-main-logo {
+    display: flex;
+    align-items: center;
+}
+
+.agc-glow-logo {
+    height: 45px; /* Tamaño ideal para la cabecera */
+    width: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    
+    /* Aplicamos la animación de resplandor infinito */
+    animation: premiumLogoGlow 3s ease-in-out infinite alternate;
+}
+
+/* Efecto de resplandor (Glow) y pequeño latido (Scale) */
+@keyframes premiumLogoGlow {
+    0% { 
+        filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.2)) brightness(1); 
+        transform: scale(1);
+    }
+    50% { 
+        /* En el medio de la animación, el brillo dorado se expande */
+        filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8)) brightness(1.2); 
+        transform: scale(1.03); 
+    }
+    100% { 
+        filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.2)) brightness(1); 
+        transform: scale(1);
+    }
+}
+
+/* Ocultar en celular (Porque ahí ya sale la cabecera de la marca) */
+@media (max-width: 768px) {
+    .desktop-main-logo {
+        display: none !important;
+    }
+}
+
+/* Asegurar que en PC el Logo quede a la izquierda y los botones a la derecha */
+@media (min-width: 769px) {
+    #homeSection .header-top { 
+        justify-content: space-between !important; 
+        width: 100% !important; 
+    }
+}
