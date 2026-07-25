@@ -517,15 +517,6 @@
             <form id="clientForm" class="form-grid" style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border); box-shadow: var(--glass-shadow);">
             <form id="clientForm" class="form-grid" style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border); box-shadow: var(--glass-shadow);">
                 <input type="text" id="clientName" placeholder="Nombre del Cliente" required>
-                <!-- NUEVO: Sistema de Etiquetas y CRM -->
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="clientTag" placeholder="Etiqueta (Ej: VIP, Moroso...)" style="flex: 2;">
-                    <div style="flex: 1; display: flex; flex-direction: column;">
-                        <input type="color" id="clientTagColor" value="#0a84ff" style="width: 100%; height: 45px; padding: 2px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); cursor: pointer;" title="Color de la etiqueta">
-                    </div>
-                </div>
-                <textarea id="clientNotes" placeholder="Notas Privadas (Solo tú las ves)..." rows="2" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none;"></textarea>
-                <!-- FIN NUEVO -->
                 <div class="custom-select" id="customSelect">
                     <div class="select-box" id="selectBox" onclick="window.togglePlatformDropdown(event)">
                         <span id="selectText">Plataforma(s)...</span><span>▼</span>
@@ -1116,16 +1107,10 @@
             <h3 style="margin: 0; font-size: 18px;" id="mcName">Cargando...</h3>
             <span id="mcStatus" class="status">...</span>
         </div>
-        <!-- NUEVO: Detalles móviles actualizados con CRM -->
-        <div style="display: flex; gap: 10px; margin-bottom: 10px;" id="mcBadges"></div>
         <div style="background: var(--mac-bg); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
             <p style="margin: 5px 0; font-size: 14px;"><strong><i class='bx bxl-whatsapp'></i> WhatsApp:</strong> <span id="mcPhone"></span></p>
             <p style="margin: 5px 0; font-size: 14px;"><strong><i class='bx bx-wallet'></i> Pagó:</strong> <span id="mcPrice" style="color: var(--mac-green); font-weight: bold;"></span></p>
             <p style="margin: 5px 0; font-size: 14px;"><strong><i class='bx bx-calendar-x'></i> Vence:</strong> <span id="mcDate"></span></p>
-            <div id="mcNotesContainer" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--mac-border);">
-                <p style="margin: 0; font-size: 12px; color: var(--mac-text-secondary);"><i class='bx bx-note'></i> Notas Privadas:</p>
-                <p id="mcNotes" style="margin: 4px 0 0 0; font-size: 13px; color: var(--mac-text-main); font-style: italic;"></p>
-            </div>
         </div>
         <p style="font-size: 11px; color: var(--mac-text-secondary); margin-bottom: 10px; font-weight: bold; text-align: center; letter-spacing: 1px;">ACCIONES RÁPIDAS</p>
         <div id="mcActions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
