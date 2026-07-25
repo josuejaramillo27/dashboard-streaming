@@ -24,7 +24,7 @@ let currentUser = null; let currentUserData = null; let clients = []; let editin
 let currentManageUserId = null; 
 let multiAccData = {};
 let currentActiveTab = '';
-window.getDefaultAccData = () => ({ email: '', password: '', profile: '', pin: '', units: 1, deviceName: '', deviceType: '', saleType: 'Perfil', inventoryId: null });
+window.getDefaultAccData = () => ({ email: '', password: '', profile: '', pin: '', units: 1, months: 1, deviceName: '', deviceType: '', saleType: 'Perfil', inventoryId: null });
 let globalCurrency = "S/";
 let lastVisibleDoc = null;
 let editingNewsId = null;
@@ -563,6 +563,7 @@ window.switchAccTab = (platform, modalType) => {
         document.getElementById('accPin').value = data.pin || '';
         document.getElementById('accSaleType').value = data.saleType || 'Perfil';
         document.getElementById('accUnits').value = data.units || 1;
+        if(document.getElementById('accMonths')) document.getElementById('accMonths').value = data.months || 1;
         document.getElementById('accDeviceName').value = data.deviceName || '';
         document.getElementById('accDeviceType').value = data.deviceType || '';
     } else {
@@ -571,6 +572,7 @@ window.switchAccTab = (platform, modalType) => {
         document.getElementById('viewAccPassword').innerText = data.password || '-';
         document.getElementById('viewAccProfile').innerText = data.profile || '-';
         document.getElementById('viewAccPin').innerText = data.pin || '-';
+        if(document.getElementById('viewAccMonths')) document.getElementById('viewAccMonths').innerText = data.months || '1';
         
         let deviceText = 'Sin configurar';
         if (data.deviceType) {
@@ -1016,7 +1018,8 @@ window.saveClientData = async () => {
             accountPassword: primaryData.password, 
             accountProfile: primaryData.profile, 
             accountPin: primaryData.pin, 
-            accountUnits: primaryData.units || 1, 
+            accountUnits: primaryData.units || 1,
+            accountMonths: primaryData.months || 1,
             linkedMasterId: finalLinkedMasterId, 
             accountDeviceName: primaryData.deviceName, 
             accountDeviceType: primaryData.deviceType,
@@ -1079,34 +1082,55 @@ window.saveClientData = async () => {
     }
 };
 
-window.deleteClient = async (id) => { if(confirm('¿Borrar registro?')) { await deleteDoc(doc(db, "clients", id)); loadUserClients(); } };
+window.deleteClient = async (id) => { 
+    Swal.fire({
+        title: '¿Borrar cliente?',
+        text: "Los datos de este cliente se perderán.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#FF3B30',
+        cancelButtonColor: 'var(--mac-gray)',
+        confirmButtonText: 'Sí, borrar',
+        cancelButtonText: '<span style="color:var(--mac-text-main)">Cancelar</span>',
+        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            await deleteDoc(doc(db, "clients", id)); 
+            loadUserClients(); 
+            window.showNotification("🗑️ Cliente borrado");
+        }
+    });
+};
 window.renewClient = async (id) => { 
-    // 1. Buscamos los datos actuales del cliente
     const c = clients.find(x => x.id === id);
     if (!c) return;
 
-    // 2. Calculamos la nueva fecha basándonos en su VENCIMIENTO ANTERIOR
-    // Separamos el string (YYYY-MM-DD) para evitar problemas de zona horaria
+    // Detectar cuántos meses tiene contratado este cliente (o por defecto 1)
+    let mesesARenovar = 1;
+    if (c.multiAccounts) {
+        const firstPlatform = Object.keys(c.multiAccounts)[0];
+        if (c.multiAccounts[firstPlatform].months) mesesARenovar = parseInt(c.multiAccounts[firstPlatform].months);
+    } else if (c.accountMonths) {
+        mesesARenovar = parseInt(c.accountMonths);
+    }
+
     let [year, month, day] = c.date.split('-');
     let fechaAntigua = new Date(year, month - 1, day);
     
-    // Le sumamos 1 mes exacto
+    // Le sumamos los meses correspondientes
     let fechaNueva = new Date(fechaAntigua);
-    fechaNueva.setMonth(fechaNueva.getMonth() + 1);
+    fechaNueva.setMonth(fechaNueva.getMonth() + mesesARenovar);
     
-    // Formato informático para guardar en Firebase (YYYY-MM-DD)
     const strFirebase = `${fechaNueva.getFullYear()}-${String(fechaNueva.getMonth()+1).padStart(2,'0')}-${String(fechaNueva.getDate()).padStart(2,'0')}`; 
-    
-    // Formato amigable para mostrar al usuario y para el WhatsApp (DD/MM/YYYY)
     const nuevaFechaBonita = fechaNueva.toLocaleDateString('es-ES'); 
     const antiguaFechaBonita = fechaAntigua.toLocaleDateString('es-ES');
 
-    // 3. Creamos la alerta "PRO" interactiva con SweetAlert2
     Swal.fire({
         title: '🔄 Renovar Servicio',
         html: `
             <p style="color: var(--mac-text-secondary); font-size: 14px; margin-bottom: 10px;">
-                Se sumará <b>1 mes</b> exacto a la fecha de vencimiento configurada.
+                Se sumará(n) <b>${mesesARenovar} mes(es)</b> a la fecha de vencimiento configurada.
             </p>
             <div style="background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 8px; padding: 12px; text-align: left; display: inline-block; width: 85%;">
                 <p style="margin: 0 0 8px 0; font-size: 13px; color: var(--mac-text-main);">
@@ -1121,44 +1145,23 @@ window.renewClient = async (id) => {
         showCancelButton: true,
         confirmButtonText: '<i class="bx bx-check"></i> Sí, Renovar',
         cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#34C759', // Verde Mac
-        cancelButtonColor: '#FF3B30',  // Rojo Mac
+        confirmButtonColor: '#34C759', 
+        cancelButtonColor: '#FF3B30',  
         background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
-        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
-        customClass: {
-            confirmButton: 'btn-primary',
-            cancelButton: 'btn-secondary'
-        }
+        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
     }).then(async (result) => {
-        // Solo si el usuario presiona "Sí, Renovar", ejecutamos la acción
         if (result.isConfirmed) {
             try {
-                // Actualizamos la base de datos en Firebase
                 await updateDoc(doc(db, "clients", id), { date: strFirebase }); 
-                window.showNotification("Servicio renovado con éxito ✅"); 
+                window.showNotification("Servicio renovado ✅"); 
                 loadUserClients(); 
 
-                // MAGIA AUTOMÁTICA: Llamamos al bot en DigitalOcean
                 const plan = currentUserData.plan_actual || 'demo';
                 if (plan === 'pro' || plan === 'elite') {
-                    const datosRenovacion = {
-                        distribuidorId: currentUser.uid,
-                        numeroCliente: c.phone,
-                        plataforma: c.platform,
-                        nuevaFecha: nuevaFechaBonita
-                    };
-                    
-                    fetch('https://bot.panelagc.com/api/confirmar-renovacion', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(datosRenovacion)
-                    })
-                    .then(res => console.log("Señal de renovación enviada al servidor bot."))
-                    .catch(err => console.error("Error de red al contactar al bot:", err));
+                    const datosRenovacion = { distribuidorId: currentUser.uid, numeroCliente: c.phone, plataforma: c.platform, nuevaFecha: nuevaFechaBonita };
+                    fetch('https://bot.panelagc.com/api/confirmar-renovacion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datosRenovacion) });
                 }
-            } catch (error) {
-                window.showNotification("Error al renovar: " + error.message);
-            }
+            } catch (error) { window.showNotification("Error: " + error.message); }
         }
     });
 };
@@ -2704,7 +2707,20 @@ window.aprobarVenta = async (pedidoId, numeroCliente) => {
     const precioTotal = parseFloat(document.getElementById(`precio_venta_${pedidoId}`).value) || 0;
     const precioDividido = precioTotal / cuentasIds.length;
 
-    if (!confirm(`¿Confirmas la entrega de ${cuentasIds.length} cuenta(s)? Se enviarán juntas al cliente por WhatsApp.`)) return;
+   const confirmacion = await Swal.fire({
+        title: '¿Confirmar Entrega?',
+        text: `Se enviarán ${cuentasIds.length} cuenta(s) al cliente por WhatsApp.`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '<i class="bx bx-send"></i> Sí, Aprobar y Enviar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#34C759',
+        cancelButtonColor: '#FF3B30',
+        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+    });
+
+    if (!confirmacion.isConfirmed) return;
 
     try {
         window.showNotification("⏳ Procesando entrega...");
@@ -2834,15 +2850,26 @@ window.editMasterAccount = (id, platform, email, pass, maxProfiles, cost, provid
 
 // 3. ELIMINAR CUENTA MATRIZ
 window.deleteMasterAccount = async (id) => {
-    if(confirm("¿Estás seguro de eliminar esta cuenta completa? Los clientes no se borrarán, pero perderán su enlace a esta matriz.")){
-        try {
-            await deleteDoc(doc(db, "masterAccounts", id));
-            window.showNotification("🗑️ Cuenta Matriz eliminada");
-            window.renderMasterAccounts();
-        } catch(e) {
-            window.showNotification("Error: " + e.message);
+    Swal.fire({
+        title: '¿Eliminar Cuenta Matriz?',
+        text: "Los clientes vinculados no se borrarán, pero perderán su enlace a esta cuenta.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#FF3B30',
+        confirmButtonText: 'Eliminar Matriz',
+        cancelButtonText: '<span style="color:var(--mac-text-main)">Cancelar</span>',
+        cancelButtonColor: 'var(--mac-gray)',
+        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                await deleteDoc(doc(db, "masterAccounts", id));
+                window.showNotification("🗑️ Cuenta Matriz eliminada");
+                window.renderMasterAccounts();
+            } catch(e) { window.showNotification("Error: " + e.message); }
         }
-    }
+    });
 };
 
 // 4. GUARDAR (CREAR O ACTUALIZAR)
