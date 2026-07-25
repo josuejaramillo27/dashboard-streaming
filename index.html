@@ -274,16 +274,22 @@
                 font-size: 16px !important;
             }
 
-            /* 4. SEPARACIÓN FINAL (Empuja el final de las listas hacia arriba) */
+            /* 4. PERMITIR SCROLL NATURAL (Las listas ahora se adaptan sin cruzarse) */
+            /* Apagamos el límite de altura forzado para que el padding inferior sí funcione */
+            .dashboard-section .modal-card { height: auto !important; min-height: 100vh !important; padding-bottom: 120px !important; }
+            .dashboard-section .modal-card > div[style*="overflow-y: auto"] { overflow: visible !important; max-height: none !important; }
+            
             #inventoryModal .modal-card > div:nth-child(2) > div { min-width: 100% !important; max-width: 100% !important; margin-bottom: 15px; }
             
-            /* Damos un margen interno gigante abajo (120px) para que el último elemento termine mucho antes del botón */
+            /* Liberamos las listas de su caja pequeña */
             #inventoryList, #pedidosList, #storeItemsList, #wrappedContentArea { 
                 overflow: visible !important; 
                 max-height: none !important; 
                 padding-right: 0 !important; 
-                padding-bottom: 120px !important; 
             }
+            
+            /* Separación específica para el botón Copiar Link en la Tiendita */
+            #btnCopyInternalLink { margin-bottom: 80px !important; width: 100% !important; }
             
             /* Ajustes estéticos de Inventario en celular */
             #inventoryList > div { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; width: 100% !important; }
