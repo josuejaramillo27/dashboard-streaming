@@ -2292,7 +2292,7 @@ window.renderPublicCatalog = (filterType) => {
         `;
         catalogBox.appendChild(card);
     });
-
+};
 // EL DETECTOR DEL CLIENTE PÚBLICO (MÓDULO DE TIENDITA OPTIMIZADO)
 const checkPublicStore = async () => {
     const urlParams = new URLSearchParams(window.location.search);
