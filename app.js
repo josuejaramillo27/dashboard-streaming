@@ -2458,44 +2458,40 @@ window.openInventoryModal = () => {
     document.body.style.overflow = 'hidden'; 
     window.renderInventory();
 };
+let editingInvId = null; // Variable global para saber si estamos editando
+
 window.addInventoryAccount = async () => {
     const platform = document.getElementById('invPlatform').value;
     const type = document.getElementById('invType').value;
     const email = document.getElementById('invEmail').value.trim();
     const pass = document.getElementById('invPass').value.trim();
-    const profile = document.getElementById('invProfile').value.trim(); // Le quitamos el 'N/A' por defecto
+    const profile = document.getElementById('invProfile').value.trim(); 
     const pin = document.getElementById('invPin').value.trim() || 'N/A';
 
-    if (!platform || !email || !pass) {
-        return window.showNotification("Plataforma, Correo y Contraseña son obligatorios.");
-    }
+    if (!platform || !email || !pass) return window.showNotification("Plataforma, Correo y Contraseña son obligatorios.");
+    if (type === 'Perfil' && (!profile || !/\d/.test(profile))) return window.showNotification("⚠️ En 'N° Perfil' debes incluir al menos un NÚMERO (Ej: 3, J3).");
 
-    // NUEVA VALIDACIÓN: Si es tipo "Perfil", DEBE tener un número
-    if (type === 'Perfil') {
-        if (!profile || !/\d/.test(profile)) {
-            return window.showNotification("⚠️ En 'N° Perfil' debes incluir al menos un NÚMERO (Ej: 3, J3, P4).");
-        }
-    }
-
-    const btn = document.querySelector('#inventoryModal .btn-primary');
-    btn.innerHTML = "⏳ Guardando..."; btn.disabled = true;
+    const btn = document.getElementById('btnSaveInv');
+    btn.innerHTML = "⏳ Procesando..."; btn.disabled = true;
 
     try {
         let stock = currentUserData.inventory || [];
-        const accountId = 'acc_' + Date.now();
         
-        // Guardamos el tipo (Completa o Perfil)
-        stock.push({ id: accountId, platform, type, email, pass, profile, pin, status: 'libre' });
+        if (editingInvId) {
+            // MODO EDICIÓN: Actualizamos los datos del objeto existente
+            stock = stock.map(item => item.id === editingInvId ? { ...item, platform, type, email, pass, profile, pin } : item);
+            window.showNotification("✅ Cuenta actualizada");
+        } else {
+            // MODO CREACIÓN
+            const accountId = 'acc_' + Date.now();
+            stock.push({ id: accountId, platform, type, email, pass, profile, pin, status: 'libre' });
+            window.showNotification("✅ Cuenta añadida al stock");
+        }
 
         await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
         currentUserData.inventory = stock;
 
-        document.getElementById('invEmail').value = '';
-        document.getElementById('invPass').value = '';
-        document.getElementById('invProfile').value = '';
-        document.getElementById('invPin').value = '';
-
-        window.showNotification("✅ Cuenta añadida al stock");
+        window.cancelInventoryEdit(); // Limpia el formulario
         window.renderInventory();
     } catch (e) {
         window.showNotification("Error: " + e.message);
@@ -2504,9 +2500,43 @@ window.addInventoryAccount = async () => {
     }
 };
 
+window.editInventoryAccount = (id) => {
+    const stock = currentUserData.inventory || [];
+    const item = stock.find(i => i.id === id);
+    if(!item) return;
+
+    document.getElementById('invPlatform').value = item.platform || '';
+    document.getElementById('invType').value = item.type || 'Perfil';
+    document.getElementById('invEmail').value = item.email || '';
+    document.getElementById('invPass').value = item.pass || '';
+    document.getElementById('invProfile').value = item.profile || '';
+    document.getElementById('invPin').value = item.pin || '';
+
+    editingInvId = id;
+    
+    // Cambiamos el aspecto visual del formulario
+    document.getElementById('btnSaveInv').innerHTML = "<i class='bx bx-check-double'></i> Actualizar Cuenta";
+    document.getElementById('btnSaveInv').style.backgroundColor = "var(--mac-orange)";
+    document.getElementById('btnCancelInv').style.display = "block";
+};
+
+window.cancelInventoryEdit = () => {
+    editingInvId = null;
+    document.getElementById('invPlatform').value = '';
+    document.getElementById('invType').value = 'Perfil';
+    document.getElementById('invEmail').value = '';
+    document.getElementById('invPass').value = '';
+    document.getElementById('invProfile').value = '';
+    document.getElementById('invPin').value = '';
+    
+    document.getElementById('btnSaveInv').innerHTML = "<i class='bx bx-save'></i> Guardar en stock";
+    document.getElementById('btnSaveInv').style.backgroundColor = "var(--mac-blue)";
+    document.getElementById('btnCancelInv').style.display = "none";
+};
+
 window.renderInventory = () => {
     const list = document.getElementById('inventoryList');
-    if (!list) return; // Por si el HTML aún no carga
+    if (!list) return; 
     list.innerHTML = '';
     const stock = currentUserData.inventory || [];
     const cuentasLibres = stock.filter(item => item.status === 'libre');
@@ -2519,25 +2549,24 @@ window.renderInventory = () => {
     cuentasLibres.forEach(item => {
         const div = document.createElement('div');
         div.style.cssText = "background:var(--mac-surface); padding:12px; border-radius:8px; border:1px solid var(--mac-border); display:flex; justify-content:space-between; align-items:center;";
-const tipoBadge = item.type === 'Completa' ? 
-            `<span style="background:var(--mac-orange); color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px; font-weight:bold;"><i class='bx bxs-star'></i> COMPLETA</span>` : 
-            `<span style="background:var(--mac-blue); color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px; font-weight:bold;"><i class='bx bxs-user'></i> PERFIL</span>`;
+        const tipoBadge = item.type === 'Completa' ? `<span style="background:var(--mac-orange); color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px; font-weight:bold;"><i class='bx bxs-star'></i> COMPLETA</span>` : `<span style="background:var(--mac-blue); color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px; font-weight:bold;"><i class='bx bxs-user'></i> PERFIL</span>`;
 
         div.innerHTML = `
             <div>
-                <strong style="color:var(--mac-text-main); font-size:15px;">${item.platform}</strong>
-                ${tipoBadge}
+                <strong style="color:var(--mac-text-main); font-size:15px;">${item.platform}</strong>${tipoBadge}
                 <div style="color:var(--mac-text-secondary); font-size:12px; margin-top:4px;">
                     <i class='bx bx-envelope'></i> ${item.email}<br>
                     <i class='bx bx-lock-alt'></i> ${item.pass} | <i class='bx bx-user-circle'></i>: ${item.profile} | <i class='bx bx-pin'></i>: ${item.pin}
                 </div>
             </div>
             <div style="display:flex; gap: 5px;">
-    <button class="action-btn" style="color:var(--mac-text-main); border:1px solid var(--mac-border);" onclick="window.copyFromInventory('${item.id}')" title="Copiar Datos"><i class='bx bx-copy'></i></button>
-    <button class="action-btn" style="color:var(--mac-green); border:1px solid var(--mac-green); background: rgba(52, 199, 89, 0.1);" onclick="window.deliverFromInventory('${item.id}')" title="Entregar a Cliente"><i class='bx bx-send'></i></button>
-    <button class="action-btn btn-del" onclick="window.deleteInventoryAccount('${item.id}')"><i class='bx bx-trash'></i></button>
-</div>
-        `;;
+                <button class="action-btn" style="color:var(--mac-text-main); border:1px solid var(--mac-border);" onclick="window.copyFromInventory('${item.id}')" title="Copiar Datos"><i class='bx bx-copy'></i></button>
+                <button class="action-btn" style="color:var(--mac-green); border:1px solid var(--mac-green); background: rgba(52, 199, 89, 0.1);" onclick="window.deliverFromInventory('${item.id}')" title="Entregar a Cliente"><i class='bx bx-send'></i></button>
+                <!-- EL NUEVO BOTÓN DE EDITAR -->
+                <button class="action-btn" style="color:var(--mac-orange); border:1px solid var(--mac-orange); background: rgba(255, 149, 0, 0.1);" onclick="window.editInventoryAccount('${item.id}')" title="Editar Cuenta"><i class='bx bx-edit-alt'></i></button>
+                <button class="action-btn btn-del" onclick="window.deleteInventoryAccount('${item.id}')"><i class='bx bx-trash'></i></button>
+            </div>
+        `;
         list.appendChild(div);
     });
 };
