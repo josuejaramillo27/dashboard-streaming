@@ -1352,7 +1352,7 @@ window.toggleStats = (forceUpdate = false) => {
     }
 };
 
-window.exportToExcel = () => { if (!clients.length) return window.showNotification("No hay datos"); let csv = `data:text/csv;charset=utf-8,Cliente,Plataformas,WhatsApp,Unidades,Costo Total(${globalCurrency}),Precio Total(${globalCurrency}),Vencimiento\n`; clients.forEach(c => { const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); const u = c.accountUnits||1; csv += `${c.name},"${c.platform}",${c.phone},${u},${(c.cost||0)*u},${(c.price||0)*u},${exp.toLocaleDateString('es-ES')}\n`; }); const link = document.createElement("a"); link.setAttribute("href", encodeURI(csv)); link.setAttribute("download", `Clientes_${new Date().toLocaleDateString('es-ES').replace(/\//g, '-')}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); }
+window.exportToExcel = () => { if (!clients.length) return window.showNotification("No hay datos"); let csv = `data:text/csv;charset=utf-8,Cliente,Plataformas,WhatsApp,Unidades,Costo Total(${globalCurrency}),Precio Total(${globalCurrency}),Vencimiento\n`; clients.forEach(c => { const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); const u = c.accountUnits||1; csv += `"${c.name}","${c.platform}",${c.phone},${u},${(c.cost||0)*u},${(c.price||0)*u},${exp.toLocaleDateString('es-ES')}\n`; }); const link = document.createElement("a"); link.setAttribute("href", encodeURI(csv)); link.setAttribute("download", `Clientes_${new Date().toLocaleDateString('es-ES').replace(/\//g, '-')}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); }
 window.copyExpiredList = () => { const t = new Date(); t.setHours(0,0,0,0); let exp = []; clients.forEach(c => { const x = new Date(c.date); x.setMinutes(x.getMinutes() + x.getTimezoneOffset()); x.setHours(0,0,0,0); if (x < t) exp.push(`- ${c.name} | ${c.platform} | ${c.phone}`); }); if (!exp.length) return window.showNotification("Sin vencidos"); navigator.clipboard.writeText("🚨 VENCEDORES:\n\n" + exp.join('\n')).then(() => window.showNotification("Lista copiada")); }
 
 
@@ -1424,8 +1424,7 @@ window.downloadTicket = async (clientId, event) => {
         const canvas = await html2canvas(ticketEl, { 
             backgroundColor: '#1c1c1e',
             scale: 2, 
-            useCORS: true, 
-            allowTaint: true
+            useCORS: true,
         });
         
         ticketEl.style.left = '-9999px'; 
