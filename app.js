@@ -2010,6 +2010,8 @@ window.addStoreItem = async () => {
     const plat = document.getElementById('storePlatform').value.trim();
     const price = document.getElementById('storePrice').value;
     const desc = document.getElementById('storeDesc') ? document.getElementById('storeDesc').value.trim() : '';
+    const autoStock = document.getElementById('storeAutoStock').checked;
+    const timer = document.getElementById('storeTimer').value;
     
     const fileInput = document.getElementById('storeImg');
     const file = fileInput ? fileInput.files[0] : null;
@@ -2036,6 +2038,8 @@ window.addStoreItem = async () => {
             desc: desc, 
             imgUrl: imgUrl,
             type: type, // Guarda si es Combo o Servicio
+            autoStock: autoStock, // NUEVO
+            timer: timer,
             status: 'disponible' // Por defecto siempre está disponible al crearlo
         });
         
@@ -2231,12 +2235,30 @@ window.renderPublicCatalog = (filterType) => {
 
     itemsFiltrados.forEach(item => {
         const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
-        const isAgotado = item.status === 'agotado';
+        let isAgotado = item.status === 'agotado';
         
-        let typeBadgeHtml = '';
-        if (item.type === 'Combo') {
-            typeBadgeHtml = `<div class="store-vibrant-badge badge-combo"><i class='bx bx-gift'></i> Combo</div>`;
-        } else if (item.desc && item.desc.toLowerCase().includes('oferta')) {
+        // MAGIA DE STOCK AUTOMÁTICO
+        let stockHtml = '';
+        if (item.autoStock && item.type !== 'Combo' && data.inventory) {
+            // Cuenta cuántos perfiles de esa plataforma hay "libres" en su inventario
+            const cantidadLibre = data.inventory.filter(i => i.status === 'libre' && i.platform.toLowerCase() === item.platform.toLowerCase()).length;
+            if (cantidadLibre === 0) isAgotado = true; // Auto-Agotado!
+            
+            const colorStock = cantidadLibre > 2 ? 'var(--mac-green)' : 'var(--mac-red)';
+            stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold;"><i class='bx bx-box'></i> Stock: <span style="color:${colorStock};">${cantidadLibre} disponibles</span></span>`;
+        }
+
+        // MAGIA DE LA OFERTA TEMPORAL
+        let typeBadgeHtml = item.type === 'Combo' ? `<div class="store-vibrant-badge badge-combo"><i class='bx bx-gift'></i> Combo</div>` : '';
+        if (item.timer) {
+            const endDate = new Date(item.timer + 'T23:59:59').getTime();
+            const now = new Date().getTime();
+            if (endDate > now) {
+                // Calcula días restantes
+                const diasRestantes = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+                typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta"><i class='bx bxs-time-five'></i> Oferta: ${diasRestantes} días</div>`;
+            }
+        } else if (item.desc && item.desc.toLowerCase().includes('oferta') && !typeBadgeHtml) {
             typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta"><i class='bx bxs-flame'></i> Oferta</div>`;
         }
 
@@ -2245,18 +2267,11 @@ window.renderPublicCatalog = (filterType) => {
         const waLink = `https://wa.me/${numLimpio}?text=${msg}`;
 
         const titleSafe = item.platform.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : 'Este producto no tiene detalles adicionales.';
+        const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : 'Sin detalles adicionales.';
 
-        const imgHTML = item.imgUrl 
-            ? `<img src="${item.imgUrl}" alt="${item.platform}">` 
-            : `<div style="width:100%; height:100%; background:linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%); display:flex; align-items:center; justify-content:center;"><i class='bx bx-play-circle' style='font-size:48px; color:var(--mac-text-secondary); opacity:0.3;'></i></div>`;
+        const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}" alt="${item.platform}">` : `<div style="width:100%; height:100%; background:var(--mac-gray); display:flex; align-items:center; justify-content:center;"><i class='bx bx-play-circle' style='font-size:48px; color:var(--mac-text-secondary); opacity:0.3;'></i></div>`;
 
-        let btnHTML = '';
-        if (isAgotado) {
-            btnHTML = `<span class="status expired" style="padding:10px 16px; border-radius:20px; font-weight:800; font-size:13px; text-transform:none; letter-spacing:0;">Agotado</span>`;
-        } else {
-            btnHTML = `<a href="${waLink}" target="_blank" class="btn-wa" style="text-decoration:none; padding:10px 18px; border-radius:20px; font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:4px; margin:0;"><i class='bx bxl-whatsapp' style='font-size:16px;'></i> Comprar</a>`;
-        }
+        let btnHTML = isAgotado ? `<span class="status expired" style="padding:10px 16px; border-radius:20px; font-weight:800; font-size:13px; text-transform:none; letter-spacing:0;">Agotado</span>` : `<a href="${waLink}" target="_blank" class="btn-wa" style="text-decoration:none; padding:10px 18px; border-radius:20px; font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:4px; margin:0;"><i class='bx bxl-whatsapp' style='font-size:16px;'></i> Comprar</a>`;
 
         const card = document.createElement('div');
         card.className = `store-product-card ${isAgotado ? 'is-agotado' : ''}`;
@@ -2264,24 +2279,19 @@ window.renderPublicCatalog = (filterType) => {
             ${typeBadgeHtml}
             <div class="store-product-visual" onclick="window.openProductDesc('${titleSafe}', '${descSafe}')">
                 ${imgHTML}
-                <div class="store-product-visual-overlay">
-                    <span class="view-desc-hint"><i class='bx bx-zoom-in'></i> Ver Detalles</span>
-                </div>
+                <div class="store-product-visual-overlay"><span class="view-desc-hint"><i class='bx bx-zoom-in'></i> Detalles</span></div>
             </div>
             <div class="store-product-glass-footer">
                 <div class="store-product-info">
                     <strong class="store-product-title">${item.platform}</strong>
                     <span class="store-product-price">${priceStr}</span>
-                    ${item.imgUrl && item.desc ? `<span style="font-size:9px; color:var(--mac-text-secondary); display:block; margin-top:2px;">👆 Presiona la foto para ver detalles</span>` : ''}
+                    ${stockHtml} <!-- AQUÍ SE INYECTA EL STOCK EN VIVO -->
                 </div>
-                <div class="store-product-action">
-                    ${btnHTML}
-                </div>
+                <div class="store-product-action">${btnHTML}</div>
             </div>
         `;
         catalogBox.appendChild(card);
     });
-};
 
 // EL DETECTOR DEL CLIENTE PÚBLICO (MÓDULO DE TIENDITA OPTIMIZADO)
 const checkPublicStore = async () => {
