@@ -713,6 +713,16 @@
                     <div id="internalCatalogSection">
                         <div style="background: var(--mac-bg); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
                             <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Añadir un producto o combo:</label>
+                            <!-- NUEVOS CAMPOS: Stock y Oferta -->
+                                <div style="display: flex; gap: 10px; align-items: center; background: rgba(0, 122, 255, 0.05); padding: 8px; border-radius: 8px; border: 1px dashed var(--mac-blue);">
+                                    <label style="font-size: 12px; font-weight: bold; color: var(--mac-blue); cursor: pointer; flex: 1;">
+                                        <input type="checkbox" id="storeAutoStock" checked style="width: auto; margin-right: 5px;"> Conectar al Stock de Inventario
+                                    </label>
+                                    <div style="flex: 1;">
+                                        <label style="font-size: 10px; color: var(--mac-text-secondary); display: block;">Oferta hasta (Opcional):</label>
+                                        <input type="date" id="storeTimer" style="padding: 6px; font-size: 11px;">
+                                    </div>
+                                </div>
                             <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
                                 <div style="display: flex; gap: 10px;">
                                     <select id="storeType" style="flex: 1; padding: 8px; border-radius: 6px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
