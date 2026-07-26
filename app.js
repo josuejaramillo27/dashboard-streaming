@@ -1691,38 +1691,48 @@ window.downloadWrapup = async (acc, platform, day, clientName, clientUnits, fras
     }
 };
 
-/* --- MODAL DE DETALLES DEL CLIENTE (EXCLUSIVO MÓVIL) --- */
 window.openMobileClientModal = (id) => {
     const c = clients.find(x => x.id === id);
     if (!c) return;
+
+    // 1. Llenar textos principales
+    const mcName = document.getElementById('mcName');
+    if (mcName) mcName.innerText = c.name;
     
-    // 1. Llenar textos
-    document.getElementById('mcName').innerText = c.name;
-    document.getElementById('mcPhone').innerText = c.phone;
-    
+    const mcPhone = document.getElementById('mcPhone');
+    if (mcPhone) mcPhone.innerText = c.phone;
+
     const uCount = c.accountUnits || 1; 
     const total = (c.price || 0) * uCount;
-    document.getElementById('mcPrice').innerText = `${globalCurrency}${total.toFixed(2)}`;
-    
+    const mcPrice = document.getElementById('mcPrice');
+    if (mcPrice) mcPrice.innerText = `${globalCurrency}${total.toFixed(2)}`;
+
     const exp = new Date(c.date);
     exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
     exp.setHours(0,0,0,0);
-    document.getElementById('mcDate').innerText = exp.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-    // Inyección de Novedades (CRM)
+    
+    const mcDate = document.getElementById('mcDate');
+    if (mcDate) mcDate.innerText = exp.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    
+    // 🛡️ CORRECCIÓN 1: Validar que el HTML de Novedades exista antes de modificarlo
     const badgesContainer = document.getElementById('mcBadges');
-    badgesContainer.innerHTML = '';
-    
-    if (c.tag) badgesContainer.innerHTML += `<span style="background: ${c.tagColor}15; color: ${c.tagColor}; font-size: 11px; padding: 4px 8px; border-radius: 6px; border: 1px solid ${c.tagColor}50; font-weight:bold;">${c.tag}</span>`;
-    
-    if (c.renovations > 0) badgesContainer.innerHTML += `<span style="font-size: 11px; color: #5c4000; background: linear-gradient(110deg, #FFD700 0%, #FFF8DC 50%, #FFD700 100%); padding: 4px 8px; border-radius: 6px; font-weight: bold; border: 1px solid #FFD700;"><i class='bx bxs-star'></i> Cliente Fiel (${c.renovations})</span>`;
+    if (badgesContainer) {
+        badgesContainer.innerHTML = '';
+        if (c.tag) badgesContainer.innerHTML += `<span style="background: ${c.tagColor}15; color: ${c.tagColor}; font-size: 11px; padding: 4px 8px; border-radius: 6px; border: 1px solid ${c.tagColor}50; font-weight:bold;">${c.tag}</span>`;
+        if (c.renovations > 0) badgesContainer.innerHTML += `<span style="font-size: 11px; color: #5c4000; background: linear-gradient(110deg, #FFD700 0%, #FFF8DC 50%, #FFD700 100%); padding: 4px 8px; border-radius: 6px; font-weight: bold; border: 1px solid #FFD700;"><i class='bx bxs-star'></i> Cliente Fiel (${c.renovations})</span>`;
+    }
 
     const notesContainer = document.getElementById('mcNotesContainer');
-    if (c.notes) {
-        document.getElementById('mcNotes').innerText = c.notes;
-        notesContainer.style.display = 'block';
-    } else {
-        notesContainer.style.display = 'none';
+    if (notesContainer) {
+        if (c.notes) {
+            const mcNotes = document.getElementById('mcNotes');
+            if (mcNotes) mcNotes.innerText = c.notes;
+            notesContainer.style.display = 'block';
+        } else {
+            notesContainer.style.display = 'none';
+        }
     }
+    
     // 2. Calcular estado
     const today = new Date(); today.setHours(0,0,0,0);
     const diffDays = Math.ceil((exp - today) / 86400000);
@@ -1730,22 +1740,37 @@ window.openMobileClientModal = (id) => {
     const stText = diffDays > 0 ? `Faltan ${diffDays} d` : (diffDays === 0 ? 'Hoy' : 'Vencido');
     
     const statusBadge = document.getElementById('mcStatus');
-    statusBadge.className = `status ${statusCat}`;
-    statusBadge.innerText = stText;
+    if (statusBadge) {
+        statusBadge.className = `status ${statusCat}`;
+        statusBadge.innerText = stText;
+    }
+    
+    // 🛡️ CORRECCIÓN 2: Limpiar nombres con comillas (Ej: McDonald's) para que no rompan el botón HTML
+    const safeName = c.name ? c.name.replace(/'/g, "\\'") : '';
+    const safePlatform = c.platform ? c.platform.replace(/'/g, "\\'") : '';
     
     // 3. Inyectar Botones Grandes
     const renewBtn = statusCat !== 'active' ? `<button class="action-btn btn-renew" style="padding:12px; font-size:14px;" onclick="window.closeModals(); window.renewClient('${c.id}')"><i class='bx bx-refresh'></i> Renovar</button>` : '';
     
-    document.getElementById('mcActions').innerHTML = `
-        <button class="action-btn btn-wa" style="padding:12px; font-size:14px;" onclick="window.sendWA('${c.phone}', '${c.name}', '${c.platform}', '${exp.toLocaleDateString('es-ES')}')"><i class='bx bxl-whatsapp'></i> WhatsApp</button>
-        <button class="action-btn" style="padding:12px; font-size:14px; background: rgba(175, 82, 222, 0.15); color: #AF52DE; font-weight: bold;" onclick="window.downloadTicket('${c.id}', event)"><i class='bx bx-receipt'></i> Recibo</button>
-        <button class="action-btn" style="padding:12px; font-size:14px; background: rgba(0, 122, 255, 0.15); color: #007AFF; font-weight: bold;" onclick="window.closeModals(); window.openLinkModal('${c.id}', '${c.platform}')"><i class='bx bx-link'></i> Vincular</button>
-        <button class="action-btn" style="padding:12px; font-size:14px; color: var(--mac-text-main);" onclick="window.closeModals(); window.startEdit('${c.id}')"><i class='bx bx-edit-alt'></i> Editar</button>
-        <button class="action-btn btn-del" style="padding:12px; font-size:14px;" onclick="window.closeModals(); window.deleteClient('${c.id}')"><i class='bx bx-trash'></i> Borrar</button>
-        ${renewBtn}
-    `;
+    const mcActions = document.getElementById('mcActions');
+    if (mcActions) {
+        mcActions.innerHTML = `
+            <button class="action-btn btn-wa" style="padding:12px; font-size:14px;" onclick="window.sendWA('${c.phone}', '${safeName}', '${safePlatform}', '${exp.toLocaleDateString('es-ES')}')"><i class='bx bxl-whatsapp'></i> WhatsApp</button>
+            <button class="action-btn" style="padding:12px; font-size:14px; background: rgba(175, 82, 222, 0.15); color: #AF52DE; font-weight: bold;" onclick="window.downloadTicket('${c.id}', event)"><i class='bx bx-receipt'></i> Recibo</button>
+            <button class="action-btn" style="padding:12px; font-size:14px; background: rgba(0, 122, 255, 0.15); color: #007AFF; font-weight: bold;" onclick="window.closeModals(); window.openLinkModal('${c.id}', '${safePlatform}')"><i class='bx bx-link'></i> Vincular</button>
+            <button class="action-btn" style="padding:12px; font-size:14px; color: var(--mac-text-main);" onclick="window.closeModals(); window.startEdit('${c.id}')"><i class='bx bx-edit-alt'></i> Editar</button>
+            <button class="action-btn btn-del" style="padding:12px; font-size:14px;" onclick="window.closeModals(); window.deleteClient('${c.id}')"><i class='bx bx-trash'></i> Borrar</button>
+            ${renewBtn}
+        `;
+    }
     
-    document.getElementById('mobileClientModal').style.display = 'flex';
+    // 4. Mostrar el modal
+    const mobileModal = document.getElementById('mobileClientModal');
+    if (mobileModal) {
+        mobileModal.style.display = 'flex';
+    } else {
+        console.warn("No se encontró el contenedor con ID 'mobileClientModal' en el HTML.");
+    }
 };
 
 /* --- SISTEMA DE NOTIFICACIONES PUSH (FCM) --- */
