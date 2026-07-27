@@ -2028,14 +2028,57 @@ window.removeExternalStore = async () => {
     }
 };
 
+window.toggleStoreStockFields = () => {
+    const isChecked = document.getElementById('storeAutoStock').checked;
+    const configDiv = document.getElementById('storeStockConfig');
+    const select = document.getElementById('storeStockPlatform');
+    
+    if (isChecked) {
+        configDiv.style.display = 'flex';
+        const stock = currentUserData.inventory || [];
+        
+        // Obtenemos qué plataformas realmente tienen stock libre ahora mismo
+        const platformsEnStock = [...new Set(stock.filter(i => i.status === 'libre').map(i => i.platform))];
+        
+        select.innerHTML = '<option value="">Selecciona plataforma...</option>';
+        platformsEnStock.forEach(p => {
+            select.innerHTML += `<option value="${p}">${p}</option>`;
+        });
+        window.updateStoreStockCount();
+    } else {
+        configDiv.style.display = 'none';
+        select.value = '';
+        window.updateStoreStockCount();
+    }
+};
+
+window.updateStoreStockCount = () => {
+    const platform = document.getElementById('storeStockPlatform').value;
+    const countText = document.getElementById('storeStockCountText');
+    if (!platform) {
+        countText.innerText = '0 disp.';
+        countText.style.color = 'var(--mac-text-secondary)';
+        return;
+    }
+    const stock = currentUserData.inventory || [];
+    const count = stock.filter(i => i.status === 'libre' && i.platform === platform).length;
+    
+    countText.innerText = `${count} disp.`;
+    countText.style.color = count > 0 ? 'var(--mac-green)' : 'var(--mac-red)';
+};
+
 // 2. GESTIÓN DEL CATÁLOGO INTERNO (Con Combos y Estado Agotado)
 window.addStoreItem = async () => {
     const type = document.getElementById('storeType') ? document.getElementById('storeType').value : 'Servicio';
-    const plat = document.getElementById('storePlatform').value.trim();
-    const price = document.getElementById('storePrice').value;
-    const desc = document.getElementById('storeDesc') ? document.getElementById('storeDesc').value.trim() : '';
-    const autoStock = document.getElementById('storeAutoStock').checked;
-    const timer = document.getElementById('storeTimer').value;
+const plat = document.getElementById('storePlatform').value.trim();
+const price = document.getElementById('storePrice').value;
+const desc = document.getElementById('storeDesc') ? document.getElementById('storeDesc').value.trim() : '';
+
+const autoStock = document.getElementById('storeAutoStock').checked;
+const stockPlatform = autoStock ? document.getElementById('storeStockPlatform').value : null;
+const badgeOption = document.getElementById('storeBadgeOption').value;
+
+if (autoStock && !stockPlatform) return window.showNotification("⚠️ Debes seleccionar qué plataforma del inventario vas a vincular.");
     
     const fileInput = document.getElementById('storeImg');
     const file = fileInput ? fileInput.files[0] : null;
@@ -2063,7 +2106,8 @@ window.addStoreItem = async () => {
             imgUrl: imgUrl,
             type: type, // Guarda si es Combo o Servicio
             autoStock: autoStock, // NUEVO
-            timer: timer,
+            stockPlatform: stockPlatform, // NUEVO
+            badgeOption: badgeOption,
             status: 'disponible' // Por defecto siempre está disponible al crearlo
         });
         
@@ -2072,6 +2116,9 @@ window.addStoreItem = async () => {
         
         document.getElementById('storePlatform').value = '';
         document.getElementById('storePrice').value = '';
+        document.getElementById('storeAutoStock').checked = false;
+        document.getElementById('storeBadgeOption').value = '';
+        window.toggleStoreStockFields();
         if (document.getElementById('storeDesc')) document.getElementById('storeDesc').value = '';
         if (fileInput) fileInput.value = ''; 
         
@@ -2261,30 +2308,31 @@ window.renderPublicCatalog = (filterType) => {
         const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
         let isAgotado = item.status === 'agotado';
         
-        // MAGIA DE STOCK AUTOMÁTICO
-        let stockHtml = '';
-        if (item.autoStock && item.type !== 'Combo' && data.inventory) {
-            // Cuenta cuántos perfiles de esa plataforma hay "libres" en su inventario
-            const cantidadLibre = data.inventory.filter(i => i.status === 'libre' && i.platform.toLowerCase() === item.platform.toLowerCase()).length;
-            if (cantidadLibre === 0) isAgotado = true; // Auto-Agotado!
-            
-            const colorStock = cantidadLibre > 2 ? 'var(--mac-green)' : 'var(--mac-red)';
-            stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold;"><i class='bx bx-box'></i> Stock: <span style="color:${colorStock};">${cantidadLibre} disponibles</span></span>`;
-        }
+        // 1. MAGIA DE STOCK AUTOMÁTICO VINCULADO EXACTO
+let stockHtml = '';
+if (item.autoStock && item.stockPlatform && item.type !== 'Combo' && data.inventory) {
+    // Cuenta cuántos perfiles de la plataforma ELEGIDA hay libres
+    const cantidadLibre = data.inventory.filter(i => i.status === 'libre' && i.platform === item.stockPlatform).length;
+    if (cantidadLibre === 0) isAgotado = true; // Auto-Agotado!
+    
+    const colorStock = cantidadLibre > 2 ? 'var(--mac-green)' : (cantidadLibre > 0 ? 'var(--mac-orange)' : 'var(--mac-red)');
+    stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold;"><i class='bx bx-box'></i> Stock en vivo: <span style="color:${colorStock};">${cantidadLibre} disponibles</span></span>`;
+}
 
-        // MAGIA DE LA OFERTA TEMPORAL
-        let typeBadgeHtml = item.type === 'Combo' ? `<div class="store-vibrant-badge badge-combo"><i class='bx bx-gift'></i> Combo</div>` : '';
-        if (item.timer) {
-            const endDate = new Date(item.timer + 'T23:59:59').getTime();
-            const now = new Date().getTime();
-            if (endDate > now) {
-                // Calcula días restantes
-                const diasRestantes = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
-                typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta"><i class='bx bxs-time-five'></i> Oferta: ${diasRestantes} días</div>`;
-            }
-        } else if (item.desc && item.desc.toLowerCase().includes('oferta') && !typeBadgeHtml) {
-            typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta"><i class='bx bxs-flame'></i> Oferta</div>`;
-        }
+// 2. MAGIA DE LAS ETIQUETAS EMOJI
+let typeBadgeHtml = item.type === 'Combo' ? `<div class="store-vibrant-badge badge-combo"><i class='bx bx-gift'></i> Combo</div>` : '';
+
+if (item.badgeOption) {
+    if (item.badgeOption === 'oferta') {
+        typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta"><i class='bx bxs-flame'></i> Oferta Especial</div>`;
+    } else if (item.badgeOption === 'poco_stock') {
+        typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #FF9500 0%, #FF5E00 100%);"><i class='bx bx-error-alt'></i> Poco Stock</div>`;
+    } else if (item.badgeOption === 'tiempo_limitado') {
+        typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #AF52DE 0%, #5856D6 100%);"><i class='bx bxs-time-five'></i> Tiempo Limitado</div>`;
+    } else if (item.badgeOption === 'nuevo') {
+        typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #34C759 0%, #28CD41 100%);"><i class='bx bxs-star'></i> Nuevo Ingreso</div>`;
+    }
+}
 
         const numLimpio = data.phone.replace(/[^\d+]/g, '');
         const msg = encodeURIComponent(`/comprar ${item.platform.toLowerCase()}`);
