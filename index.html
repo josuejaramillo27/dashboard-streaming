@@ -713,15 +713,36 @@
                         <div style="background: var(--mac-bg); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
                             <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Añadir un producto o combo:</label>
                             <!-- NUEVOS CAMPOS: Stock y Oferta -->
-                                <div style="display: flex; gap: 10px; align-items: center; background: rgba(0, 122, 255, 0.05); padding: 8px; border-radius: 8px; border: 1px dashed var(--mac-blue);">
-                                    <label style="font-size: 12px; font-weight: bold; color: var(--mac-blue); cursor: pointer; flex: 1;">
-                                        <input type="checkbox" id="storeAutoStock" checked style="width: auto; margin-right: 5px;"> Conectar al Stock de Inventario
-                                    </label>
-                                    <div style="flex: 1;">
-                                        <label style="font-size: 10px; color: var(--mac-text-secondary); display: block;">Oferta hasta (Opcional):</label>
-                                        <input type="date" id="storeTimer" style="padding: 6px; font-size: 11px;">
-                                    </div>
-                                </div>
+                                <div style="background: rgba(0, 122, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed var(--mac-blue); display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <label style="font-size: 12px; font-weight: bold; color: var(--mac-blue); cursor: pointer; flex: 1; min-width: 200px;">
+            <input type="checkbox" id="storeAutoStock" onchange="window.toggleStoreStockFields()" style="width: auto; margin-right: 5px;"> Conectar al Stock de Inventario
+        </label>
+        <div style="flex: 1; min-width: 150px;">
+            <label style="font-size: 10px; color: var(--mac-text-secondary); display: block;">Etiqueta de Tienda (Opcional):</label>
+            <select id="storeBadgeOption" style="padding: 6px; font-size: 11px; width: 100%; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border);">
+                <option value="">Ninguna</option>
+                <option value="oferta">🔥 Oferta Especial</option>
+                <option value="poco_stock">⚠️ Poco Stock</option>
+                <option value="tiempo_limitado">⏳ Por Tiempo Limitado</option>
+                <option value="nuevo">✨ Nuevo Ingreso</option>
+            </select>
+        </div>
+    </div>
+    
+    <div id="storeStockConfig" style="display: none; flex-direction: column; gap: 8px; border-top: 1px dashed rgba(0, 122, 255, 0.3); padding-top: 10px;">
+        <label style="font-size: 11px; color: var(--mac-text-secondary);">¿Qué plataforma del inventario vas a vender aquí?</label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <select id="storeStockPlatform" style="flex: 2; padding: 8px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); font-size: 12px;" onchange="window.updateStoreStockCount()">
+                <option value="">Selecciona plataforma...</option>
+            </select>
+            <div style="flex: 1; text-align: center; background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 6px; padding: 8px;">
+                <span id="storeStockCountText" style="font-size: 12px; font-weight: bold; color: var(--mac-blue);">0 disp.</span>
+            </div>
+        </div>
+        <p style="font-size: 10px; color: var(--mac-text-secondary); margin: 0;">* En tu tiendita se mostrará la cantidad en tiempo real.</p>
+    </div>
+</div>
                             <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
                                 <div style="display: flex; gap: 10px;">
                                     <select id="storeType" style="flex: 1; padding: 8px; border-radius: 6px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
