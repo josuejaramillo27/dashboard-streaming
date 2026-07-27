@@ -2027,70 +2027,126 @@ window.removeExternalStore = async () => {
         window.showNotification("Error: " + e.message); 
     }
 };
-
+window.handleStoreTypeChange = () => {
+    const isAutoStock = document.getElementById('storeAutoStock').checked;
+    if (isAutoStock) {
+        window.toggleStoreStockFields();
+    }
+};
 window.toggleStoreStockFields = () => {
     const isChecked = document.getElementById('storeAutoStock').checked;
     const configDiv = document.getElementById('storeStockConfig');
-    const select = document.getElementById('storeStockPlatform');
+    const type = document.getElementById('storeType') ? document.getElementById('storeType').value : 'Servicio';
+    const addComboBtn = document.getElementById('btnAddComboPlatformBtn');
+    const label = document.getElementById('storeStockLabel');
     
     if (isChecked) {
         configDiv.style.display = 'flex';
-        const stock = currentUserData.inventory || [];
-        
-        // Obtenemos qué plataformas realmente tienen stock libre ahora mismo
-        const platformsEnStock = [...new Set(stock.filter(i => i.status === 'libre').map(i => i.platform))];
-        
-        select.innerHTML = '<option value="">Selecciona plataforma...</option>';
-        platformsEnStock.forEach(p => {
-            select.innerHTML += `<option value="${p}">${p}</option>`;
-        });
-        window.updateStoreStockCount();
+        const listContainer = document.getElementById('storeStockPlatformsList');
+        listContainer.innerHTML = ''; // Limpiar selectores previos
+
+        if (type === 'Combo') {
+            label.innerText = 'Selecciona las plataformas del inventario que integran este Combo:';
+            if (addComboBtn) addComboBtn.style.display = 'inline-flex';
+            // Para combo, creamos al menos 2 filas de selección por defecto
+            window.addStoreStockSelectRow();
+            window.addStoreStockSelectRow();
+        } else {
+            label.innerText = 'Selecciona la plataforma del inventario vinculada a este servicio:';
+            if (addComboBtn) addComboBtn.style.display = 'none';
+            // Para servicio único, 1 sola fila
+            window.addStoreStockSelectRow();
+        }
     } else {
         configDiv.style.display = 'none';
-        select.value = '';
+        document.getElementById('storeStockPlatformsList').innerHTML = '';
         window.updateStoreStockCount();
     }
 };
 
+// 3. Agrega una fila de selector de plataforma al contenedor de stock
+window.addStoreStockSelectRow = () => {
+    const listContainer = document.getElementById('storeStockPlatformsList');
+    const stock = currentUserData.inventory || [];
+    const platformsEnStock = [...new Set(stock.filter(i => i.status === 'libre').map(i => i.platform))];
+
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'store-stock-row';
+    rowDiv.style.cssText = 'display: flex; gap: 8px; align-items: center;';
+
+    let selectHTML = `<select class="store-stock-select" onchange="window.updateStoreStockCount()" style="flex: 1; padding: 6px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); font-size: 12px;">`;
+    selectHTML += `<option value="">Selecciona plataforma...</option>`;
+    platformsEnStock.forEach(p => {
+        const countLibres = stock.filter(i => i.status === 'libre' && i.platform === p).length;
+        selectHTML += `<option value="${p}">${p} (${countLibres} en stock)</option>`;
+    });
+    selectHTML += `</select>`;
+
+    // Botón para borrar fila si hay más de 1 selector
+    const removeBtnHTML = listContainer.children.length > 0 ? 
+        `<button type="button" class="action-btn btn-del" style="padding: 4px 8px; font-size: 11px;" onclick="this.parentElement.remove(); window.updateStoreStockCount();"><i class='bx bx-trash'></i></button>` : '';
+
+    rowDiv.innerHTML = selectHTML + removeBtnHTML;
+    listContainer.appendChild(rowDiv);
+    window.updateStoreStockCount();
+};
+
 window.updateStoreStockCount = () => {
-    const platform = document.getElementById('storeStockPlatform').value;
     const countText = document.getElementById('storeStockCountText');
-    if (!platform) {
+    const selects = document.querySelectorAll('.store-stock-select');
+    const selectedPlatforms = Array.from(selects).map(s => s.value).filter(val => val !== '');
+    
+    if (selectedPlatforms.length === 0) {
         countText.innerText = '0 disp.';
         countText.style.color = 'var(--mac-text-secondary)';
         return;
     }
+
     const stock = currentUserData.inventory || [];
-    const count = stock.filter(i => i.status === 'libre' && i.platform === platform).length;
-    
-    countText.innerText = `${count} disp.`;
-    countText.style.color = count > 0 ? 'var(--mac-green)' : 'var(--mac-red)';
+    const type = document.getElementById('storeType') ? document.getElementById('storeType').value : 'Servicio';
+
+    if (type === 'Combo') {
+        // En un combo, el stock es el MÍNIMO de todas las plataformas seleccionadas
+        const counts = selectedPlatforms.map(plat => stock.filter(i => i.status === 'libre' && i.platform === plat).length);
+        const minStock = Math.min(...counts);
+        
+        countText.innerText = `${minStock} Combos disp.`;
+        countText.style.color = minStock > 0 ? 'var(--mac-green)' : 'var(--mac-red)';
+    } else {
+        // Servicio único: stock de la primera plataforma
+        const count = stock.filter(i => i.status === 'libre' && i.platform === selectedPlatforms[0]).length;
+        countText.innerText = `${count} disp.`;
+        countText.style.color = count > 0 ? 'var(--mac-green)' : 'var(--mac-red)';
+    }
 };
 
 // 2. GESTIÓN DEL CATÁLOGO INTERNO (Con Combos y Estado Agotado)
 window.addStoreItem = async () => {
     const type = document.getElementById('storeType') ? document.getElementById('storeType').value : 'Servicio';
-const plat = document.getElementById('storePlatform').value.trim();
-const price = document.getElementById('storePrice').value;
-const desc = document.getElementById('storeDesc') ? document.getElementById('storeDesc').value.trim() : '';
+    const plat = document.getElementById('storePlatform').value.trim();
+    const price = document.getElementById('storePrice').value;
+    const desc = document.getElementById('storeDesc') ? document.getElementById('storeDesc').value.trim() : '';
 
-const autoStock = document.getElementById('storeAutoStock').checked;
-const stockPlatform = autoStock ? document.getElementById('storeStockPlatform').value : null;
-const badgeOption = document.getElementById('storeBadgeOption').value;
+    const autoStock = document.getElementById('storeAutoStock').checked;
+    const badgeOption = document.getElementById('storeBadgeOption').value;
 
-if (autoStock && !stockPlatform) return window.showNotification("⚠️ Debes seleccionar qué plataforma del inventario vas a vincular.");
-    
-    const fileInput = document.getElementById('storeImg');
-    const file = fileInput ? fileInput.files[0] : null;
+    // Obtenemos todas las plataformas seleccionadas en el formulario
+    const selects = document.querySelectorAll('.store-stock-select');
+    const stockPlatforms = Array.from(selects).map(s => s.value).filter(val => val !== '');
 
     if (!plat || !price) return window.showNotification("Completa plataforma y precio");
+    if (autoStock && stockPlatforms.length === 0) {
+        return window.showNotification("⚠️ Debes seleccionar al menos una plataforma del inventario para conectar el stock.");
+    }
 
     const btn = document.querySelector('#storeModal .btn-primary');
     btn.innerText = "⏳ Subiendo..."; btn.disabled = true;
 
     try {
+        const fileInput = document.getElementById('storeImg');
+        const file = fileInput ? fileInput.files[0] : null;
         let imgUrl = "";
-        
+
         if (file) {
             const storageRef = ref(storage, `store_images/${currentUser.uid}_${Date.now()}_${file.name}`);
             const snapshot = await uploadBytes(storageRef, file);
@@ -2104,24 +2160,25 @@ if (autoStock && !stockPlatform) return window.showNotification("⚠️ Debes se
             price: parseFloat(price), 
             desc: desc, 
             imgUrl: imgUrl,
-            type: type, // Guarda si es Combo o Servicio
-            autoStock: autoStock, // NUEVO
-            stockPlatform: stockPlatform, // NUEVO
+            type: type, 
+            autoStock: autoStock, 
+            stockPlatforms: stockPlatforms, // Lista de plataformas vinculadas (Array)
             badgeOption: badgeOption,
-            status: 'disponible' // Por defecto siempre está disponible al crearlo
+            status: 'disponible' 
         });
-        
+
         await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
         currentUserData.storeCatalog = catalog;
-        
+
+        // Limpieza del formulario
         document.getElementById('storePlatform').value = '';
         document.getElementById('storePrice').value = '';
+        if (document.getElementById('storeDesc')) document.getElementById('storeDesc').value = '';
+        if (fileInput) fileInput.value = '';
         document.getElementById('storeAutoStock').checked = false;
         document.getElementById('storeBadgeOption').value = '';
         window.toggleStoreStockFields();
-        if (document.getElementById('storeDesc')) document.getElementById('storeDesc').value = '';
-        if (fileInput) fileInput.value = ''; 
-        
+
         window.renderStoreItems();
         window.showNotification("✅ Producto añadido al catálogo");
     } catch(e) { 
@@ -2308,18 +2365,31 @@ window.renderPublicCatalog = (filterType) => {
         const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
         let isAgotado = item.status === 'agotado';
         
-        // 1. MAGIA DE STOCK AUTOMÁTICO VINCULADO EXACTO
+        // 1. CÁLCULO DE STOCK EN VIVO (SERVICIO ÚNICO O COMBOS MULTI-PLATAFORMA)
 let stockHtml = '';
-if (item.autoStock && item.stockPlatform && item.type !== 'Combo' && data.inventory) {
-    // Cuenta cuántos perfiles de la plataforma ELEGIDA hay libres
-    const cantidadLibre = data.inventory.filter(i => i.status === 'libre' && i.platform === item.stockPlatform).length;
-    if (cantidadLibre === 0) isAgotado = true; // Auto-Agotado!
-    
-    const colorStock = cantidadLibre > 2 ? 'var(--mac-green)' : (cantidadLibre > 0 ? 'var(--mac-orange)' : 'var(--mac-red)');
-    stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold;"><i class='bx bx-box'></i> Stock en vivo: <span style="color:${colorStock};">${cantidadLibre} disponibles</span></span>`;
+if (item.autoStock && item.stockPlatforms && item.stockPlatforms.length > 0 && data.inventory) {
+    const stock = data.inventory || [];
+
+    if (item.type === 'Combo') {
+        // Calcula cuántas unidades de cada plataforma hay en stock libre
+        const counts = item.stockPlatforms.map(p => stock.filter(i => i.status === 'libre' && i.platform === p).length);
+        const comboDisponible = Math.min(...counts); // El combo depende de la menor disponibilidad
+
+        if (comboDisponible === 0) isAgotado = true; // Auto-Agotado
+
+        const colorStock = comboDisponible > 2 ? 'var(--mac-green)' : (comboDisponible > 0 ? 'var(--mac-orange)' : 'var(--mac-red)');
+        stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold;"><i class='bx bx-box'></i> Stock Combo: <span style="color:${colorStock};">${comboDisponible} disp.</span></span>`;
+    } else {
+        // Servicio Único
+        const cantidadLibre = stock.filter(i => i.status === 'libre' && i.platform === item.stockPlatforms[0]).length;
+        if (cantidadLibre === 0) isAgotado = true;
+
+        const colorStock = cantidadLibre > 2 ? 'var(--mac-green)' : (cantidadLibre > 0 ? 'var(--mac-orange)' : 'var(--mac-red)');
+        stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold;"><i class='bx bx-box'></i> Stock en vivo: <span style="color:${colorStock};">${cantidadLibre} disp.</span></span>`;
+    }
 }
 
-// 2. MAGIA DE LAS ETIQUETAS EMOJI
+// 2. ETIQUETAS Y EMOJIS DE TIENDA
 let typeBadgeHtml = item.type === 'Combo' ? `<div class="store-vibrant-badge badge-combo"><i class='bx bx-gift'></i> Combo</div>` : '';
 
 if (item.badgeOption) {
@@ -2333,7 +2403,6 @@ if (item.badgeOption) {
         typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #34C759 0%, #28CD41 100%);"><i class='bx bxs-star'></i> Nuevo Ingreso</div>`;
     }
 }
-
         const numLimpio = data.phone.replace(/[^\d+]/g, '');
         const msg = encodeURIComponent(`/comprar ${item.platform.toLowerCase()}`);
         const waLink = `https://wa.me/${numLimpio}?text=${msg}`;
