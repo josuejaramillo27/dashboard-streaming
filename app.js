@@ -1357,89 +1357,56 @@ window.copyExpiredList = () => { const t = new Date(); t.setHours(0,0,0,0); let 
 
 
 /* --- GENERADOR DE RECIBOS EN IMAGEN (VERSIÓN DEFINITIVA ANTI-CACHÉ CONTAMINADA) --- */
-window.downloadTicket = async (clientId, event) => {
-    const btn = event.currentTarget; 
+window.downloadTicket = async () => {
+    const ticketEl = document.getElementById('ticketView');
+    const btn = document.querySelector('.ticket-actions button');
+    if (!ticketEl) return;
+
     const originalText = btn.innerHTML;
-    btn.innerHTML = "⏳ Gen...";
+    btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Procesando...";
     btn.disabled = true;
 
     try {
-        const c = clients.find(x => x.id === clientId);
-        if(!c) return window.showNotification("Cliente no encontrado");
-
-        // 1. Llenar los datos de texto del ticket
-        document.getElementById('ticketBrand').innerText = currentUserData.name || 'Mi Panel';
-        document.getElementById('ticketClient').innerText = c.name;
-        document.getElementById('ticketPlatform').innerText = c.platform;
-        
-        const exp = new Date(c.date); 
-        exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); 
-        document.getElementById('ticketDate').innerText = exp.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
-        
-        const total = (c.price || 0) * (c.accountUnits || 1);
-        document.getElementById('ticketPrice').innerText = `${globalCurrency}${total.toFixed(2)}`;
-
-        // 1.5 Hack Supremo: Engañar a la caché y crear un lienzo virtual
-        const ticketLogo = document.getElementById('ticketLogo');
-        if (ticketLogo) {
-            if (currentUserData.logoUrl) {
-                await new Promise((resolve) => {
-                    const img = new Image();
-                    img.crossOrigin = 'anonymous'; // Exigimos permisos
-                    
-                    // El "?cb=" le hace creer al navegador que es una imagen totalmente nueva
-                    img.src = currentUserData.logoUrl + (currentUserData.logoUrl.includes('?') ? '&' : '?') + 'cb=' + new Date().getTime();
-                    
-                    img.onload = () => {
-                        // La redibujamos en un mini-lienzo invisible y extraemos el código puro
-                        const tempCanvas = document.createElement('canvas');
-                        tempCanvas.width = img.width;
-                        tempCanvas.height = img.height;
-                        const ctx = tempCanvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0);
-                        
-                        ticketLogo.src = tempCanvas.toDataURL('image/png');
-                        ticketLogo.style.display = 'inline-block';
-                        resolve();
-                    };
-                    
-                    img.onerror = () => {
-                        console.error("Firebase bloqueó la lectura de la imagen.");
-                        ticketLogo.style.display = 'none';
-                        resolve(); // Que el recibo siga adelante aunque falle el logo
-                    };
-                });
-                
-                // Micro-pausa para darle tiempo al navegador a inyectar la imagen en el HTML
-                await new Promise(r => setTimeout(r, 150));
-            } else {
-                ticketLogo.style.display = 'none';
-            }
-        }
-
-        // 2. Tomar la foto
-        const ticketEl = document.getElementById('ticketTemplate');
-        ticketEl.style.left = '0px'; 
-        
+        // Generamos el canvas igual que antes (sin allowTaint)
         const canvas = await html2canvas(ticketEl, { 
             backgroundColor: '#1c1c1e',
             scale: 2, 
-            useCORS: true,
+            useCORS: true
         });
-        
-        ticketEl.style.left = '-9999px'; 
 
-        // 3. Descargar la imagen
-        const link = document.createElement('a');
-        link.download = `Recibo_${c.name.replace(/\s+/g, '_')}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        
-        window.showNotification("Recibo generado al instante 🧾");
+        // Convertimos el canvas a un archivo real (Blob)
+        canvas.toBlob(async (blob) => {
+            const file = new File([blob], "recibo_agc.png", { type: "image/png" });
 
-    } catch(e) {
-        console.error(e);
-        window.showNotification("Error al generar el recibo.");
+            // 1. Intentamos usar el Menú de Compartir Nativo (Ideal para iPhone/Android)
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Recibo de Compra',
+                        text: 'Aquí tienes tu recibo.'
+                    });
+                    window.showNotification("✅ Menú de compartir abierto");
+                } catch (err) {
+                    console.warn("El usuario canceló el menú de compartir", err);
+                }
+            } else {
+                // 2. Si es PC o un navegador viejo, forzamos la descarga clásica
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Recibo_${Date.now()}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url); // Liberar memoria
+                window.showNotification("✅ Recibo descargado");
+            }
+        }, 'image/png');
+
+    } catch (error) {
+        console.error("Error al generar recibo:", error);
+        window.showNotification("❌ Error al generar el recibo.");
     } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;
