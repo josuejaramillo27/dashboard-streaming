@@ -3204,7 +3204,14 @@ window.renderMasterAccounts = async () => {
 
             cuentasEncontradas++;
 
-            const clientesDeEstaCuenta = listaClientes.filter(c => c.linkedMasterId === accId);
+            // Filtro inteligente que busca en todas las plataformas vinculadas
+            const clientesDeEstaCuenta = listaClientes.filter(c => {
+                if (c.linkedMasterId === accId) return true; // Soporte para cuentas viejas
+                if (c.multiAccounts) {
+                    return Object.values(c.multiAccounts).some(acc => acc.masterAccountId === accId);
+                }
+                return false;
+            });
             const cuposOcupados = clientesDeEstaCuenta.length;
             const cuposDisponibles = acc.maxProfiles - cuposOcupados;
             const ingresosTotales = clientesDeEstaCuenta.reduce((sum, c) => sum + (parseFloat(c.price) || 0), 0);
@@ -3278,10 +3285,19 @@ window.renderMasterAccounts = async () => {
             let perfilesHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;">`;
 
             for (let i = 1; i <= acc.maxProfiles; i++) {
-                // NUEVA LÓGICA: Extrae solo el primer número que encuentre en el texto del perfil
+                // NUEVA LÓGICA MULTI-PLATAFORMA
                 const clienteEnPerfil = clientesDeEstaCuenta.find(c => {
-                    if (!c.accountProfile) return false;
-                    const numeroEncontrado = String(c.accountProfile).match(/\d+/); 
+                    let pName = null;
+                    if (c.multiAccounts) {
+                        // Buscamos específicamente la plataforma de ESTA matriz
+                        const linkedAcc = Object.values(c.multiAccounts).find(a => a.masterAccountId === accId || c.linkedMasterId === accId);
+                        if (linkedAcc) pName = linkedAcc.profile;
+                    } else {
+                        pName = c.accountProfile;
+                    }
+                    if (!pName) return false;
+                    
+                    const numeroEncontrado = String(pName).match(/\d+/); 
                     return numeroEncontrado && parseInt(numeroEncontrado[0]) === i;
                 });
 
@@ -3389,75 +3405,154 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) =>
     document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
     window.showNotification("Completa el teléfono y los precios para guardar.");
 };
-/* --- MODAL PARA VINCULAR CLIENTE SUELTO A MATRIZ --- */
+/* --- MODAL PARA VINCULAR CLIENTE SUELTO A MATRIZ (MULTIPLE) --- */
 window.openLinkModal = async (clientId, clientPlatform) => {
     try {
+        // 1. Obtenemos el cliente para respetar sus datos previos (multiAccounts)
+        const c = clients.find(x => x.id === clientId);
+        if (!c) return window.showNotification("Cliente no encontrado.");
+
+        // 2. Obtenemos las Cuentas Matrices disponibles
         const qMat = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
         const snapMat = await getDocs(qMat);
         
-        let optionsHTML = '<option value="">-- Selecciona una Matriz --</option>';
-        let masterDataMap = {}; // Guardará los datos de las cuentas para heredarlos
-        let count = 0;
+        let masterDataMap = {};
+        let matricesPorPlataforma = {};
 
         snapMat.forEach(doc => {
             const mat = doc.data();
-            if (clientPlatform.toLowerCase().includes(mat.platform.toLowerCase())) {
-                optionsHTML += `<option value="${doc.id}">${mat.platform} - ${mat.email}</option>`;
-                masterDataMap[doc.id] = mat; // Guardamos la información completa de la matriz
-                count++;
-            }
+            masterDataMap[doc.id] = mat;
+            // Agrupamos las matrices por plataforma
+            const platKey = mat.platform.toLowerCase();
+            if (!matricesPorPlataforma[platKey]) matricesPorPlataforma[platKey] = [];
+            matricesPorPlataforma[platKey].push({ id: doc.id, ...mat });
         });
 
-        if (count === 0) {
-            return window.showNotification("No tienes Cuentas Matrices creadas para la plataforma: " + clientPlatform);
+        // 3. Crear el HTML dinámico para cada plataforma que tenga el cliente
+        const plataformas = clientPlatform.split(',').map(p => p.trim());
+        let htmlContenido = `<p style="font-size: 13px; color: var(--mac-text-secondary); text-align: left; margin-bottom: 15px;">Este cliente tiene <b>${plataformas.length}</b> plataforma(s). Puedes vincular cada una a su respectiva Cuenta Matriz.</p>`;
+        
+        let hasAnyMatrix = false;
+
+        plataformas.forEach((plat, index) => {
+            const platKey = plat.toLowerCase();
+            const matricesDisponibles = matricesPorPlataforma[platKey] || [];
+            
+            htmlContenido += `<div style="background: var(--mac-gray); padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--mac-border); text-align: left;">`;
+            htmlContenido += `<h4 style="margin: 0 0 10px 0; color: var(--mac-blue); font-size: 14px;"><i class='bx bx-tv'></i> ${plat}</h4>`;
+
+            if (matricesDisponibles.length > 0) {
+                hasAnyMatrix = true;
+                
+                // Buscar si ya estaba vinculado previamente para dejarlo preseleccionado
+                let matrizActual = '';
+                let perfilActual = '';
+                if (c.multiAccounts && c.multiAccounts[plat]) {
+                    matrizActual = c.multiAccounts[plat].masterAccountId || '';
+                    perfilActual = c.multiAccounts[plat].profile || '';
+                } else if (plataformas.length === 1 && c.linkedMasterId) { // Fallback para clientes antiguos
+                    matrizActual = c.linkedMasterId;
+                    perfilActual = c.accountProfile || '';
+                }
+
+                let optionsHTML = '<option value="">-- No vincular esta plataforma --</option>';
+                matricesDisponibles.forEach(mat => {
+                    const selected = matrizActual === mat.id ? 'selected' : '';
+                    optionsHTML += `<option value="${mat.id}" ${selected}>${mat.platform} - ${mat.email}</option>`;
+                });
+
+                htmlContenido += `
+                    <select id="swal-matriz-${index}" data-plat="${plat}" style="width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 6px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); outline:none;">
+                        ${optionsHTML}
+                    </select>
+                    <input id="swal-perfil-${index}" value="${perfilActual}" placeholder="N° de Perfil (Ej: 3, J3)" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); box-sizing: border-box; outline:none;">
+                `;
+            } else {
+                htmlContenido += `<p style="margin: 0; font-size: 12px; color: var(--mac-orange);">⚠️ No tienes cuentas matrices creadas para ${plat}.</p>`;
+            }
+            htmlContenido += `</div>`;
+        });
+
+        if (!hasAnyMatrix) {
+            return window.showNotification("No tienes Cuentas Matrices creadas para las plataformas de este cliente.");
         }
 
         const { value: formValues } = await Swal.fire({
-            title: '🔗 Vincular a Matriz',
-            html: `
-                <p style="font-size: 13px; color: var(--mac-text-secondary); text-align: left;">Selecciona a qué cuenta matriz pertenece este cliente y qué N° de perfil ocupa para que aparezca en el cuadrito.</p>
-                
-                <select id="swal-matriz" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main);">
-                    ${optionsHTML}
-                </select>
-                
-                <input id="swal-perfil" placeholder="N° de Perfil (Ej: 3, J3)" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); box-sizing: border-box;">
-            `,
+            title: '🔗 Vincular a Matrices',
+            html: `<div style="max-height: 60vh; overflow-y: auto; overflow-x: hidden; padding-right: 5px;">${htmlContenido}</div>`,
             focusConfirm: false,
             showCancelButton: true,
-            confirmButtonText: 'Guardar Vínculo',
+            confirmButtonText: 'Guardar Vínculos',
             cancelButtonText: 'Cancelar',
             confirmButtonColor: '#007AFF',
             background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
             color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
             preConfirm: () => {
-                const matrizId = document.getElementById('swal-matriz').value;
-                const perfil = document.getElementById('swal-perfil').value.trim();
-                
-                if (!matrizId) {
-                    Swal.showValidationMessage('Debes seleccionar una matriz.');
-                    return false;
+                let resultados = [];
+                for (let i = 0; i < plataformas.length; i++) {
+                    const matSelect = document.getElementById(`swal-matriz-${i}`);
+                    const perfInput = document.getElementById(`swal-perfil-${i}`);
+                    
+                    if (matSelect && matSelect.value) {
+                        const perfil = perfInput.value.trim();
+                        if (!perfil || !/\d/.test(perfil)) {
+                            Swal.showValidationMessage(`El perfil para ${plataformas[i]} debe contener al menos un NÚMERO (Ej: 3, J3).`);
+                            return false;
+                        }
+                        resultados.push({
+                            plataforma: matSelect.getAttribute('data-plat'),
+                            matrizId: matSelect.value,
+                            perfil: perfil
+                        });
+                    }
                 }
-                if (!perfil || !/\d/.test(perfil)) {
-                    Swal.showValidationMessage('El perfil debe contener al menos un NÚMERO (Ej: 3, J3).');
-                    return false;
-                }
-                return { matrizId, perfil };
+                return resultados; // Retorna un array con todas las asignaciones
             }
         });
 
-        if (formValues) {
-            const matrizSeleccionada = masterDataMap[formValues.matrizId]; // Obtenemos la matriz elegida
+        if (formValues && formValues.length > 0) { 
+            // Reconstruir o usar multiAccounts existente
+            let multiAccounts = c.multiAccounts || {};
+            
+            // Si estaba usando estructura antigua (1 sola plataforma genérica), la pasamos al nuevo formato multi-pestaña
+            if (!c.multiAccounts) {
+                plataformas.forEach(p => {
+                    multiAccounts[p] = {
+                        email: c.accountEmail || '', password: c.accountPassword || '', profile: c.accountProfile || '',
+                        pin: c.accountPin || '', units: c.accountUnits || 1, months: c.accountMonths || 1,
+                        deviceName: c.accountDeviceName || '', deviceType: c.accountDeviceType || '', saleType: c.accountSaleType || 'Perfil'
+                    };
+                });
+            }
 
-            // Actualizamos el vínculo Y sobreescribimos los datos del cliente con los de la matriz
+            let rootUpdates = {};
+
+            // Aplicar los nuevos vínculos seleccionados
+            formValues.forEach(vinculo => {
+                const matrizSeleccionada = masterDataMap[vinculo.matrizId];
+                if (!multiAccounts[vinculo.plataforma]) multiAccounts[vinculo.plataforma] = window.getDefaultAccData();
+                
+                multiAccounts[vinculo.plataforma].masterAccountId = vinculo.matrizId;
+                multiAccounts[vinculo.plataforma].profile = vinculo.perfil;
+                multiAccounts[vinculo.plataforma].email = matrizSeleccionada.email;
+                multiAccounts[vinculo.plataforma].password = matrizSeleccionada.pass;
+
+                // Actualizamos las variables raíz base al primer vínculo para compatibilidad con paneles legados
+                if (vinculo.plataforma === formValues[0].plataforma) {
+                    rootUpdates.linkedMasterId = vinculo.matrizId;
+                    rootUpdates.accountProfile = vinculo.perfil;
+                    rootUpdates.accountEmail = matrizSeleccionada.email;
+                    rootUpdates.accountPassword = matrizSeleccionada.pass;
+                }
+            });
+
+            // Guardar todo de golpe en Firebase
             await updateDoc(doc(db, "clients", clientId), {
-                linkedMasterId: formValues.matrizId,
-                accountProfile: formValues.perfil,
-                accountEmail: matrizSeleccionada.email,      // Hereda el correo de la matriz
-                accountPassword: matrizSeleccionada.pass     // Hereda la clave de la matriz
+                multiAccounts: multiAccounts,
+                ...rootUpdates
             });
             
-            window.showNotification("✅ Cliente vinculado y datos actualizados con la Matriz.");
+            window.showNotification("✅ Vínculos guardados y datos actualizados.");
             loadUserClients(); 
         }
 
