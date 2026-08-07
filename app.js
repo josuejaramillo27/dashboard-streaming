@@ -1106,7 +1106,7 @@ window.renewClient = async (id) => {
     const c = clients.find(x => x.id === id);
     if (!c) return;
 
-    // Detectar cuántos meses tiene contratado este cliente (o por defecto 1)
+    // Detectar cuántos meses tiene contratado este cliente
     let mesesARenovar = 1;
     if (c.multiAccounts) {
         const firstPlatform = Object.keys(c.multiAccounts)[0];
@@ -1118,57 +1118,74 @@ window.renewClient = async (id) => {
     let [year, month, day] = c.date.split('-');
     let fechaAntigua = new Date(year, month - 1, day);
     
-    // Le sumamos los meses correspondientes
-    let fechaNueva = new Date(fechaAntigua);
-    fechaNueva.setMonth(fechaNueva.getMonth() + mesesARenovar);
-    
-    const strFirebase = `${fechaNueva.getFullYear()}-${String(fechaNueva.getMonth()+1).padStart(2,'0')}-${String(fechaNueva.getDate()).padStart(2,'0')}`; 
-    const nuevaFechaBonita = fechaNueva.toLocaleDateString('es-ES'); 
+    // Opción 1: Mes a Mes (Día a Día)
+    let fechaMesAMes = new Date(fechaAntigua);
+    fechaMesAMes.setMonth(fechaMesAMes.getMonth() + mesesARenovar);
+    const strMesAMes = `${fechaMesAMes.getFullYear()}-${String(fechaMesAMes.getMonth()+1).padStart(2,'0')}-${String(fechaMesAMes.getDate()).padStart(2,'0')}`; 
+    const bonitaMesAMes = fechaMesAMes.toLocaleDateString('es-ES'); 
+
+    // Opción 2: 30 Días Exactos
+    let fecha30Dias = new Date(fechaAntigua);
+    fecha30Dias.setDate(fecha30Dias.getDate() + (30 * mesesARenovar));
+    const str30Dias = `${fecha30Dias.getFullYear()}-${String(fecha30Dias.getMonth()+1).padStart(2,'0')}-${String(fecha30Dias.getDate()).padStart(2,'0')}`;
+    const bonita30Dias = fecha30Dias.toLocaleDateString('es-ES');
+
     const antiguaFechaBonita = fechaAntigua.toLocaleDateString('es-ES');
 
     Swal.fire({
-        title: '🔄 Renovar Servicio',
+        title: '🔄 Opciones de Renovación',
         html: `
-            <p style="color: var(--mac-text-secondary); font-size: 14px; margin-bottom: 10px;">
-                Se sumará(n) <b>${mesesARenovar} mes(es)</b> a la fecha de vencimiento configurada.
+            <p style="color: var(--mac-text-secondary); font-size: 14px; margin-bottom: 15px;">
+                Vencimiento actual: <strong>${antiguaFechaBonita}</strong><br>
+                Selecciona la modalidad para sumar <b>${mesesARenovar} mes(es)</b>:
             </p>
-            <div style="background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 8px; padding: 12px; text-align: left; display: inline-block; width: 85%;">
-                <p style="margin: 0 0 8px 0; font-size: 13px; color: var(--mac-text-main);">
-                    📅 Vence el: <span style="color: var(--mac-red); font-weight: bold; float: right;">${antiguaFechaBonita}</span>
-                </p>
-                <div style="border-top: 1px dashed var(--mac-border); margin: 8px 0;"></div>
-                <p style="margin: 8px 0 0 0; font-size: 13px; color: var(--mac-text-main);">
-                    ✨ Nuevo Vencimiento: <span style="color: var(--mac-green); font-weight: bold; float: right;">${nuevaFechaBonita}</span>
-                </p>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button id="btnRenovarMes" style="background:var(--mac-blue); border:none; color:white; padding:14px; font-size:14px; border-radius:8px; cursor:pointer; font-weight:bold;">
+                    📆 De Día a Día (Vence: ${bonitaMesAMes})
+                </button>
+                <button id="btnRenovar30" style="background:var(--mac-orange); border:none; color:white; padding:14px; font-size:14px; border-radius:8px; cursor:pointer; font-weight:bold;">
+                    🔢 30 Días Exactos (Vence: ${bonita30Dias})
+                </button>
             </div>
         `,
+        showConfirmButton: false,
         showCancelButton: true,
-        confirmButtonText: '<i class="bx bx-check"></i> Sí, Renovar',
         cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#34C759', 
-        cancelButtonColor: '#FF3B30',  
         background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
-        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
-    }).then(async (result) => {
-        if (result.isConfirmed) {
-            try {
-                // NUEVO: Sumamos 1 al historial de renovaciones
-                const nuevasRenovaciones = (c.renovations || 0) + 1;
-                await updateDoc(doc(db, "clients", id), { 
-                    date: strFirebase, 
-                    renovations: nuevasRenovaciones 
-                }); 
-                window.showNotification("Servicio renovado ✅"); 
-                loadUserClients(); 
-
-                const plan = currentUserData.plan_actual || 'demo';
-                if (plan === 'pro' || plan === 'elite') {
-                    const datosRenovacion = { distribuidorId: currentUser.uid, numeroCliente: c.phone, plataforma: c.platform, nuevaFecha: nuevaFechaBonita };
-                    fetch('https://bot.panelagc.com/api/confirmar-renovacion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datosRenovacion) });
-                }
-            } catch (error) { window.showNotification("Error: " + error.message); }
+        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
+        didOpen: () => {
+            // Asignar funciones a los botones personalizados
+            document.getElementById('btnRenovarMes').addEventListener('click', () => {
+                Swal.close();
+                aplicarRenovacionFirebase(id, strMesAMes, bonitaMesAMes, c);
+            });
+            document.getElementById('btnRenovar30').addEventListener('click', () => {
+                Swal.close();
+                aplicarRenovacionFirebase(id, str30Dias, bonita30Dias, c);
+            });
         }
     });
+};
+
+// Función auxiliar para guardar la fecha que el cliente seleccionó
+const aplicarRenovacionFirebase = async (id, strFirebase, nuevaFechaBonita, c) => {
+    try {
+        const nuevasRenovaciones = (c.renovations || 0) + 1;
+        await updateDoc(doc(db, "clients", id), { 
+            date: strFirebase, 
+            renovations: nuevasRenovaciones 
+        }); 
+        window.showNotification("Servicio renovado ✅"); 
+        loadUserClients(); 
+
+        const plan = currentUserData.plan_actual || 'demo';
+        if (plan === 'pro' || plan === 'elite') {
+            const datosRenovacion = { distribuidorId: currentUser.uid, numeroCliente: c.phone, plataforma: c.platform, nuevaFecha: nuevaFechaBonita };
+            fetch('https://bot.panelagc.com/api/confirmar-renovacion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datosRenovacion) });
+        }
+    } catch (error) { 
+        window.showNotification("Error: " + error.message); 
+    }
 };
 
 window.startEdit = (id) => {
