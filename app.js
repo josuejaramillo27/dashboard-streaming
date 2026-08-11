@@ -3117,7 +3117,7 @@ window.deleteMasterAccount = async (id) => {
     });
 };
 
-// 4. GUARDAR (CREAR O ACTUALIZAR)
+// 4. GUARDAR (CREAR O ACTUALIZAR) Y SINCRONIZAR
 window.saveMasterAccount = async () => {
     const platform = document.getElementById('matPlatform').value;
     const email = document.getElementById('matEmail').value.trim();
@@ -3131,7 +3131,6 @@ window.saveMasterAccount = async () => {
     if (!email || !pass) return window.showNotification("⚠️ Escribe el correo y clave de la cuenta.");
 
     try {
-        // 🔒 LÍMITE DE 20 PARA PLAN BÁSICO
         if (!editingMasterId) {
             const plan = currentUserData.plan_actual || 'demo';
             const qMatCount = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
@@ -3142,8 +3141,53 @@ window.saveMasterAccount = async () => {
         }
 
         if (editingMasterId) {
+            // Actualizamos la matriz
             await updateDoc(doc(db, "masterAccounts", editingMasterId), { platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName });
             window.showNotification("✅ Cuenta Matriz actualizada");
+
+            // --- INICIO NUEVA LÓGICA: Sincronizar clientes vinculados ---
+            const qCli = query(collection(db, "clients"), where("userId", "==", currentUser.uid));
+            const snapCli = await getDocs(qCli);
+            const updatePromises = [];
+            
+            snapCli.forEach(d => {
+                const c = d.data();
+                let needsUpdate = false;
+                let mAccounts = c.multiAccounts || {};
+                let rootUpdates = {};
+                
+                // Actualizar si usaba el sistema antiguo de enlace
+                if (c.linkedMasterId === editingMasterId) {
+                    rootUpdates.accountEmail = email;
+                    rootUpdates.accountPassword = pass;
+                    needsUpdate = true;
+                }
+                
+                // Actualizar si usa el sistema nuevo (multipestaña)
+                if (c.multiAccounts) {
+                    for (let platKey in mAccounts) {
+                        if (mAccounts[platKey].masterAccountId === editingMasterId) {
+                            mAccounts[platKey].email = email;
+                            mAccounts[platKey].password = pass;
+                            needsUpdate = true;
+                        }
+                    }
+                }
+                
+                // Si este cliente pertenece a la matriz, preparamos la actualización
+                if (needsUpdate) {
+                    let finalUpdate = { ...rootUpdates };
+                    if (c.multiAccounts) finalUpdate.multiAccounts = mAccounts;
+                    updatePromises.push(updateDoc(doc(db, "clients", d.id), finalUpdate));
+                }
+            });
+            
+            if (updatePromises.length > 0) {
+                await Promise.all(updatePromises);
+                if (typeof loadUserClients === 'function') loadUserClients(); // Recarga la tabla de clientes para que veas el cambio
+            }
+            // --- FIN NUEVA LÓGICA ---
+
         } else {
             await addDoc(collection(db, "masterAccounts"), { userId: currentUser.uid, platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName, timestamp: Date.now() });
             window.showNotification("✅ Cuenta Matriz registrada con éxito");
@@ -3151,7 +3195,9 @@ window.saveMasterAccount = async () => {
         document.getElementById('masterAccountModal').style.display = 'none';
         editingMasterId = null;
         window.renderMasterAccounts();
-    } catch(e) { window.showNotification("Error: " + e.message); }
+    } catch(e) { 
+        window.showNotification("Error: " + e.message); 
+    }
 };
 
 // 5. RENDERIZAR LAS TARJETAS CON BUSCADOR Y ALERTAS OPTIMIZADAS
@@ -3384,7 +3430,6 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) =>
         selectText.classList.add('has-selection');
     }
 
-    // 🔥 NUEVA LÓGICA DE PESTAÑAS (MULTI-ACC) APLICADA AQUÍ 🔥
     multiAccData = {}; 
     multiAccData[platform] = window.getDefaultAccData();
     multiAccData[platform].email = email;
@@ -3393,6 +3438,17 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) =>
     multiAccData[platform].pin = '';
     multiAccData[platform].units = 1;
     multiAccData[platform].saleType = 'Perfil';
+    multiAccData[platform].masterAccountId = masterId; // Asegura el enlace en el nuevo sistema
+
+    // --- INICIO NUEVA LÓGICA: Detectar en Inventario ---
+    const stock = currentUserData.inventory || [];
+    // Buscamos si este mismo perfil de esta misma cuenta está libre en el inventario
+    const invMatch = stock.find(i => i.platform === platform && i.email === email && String(i.profile) === String(profileNum) && i.status === 'libre');
+    if (invMatch) {
+        // Al inyectar el inventoryId, la función de Guardar Cliente lo eliminará del stock automáticamente
+        multiAccData[platform].inventoryId = invMatch.id; 
+    }
+    // --- FIN NUEVA LÓGICA ---
 
     const btnAcc = document.getElementById('btnAccountData');
     if (btnAcc) {
