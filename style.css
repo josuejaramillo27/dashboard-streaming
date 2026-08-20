@@ -1318,3 +1318,54 @@ table tbody tr {
 table tbody tr:hover {
     background: var(--mac-table-hover) !important;
 }
+
+/* =========================================================
+   ELIMINAR COMPLETAMENTE EL FONDO GRIS Y FOCO DE LOS FILTROS
+========================================================= */
+
+/* 1. Fondo cristalino oscuro para TODOS los filtros e inputs (Reemplaza el gris) */
+select, 
+input, 
+textarea, 
+.filter-btn, 
+.filter-chip, 
+.status-pill, 
+.search-input {
+    background: rgba(18, 18, 22, 0.65) !important; /* Cristal abisal oscuro */
+    color: var(--mac-text-main, #f5f5f7) !important;
+    border: 1px solid rgba(94, 92, 230, 0.2) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    appearance: none !important; /* Elimina el estilo nativo del navegador */
+    -webkit-appearance: none !important;
+}
+
+/* 2. Estado al presionar, hacer clic o pasar el mouse (Hover / Focus / Active) */
+select:hover, 
+input:hover, 
+.filter-btn:hover,
+select:focus, 
+input:focus, 
+select:active, 
+input:active {
+    background: rgba(94, 92, 230, 0.18) !important; /* Resplandor Índigo en lugar de gris */
+    border-color: var(--mac-blue, #5e5ce6) !important;
+    box-shadow: 0 0 12px rgba(94, 92, 230, 0.35) !important;
+    outline: none !important;
+}
+
+/* 3. Menú desplegable interno de las opciones (Evita el fondo gris/blanco al abrir) */
+select option {
+    background-color: #0e0e12 !important; /* Negro mate puro */
+    color: #f5f5f7 !important;
+    padding: 10px !important;
+}
+
+/* 4. Opción seleccionada o resaltada en la lista del filtro */
+select option:hover,
+select option:focus,
+select option:active,
+select option:checked {
+    background-color: #5e5ce6 !important; /* Color Índigo de la gama Aurora */
+    color: #ffffff !important;
+}
