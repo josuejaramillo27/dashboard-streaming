@@ -37,43 +37,42 @@
 }
 
 body.dark-mode {
-    /* Fondo base: Azul abisal (Casi negro, pero con alma azul) */
-    --mac-bg: #050b14; 
+    /* Fondo base: Negro mate profundo (Elegancia total) */
+    --mac-bg: #0a0a0c; 
     
-    /* Paneles y Rectángulos: Cristal azul noche (Adiós al gris sucio) */
-    --mac-surface: rgba(16, 26, 43, 0.65); 
+    /* Paneles y Rectángulos: Cristal oscuro ahumado (Sin tintes azules) */
+    --mac-surface: rgba(24, 24, 26, 0.65); 
     
-    /* Textos: Blanco azulado y gris platinado para que resalten suavemente */
-    --mac-text-main: #f0f4f8;
-    --mac-text-secondary: #8b9bb4; 
+    /* Textos: Blanco diamante y gris neutro para máxima nitidez */
+    --mac-text-main: #f5f5f7;
+    --mac-text-secondary: #86868b; 
     
-    /* Bordes: Sutiles destellos de azul metálico */
-    --mac-border: rgba(43, 65, 98, 0.5); 
-    --mac-border-solid: rgba(43, 65, 98, 0.8);
+    /* Bordes: Sutiles líneas plateadas casi invisibles */
+    --mac-border: rgba(255, 255, 255, 0.08); 
+    --mac-border-solid: rgba(255, 255, 255, 0.15);
     
-    /* Acentos vibrantes (Se mantienen para resaltar botones) */
+    /* Acentos vibrantes (Se mantienen brillantes para resaltar botones) */
     --mac-blue: #0a84ff;
     --mac-blue-hover: #0070e0; 
     --mac-red: #ff453a; 
     --mac-green: #30d158;
     --mac-orange: #ff9f0a; 
     
-    /* Cajas interiores (Inputs, Tarjetas de Inventario, etc.) */
-    --mac-gray: rgba(26, 40, 65, 0.6); 
+    /* Cajas interiores (Inputs y tarjetas) */
+    --mac-gray: rgba(255, 255, 255, 0.03); 
     
-    --mac-table-hover: rgba(255, 255, 255, 0.05);
-    --mac-dropdown-bg: rgba(16, 26, 43, 0.85);
+    --mac-table-hover: rgba(255, 255, 255, 0.04);
+    --mac-dropdown-bg: rgba(24, 24, 26, 0.85);
     
-    /* Sombra con un levísimo resplandor azul cibernético */
-    --glass-shadow: 0 10px 40px -10px rgba(10, 132, 255, 0.1), 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-    --glass-blur: blur(20px);
+    /* Sombra profunda y minimalista para que los paneles parezcan flotar */
+    --glass-shadow: 0 15px 45px rgba(0, 0, 0, 0.9);
+    --glass-blur: blur(25px);
 
-    /* Olas perfectamente calibradas con los paneles */
-    --wave-1: #0a192f; 
-    --wave-2: #112240; 
-    --wave-3: #020c1b; 
+    /* Olas en movimiento: Tonos grafito, carbón y negro puro */
+    --wave-1: #121214; 
+    --wave-2: #1c1c1f; 
+    --wave-3: #050505; 
 }
-
 /* =========================================================
    FONDO DINÁMICO DE OLAS (MOVIMIENTO DE LADO A LADO)
 ========================================================= */
