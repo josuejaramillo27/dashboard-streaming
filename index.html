@@ -392,6 +392,22 @@
         <button class="btn-primary" onclick="window.doResetPassword()">Enviar Link</button>
         <span class="auth-link" onclick="window.showLogin()">Volver</span>
     </div>
+    <div id="resetForm" class="auth-form" style="display: none;">
+        <input type="email" id="resetEmail" placeholder="Correo Electrónico" required>
+        <button class="btn-primary" onclick="window.doResetPassword()">Enviar Link</button>
+        <span class="auth-link" onclick="window.showLogin()">Volver</span>
+    </div>
+
+    <div style="text-align: center; margin-top: 20px; font-size: 11px; color: var(--mac-text-secondary);">
+        <p>© 2026 A.G.C. - Área de Gestión y Control</p>
+        <p style="margin-top: 4px;">
+            <a href="javascript:void(0)" onclick="window.openTermsModal()" style="color: var(--mac-blue); text-decoration: underline;">
+                Términos y Condiciones de Uso
+            </a>
+        </p>
+    </div>
+
+</div>
 </div>
 
 <!-- ==============================================
@@ -1420,6 +1436,12 @@
         <a id="portalSupportWaBtn" href="#" target="_blank" style="font-size: 13px; color: var(--mac-text-secondary); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
             <i class='bx bxl-whatsapp' style="color: var(--mac-green); font-size: 18px;"></i> ¿Necesitas ayuda con tu cuenta? Contáctanos
         </a>
+    </div>
+    <div style="margin-top: 30px; padding: 12px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid var(--mac-border); text-align: center; font-size: 11px; color: var(--mac-text-secondary);">
+        <i class='bx bx-info-circle' style="color: var(--mac-blue);"></i> 
+        <b>Aviso Importante:</b> A.G.C. es una herramienta de gestión administrativa independiente. Para soporte, renovaciones o pagos de tu servicio, contacta directamente a tu proveedor registrado. 
+        <br>
+        <a href="javascript:void(0)" onclick="window.openTermsModal()" style="color: var(--mac-blue); text-decoration: underline; margin-top: 4px; display: inline-block;">Ver Términos Legal</a>
     </div>
 </div>
 
