@@ -137,7 +137,18 @@ window.doRegister = async () => {
         });
 
         if (!response.ok) throw new Error("Error del servidor al asignar perfil.");
+        // --- NUEVO: ACTIVACIÓN DE DEMO POR 3 HORAS ---
+        const planElegido = document.getElementById('regPlanDemo').value;
+        const targetDate = new Date();
+        targetDate.setHours(targetDate.getHours() + 3);
 
+        await updateDoc(doc(db, "users", user.uid), {
+            active: true,
+            activeUntil: targetDate.toISOString(),
+            plan_actual: planElegido,
+            limite_clientes: planElegido === 'pro' ? 9999 : 100,
+            tutorialVisto: false // Activa el disparador del tutorial
+        });
         window.showNotification("¡Cuenta creada con éxito! Disfruta tu prueba gratuita.");
         
     } catch (e) { 
@@ -263,16 +274,33 @@ onAuthStateChanged(auth, async (user) => {
                 if(document.getElementById('clientCost')) document.getElementById('clientCost').placeholder = `Costo Proveedor (${globalCurrency})`;
                 if(document.getElementById('clientPrice')) document.getElementById('clientPrice').placeholder = `Precio de Venta (${globalCurrency})`;
                 
-                // 🔥 MEJORA DE RENDIMIENTO: Guardado asíncrono SIN bloquear la pantalla
+                // 🔥 MEJORA DE RENDIMIENTO Y AUTO-BLOQUEO
                 const now = new Date(); let needsUpdate = false;
                 if (currentUserData.active === true && currentUserData.activeUntil) { 
-                    if (now > new Date(currentUserData.activeUntil)) { currentUserData.active = false; currentUserData.activeUntil = null; needsUpdate = true; } 
+                    if (now > new Date(currentUserData.activeUntil)) { 
+                        // --- CIERRE AUTOMÁTICO DE DEMO CON ALERTA ---
+                        await updateDoc(doc(db, "users", user.uid), { active: false, activeUntil: null });
+                        
+                        Swal.fire({
+                            icon: 'warning',
+                            title: '⏳ ¡Tu Demo ha expirado!',
+                            text: `Esperamos que te haya encantado el Plan ${currentUserData.plan_actual.toUpperCase()}. ¡Adquiérelo ahora para seguir dominando el mercado!`,
+                            confirmButtonText: '<i class="bx bxl-whatsapp"></i> Adquirir Plan Oficial',
+                            allowOutsideClick: false,
+                            background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+                            color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+                        }).then(() => {
+                            // Cambia este número por tu WhatsApp
+                            window.open(`https://wa.me/51961341323?text=Hola,%20mi%20demo%20ha%20terminado.%20Deseo%20comprar%20el%20Plan%20${currentUserData.plan_actual.toUpperCase()}%20del%20Panel%20A.G.C.`, '_blank');
+                            window.doLogout();
+                        });
+                        return; // Detiene la carga del Dashboard
+                    } 
                 } else if (currentUserData.active === false && currentUserData.suspendedUntil) { 
                     if (now > new Date(currentUserData.suspendedUntil)) { currentUserData.active = true; currentUserData.suspendedUntil = null; needsUpdate = true; } 
                 }
                 
                 if (needsUpdate) { 
-                    // NO usar await aquí. Firebase lo envía en segundo plano.
                     updateDoc(doc(db, "users", user.uid), { active: currentUserData.active, activeUntil: currentUserData.activeUntil || null, suspendedUntil: currentUserData.suspendedUntil || null }); 
                 }
                 
@@ -293,6 +321,12 @@ onAuthStateChanged(auth, async (user) => {
                         window.requestNotificationPermission(); 
                         window.renderInventory();
                         window.syncUserServices();
+                        
+                        // --- LANZADOR DEL TUTORIAL ---
+                        if (!currentUserData.tutorialVisto && window.innerWidth > 768) {
+                            setTimeout(() => window.startTutorial(), 1500);
+                        }
+                    }
                     } else { 
                         await signOut(auth); 
                         window.showNotification("Tu cuenta está suspendida o pendiente."); 
@@ -626,15 +660,57 @@ window.viewAccountData = (id) => {
     document.getElementById('viewAccountModal').style.display = 'flex'; 
 };
 
-window.openManageModal = (id, name, isActive) => { currentManageUserId = id; document.getElementById('manageUserName').innerText = name; document.getElementById('manageAction').value = isActive ? "true" : "false"; document.getElementById('manageDuration').value = "permanent"; window.toggleDurationFields(); document.getElementById('adminManageModal').style.display = 'flex'; };
+window.openManageModal = (id, name, isActive, planActual) => { 
+    currentManageUserId = id; 
+    document.getElementById('manageUserName').innerText = name; 
+    document.getElementById('manageAction').value = isActive ? "true" : "false"; 
+    
+    const p = (planActual || 'demo').toLowerCase();
+    const durationSelect = document.getElementById('manageDuration');
+    
+    // Si es plan básico, ocultar opciones temporales. Si es PRO, permitirlas.
+    if (p === 'basico') {
+        durationSelect.style.display = 'none';
+        durationSelect.value = 'permanent';
+    } else {
+        durationSelect.style.display = 'block';
+        durationSelect.value = 'permanent';
+    }
+    
+    window.toggleDurationFields(); 
+    document.getElementById('adminManageModal').style.display = 'flex'; 
+};
 window.toggleDurationFields = () => { document.getElementById('temporaryFields').style.display = document.getElementById('manageDuration').value === 'temporary' ? 'flex' : 'none'; };
 window.toggleTempType = () => { document.getElementById('manageDays').style.display = document.getElementById('manageTempType').value === 'days' ? 'block' : 'none'; };
 window.saveManageStatus = async () => {
-    const action = document.getElementById('manageAction').value === "true", duration = document.getElementById('manageDuration').value;
+    const action = document.getElementById('manageAction').value === "true";
+    const duration = document.getElementById('manageDuration').value;
     let activeUntil = null, suspendedUntil = null;
-    if (duration === 'temporary') { const targetDate = new Date(); if (document.getElementById('manageTempType').value === 'hours') { targetDate.setHours(targetDate.getHours() + 3); } else { const days = parseInt(document.getElementById('manageDays').value); if (!days || days <= 0) return window.showNotification("Ingresa días."); targetDate.setDate(targetDate.getDate() + days); } if (action === true) activeUntil = targetDate.toISOString(); else suspendedUntil = targetDate.toISOString(); }
-    const btn = document.querySelector('#adminManageModal .btn-primary'); btn.innerText = "Guardando..."; btn.disabled = true;
-    try { await updateDoc(doc(db, "users", currentManageUserId), { active: action, activeUntil: activeUntil, suspendedUntil: suspendedUntil }); window.showNotification("Configuración aplicada."); window.closeModals(); loadAdminData(); } catch (e) { window.showNotification("Error: " + e.message); } finally { btn.innerText = "Guardar y Aplicar"; btn.disabled = false; }
+    
+    if (duration === 'temporary') { 
+        const targetDate = new Date(); 
+        if (document.getElementById('manageTempType').value === '3hours') { 
+            targetDate.setHours(targetDate.getHours() + 3); 
+        } else { 
+            targetDate.setDate(targetDate.getDate() + 30); 
+        } 
+        if (action === true) activeUntil = targetDate.toISOString(); 
+        else suspendedUntil = targetDate.toISOString(); 
+    }
+    
+    const btn = document.querySelector('#adminManageModal .btn-primary'); 
+    btn.innerText = "Guardando..."; btn.disabled = true;
+    
+    try { 
+        await updateDoc(doc(db, "users", currentManageUserId), { active: action, activeUntil: activeUntil, suspendedUntil: suspendedUntil }); 
+        window.showNotification("Configuración aplicada."); 
+        window.closeModals(); 
+        loadAdminData(); 
+    } catch (e) { 
+        window.showNotification("Error: " + e.message); 
+    } finally { 
+        btn.innerText = "Guardar y Aplicar"; btn.disabled = false; 
+    }
 };
 /* --- SISTEMA DE GESTIÓN DE PLANES (ADMIN) --- */
 let currentPlanUserId = null;
@@ -689,20 +765,27 @@ window.savePlan = async () => {
     }
 };
 /* --- CARGA DEL PANEL GLOBAL (ADMIN) --- */
-async function loadAdminData() {
-    // 🔥 MEJORA DE RENDIMIENTO: Descargar todas las colecciones al mismo tiempo
-    const [qUsers, qSuggestions, qNews] = await Promise.all([
-        getDocs(collection(db, "users")),
-        getDocs(collection(db, "suggestions")),
-        getDocs(collection(db, "news"))
-    ]);
+let adminUsersCache = []; // Memoria caché para no recargar de Firebase
 
-    // 1. Cargar Usuarios
-    const tbody = document.getElementById('adminTableBody'); tbody.innerHTML = '';
-    qUsers.forEach((d) => {
-        const data = d.data(), id = d.id; 
-        if(data.role === 'admin') return;
-        
+window.toggleAdminPlanFilter = () => {
+    const status = document.getElementById('adminFilterStatus').value;
+    document.getElementById('adminFilterPlan').style.display = status === 'active' ? 'block' : 'none';
+    window.renderAdminUsers();
+};
+
+window.renderAdminUsers = () => {
+    const tbody = document.getElementById('adminTableBody'); 
+    tbody.innerHTML = '';
+    const statusFilter = document.getElementById('adminFilterStatus').value;
+    const planFilter = document.getElementById('adminFilterPlan').value;
+
+    adminUsersCache.forEach((data) => {
+        // Filtrado
+        if (statusFilter === 'active' && !data.active) return;
+        if (statusFilter === 'inactive' && data.active) return;
+        if (statusFilter === 'active' && planFilter !== 'all' && (data.plan_actual || 'demo').toLowerCase() !== planFilter) return;
+
+        const id = data.id;
         const statusHtml = data.active ? `<span class="status active">Activado</span>` : `<span class="status expired">Suspendido</span>`;
         let expText = ""; 
         if (data.active && data.activeUntil) { expText = `<br><span style="font-size:11px; color:var(--mac-text-secondary);">Vence: ${new Date(data.activeUntil).toLocaleString('es-ES', {dateStyle:'short', timeStyle:'short'})}</span>`; } else if (!data.active && data.suspendedUntil) { expText = `<br><span style="font-size:11px; color:var(--mac-text-secondary);">Hasta: ${new Date(data.suspendedUntil).toLocaleString('es-ES', {dateStyle:'short', timeStyle:'short'})}</span>`; }
@@ -710,6 +793,7 @@ async function loadAdminData() {
         const planDisplay = (data.plan_actual || 'demo').toUpperCase();
         const planColor = planDisplay === 'PRO' ? 'var(--mac-blue)' : (planDisplay === 'BASICO' ? 'var(--mac-green)' : 'var(--mac-text-secondary)');
         const safeName = (data.name || 'Usuario').replace(/'/g, "\\'");
+        
         const tr = document.createElement('tr'); 
         tr.innerHTML = `
             <td data-label="Nombre"><strong>${data.name}</strong></td>
@@ -719,11 +803,26 @@ async function loadAdminData() {
             <td data-label="Plan"><strong style="color: ${planColor};">${planDisplay}</strong></td>
             <td data-label="Estado">${statusHtml}${expText}</td>
             <td data-label="Acción" class="actions-cell" style="display: flex; gap: 5px;">
-                <button class="action-btn" style="border: 1px solid var(--mac-border); background: transparent;" onclick="window.openManageModal('${id}', '${data.name}', ${data.active})">⚙️ Estado</button>
-                <button class="action-btn" style="border: 1px solid var(--mac-blue); color: var(--mac-blue); background: transparent;" onclick="window.openPlanModal('${id}', '${data.name}', '${data.plan_actual || 'demo'}')">💎 Plan</button>
+                <button class="action-btn" style="border: 1px solid var(--mac-border); background: transparent;" onclick="window.openManageModal('${id}', '${safeName}', ${data.active}, '${data.plan_actual}')">⚙️ Estado</button>
+                <button class="action-btn" style="border: 1px solid var(--mac-blue); color: var(--mac-blue); background: transparent;" onclick="window.openPlanModal('${id}', '${safeName}', '${data.plan_actual || 'demo'}')">💎 Plan</button>
             </td>`; 
         tbody.appendChild(tr);
     });
+};
+
+async function loadAdminData() {
+    const [qUsers, qSuggestions, qNews] = await Promise.all([
+        getDocs(collection(db, "users")),
+        getDocs(collection(db, "suggestions")),
+        getDocs(collection(db, "news"))
+    ]);
+
+    // Llenar la caché y renderizar
+    adminUsersCache = [];
+    qUsers.forEach((d) => {
+        if(d.data().role !== 'admin') adminUsersCache.push({ id: d.id, ...d.data() });
+    });
+    window.toggleAdminPlanFilter();
 
     // 2. Cargar Sugerencias
     const sBody = document.getElementById('adminSuggestionsBody'); sBody.innerHTML = ''; 
@@ -4519,4 +4618,31 @@ window.checkPlanesView = () => {
     if (btnHelp) btnHelp.href = `https://wa.me/${cleanPhone}?text=${helpMsg}`;
 
     return true;
+};
+
+window.startTutorial = () => {
+    const driver = window.driver.js.driver;
+    const isDark = document.body.classList.contains('dark-mode');
+    
+    const driverObj = driver({
+        showProgress: true,
+        nextBtnText: 'Siguiente &rarr;',
+        prevBtnText: '&larr; Atrás',
+        doneBtnText: '¡Comenzar a Vender! 🚀',
+        popoverClass: isDark ? 'driverjs-theme-dark' : '',
+        steps: [
+            { popover: { title: '¡Bienvenido a A.G.C.!', description: 'Vamos a dar un paseo rápido por tu nuevo panel de control.' } },
+            { element: '#homeSection .header-top', popover: { title: 'Finanzas', description: 'Aquí podrás ver tu utilidad neta y métricas clave en tiempo real.' } },
+            { element: '#clientForm', popover: { title: 'Registrar Clientes', description: 'Usa este formulario para añadir clientes y vincularles sus plataformas.' } },
+            { element: '#btnTabCuentas', popover: { title: 'Cuentas Matrices', description: 'Un área especial para llevar el control del stock de tus Cuentas Completas.' } },
+            { element: '#mainSidebar', popover: { title: 'Menú Lateral', description: 'Desde aquí accedes a tu Inventario, tu Tiendita Web y la configuración de tu Bot.' } }
+        ],
+        onDestroyStarted: async () => {
+            if (driverObj.hasNextStep()) { driverObj.destroy(); return; }
+            await updateDoc(doc(db, "users", currentUser.uid), { tutorialVisto: true });
+            currentUserData.tutorialVisto = true;
+            driverObj.destroy();
+        }
+    });
+    driverObj.drive();
 };
