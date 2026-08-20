@@ -897,16 +897,33 @@
     <h3><i class='bx bx-group'></i> Gestión de Distribuidores</h3>
     
     <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px;">
-        <button class="action-btn active" id="btnFilterAllUsers" onclick="window.filterAdminUsers('all')">Todos</button>
-        <button class="action-btn" id="btnFilterActiveUsers" onclick="window.filterAdminUsers('active')">🟢 Activos/Demo</button>
-        <button class="action-btn" id="btnFilterSuspendedUsers" onclick="window.filterAdminUsers('suspended')">🔴 Suspendidos</button>
-        <button class="action-btn" id="btnFilterProUsers" onclick="window.filterAdminUsers('pro')">👑 Plan PRO</button>
-        <button class="action-btn" id="btnFilterBasicUsers" onclick="window.filterAdminUsers('basico')">⚡ Plan Básico</button>
+        <button class="action-btn active" id="btnFilterAllUsers" onclick="window.filterAdminUsers('all')">
+            <i class='bx bx-grid-alt'></i> Todos
+        </button>
+        <button class="action-btn" id="btnFilterActiveUsers" onclick="window.filterAdminUsers('active')">
+            <i class='bx bx-check-circle' style="color: var(--mac-green);"></i> Activos / Demo
+        </button>
+        <button class="action-btn" id="btnFilterSuspendedUsers" onclick="window.filterAdminUsers('suspended')">
+            <i class='bx bx-block' style="color: var(--mac-red);"></i> Suspendidos
+        </button>
+        <button class="action-btn" id="btnFilterProUsers" onclick="window.filterAdminUsers('pro')">
+            <i class='bx bxs-diamond' style="color: var(--mac-blue);"></i> Plan PRO
+        </button>
+        <button class="action-btn" id="btnFilterBasicoUsers" onclick="window.filterAdminUsers('basico')">
+            <i class='bx bx-bolt-circle' style="color: var(--mac-orange);"></i> Plan Básico
+        </button>
     </div>
 
     <div style="overflow-x:auto; margin-bottom: 40px;">
         <table>
-            <thead><tr><th>Distribuidor</th><th>Plan</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>Distribuidor</th>
+                    <th>Plan</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
             <tbody id="adminTableBody"></tbody>
         </table>
     </div>
