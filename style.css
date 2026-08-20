@@ -1,31 +1,39 @@
 :root {
-    /* Fondo base: Gris claro clásico */
-    --mac-bg: #f5f5f7; 
-    --mac-surface: rgba(255, 255, 255, 0.85); 
-    --mac-text-main: #1d1d1f;
-    --mac-text-secondary: #6e6e73; 
+    /* Fondo base: Blanco perla / Gris ultra claro */
+    --mac-bg: #f3f4f6; 
+    
+    /* Paneles y Rectángulos: Cristal blanco puro translúcido */
+    --mac-surface: rgba(255, 255, 255, 0.75); 
+    
+    /* Textos: Gris carbón profundo (más elegante que el negro puro) */
+    --mac-text-main: #1f2937;
+    --mac-text-secondary: #6b7280; 
+    
+    /* Bordes: Sutiles líneas grises casi invisibles */
     --mac-border: rgba(0, 0, 0, 0.08); 
     --mac-border-solid: rgba(0, 0, 0, 0.15); 
     
-    /* 🪄 NUEVOS ACENTOS "AURORA TECH" (Modo Claro) */
-    --mac-blue: #5856d6; /* Índigo profundo y elegante */
-    --mac-blue-hover: #4644b9; /* Índigo más oscuro al pasar el ratón */
-    --mac-red: #ff3b30; 
-    --mac-green: #34c759;
-    --mac-orange: #ff9500; 
+    /* 🪄 ACENTOS "AURORA TECH" (Modo Claro) */
+    --mac-blue: #4f46e5; /* Índigo vibrante y corporativo */
+    --mac-blue-hover: #4338ca; /* Índigo más oscuro al presionar */
+    --mac-red: #ef4444; 
+    --mac-green: #10b981; /* Verde esmeralda fresco (más moderno) */
+    --mac-orange: #f59e0b; 
     
-    --mac-gray: rgba(0, 0, 0, 0.03); 
-    --mac-table-hover: rgba(0, 0, 0, 0.04);
+    /* Cajas interiores y fondos de inputs */
+    --mac-gray: rgba(0, 0, 0, 0.04); 
+    --mac-table-hover: rgba(0, 0, 0, 0.03);
     --mac-dropdown-bg: rgba(255, 255, 255, 0.95);
-    --glass-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+    
+    /* 🪄 SOMBRAS PREMIUM: Le damos un levísimo resplandor índigo a las sombras */
+    --glass-shadow: 0 10px 40px -10px rgba(79, 70, 229, 0.12), 0 8px 32px 0 rgba(0, 0, 0, 0.05);
     --glass-blur: blur(25px);
 
-    /* Colores de Aurora para el Modo Claro */
-    --aurora-1: rgba(88, 86, 214, 0.06); /* Índigo claro */
-    --aurora-2: rgba(94, 234, 212, 0.05); /* Cian sutil */
-    --aurora-3: rgba(52, 199, 89, 0.03); 
+    /* 🪄 LUCES DE AURORA PARA EL MODO CLARO (Efecto Perlado / Holográfico) */
+    --aurora-1: rgba(79, 70, 229, 0.07); /* Índigo suave */
+    --aurora-2: rgba(45, 212, 191, 0.08); /* Cian pastel */
+    --aurora-3: rgba(139, 92, 246, 0.05); /* Morado claro tenue */
 }
-
 body.dark-mode {
     /* Fondo base: Negro mate profundo */
     --mac-bg: #050505; 
