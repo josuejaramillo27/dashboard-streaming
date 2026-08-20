@@ -1368,11 +1368,15 @@
             </button>
         </div>
 
-        <div id="waDataOptionsContainer" style="display: none; text-align: left; margin-top: 20px; background: var(--mac-gray); padding: 15px; border-radius: 12px; border: 1px solid var(--mac-border);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <span style="font-size: 13px; font-weight: bold; color: var(--mac-text-main);">¿Qué datos enviarás?</span>
+        <div id="waDataOptionsContainer" style="display: none; text-align: left; margin-top: 20px; background: var(--mac-gray); padding: 15px; border-radius: 12px; border: 1px solid var(--mac-border); max-height: 350px; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: sticky; top: 0; background: var(--mac-gray); z-index: 2; padding-bottom: 5px;">
+                <span style="font-size: 13px; font-weight: bold; color: var(--mac-text-main);">Opciones por Plataforma:</span>
                 <button class="action-btn" id="btnToggleAllWaBoxes" onclick="window.toggleAllWaBoxes()" style="font-size: 11px; padding: 4px 8px; border: 1px solid var(--mac-border); background: var(--mac-surface);">Desmarcar Todo</button>
             </div>
+            
+            <div id="dynamicWaPlatformsContainer" style="display: flex; flex-direction: column; gap: 15px;">
+            </div>
+        </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px;">
                 <label class="wa-chk-card" onclick="window.updateWaChkCard(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); color: var(--mac-text-main); font-weight: 500; transition: all 0.2s;">
