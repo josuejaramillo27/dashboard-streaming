@@ -1254,42 +1254,32 @@
 <!-- ==============================================
      VISTA DEL PORTAL DE AUTOGESTIÓN (CLIENTE FINAL)
 =================================================== -->
-<div id="clientPortalView" style="display: none; width: 100vw; height: 100vh; background: #0a0a0c; color: #ffffff; align-items: center; justify-content: center; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 9999999; overflow-y: auto;">
+<div id="clientPortalView" class="container portal-container" style="display: none;">
     
-    <!-- PANTALLA DE LOGIN (ESTILO NETFLIX) -->
-    <div id="portalLoginScreen" style="width: 100%; max-width: 400px; padding: 40px 20px; box-sizing: border-box; text-align: center;">
-        <img id="portalLogo" src="AGC.png" alt="Logo" style="width: 80px; height: 80px; border-radius: 16px; margin-bottom: 20px; display: none; margin-left: auto; margin-right: auto; object-fit: cover;">
-        <h2 id="portalStoreName" style="margin: 0 0 5px 0; font-size: 24px; font-weight: 800;">Mi Portal</h2>
-        <p style="color: #86868b; font-size: 14px; margin-bottom: 30px;">Ingresa para ver las credenciales de tus servicios activos.</p>
-        
-        <div style="display: flex; flex-direction: column; gap: 15px;">
-            <input type="tel" id="portalPhoneInput" placeholder="Tu número de WhatsApp (Ej: +51...)" style="width: 100%; padding: 16px; border-radius: 8px; border: none; background: #1c1c1e; color: #ffffff; font-size: 16px; outline: none;">
-            <input type="password" id="portalCodeInput" placeholder="Código de Acceso (4 dígitos)" style="width: 100%; padding: 16px; border-radius: 8px; border: none; background: #1c1c1e; color: #ffffff; font-size: 16px; outline: none; text-transform: uppercase;">
-            
-            <label style="display: flex; align-items: center; gap: 10px; color: #86868b; font-size: 13px; cursor: pointer; text-align: left; margin-top: 5px;">
-                <input type="checkbox" id="portalRememberMe" style="width: 18px; height: 18px; margin: 0; cursor: pointer;"> Recordar mi sesión en este dispositivo
-            </label>
-            
-            <button class="btn-primary" style="padding: 16px; font-size: 16px; font-weight: bold; margin-top: 10px; background: #e50914;" onclick="window.loginClientPortal()">Ingresar a mi cuenta</button>
-        </div>
-        <p style="color: #86868b; font-size: 12px; margin-top: 30px;">Si no conoces tu código, escribe el comando <strong>/info</strong> en el chat de WhatsApp.</p>
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img id="portalStoreLogo" src="agcf.png" style="height: 55px; width: auto; border-radius: 12px; margin-bottom: 10px; object-fit: contain;">
+        <h2 id="portalStoreName" style="margin: 0; font-size: 20px; color: var(--mac-text-main);">Mi Portal de Servicio</h2>
+        <p style="font-size: 12px; color: var(--mac-text-secondary); margin-top: 4px;">Consulta el estado y los accesos de tus servicios en tiempo real</p>
     </div>
 
-    <!-- PANTALLA DEL DASHBOARD DEL CLIENTE (DONDE VEN SUS CUENTAS) -->
-    <div id="portalDashboardScreen" style="display: none; width: 100%; max-width: 600px; padding: 30px 20px; box-sizing: border-box;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #1c1c1e; padding-bottom: 20px;">
-            <h2 style="margin: 0; font-size: 22px;">Mis Servicios</h2>
-            <button style="background: transparent; border: 1px solid #38383a; color: #ffffff; padding: 8px 15px; border-radius: 20px; font-size: 12px; cursor: pointer;" onclick="window.logoutClientPortal()">Cerrar Sesión</button>
-        </div>
+    <div id="portalSearchCard" class="portal-hero-card" style="margin-bottom: 20px;">
+        <h3 style="margin-top: 0; font-size: 16px; color: var(--mac-text-main);"><i class='bx bx-search-alt-2'></i> Consulta tus Accesos</h3>
+        <p style="font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 15px;">Ingresa tu número de teléfono registrado para ver tus credenciales:</p>
         
-        <div id="portalServicesList" style="display: flex; flex-direction: column; gap: 15px;">
-            <!-- Aquí se inyectarán las tarjetas de los servicios desde Firebase -->
-        </div>
-        
-        <div style="text-align: center; margin-top: 40px; border-top: 1px solid #1c1c1e; padding-top: 20px;">
-            <a id="portalSupportBtn" href="#" target="_blank" style="color: #86868b; text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; gap: 5px;"><i class='bx bxl-whatsapp'></i> Contactar Soporte</a>
+        <div style="display: flex; gap: 8px;">
+            <input type="tel" id="portalPhoneSearchInput" placeholder="Ej: +51 987654321" style="flex: 1;">
+            <button class="btn-primary" style="width: auto; padding: 0 20px;" onclick="window.searchPortalByPhone()">Buscar <i class='bx bx-right-arrow-alt'></i></button>
         </div>
     </div>
+
+    <div id="portalClientResults" style="display: none;"></div>
+
+    <div style="text-align: center; margin-top: 25px;">
+        <a id="portalSupportWaBtn" href="#" target="_blank" style="font-size: 13px; color: var(--mac-text-secondary); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+            <i class='bx bxl-whatsapp' style="color: var(--mac-green); font-size: 18px;"></i> ¿Necesitas ayuda con tu cuenta? Contáctanos
+        </a>
+    </div>
+</div>
 
 </div>
     <!-- ==============================================
