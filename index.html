@@ -12,8 +12,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
-<script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
 
     <style>
         /* Ajuste fino para que los íconos se alineen perfecto con el texto */
@@ -368,11 +366,7 @@
             <option value="Perú">Perú</option>
             <option value="Colombia">Colombia</option>
             <option value="México">México</option>
-            <option value="Argentina">Argentina</option>
-            <option value="Chile">Chile</option>
-            <option value="Ecuador">Ecuador</option>
-            <option value="Bolivia">Bolivia</option>
-            <option value="Paraguay">Paraguay</option>
+            <option value="Argentina">Argentina</option><option value="Chile">Chile</option><option value="Ecuador">Ecuador</option><option value="Bolivia">Bolivia</option><option value="Paraguay">Paraguay</option>
             <option value="Otro País">Otro País...</option>
         </select>
         <input type="tel" id="regPhone" placeholder="WhatsApp (Ej: +51...)" required>
@@ -381,13 +375,7 @@
             <input type="password" id="regPassword" placeholder="Contraseña (mín 6 carácteres)" required>
             <button type="button" class="pwd-toggle" onclick="window.togglePassword('regPassword', this)"><i class='bx bx-show'></i></button>
         </div>
-        
-        <select id="regDemoPlan" required style="margin-bottom: 15px; font-weight: bold;">
-            <option value="pro">👑 Probar Demo Plan PRO (3 Horas)</option>
-            <option value="basico">⚡ Probar Demo Plan Básico (3 Horas)</option>
-        </select>
-
-        <button class="btn-primary" onclick="window.doRegister()">Crear Cuenta y Probar</button>
+        <button class="btn-primary" onclick="window.doRegister()">Crear Cuenta</button>
         <span class="auth-link" onclick="window.showLogin()">Ya tengo cuenta. Iniciar sesión</span>
     </div>
 
@@ -886,76 +874,23 @@
      VISTA DEL ADMINISTRADOR GLOBAL (A.G.C)
 =================================================== -->
 <div class="container" id="adminView" style="display: none;">
-    <h3><i class='bx bx-shield-quarter'></i> Panel de Control Administrador</h3>
-    <p style="font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 20px;">
-        Gestión de licencias, distribuidores y accesos a la plataforma A.G.C.
-    </p>
-
-    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;">
-        <button class="action-btn active" id="btnFilterAllUsers" onclick="window.filterAdminUsers('all')">
-            <i class='bx bx-grid-alt'></i> Todos
-        </button>
-        <button class="action-btn" id="btnFilterActiveUsers" onclick="window.filterAdminUsers('active')">
-            <i class='bx bx-check-circle' style="color: var(--mac-green);"></i> Activos / Demo
-        </button>
-        <button class="action-btn" id="btnFilterSuspendedUsers" onclick="window.filterAdminUsers('suspended')">
-            <i class='bx bx-block' style="color: var(--mac-red);"></i> Suspendidos
-        </button>
-        <button class="action-btn" id="btnFilterProUsers" onclick="window.filterAdminUsers('pro')">
-            <i class='bx bxs-diamond' style="color: var(--mac-blue);"></i> Plan PRO
-        </button>
-        <button class="action-btn" id="btnFilterBasicoUsers" onclick="window.filterAdminUsers('basico')">
-            <i class='bx bx-bolt-circle' style="color: var(--mac-orange);"></i> Plan Básico
-        </button>
+    <div class="header-top">
+        <h2>Panel Global A.G.C.</h2>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-primary" style="background: rgba(52, 199, 89, 0.15); color: var(--mac-green); border: 1px solid var(--mac-green); padding: 5px 15px;" onclick="window.abrirModalAdminBot()"><i class='bx bxl-whatsapp'></i> Conectar Mi Bot</button>
+            <button class="btn-logout" onclick="window.doLogout()"><i class='bx bx-log-out'></i> Salir</button>
+            <button class="theme-toggle" onclick="window.toggleTheme()"><i class='bx bx-moon'></i></button>
+        </div>
     </div>
-
+    
+    <h3><i class='bx bx-group'></i> Gestión de Distribuidores</h3>
     <div style="overflow-x:auto; margin-bottom: 40px;">
         <table>
-            <thead>
-                <tr>
-                    <th>Distribuidor</th>
-                    <th>Plan</th>
-                    <th>Estado</th>
-                    <th>Acción</th>
-                </tr>
-            </thead>
+            <thead><tr><th>Nombre</th><th>País</th><th>Correo</th><th>Teléfono</th><th>Plan</th><th>Estado</th><th>Acción</th></tr></thead>
             <tbody id="adminTableBody"></tbody>
         </table>
     </div>
-</div>
 
-<div id="adminEditUserModal" class="modal-overlay" style="display: none; z-index: 10001;">
-    <div class="modal-card" style="max-width: 420px; text-align: left;">
-        <h3 style="margin-bottom: 15px; font-size: 18px; color: var(--mac-text-main);"><i class='bx bx-user-voice'></i> Gestionar Licencia de Usuario</h3>
-        
-        <div style="margin-bottom: 15px;">
-            <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary); text-transform: uppercase;">PLAN ASIGNADO:</label>
-            <select id="adminUserPlanSelect" onchange="window.updateAdminDurationOptions()" style="width: 100%; margin-top: 4px; font-weight: bold;">
-                <option value="pro">👑 Plan PRO</option>
-                <option value="basico">⚡ Plan Básico</option>
-            </select>
-        </div>
-
-        <div style="margin-bottom: 15px;">
-            <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary); text-transform: uppercase;">ESTADO DE LA CUENTA:</label>
-            <select id="adminUserStatusSelect" onchange="window.updateAdminDurationOptions()" style="width: 100%; margin-top: 4px;">
-                <option value="active">🟢 Activo / Habilitado</option>
-                <option value="suspended">🔴 Suspendido / Inhabilitado</option>
-            </select>
-        </div>
-
-        <div id="adminDurationContainer" style="margin-bottom: 20px;">
-            <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary); text-transform: uppercase;">DURACIÓN DEL ACCESO:</label>
-            <select id="adminUserDurationSelect" style="width: 100%; margin-top: 4px;">
-                </select>
-        </div>
-
-        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-            <button class="btn-primary" onclick="window.saveAdminUserLicense()">Guardar Cambios</button>
-            <button class="btn-secondary" onclick="document.getElementById('adminEditUserModal').style.display='none'">Cancelar</button>
-        </div>
-    </div>
-</div>
     <h3><i class='bx bxs-megaphone'></i> Gestión de Noticias / Novedades</h3>
     <div class="form-grid" style="margin-bottom: 20px; background: var(--mac-gray); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border);">
         <input type="text" id="newsInputTitle" placeholder="Título de la noticia" style="background: var(--mac-surface);" required>
@@ -1469,6 +1404,50 @@
     </div>
 </div>
 
+</div>
+    <!-- ==============================================
+     MODALES DEL ADMINISTRADOR (PLANES, ESTADO Y BOT)
+=================================================== -->
+<div id="adminManageModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <h3>⚙️ Gestionar Estado: <span id="manageUserName"></span></h3>
+        <select id="manageAction" style="width: 100%; margin-bottom: 10px; padding: 10px; border-radius: 8px;">
+            <option value="true">Activar Cuenta</option>
+            <option value="false">Suspender Cuenta</option>
+        </select>
+        <select id="manageDuration" style="width: 100%; margin-bottom: 10px; padding: 10px; border-radius: 8px;" onchange="window.toggleDurationFields()">
+            <option value="permanent">Permanente</option>
+            <option value="temporary">Temporal (Con fecha de caducidad)</option>
+        </select>
+        <div id="temporaryFields" style="display: none; flex-direction: column; gap: 10px;">
+            <select id="manageTempType" onchange="window.toggleTempType()" style="padding: 10px; border-radius: 8px;">
+                <option value="hours">Por 3 horas (Demo)</option>
+                <option value="days">Por Días</option>
+            </select>
+            <input type="number" id="manageDays" placeholder="Cantidad de Días" style="display: none;">
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button class="btn-primary" onclick="window.saveManageStatus()">Guardar y Aplicar</button>
+            <button class="btn-secondary" onclick="window.closeModals()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<div id="planModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <h3>💎 Cambiar Plan: <span id="planUserName"></span></h3>
+        <p style="font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 15px;">Selecciona el nuevo nivel de suscripción. Los límites se ajustarán automáticamente.</p>
+        <select id="newPlanSelect" style="width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border); margin-bottom: 20px;">
+            <option value="demo">Prueba (Demo)</option>
+            <option value="basico">Plan Básico</option>
+            <option value="pro">Plan PRO</option>
+            <option value="elite">Plan ELITE</option>
+        </select>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-primary" style="background: linear-gradient(45deg, #007AFF, #5856D6); border: none;" onclick="window.savePlan()">Guardar Nuevo Plan</button>
+            <button class="btn-secondary" onclick="window.closeModals()">Cancelar</button>
+        </div>
+    </div>
 </div>
 
 <div id="adminBotModal" class="modal-overlay" style="display: none;">
