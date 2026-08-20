@@ -729,7 +729,7 @@ async function loadAdminData() {
             <td data-label="Plan"><strong style="color: ${planColor};">${planDisplay}</strong></td>
             <td data-label="Estado">${statusHtml}${expText}</td>
             <td data-label="Acción" class="actions-cell" style="display: flex; gap: 5px;">
-                <button class="action-btn" style="border: 1px solid var(--mac-border); background: transparent;" onclick="window.openManageModal('${id}', '${data.name}', ${data.active})">⚙️ Estado</button>
+                <button class="action-btn" onclick="window.openAdminEditUserModal('${u.id}')">
                 <button class="action-btn" style="border: 1px solid var(--mac-blue); color: var(--mac-blue); background: transparent;" onclick="window.openPlanModal('${id}', '${data.name}', '${data.plan_actual || 'demo'}')">💎 Plan</button>
             </td>`; 
         tbody.appendChild(tr);
