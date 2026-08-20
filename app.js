@@ -4503,7 +4503,7 @@ window.checkPlanesView = () => {
     if (planesView) planesView.style.display = 'block';
 
     // Número de WhatsApp Administrador para recibir las compras
-    const adminPhone = "+51987654321"; // 👈 PON AQUÍ TU NÚMERO DE WHATSAPP CON CÓDIGO DE PAÍS
+    const adminPhone = "+51961341323"; // 👈 PON AQUÍ TU NÚMERO DE WHATSAPP CON CÓDIGO DE PAÍS
     const cleanPhone = adminPhone.replace(/[^\d+]/g, '');
 
     const basicMsg = encodeURIComponent("¡Hola! 👋 Quisiera adquirir el *PLAN BÁSICO* de A.G.C. (S/ 35.00 / $10 USD - Pago Permanente). ¿Cómo realizo el pago?");
