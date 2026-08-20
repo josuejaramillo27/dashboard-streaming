@@ -6,46 +6,52 @@
     --mac-text-secondary: #6e6e73; 
     --mac-border: rgba(0, 0, 0, 0.08); 
     --mac-border-solid: rgba(0, 0, 0, 0.15); 
-    --mac-blue: #007aff;
-    --mac-blue-hover: #006ae6; 
+    
+    /* 🪄 NUEVOS ACENTOS "AURORA TECH" (Modo Claro) */
+    --mac-blue: #5856d6; /* Índigo profundo y elegante */
+    --mac-blue-hover: #4644b9; /* Índigo más oscuro al pasar el ratón */
     --mac-red: #ff3b30; 
     --mac-green: #34c759;
     --mac-orange: #ff9500; 
+    
     --mac-gray: rgba(0, 0, 0, 0.03); 
     --mac-table-hover: rgba(0, 0, 0, 0.04);
     --mac-dropdown-bg: rgba(255, 255, 255, 0.95);
     --glass-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
     --glass-blur: blur(25px);
 
-    /* NUEVO: Colores de Aurora para el Modo Claro (Súper tenues) */
-    --aurora-1: rgba(0, 122, 255, 0.05); /* Resplandor azul claro */
-    --aurora-2: rgba(88, 86, 214, 0.05); /* Resplandor morado claro */
-    --aurora-3: rgba(52, 199, 89, 0.03); /* Resplandor verde tenue */
+    /* Colores de Aurora para el Modo Claro */
+    --aurora-1: rgba(88, 86, 214, 0.06); /* Índigo claro */
+    --aurora-2: rgba(94, 234, 212, 0.05); /* Cian sutil */
+    --aurora-3: rgba(52, 199, 89, 0.03); 
 }
 
 body.dark-mode {
-    /* Fondo base: Negro mate profundo (Elegancia total) */
+    /* Fondo base: Negro mate profundo */
     --mac-bg: #050505; 
     --mac-surface: rgba(24, 24, 26, 0.65); 
     --mac-text-main: #f5f5f7;
     --mac-text-secondary: #86868b; 
     --mac-border: rgba(255, 255, 255, 0.08); 
     --mac-border-solid: rgba(255, 255, 255, 0.15);
-    --mac-blue: #0a84ff;
-    --mac-blue-hover: #0070e0; 
+    
+    /* 🪄 NUEVOS ACENTOS "AURORA TECH" (Modo Oscuro) */
+    --mac-blue: #5e5ce6; /* Índigo brillante (Reemplaza al celeste genérico) */
+    --mac-blue-hover: #4b48d6; /* Índigo intenso al tocar */
     --mac-red: #ff453a; 
     --mac-green: #30d158;
     --mac-orange: #ff9f0a; 
+    
     --mac-gray: rgba(255, 255, 255, 0.03); 
     --mac-table-hover: rgba(255, 255, 255, 0.04);
     --mac-dropdown-bg: rgba(24, 24, 26, 0.85);
     --glass-shadow: 0 15px 45px rgba(0, 0, 0, 0.9);
     --glass-blur: blur(25px);
 
-    /* NUEVO: Colores de Aurora para el Modo Oscuro (Misterioso y tecnológico) */
-    --aurora-1: rgba(10, 132, 255, 0.12); /* Resplandor azul abisal */
-    --aurora-2: rgba(94, 92, 230, 0.10);  /* Resplandor índigo */
-    --aurora-3: rgba(48, 209, 88, 0.06);  /* Resplandor verde esmeralda levísimo */
+    /* Colores de Aurora para el Modo Oscuro */
+    --aurora-1: rgba(94, 92, 230, 0.12); /* Resplandor índigo abisal */
+    --aurora-2: rgba(45, 212, 191, 0.08);  /* Resplandor cian tecnológico */
+    --aurora-3: rgba(10, 132, 255, 0.06);  /* Resplandor azul profundo */
 }
 /* =========================================================
    FONDO DINÁMICO AURORA PREMIUM (MESH GRADIENT)
