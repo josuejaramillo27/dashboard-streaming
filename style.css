@@ -1348,3 +1348,67 @@ body.dark-mode .bottom-nav { background: linear-gradient(to top, rgba(0, 0, 0, 1
     50% { transform: translateY(-6px) scale(1.1) rotate(3deg); }
     100% { transform: translateY(0px) scale(1) rotate(0deg); }
 }
+
+/* Custom Driver.js Theme - Glassmorphism & Glow */
+.driver-popover.driverjs-theme-dark {
+    background: rgba(28, 28, 30, 0.65) !important; /* Fondo oscuro traslúcido */
+    backdrop-filter: blur(15px) !important; /* Efecto de desenfoque de cristal */
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), 
+                0 0 15px rgba(0, 212, 255, 0.2) !important; /* Resplandor suave */
+    border-radius: 12px !important;
+    padding: 20px !important;
+    max-width: 350px !important;
+    color: #ffffff !important;
+}
+
+/* Título del Tutorial */
+.driver-popover.driverjs-theme-dark .driver-popover-title {
+    font-weight: 700 !important;
+    font-size: 1.2rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    color: #ffffff !important;
+    margin-bottom: 10px !important;
+}
+
+/* Descripción */
+.driver-popover.driverjs-theme-dark .driver-popover-description {
+    font-size: 0.95rem !important;
+    line-height: 1.5 !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Botones (General) */
+.driver-popover.driverjs-theme-dark .driver-popover-footer button {
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    padding: 8px 16px !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Botón Siguiente (Principal) */
+.driver-popover.driverjs-theme-dark .driver-popover-next-btn {
+    background-color: #00d4ff !important; /* Color Cian/Azul brillante */
+    color: #000000 !important;
+    border: none !important;
+    text-shadow: none !important;
+}
+
+.driver-popover.driverjs-theme-dark .driver-popover-next-btn:hover {
+    background-color: #ffffff !important;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.5) !important;
+}
+
+/* Botón Atrás (Secundario) */
+.driver-popover.driverjs-theme-dark .driver-popover-prev-btn {
+    background-color: transparent !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.driver-popover.driverjs-theme-dark .driver-popover-prev-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
