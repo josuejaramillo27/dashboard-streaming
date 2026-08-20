@@ -35,31 +35,38 @@
     --aurora-3: rgba(139, 92, 246, 0.05); /* Morado claro tenue */
 }
 body.dark-mode {
-    /* Fondo base: Negro mate profundo */
+    /* Fondo base: Negro mate abisal */
     --mac-bg: #050505; 
-    --mac-surface: rgba(24, 24, 26, 0.65); 
-    --mac-text-main: #f5f5f7;
-    --mac-text-secondary: #86868b; 
-    --mac-border: rgba(255, 255, 255, 0.08); 
-    --mac-border-solid: rgba(255, 255, 255, 0.15);
     
-    /* 🪄 NUEVOS ACENTOS "AURORA TECH" (Modo Oscuro) */
-    --mac-blue: #5e5ce6; /* Índigo brillante (Reemplaza al celeste genérico) */
-    --mac-blue-hover: #4b48d6; /* Índigo intenso al tocar */
+    /* Paneles principales: Cristal oscuro ahumado */
+    --mac-surface: rgba(18, 18, 22, 0.70); 
+    
+    /* Textos nítidos */
+    --mac-text-main: #f5f5f7;
+    --mac-text-secondary: #8e8e93; 
+    
+    /* Bordes con un micro-resplandor índigo sutil */
+    --mac-border: rgba(94, 92, 230, 0.18); 
+    --mac-border-solid: rgba(255, 255, 255, 0.12);
+    
+    /* Acentos Aurora Tech */
+    --mac-blue: #5e5ce6; 
+    --mac-blue-hover: #4b48d6; 
     --mac-red: #ff453a; 
     --mac-green: #30d158;
     --mac-orange: #ff9f0a; 
     
-    --mac-gray: rgba(255, 255, 255, 0.03); 
-    --mac-table-hover: rgba(255, 255, 255, 0.04);
-    --mac-dropdown-bg: rgba(24, 24, 26, 0.85);
-    --glass-shadow: 0 15px 45px rgba(0, 0, 0, 0.9);
+    /* 🪄 EL CAMBIO CLAVE: Reemplazamos el gris opaco por un negro/índigo translúcido */
+    --mac-gray: rgba(255, 255, 255, 0.04); 
+    --mac-table-hover: rgba(94, 92, 230, 0.08);
+    --mac-dropdown-bg: rgba(20, 20, 25, 0.90);
+    
+    --glass-shadow: 0 15px 45px rgba(0, 0, 0, 0.85);
     --glass-blur: blur(25px);
 
-    /* Colores de Aurora para el Modo Oscuro */
-    --aurora-1: rgba(94, 92, 230, 0.12); /* Resplandor índigo abisal */
-    --aurora-2: rgba(45, 212, 191, 0.08);  /* Resplandor cian tecnológico */
-    --aurora-3: rgba(10, 132, 255, 0.06);  /* Resplandor azul profundo */
+    --aurora-1: rgba(94, 92, 230, 0.14); 
+    --aurora-2: rgba(45, 212, 191, 0.08); 
+    --aurora-3: rgba(10, 132, 255, 0.06); 
 }
 /* =========================================================
    FONDO DINÁMICO AURORA PREMIUM (MESH GRADIENT)
