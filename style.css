@@ -1227,3 +1227,94 @@ body.dark-mode .bottom-nav { background: linear-gradient(to top, rgba(0, 0, 0, 1
     color: white;
     border-color: var(--mac-blue);
 }
+
+/* =========================================================
+   REDISEÑO DE CONTENEDORES, BUSCADORES Y SIDEBAR (AURORA TECH)
+========================================================= */
+
+/* 1. Barra Lateral / Sidebar de Accesos */
+.sidebar, nav, .sidebar-container, .mobile-sidebar {
+    background: rgba(15, 15, 18, 0.75) !important;
+    backdrop-filter: var(--glass-blur) !important;
+    -webkit-backdrop-filter: var(--glass-blur) !important;
+    border-right: 1px solid var(--mac-border) !important;
+}
+
+.sidebar .nav-item, .sidebar a, .menu-btn {
+    color: var(--mac-text-secondary);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.sidebar .nav-item:hover, .sidebar a:hover, .sidebar .active {
+    background: rgba(94, 92, 230, 0.15) !important;
+    color: var(--mac-text-main) !important;
+    border: 1px solid rgba(94, 92, 230, 0.3);
+}
+
+/* 2. Buscador e Inputs de Filtros ("Todos los estados", "Países", etc.) */
+input[type="text"], 
+input[type="tel"], 
+input[type="email"], 
+input[type="password"], 
+input[type="number"], 
+input[type="date"], 
+select, 
+textarea,
+.search-box {
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: var(--mac-text-main) !important;
+    border: 1px solid var(--mac-border) !important;
+    border-radius: 12px !important;
+    padding: 10px 14px !important;
+    backdrop-filter: blur(10px) !important;
+    transition: all 0.25s ease !important;
+}
+
+/* Iluminación al hacer foco/clic en los buscadores */
+input:focus, select:focus, textarea:focus {
+    border-color: var(--mac-blue) !important;
+    box-shadow: 0 0 12px rgba(94, 92, 230, 0.35) !important;
+    background: rgba(94, 92, 230, 0.08) !important;
+    outline: none !important;
+}
+
+/* Opciones desplegables de los selects */
+select option {
+    background: #141419 !important;
+    color: var(--mac-text-main) !important;
+}
+
+/* 3. Contenedores de Clientes, Inventario y Tiendita Web */
+.card, 
+.modal-card, 
+.client-card, 
+.inventory-card, 
+.store-item-card,
+.data-box,
+.mac-card {
+    background: var(--mac-surface) !important;
+    border: 1px solid var(--mac-border) !important;
+    backdrop-filter: var(--glass-blur) !important;
+    -webkit-backdrop-filter: var(--glass-blur) !important;
+    border-radius: 20px !important;
+    box-shadow: var(--glass-shadow) !important;
+}
+
+/* Sub-bloques y cajitas internas (Campos de contraseñas, perfiles, etc.) */
+.inner-box, 
+.credential-card, 
+.account-box, 
+.info-row {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 12px !important;
+}
+
+/* Tablas y filas hover */
+table tbody tr {
+    transition: background 0.2s ease;
+}
+table tbody tr:hover {
+    background: var(--mac-table-hover) !important;
+}
