@@ -1096,3 +1096,127 @@ body.dark-mode .bottom-nav { background: linear-gradient(to top, rgba(0, 0, 0, 1
         width: 100% !important; 
     }
 }
+
+/* =========================================================
+   DISEÑO PREMIUM PARA "MI PORTAL" (VISTA CLIENTE)
+========================================================= */
+.portal-container {
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.portal-hero-card {
+    background: var(--mac-surface) !important;
+    border: 1px solid var(--mac-border) !important;
+    backdrop-filter: var(--glass-blur) !important;
+    -webkit-backdrop-filter: var(--glass-blur) !important;
+    border-radius: 24px !important;
+    padding: 25px 20px !important;
+    box-shadow: var(--glass-shadow) !important;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Insignia de Estado con Brillo de Neón */
+.portal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 15px;
+}
+.portal-badge.active {
+    background: rgba(48, 209, 88, 0.15);
+    color: var(--mac-green);
+    border: 1px solid rgba(48, 209, 88, 0.4);
+    box-shadow: 0 0 15px rgba(48, 209, 88, 0.2);
+}
+.portal-badge.warning {
+    background: rgba(255, 159, 10, 0.15);
+    color: var(--mac-orange);
+    border: 1px solid rgba(255, 159, 10, 0.4);
+    box-shadow: 0 0 15px rgba(255, 159, 10, 0.2);
+    animation: portalPulse 2s infinite alternate;
+}
+.portal-badge.expired {
+    background: rgba(255, 69, 58, 0.15);
+    color: var(--mac-red);
+    border: 1px solid rgba(255, 69, 58, 0.4);
+    box-shadow: 0 0 15px rgba(255, 69, 58, 0.25);
+    animation: portalPulse 1.5s infinite alternate;
+}
+
+@keyframes portalPulse {
+    0% { transform: scale(1); opacity: 0.9; }
+    100% { transform: scale(1.03); opacity: 1; }
+}
+
+/* Tarjetas de Credenciales (Copiar fácil) */
+.credential-card {
+    background: var(--mac-gray);
+    border: 1px solid var(--mac-border);
+    border-radius: 16px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    transition: border-color 0.2s;
+}
+.credential-card:hover {
+    border-color: var(--mac-blue);
+}
+
+.credential-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-right: 10px;
+}
+.credential-label {
+    font-size: 11px;
+    color: var(--mac-text-secondary);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.credential-value {
+    font-size: 14px;
+    color: var(--mac-text-main);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+}
+
+/* Botón de Copiar */
+.btn-copy-chip {
+    background: var(--mac-surface);
+    border: 1px solid var(--mac-border);
+    color: var(--mac-text-main);
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+.btn-copy-chip:hover {
+    background: var(--mac-blue);
+    color: white;
+    border-color: var(--mac-blue);
+}
