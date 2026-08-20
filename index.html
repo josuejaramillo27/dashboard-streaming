@@ -1268,11 +1268,12 @@
 
     <div id="portalSearchCard" class="portal-hero-card" style="margin-bottom: 20px;">
         <h3 style="margin-top: 0; font-size: 16px; color: var(--mac-text-main);"><i class='bx bx-search-alt-2'></i> Consulta tus Accesos</h3>
-        <p style="font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 15px;">Ingresa tu número de teléfono registrado para ver tus credenciales:</p>
+        <p style="font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 15px;">Ingresa tus datos de cliente para ver tus credenciales:</p>
         
-        <div style="display: flex; gap: 8px;">
-            <input type="tel" id="portalPhoneSearchInput" placeholder="Ej: +51 987654321" style="flex: 1;">
-            <button class="btn-primary" style="width: auto; padding: 0 20px;" onclick="window.searchPortalByPhone()">Buscar <i class='bx bx-right-arrow-alt'></i></button>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <input type="tel" id="portalPhoneSearchInput" placeholder="WhatsApp Registrado (Ej: +51...)" style="width: 100%; text-align: center; font-size: 14px;">
+            <input type="text" id="portalCodeSearchInput" placeholder="🔑 Código Portal Web" style="width: 100%; text-align: center; text-transform: uppercase; font-size: 14px; font-weight: bold; letter-spacing: 2px;">
+            <button class="btn-primary" style="width: 100%; padding: 12px; margin-top: 5px;" onclick="window.searchPortalByPhone()">Buscar Accesos <i class='bx bx-right-arrow-alt'></i></button>
         </div>
     </div>
 
@@ -1393,7 +1394,7 @@
         </div>
 
         <p style="font-size: 12px; color: var(--mac-text-secondary); text-align: left;">
-            💡 <b>Tip Pro:</b> Tus clientes ingresarán a este link, colocarán su teléfono registrado y verán sus cuentas en tiempo real con sus logos correspondientes.
+            💡 <b>Tip Pro:</b> Tus clientes ingresarán a este link, colocarán su teléfono registrado junto a su código de seguridad(lo encuentras al ver los datos de tu cliente) y verán sus cuentas en tiempo real. 
         </p>
 
         <div style="margin-top: 20px;">
