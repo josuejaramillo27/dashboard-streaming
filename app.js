@@ -177,10 +177,14 @@ window.doLogout = async () => {
 };
 
 onAuthStateChanged(auth, async (user) => {
-    // 🛑 Candado de Tienda y Portal (Evita que el Login se superponga a las webs públicas)
+    // 🛑 Candado de Tienda, Portal y Planes (Evita que el Login se superponga)
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('tienda') || urlParams.get('portal') || urlParams.get('store')) {
-        document.getElementById('authView').style.display = 'none';
+    if (urlParams.get('planes') || urlParams.get('tienda') || urlParams.get('portal') || urlParams.get('store')) {
+        if (document.getElementById('authView')) document.getElementById('authView').style.display = 'none';
+        
+        // Ejecutar las vistas correspondientes si existen
+        if (typeof window.checkPlanesView === 'function') window.checkPlanesView();
+        if (typeof window.checkClientPortal === 'function') window.checkClientPortal();
         return;
     }
 
@@ -4478,4 +4482,41 @@ window.openProfileModal = () => {
     document.getElementById('editProfileAlias').value = currentUserData.storeAlias || ''; 
     document.getElementById('editReferencesLink').value = currentUserData.referencesLink || '';
     if (typeof window.renderCustomServicesChips === 'function') window.renderCustomServicesChips();
+};
+
+/* =========================================================
+   LÓGICA PÚBLICA DE PLANES Y LICENCIAS (?planes=true)
+========================================================= */
+window.checkPlanesView = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.get('planes')) return false;
+
+    // Ocultar vistas privadas y login
+    if (document.getElementById('authView')) document.getElementById('authView').style.display = 'none';
+    if (document.getElementById('appView')) document.getElementById('appView').style.display = 'none';
+    if (document.getElementById('adminView')) document.getElementById('adminView').style.display = 'none';
+    if (document.getElementById('publicStoreView')) document.getElementById('publicStoreView').style.display = 'none';
+    if (document.getElementById('clientPortalView')) document.getElementById('clientPortalView').style.display = 'none';
+
+    // Mostrar vista de planes
+    const planesView = document.getElementById('planesPublicView');
+    if (planesView) planesView.style.display = 'block';
+
+    // Número de WhatsApp Administrador para recibir las compras
+    const adminPhone = "+51987654321"; // 👈 PON AQUÍ TU NÚMERO DE WHATSAPP CON CÓDIGO DE PAÍS
+    const cleanPhone = adminPhone.replace(/[^\d+]/g, '');
+
+    const basicMsg = encodeURIComponent("¡Hola! 👋 Quisiera adquirir el *PLAN BÁSICO* de A.G.C. (S/ 35.00 / $10 USD - Pago Permanente). ¿Cómo realizo el pago?");
+    const proMsg = encodeURIComponent("¡Hola! 👋 Quisiera adquirir el *PLAN PRO* de A.G.C. (S/ 25.00 / $7.15 USD - Mensual) con Bot de WhatsApp. ¿Cómo realizo la activación?");
+    const helpMsg = encodeURIComponent("¡Hola! 👋 Tengo dudas sobre los Planes de A.G.C. ¿Me podrías brindar información?");
+
+    const btnBasic = document.getElementById('btnBuyBasicPlan');
+    const btnPro = document.getElementById('btnBuyProPlan');
+    const btnHelp = document.getElementById('btnPlanesContactWa');
+
+    if (btnBasic) btnBasic.href = `https://wa.me/${cleanPhone}?text=${basicMsg}`;
+    if (btnPro) btnPro.href = `https://wa.me/${cleanPhone}?text=${proMsg}`;
+    if (btnHelp) btnHelp.href = `https://wa.me/${cleanPhone}?text=${helpMsg}`;
+
+    return true;
 };
