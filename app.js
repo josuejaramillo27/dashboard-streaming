@@ -4645,14 +4645,3 @@ window.startTutorial = () => {
     });
     driverObj.drive();
 };
-
-/* --- CONTROL DE TÉRMINOS Y CONDICIONES --- */
-window.openTermsModal = () => {
-    const modal = document.getElementById('termsModal');
-    if (modal) modal.style.display = 'flex';
-};
-
-window.closeTermsModal = () => {
-    const modal = document.getElementById('termsModal');
-    if (modal) modal.style.display = 'none';
-};
