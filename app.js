@@ -4614,18 +4614,20 @@ window.checkDemoExpiration = (userData) => {
 //  window.startNewUserTour(); )
 
 /* =========================================================
-   SISTEMA DE FILTROS Y CONTROL DE ADMIN CORREGIDO
+   SISTEMA DE ADMINISTRACIÓN DE LICENCIAS Y FILTROS (100% CORREGIDO)
 ========================================================= */
 let allAdminUsersList = [];
 let currentAdminFilter = 'all';
+let currentEditingUserId = null;
 
+// Carga la lista completa de usuarios desde Firestore
 window.loadAdminData = async () => {
     try {
         const qUsers = await getDocs(collection(db, "users"));
         allAdminUsersList = [];
         qUsers.forEach(d => {
             const data = d.data();
-            // Ignoramos la cuenta principal de admin para no auto-editarse por error
+            // Ignorar la cuenta administradora principal para evitar auto-suspensión
             if (data.role !== 'admin' && data.email !== 'admin@akaza.com') {
                 allAdminUsersList.push({ id: d.id, ...data });
             }
@@ -4634,22 +4636,23 @@ window.loadAdminData = async () => {
     } catch (e) {
         console.error("Error cargando usuarios admin:", e);
         if (typeof window.showNotification === 'function') {
-            window.showNotification("Error cargando usuarios: " + e.message);
+            window.showNotification("Error cargando lista de usuarios: " + e.message);
         }
     }
 };
 
+// Filtrar la lista de usuarios en pantalla
 window.filterAdminUsers = (filter) => {
     currentAdminFilter = filter;
 
-    // Resetear resaltado en todos los botones de filtro
-    const filterButtons = ['All', 'Active', 'Suspended', 'Pro', 'Basico'];
-    filterButtons.forEach(f => {
+    // Resetear el estado activo de los botones
+    const btnIds = ['All', 'Active', 'Suspended', 'Pro', 'Basico'];
+    btnIds.forEach(f => {
         const btn = document.getElementById('btnFilter' + f + 'Users');
         if (btn) btn.classList.remove('active');
     });
 
-    // Resaltar el botón activo según el filtro seleccionado
+    // Activar el botón seleccionado
     const capitalizedFilter = filter.charAt(0).toUpperCase() + filter.slice(1);
     const activeBtn = document.getElementById('btnFilter' + capitalizedFilter + 'Users');
     if (activeBtn) activeBtn.classList.add('active');
@@ -4658,16 +4661,22 @@ window.filterAdminUsers = (filter) => {
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    // Filtrar lista de usuarios según la categoría
+    // Filtrar según el criterio
     let filtered = allAdminUsersList;
     if (filter === 'active') {
         filtered = filtered.filter(u => u.status === 'active' || u.status === 'demo' || u.active === true);
     } else if (filter === 'suspended') {
         filtered = filtered.filter(u => u.status === 'suspended' || u.active === false);
     } else if (filter === 'pro') {
-        filtered = filtered.filter(u => u.plan_actual === 'pro' || u.plan === 'pro');
+        filtered = filtered.filter(u => {
+            const p = (u.plan_actual || u.plan || '').toLowerCase();
+            return p === 'pro';
+        });
     } else if (filter === 'basico') {
-        filtered = filtered.filter(u => u.plan_actual === 'basico' || u.plan === 'basic' || u.plan === 'basico' || !u.plan_actual);
+        filtered = filtered.filter(u => {
+            const p = (u.plan_actual || u.plan || '').toLowerCase();
+            return p === 'basico' || p === 'basic' || p === '';
+        });
     }
 
     if (filtered.length === 0) {
@@ -4680,8 +4689,8 @@ window.filterAdminUsers = (filter) => {
         const isPro = rawPlan === 'pro';
         
         const badgePlan = isPro 
-            ? `<span class="portal-badge active" style="padding: 3px 10px; font-size: 11px;"><i class='bx bxs-diamond'></i> PRO</span>`
-            : `<span class="portal-badge" style="padding: 3px 10px; font-size: 11px; background: rgba(255,255,255,0.08); color: var(--mac-text-main); border: 1px solid var(--mac-border);"><i class='bx bx-bolt-circle' style="color: var(--mac-orange);"></i> BÁSICO</span>`;
+            ? `<span class="portal-badge active" style="padding: 4px 10px; font-size: 11px;"><i class='bx bxs-diamond'></i> PRO</span>`
+            : `<span class="portal-badge" style="padding: 4px 10px; font-size: 11px; background: rgba(255,255,255,0.08); color: var(--mac-text-main); border: 1px solid var(--mac-border);"><i class='bx bx-bolt-circle' style="color: var(--mac-orange);"></i> BÁSICO</span>`;
 
         let statHtml = '';
         if (u.status === 'suspended' || u.active === false) {
@@ -4710,28 +4719,34 @@ window.filterAdminUsers = (filter) => {
     });
 };
 
+// Abrir el modal de edición de un usuario
 window.openAdminEditUserModal = (userId) => {
     currentEditingUserId = userId;
     const u = allAdminUsersList.find(x => x.id === userId);
-    if(!u) return;
+    if (!u) return;
 
-    document.getElementById('adminUserPlanSelect').value = u.plan_actual || 'basico';
-    document.getElementById('adminUserStatusSelect').value = (u.status === 'suspended' || u.active === false) ? 'suspended' : 'active';
+    const rawPlan = (u.plan_actual || u.plan || 'basico').toLowerCase();
+    document.getElementById('adminUserPlanSelect').value = rawPlan === 'pro' ? 'pro' : 'basico';
+
+    const isSuspended = u.status === 'suspended' || u.active === false;
+    document.getElementById('adminUserStatusSelect').value = isSuspended ? 'suspended' : 'active';
+
     window.updateAdminDurationOptions();
-    
     document.getElementById('adminEditUserModal').style.display = 'flex';
 };
 
+// Actualiza las opciones de duración en el modal
 window.updateAdminDurationOptions = () => {
     const plan = document.getElementById('adminUserPlanSelect').value;
     const status = document.getElementById('adminUserStatusSelect').value;
     const durContainer = document.getElementById('adminDurationContainer');
     const durSelect = document.getElementById('adminUserDurationSelect');
-    
+
     if (status === 'suspended') {
         durContainer.style.display = 'none';
         return;
     }
+
     durContainer.style.display = 'block';
     durSelect.innerHTML = '';
 
@@ -4742,39 +4757,64 @@ window.updateAdminDurationOptions = () => {
         `;
     } else {
         durSelect.innerHTML = `
-            <option value="permanent" selected>♾️ Activo Permanente</option>
+            <option value="demo_3h">⏱️ Demo 3 Horas</option>
+            <option value="permanent" selected>♾️ Activo Permanente (Pago Único)</option>
         `;
     }
 };
 
+// Guardar los cambios en Firebase Firestore
 window.saveAdminUserLicense = async () => {
-    if(!currentEditingUserId) return;
-    const plan = document.getElementById('adminUserPlanSelect').value;
-    const status = document.getElementById('adminUserStatusSelect').value;
+    if (!currentEditingUserId) return;
+
+    const plan = document.getElementById('adminUserPlanSelect').value; // 'pro' o 'basico'
+    const status = document.getElementById('adminUserStatusSelect').value; // 'active' o 'suspended'
     const dur = document.getElementById('adminUserDurationSelect').value;
 
-    let updateData = { plan_actual: plan, active: status === 'active' };
+    let updateData = {
+        plan_actual: plan,
+        plan: plan,
+        active: status === 'active',
+        updatedAtMs: Date.now()
+    };
 
     if (status === 'suspended') {
         updateData.status = 'suspended';
     } else {
         if (dur === 'demo_3h') {
             updateData.status = 'demo';
-            updateData.createdAtMs = Date.now();
+            updateData.createdAtMs = Date.now(); // Reinicia el contador de 3 horas
+            updateData.licenseExpiration = null;
         } else if (dur === '30_days') {
             updateData.status = 'active';
-            const exp = new Date(); exp.setDate(exp.getDate() + 30);
-            updateData.licenseExpiration = exp.toISOString();
+            const expDate = new Date();
+            expDate.setDate(expDate.getDate() + 30);
+            updateData.licenseExpiration = expDate.toISOString();
         } else if (dur === 'permanent') {
             updateData.status = 'active';
-            updateData.licenseExpiration = null;
+            updateData.licenseExpiration = null; // Sin fecha de expiración
         }
     }
 
     try {
         await updateDoc(doc(db, "users", currentEditingUserId), updateData);
-        window.showNotification("✅ Licencia actualizada");
+
+        // Actualizar la lista en memoria inmediatamente
+        const userIndex = allAdminUsersList.findIndex(u => u.id === currentEditingUserId);
+        if (userIndex !== -1) {
+            allAdminUsersList[userIndex] = { ...allAdminUsersList[userIndex], ...updateData };
+        }
+
+        if (typeof window.showNotification === 'function') {
+            window.showNotification("✅ Licencia actualizada exitosamente");
+        }
+
         document.getElementById('adminEditUserModal').style.display = 'none';
-        window.loadAdminData();
-    } catch(e) { window.showNotification("Error: " + e.message); }
+        window.filterAdminUsers(currentAdminFilter);
+    } catch (e) {
+        console.error("Error guardando licencia:", e);
+        if (typeof window.showNotification === 'function') {
+            window.showNotification("Error actualizando usuario: " + e.message);
+        }
+    }
 };
