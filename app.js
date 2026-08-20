@@ -1302,13 +1302,15 @@ window.renderTable = () => {
     if(document.getElementById('statsPanel').style.display === 'grid') window.toggleStats(true);
 };
 
-/* --- SISTEMA AVANZADO Y VISUAL DE ENVÍO POR WHATSAPP --- */
+/* --- SISTEMA MULTI-PLATAFORMA AVANZADO DE ENVÍO POR WHATSAPP --- */
 let currentWaClientId = null;
 let currentWaType = null;
 
 window.openWaSendModal = (id) => {
     currentWaClientId = id;
     currentWaType = null;
+    const c = clients.find(x => x.id === id);
+    if (!c) return;
     
     // Reset de botones
     document.getElementById('btnWaRenovacion').style.border = '1px solid var(--mac-blue)';
@@ -1322,16 +1324,45 @@ window.openWaSendModal = (id) => {
     document.getElementById('waDataOptionsContainer').style.display = 'none';
     document.getElementById('btnConfirmWaSend').style.display = 'none';
     
-    // Marcar visualmente todas las casillas al abrir
-    document.querySelectorAll('.wa-chk-card').forEach(labelEl => {
-        const chk = labelEl.querySelector('.wa-data-chk');
-        const icon = labelEl.querySelector('.wa-chk-icon');
-        chk.checked = true;
-        labelEl.style.border = '1px solid var(--mac-green)';
-        labelEl.style.background = 'rgba(52, 199, 89, 0.15)';
-        labelEl.style.opacity = '1';
-        icon.className = 'bx bx-check-circle wa-chk-icon';
-        icon.style.color = 'var(--mac-green)';
+    // --- GENERAR INTERFAZ DINÁMICA POR PLATAFORMA ---
+    const container = document.getElementById('dynamicWaPlatformsContainer');
+    container.innerHTML = ''; // Limpiar 
+
+    let platformsList = [];
+    if (c.multiAccounts && Object.keys(c.multiAccounts).length > 0) {
+        platformsList = Object.keys(c.multiAccounts);
+    } else {
+        platformsList = c.platform ? c.platform.split(',').map(p => p.trim()) : ['Servicio'];
+    }
+
+    // Dibujar un bloque de opciones por cada plataforma
+    platformsList.forEach(platName => {
+        const options = [
+            { val: 'correo', label: '📧 Correo' },
+            { val: 'pass', label: '🔑 Clave' },
+            { val: 'perfil', label: '👤 Perfil' },
+            { val: 'pin', label: '📌 PIN' },
+            { val: 'fecha', label: '📅 Venc.' },
+            { val: 'reglas', label: '⚠️ Reglas' }
+        ];
+
+        let cardsHtml = options.map(opt => `
+            <label class="wa-chk-card" onclick="window.updateWaChkCard(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); color: var(--mac-text-main); font-weight: 500; transition: all 0.2s;">
+                <span>${opt.label}</span>
+                <input type="checkbox" class="wa-data-chk" data-platform="${platName}" value="${opt.val}" checked style="display:none;">
+                <i class='bx bx-check-circle wa-chk-icon' style="color: var(--mac-green); font-size: 16px;"></i>
+            </label>
+        `).join('');
+
+        const blockHtml = `
+            <div style="background: var(--mac-bg); padding: 12px; border-radius: 10px; border: 1px solid var(--mac-border);">
+                <div style="font-size: 13px; font-weight: bold; color: var(--mac-text-main); margin-bottom: 10px; text-transform: uppercase;">🎬 ${platName}</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
+                    ${cardsHtml}
+                </div>
+            </div>
+        `;
+        container.innerHTML += blockHtml;
     });
     
     document.getElementById('btnToggleAllWaBoxes').innerText = 'Desmarcar Todo';
@@ -1349,33 +1380,27 @@ window.selectWaType = (type) => {
         document.getElementById('btnWaRenovacion').style.border = '2px solid var(--mac-blue)';
         document.getElementById('btnWaRenovacion').style.background = 'var(--mac-blue)';
         document.getElementById('btnWaRenovacion').style.color = 'white';
-        
         document.getElementById('btnWaDatos').style.border = '1px solid var(--mac-green)';
         document.getElementById('btnWaDatos').style.background = 'rgba(52, 199, 89, 0.1)';
         document.getElementById('btnWaDatos').style.color = 'var(--mac-green)';
-        
         document.getElementById('waDataOptionsContainer').style.display = 'none';
         document.getElementById('btnConfirmWaSend').style.display = 'block';
     } else {
         document.getElementById('btnWaDatos').style.border = '2px solid var(--mac-green)';
         document.getElementById('btnWaDatos').style.background = 'var(--mac-green)';
         document.getElementById('btnWaDatos').style.color = 'white';
-        
         document.getElementById('btnWaRenovacion').style.border = '1px solid var(--mac-blue)';
         document.getElementById('btnWaRenovacion').style.background = 'rgba(0, 122, 255, 0.1)';
         document.getElementById('btnWaRenovacion').style.color = 'var(--mac-blue)';
-        
         document.getElementById('waDataOptionsContainer').style.display = 'block';
         document.getElementById('btnConfirmWaSend').style.display = 'block';
     }
 };
 
-// Actualizar visualmente cada casilla individual al dar clic
 window.updateWaChkCard = (labelEl) => {
     setTimeout(() => {
         const chk = labelEl.querySelector('.wa-data-chk');
         const icon = labelEl.querySelector('.wa-chk-icon');
-        
         if (chk.checked) {
             labelEl.style.border = '1px solid var(--mac-green)';
             labelEl.style.background = 'rgba(52, 199, 89, 0.15)';
@@ -1392,7 +1417,6 @@ window.updateWaChkCard = (labelEl) => {
     }, 10);
 };
 
-// Botón único para Marcar Todo / Desmarcar Todo
 window.toggleAllWaBoxes = () => {
     const btn = document.getElementById('btnToggleAllWaBoxes');
     const cards = document.querySelectorAll('.wa-chk-card');
@@ -1403,7 +1427,6 @@ window.toggleAllWaBoxes = () => {
         c.checked = !allChecked;
         const labelEl = cards[idx];
         const icon = labelEl.querySelector('.wa-chk-icon');
-        
         if (c.checked) {
             labelEl.style.border = '1px solid var(--mac-green)';
             labelEl.style.background = 'rgba(52, 199, 89, 0.15)';
@@ -1418,11 +1441,9 @@ window.toggleAllWaBoxes = () => {
             icon.style.color = 'var(--mac-text-secondary)';
         }
     });
-    
     btn.innerText = !allChecked ? 'Desmarcar Todo' : 'Marcar Todo';
 };
 
-// Confirmación de envío
 window.confirmSendWa = () => {
     if (!currentWaClientId) return;
     const c = clients.find(x => x.id === currentWaClientId);
@@ -1438,7 +1459,6 @@ window.confirmSendWa = () => {
     if (currentWaType === 'renovacion') {
         let baseMsg = currentUserData.waTemplate || "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*.\nPagos: {pago}";
         let paymentInfo = currentUserData.waPaymentInfo || "(Pregúntame por mis métodos de pago)";
-        
         finalMsg = baseMsg
             .replace(/{nombre}/g, c.name)
             .replace(/{plataforma}/g, c.platform)
@@ -1446,35 +1466,59 @@ window.confirmSendWa = () => {
             .replace(/{pago}/g, paymentInfo); 
             
     } else if (currentWaType === 'datos') {
-        const selectedData = Array.from(document.querySelectorAll('.wa-data-chk:checked')).map(chk => chk.value);
-        
-        let accountData = null;
-        let rulesText = "Uso personal, no modificar los datos de acceso.";
-        const firstPlatform = c.platform.split(', ')[0];
-        
-        if (c.multiAccounts && c.multiAccounts[firstPlatform]) {
-            accountData = c.multiAccounts[firstPlatform];
+        const checkboxes = Array.from(document.querySelectorAll('.wa-data-chk:checked'));
+        if (checkboxes.length === 0) return window.showNotification("⚠️ Selecciona al menos un dato.");
+
+        // Agrupamos lo seleccionado por cada plataforma
+        let selectionsByPlatform = {};
+        checkboxes.forEach(chk => {
+            const plat = chk.getAttribute('data-platform');
+            if (!selectionsByPlatform[plat]) selectionsByPlatform[plat] = [];
+            selectionsByPlatform[plat].push(chk.value);
+        });
+
+        let platformsList = [];
+        if (c.multiAccounts && Object.keys(c.multiAccounts).length > 0) {
+            platformsList = Object.keys(c.multiAccounts);
         } else {
-            accountData = {
-                email: c.accountEmail || '-',
-                password: c.accountPassword || '-',
-                profile: c.accountProfile || '-',
-                pin: c.accountPin || '-'
-            };
+            platformsList = c.platform ? c.platform.split(',').map(p => p.trim()) : ['Servicio'];
         }
 
-        const rulesDB = currentUserData.platformRules || {};
-        rulesText = rulesDB[firstPlatform] || rulesText;
+        finalMsg = `*Tus accesos activos (${c.name}):*\n\n`;
 
-        finalMsg = `*Tus accesos de ${firstPlatform}:*\n\n`;
-        if (selectedData.includes('correo')) finalMsg += `📧 *Correo:* ${accountData.email || '-'}\n`;
-        if (selectedData.includes('pass')) finalMsg += `🔑 *Clave:* ${accountData.password || '-'}\n`;
-        if (selectedData.includes('perfil')) finalMsg += `👤 *N° Perfil:* ${accountData.profile || '-'}\n`;
-        if (selectedData.includes('pin')) finalMsg += `📌 *PIN:* ${accountData.pin || '-'}\n`;
-        if (selectedData.includes('fecha')) finalMsg += `📅 *Vencimiento:* ${dateStr}\n`;
-        if (selectedData.includes('reglas')) finalMsg += `\n⚠️ *Reglas:* ${rulesText}\n`;
-        
-        if (selectedData.length === 0) return window.showNotification("⚠️ Debes seleccionar al menos un dato para enviar.");
+        platformsList.forEach((platName) => {
+            // Si el usuario desmarcó TODO de esta plataforma, la saltamos en el mensaje
+            if (!selectionsByPlatform[platName] || selectionsByPlatform[platName].length === 0) return;
+
+            const selectedData = selectionsByPlatform[platName];
+            let accountData = null;
+
+            if (c.multiAccounts && c.multiAccounts[platName]) {
+                accountData = c.multiAccounts[platName];
+            } else {
+                accountData = {
+                    email: c.accountEmail || '-',
+                    password: c.accountPassword || '-',
+                    profile: c.accountProfile || '-',
+                    pin: c.accountPin || '-'
+                };
+            }
+
+            finalMsg += `🎬 *${platName.toUpperCase()}*\n`;
+            if (selectedData.includes('correo')) finalMsg += `📧 *Correo:* ${accountData.email || '-'}\n`;
+            if (selectedData.includes('pass')) finalMsg += `🔑 *Clave:* ${accountData.password || '-'}\n`;
+            if (selectedData.includes('perfil')) finalMsg += `👤 *N° Perfil:* ${accountData.profile || '-'}\n`;
+            if (selectedData.includes('pin')) finalMsg += `📌 *PIN:* ${accountData.pin || '-'}\n`;
+            
+            if (selectedData.includes('fecha')) finalMsg += `📅 *Vencimiento:* ${dateStr}\n`;
+            
+            if (selectedData.includes('reglas')) {
+                const rulesDB = currentUserData.platformRules || {};
+                let rulesText = rulesDB[platName] || "Uso personal en el perfil asignado.";
+                finalMsg += `⚠️ *Reglas:* ${rulesText}\n`;
+            }
+            finalMsg += `\n`;
+        });
     }
 
     window.open(`https://wa.me/${num}?text=${encodeURIComponent(finalMsg)}`, '_blank'); 
