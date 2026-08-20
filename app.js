@@ -656,6 +656,14 @@ window.saveManageStatus = async () => {
 /* --- SISTEMA DE GESTIÓN DE PLANES (ADMIN) --- */
 let currentPlanUserId = null;
 
+window.openPlanModal = (id, name, currentPlan) => {
+    currentPlanUserId = id;
+    const planSelect = document.getElementById('newPlanSelect');
+    if (planSelect) planSelect.value = currentPlan || 'demo';
+    const modal = document.getElementById('planModal');
+    if (modal) modal.style.display = 'flex';
+};
+
 window.savePlan = async () => {
     const btn = document.querySelector('#planModal .btn-primary');
     const originalText = btn.innerText;
@@ -664,7 +672,6 @@ window.savePlan = async () => {
 
     const nuevoPlan = document.getElementById('newPlanSelect').value;
     
-    // Asignación matemática de límites según tu modelo de negocio
     let limite = 20;
     let dias = 3;
 
@@ -672,11 +679,10 @@ window.savePlan = async () => {
         limite = 100; 
         dias = 30; 
     } else if (nuevoPlan === 'pro') { 
-        limite = 9999; // Ilimitado
+        limite = 9999;
         dias = 30; 
     }
 
-    // Calculamos la nueva fecha de vencimiento
     const fechaActual = new Date();
     const fechaVencimiento = new Date();
     fechaVencimiento.setDate(fechaActual.getDate() + dias);
@@ -690,7 +696,7 @@ window.savePlan = async () => {
         
         window.showNotification(`Plan ${nuevoPlan.toUpperCase()} activado con éxito 💎`);
         window.closeModals();
-        loadAdminData(); // Recarga la tabla para ver el cambio instantáneo
+        loadAdminData();
     } catch (e) {
         window.showNotification("Error: " + e.message);
     } finally {
@@ -731,7 +737,7 @@ async function loadAdminData() {
             <td data-label="Acción" class="actions-cell" style="display: flex; gap: 5px;">
                 <button class="action-btn" onclick="window.openAdminEditUserModal('${id}')"><i class='bx bx-edit-alt'></i> Editar</button>
                 <button class="action-btn" style="border: 1px solid var(--mac-blue); color: var(--mac-blue); background: transparent;" onclick="window.openPlanModal('${id}', '${data.name}', '${data.plan_actual || 'demo'}')">💎 Plan</button>
-            </td>`; 
+            </td>`;
         tbody.appendChild(tr);
     });
 
