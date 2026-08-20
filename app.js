@@ -2003,6 +2003,7 @@ window.openMobileClientModal = (id) => {
     if (mcActions) {
         mcActions.innerHTML = `
             <button class="action-btn btn-wa" style="padding:12px; font-size:14px;" onclick="window.closeModals(); window.openWaSendModal('${c.id}')"><i class='bx bxl-whatsapp'></i> WhatsApp</button>
+            <button class="action-btn" style="padding:12px; font-size:14px; background: rgba(94, 92, 230, 0.15); color: var(--mac-blue); font-weight: bold;" onclick="window.closeModals(); window.sendClientPortalWa('${c.phone}', '${c.id}')"><i class='bx bx-globe'></i> Link Portal</button>
             <button class="action-btn" style="padding:12px; font-size:14px; background: rgba(175, 82, 222, 0.15); color: #AF52DE; font-weight: bold;" onclick="window.downloadTicket('${c.id}', event)"><i class='bx bx-receipt'></i> Recibo</button>
             <button class="action-btn" style="padding:12px; font-size:14px; background: rgba(0, 122, 255, 0.15); color: #007AFF; font-weight: bold;" onclick="window.closeModals(); window.openLinkModal('${c.id}', '${safePlatform}')"><i class='bx bx-link'></i> Vincular</button>
             <button class="action-btn" style="padding:12px; font-size:14px; color: var(--mac-text-main);" onclick="window.closeModals(); window.startEdit('${c.id}')"><i class='bx bx-edit-alt'></i> Editar</button>
@@ -4068,72 +4069,66 @@ document.addEventListener("DOMContentLoaded", () => {
         if(sidebar) sidebar.classList.add('collapsed');
     }
 });
-/* ==========================================================================
-   PORTAL DE AUTOGESTIÓN DEL CLIENTE (ETAPA 2 - 100% BLINDADA)
-   ========================================================================== */
+/* =========================================================
+   LÓGICA DEL PORTAL PÚBLICO DE CLIENTES (REDiseño PREMIUM)
+========================================================= */
 let portalStoreData = null;
-let portalMatchedClients = [];
 
 window.checkClientPortal = async () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const portalAlias = urlParams.get('portal');
-    
-    if (!portalAlias) return false;
+    const storeId = urlParams.get('store');
+    const clientId = urlParams.get('client'); // Si le mandas el link directo
 
-    // Ocultamos todos los paneles
+    if (!storeId) return false;
+
+    // Apagamos la vista de administrador y mostramos el portal
     document.getElementById('authView').style.display = 'none';
     document.getElementById('appView').style.display = 'none';
     document.getElementById('adminView').style.display = 'none';
     if (document.getElementById('publicStoreView')) document.getElementById('publicStoreView').style.display = 'none';
-    
-    // Encendemos el Portal del Cliente con prioridad máxima
+
     const portalView = document.getElementById('clientPortalView');
-    if (portalView) portalView.style.display = 'flex';
+    if (portalView) portalView.style.display = 'block';
 
     try {
-        // Buscamos a qué distribuidor le pertenece este link
-        const q = query(collection(db, "users"), where("storeAlias", "==", portalAlias));
+        const q = query(collection(db, "users"), where("storeAlias", "==", storeId));
         const snap = await getDocs(q);
         
         if (!snap.empty) { 
             portalStoreData = snap.docs[0].data(); 
             portalStoreData.uid = snap.docs[0].id;
         } else {
-            const docRef = await getDoc(doc(db, "users", portalAlias));
+            const docRef = await getDoc(doc(db, "users", storeId));
             if (docRef.exists()) {
                 portalStoreData = docRef.data();
-                portalStoreData.uid = portalAlias;
+                portalStoreData.uid = storeId;
             }
         }
 
         if (!portalStoreData) {
             document.getElementById('portalStoreName').innerText = "Portal no encontrado";
-            return false;
+            return true;
         }
 
-        // 🎨 Actualizar la Interfaz Visual con los datos de TU TIENDA
         document.getElementById('portalStoreName').innerText = portalStoreData.name || "Mi Portal";
-        if (portalStoreData.logoUrl) {
-            const logo = document.getElementById('portalLogo');
+        const logo = document.getElementById('portalStoreLogo');
+        if (logo && portalStoreData.logoUrl) {
             logo.src = portalStoreData.logoUrl;
-            logo.style.display = 'block';
         }
 
-        // Configuramos el botón de soporte de forma súper segura
-        if (portalStoreData.phone) {
-            const numLimpio = String(portalStoreData.phone).replace(/[^\d+]/g, '');
-            const supportBtn = document.getElementById('portalSupportBtn');
-            if (supportBtn) supportBtn.href = `https://wa.me/${numLimpio}?text=${encodeURIComponent('Hola, necesito ayuda con mis servicios del portal.')}`;
+        const vendorPhone = portalStoreData.phone ? portalStoreData.phone.replace(/[^\d+]/g, '') : '';
+        const supportLink = document.getElementById('portalSupportWaBtn');
+        if (supportLink && vendorPhone) {
+            supportLink.href = `https://wa.me/${vendorPhone}?text=${encodeURIComponent('Hola, necesito ayuda con mis servicios del portal.')}`;
         }
 
-        // 🪄 MAGIA: Verificamos si el cliente le dio a "Recordar Sesión" antes
-        const savedPhone = localStorage.getItem(`portal_phone_${portalStoreData.uid}`);
-        const savedCode = localStorage.getItem(`portal_code_${portalStoreData.uid}`);
-        
-        if (savedPhone && savedCode) {
-            document.getElementById('portalPhoneInput').value = savedPhone;
-            document.getElementById('portalCodeInput').value = savedCode;
-            window.loginClientPortal(); // Hacemos login automático
+        // Si el cliente entró a través de su link directo, le mostramos sus datos sin pedirle teléfono
+        if (clientId) {
+            const clientDoc = await getDoc(doc(db, "clients", clientId));
+            if (clientDoc.exists() && clientDoc.data().userId === portalStoreData.uid) {
+                document.getElementById('portalSearchCard').style.display = 'none';
+                window.renderClientPortalData(clientDoc.data(), portalStoreData);
+            }
         }
         return true;
     } catch (e) {
@@ -4142,183 +4137,165 @@ window.checkClientPortal = async () => {
     }
 };
 
-window.loginClientPortal = async () => {
-    let phone = document.getElementById('portalPhoneInput').value.trim();
-    const code = document.getElementById('portalCodeInput').value.trim().toUpperCase();
-    const remember = document.getElementById('portalRememberMe').checked;
+window.searchPortalByPhone = async () => {
+    const phoneInput = document.getElementById('portalPhoneSearchInput').value.trim();
+    if (!phoneInput) return window.showNotification("Ingresa un número de teléfono");
 
-    if (!phone || !code) return window.showNotification("Ingresa tu teléfono y el código de 4 dígitos.");
-
-    // 🛡️ RE-VALIDACIÓN FORZADA
-    if (!portalStoreData || !portalStoreData.uid) {
-        const cargado = await window.checkClientPortal();
-        if (!cargado) return window.showNotification("⚠️ Error de conexión. Revisa el link que te dio tu proveedor.");
-    }
-
-    // Doble candado por si acaso
-    if (!portalStoreData || !portalStoreData.uid) return window.showNotification("No se pudo conectar a la base de datos.");
-
-    const btn = document.querySelector('#portalLoginScreen .btn-primary');
-    const origText = btn.innerText;
-    btn.innerText = "Buscando... ⏳";
+    const btn = document.querySelector('#portalSearchCard .btn-primary');
+    const origText = btn.innerHTML;
+    btn.innerHTML = "Buscando... <i class='bx bx-loader-alt bx-spin'></i>";
     btn.disabled = true;
 
     try {
-        // Traemos todos los clientes de este distribuidor para filtrarlos en memoria (Seguridad Antifallos)
+        const cleanInputPhone = phoneInput.replace(/[^\d]/g, '');
         const q = query(collection(db, "clients"), where("userId", "==", portalStoreData.uid));
         const snap = await getDocs(q);
 
-        portalMatchedClients = [];
-        
-        // 🧹 Limpiamos el número que escribió el cliente para que sea 100% compatible
-        const cleanInputPhone = String(phone).replace(/[^\d]/g, '');
-
+        let matchedClient = null;
         snap.forEach(d => {
             const c = d.data();
-            const cleanDbPhone = c.phone ? String(c.phone).replace(/[^\d]/g, '') : '';
-            
-            if (c.portalCode === code && (cleanDbPhone === cleanInputPhone || cleanDbPhone.endsWith(cleanInputPhone))) {
-                if (c.multiAccounts) {
-                    // Desarmamos las pestañas y las convertimos en tarjetas independientes para el portal
-                    Object.entries(c.multiAccounts).forEach(([platName, accData]) => {
-                        portalMatchedClients.push({ 
-                            id: d.id + '_' + platName, date: c.date, platform: platName, 
-                            accountEmail: accData.email, accountPassword: accData.password, 
-                            accountProfile: accData.profile, accountPin: accData.pin, accountSaleType: accData.saleType 
-                        });
-                    });
-                } else {
-                    c.platform.split(', ').forEach(platName => {
-                        portalMatchedClients.push({ ...c, platform: platName });
-                    });
-                }
+            const cleanDbPhone = c.phone ? c.phone.replace(/[^\d]/g, '') : '';
+            // Validamos que el teléfono coincida
+            if (cleanDbPhone === cleanInputPhone || cleanDbPhone.endsWith(cleanInputPhone)) {
+                matchedClient = c; 
             }
         });
 
-        if (portalMatchedClients.length === 0) {
-            window.showNotification("Datos incorrectos. Revisa tu número o pide tu código de acceso.");
-            btn.innerText = origText; btn.disabled = false;
-            return;
-        }
-
-        // Guardar o borrar sesión
-        if (remember) {
-            localStorage.setItem(`portal_phone_${portalStoreData.uid}`, phone);
-            localStorage.setItem(`portal_code_${portalStoreData.uid}`, code);
+        if (matchedClient) {
+            document.getElementById('portalSearchCard').style.display = 'none';
+            window.renderClientPortalData(matchedClient, portalStoreData);
         } else {
-            localStorage.removeItem(`portal_phone_${portalStoreData.uid}`);
-            localStorage.removeItem(`portal_code_${portalStoreData.uid}`);
+            window.showNotification("No se encontraron servicios activos para este número.");
         }
-
-        // Cambiamos a la pantalla de servicios
-        document.getElementById('portalLoginScreen').style.display = 'none';
-        document.getElementById('portalDashboardScreen').style.display = 'block';
-        
-        renderClientPortalDashboard();
-
-    } catch (e) {
+    } catch(e) {
+        console.error(e);
         window.showNotification("Error: " + e.message);
     } finally {
-        btn.innerText = origText; btn.disabled = false;
+        btn.innerHTML = origText;
+        btn.disabled = false;
     }
 };
 
-const renderClientPortalDashboard = () => {
-    const list = document.getElementById('portalServicesList');
-    list.innerHTML = '';
-
-    const today = new Date(); today.setHours(0,0,0,0);
-    const storePhone = portalStoreData.phone ? String(portalStoreData.phone).replace(/[^\d+]/g, '') : '';
-
-    portalMatchedClients.forEach((c, index) => {
-        const exp = new Date(c.date);
-        exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
-        exp.setHours(0,0,0,0);
-        const diffDays = Math.ceil((exp - today) / 86400000);
-        
-        const isExpired = diffDays < 0;
-        const isWarning = diffDays >= 0 && diffDays <= 3;
-        
-        let statusBadge = '';
-        let borderStyle = '1px solid #38383a';
-        
-        if (isExpired) {
-            statusBadge = `<span style="background: rgba(255, 59, 48, 0.15); color: #ff3b30; padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; border: 1px solid rgba(255, 59, 48, 0.3);">🔴 VENCIDO</span>`;
-            borderStyle = '1px solid #ff3b30';
-        } else if (isWarning) {
-            statusBadge = `<span style="background: rgba(255, 149, 0, 0.15); color: #ff9f0a; padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; border: 1px solid rgba(255, 149, 0, 0.3);">🟠 VENCE EN ${diffDays} DÍAS</span>`;
-            borderStyle = '1px solid #ff9f0a';
-        } else {
-            statusBadge = `<span style="background: rgba(52, 199, 89, 0.15); color: #30d158; padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; border: 1px solid rgba(52, 199, 89, 0.3);">🟢 ACTIVO</span>`;
-        }
-
-        const saleTypeBadge = c.accountSaleType === 'Completa' 
-            ? `<span style="background: #ff9f0a; color: #000; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold;"><i class='bx bxs-star'></i> COMPLETA</span>`
-            : `<span style="background: #0a84ff; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold;"><i class='bx bxs-user'></i> PERFIL</span>`;
-
-        // 🔒 LÓGICA DE SEGURIDAD: Censurar contraseñas si venció
-        const displayPass = isExpired ? '••••••••' : (c.accountPassword || '-');
-        const displayPin = isExpired ? '•••' : (c.accountPin || '-');
-
-        let actionButton = '';
-        if (isExpired) {
-            const msg = encodeURIComponent(`Hola, quiero renovar mi servicio de ${c.platform}.`);
-            actionButton = `<a href="https://wa.me/${storePhone}?text=${msg}" target="_blank" style="background: #ff3b30; color: #ffffff; text-decoration: none; padding: 10px 15px; border-radius: 8px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 5px; width: 100%;"><i class='bx bx-refresh'></i> Renovar Ahora</a>`;
-        } else {
-            actionButton = `<button style="background: #1c1c1e; color: #ffffff; border: 1px solid #38383a; padding: 10px 15px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; width: 100%; transition: 0.2s;" onclick="window.copyPortalData(${index})"><i class='bx bx-copy'></i> Copiar Credenciales</button>`;
-        }
-
-        const div = document.createElement('div');
-        div.style.cssText = `background: #0a0a0c; border: ${borderStyle}; border-radius: 16px; padding: 20px; position: relative;`;
-        div.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-                <div>
-                    <h3 style="margin: 0 0 5px 0; font-size: 18px; color: #ffffff;">${c.platform}</h3>
-                    ${saleTypeBadge}
-                </div>
-                ${statusBadge}
-            </div>
-
-            <div style="background: #1c1c1e; padding: 12px; border-radius: 8px; margin-bottom: 15px;">
-                <p style="margin: 0 0 5px 0; font-size: 13px; color: #86868b;"><i class='bx bx-envelope'></i> Correo: <span style="color: #ffffff; user-select: all;">${c.accountEmail || '-'}</span></p>
-                <p style="margin: 0 0 5px 0; font-size: 13px; color: #86868b;"><i class='bx bx-lock-alt'></i> Clave: <span style="color: #ffffff; user-select: all;">${displayPass}</span></p>
-                <div style="display: flex; gap: 15px; margin-top: 5px;">
-                    <p style="margin: 0; font-size: 13px; color: #86868b;"><i class='bx bx-user-circle'></i> N° Perfil: <span style="color: #ffffff;">${c.accountProfile || '-'}</span></p>
-                    <p style="margin: 0; font-size: 13px; color: #86868b;"><i class='bx bx-pin'></i> PIN: <span style="color: #ffffff;">${displayPin}</span></p>
-                </div>
-            </div>
-
-            ${actionButton}
-        `;
-        list.appendChild(div);
-    });
-};
-
-window.copyPortalData = (idx) => {
-    const c = portalMatchedClients[idx];
-    const text = `Mis accesos de ${c.platform}:\n📧 Correo: ${c.accountEmail}\n🔑 Clave: ${c.accountPassword}\n👤 Perfil: ${c.accountProfile}\n📌 PIN: ${c.accountPin}`;
+window.copyToClipboard = (text, label) => {
+    if (!text || text === '-') return window.showNotification("Sin datos para copiar");
     navigator.clipboard.writeText(text).then(() => {
-        window.showNotification("Credenciales copiadas 📋");
+        window.showNotification(`📋 ${label} copiado`);
+    }).catch(() => {
+        const input = document.createElement("input");
+        input.value = text;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand("copy");
+        document.body.removeChild(input);
+        window.showNotification(`📋 ${label} copiado`);
     });
 };
 
-window.logoutClientPortal = () => {
-    if(portalStoreData) {
-        localStorage.removeItem(`portal_phone_${portalStoreData.uid}`);
-        localStorage.removeItem(`portal_code_${portalStoreData.uid}`);
-    }
-    portalMatchedClients = [];
-    document.getElementById('portalPhoneInput').value = '';
-    document.getElementById('portalCodeInput').value = '';
-    document.getElementById('portalRememberMe').checked = false;
-    
-    document.getElementById('portalDashboardScreen').style.display = 'none';
-    document.getElementById('portalLoginScreen').style.display = 'block';
+window.openPortalManagerModal = () => {
+    const baseUrl = window.location.origin + window.location.pathname;
+    const globalUrl = `${baseUrl}?store=${currentUserData.storeAlias || currentUser.uid}`;
+    document.getElementById('globalPortalUrlInput').value = globalUrl;
+    document.getElementById('portalManagerModal').style.display = 'flex';
 };
 
-// 🔥 DETONADORES PRINCIPALES (Ejecutan el código al entrar al link automáticamente)
+window.copyGlobalPortalUrl = () => {
+    const url = document.getElementById('globalPortalUrlInput').value;
+    window.copyToClipboard(url, "Enlace del Portal");
+};
+
+window.sendClientPortalWa = (phone, clientId) => {
+    const baseUrl = window.location.origin + window.location.pathname;
+    const clientUrl = `${baseUrl}?store=${currentUserData.storeAlias || currentUser.uid}&client=${clientId}`;
+    const cleanPhone = phone.replace(/[^\d+]/g, '');
+    const msg = `¡Hola! 👋 Puedes consultar el estado de tus servicios y tus accesos en tu portal personal aquí:\n\n🔗 ${clientUrl}`;
+    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+};
+
+window.renderClientPortalData = (clientObj, storeUserData) => {
+    const container = document.getElementById('portalClientResults');
+    container.innerHTML = '';
+    
+    const now = new Date();
+    const exp = new Date(clientObj.date);
+    exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
+    
+    const diffTime = exp.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    let badgeClass = 'active';
+    let badgeIcon = 'bx-check-circle';
+    let badgeText = `Activo (${diffDays} días restantes)`;
+    
+    if (diffDays <= 0) {
+        badgeClass = 'expired';
+        badgeIcon = 'bx-x-circle';
+        badgeText = '¡SERVICIO VENCIDO!';
+    } else if (diffDays <= 3) {
+        badgeClass = 'warning';
+        badgeIcon = 'bx-time-five';
+        badgeText = `⚠️ Por vencer (${diffDays} días restantes)`;
+    }
+
+    let platformsList = [];
+    if (clientObj.multiAccounts && Object.keys(clientObj.multiAccounts).length > 0) {
+        platformsList = Object.keys(clientObj.multiAccounts);
+    } else {
+        platformsList = clientObj.platform ? clientObj.platform.split(',').map(p => p.trim()) : ['Servicio'];
+    }
+
+    let accountsHtml = '';
+    platformsList.forEach(platName => {
+        let acc = clientObj.multiAccounts && clientObj.multiAccounts[platName] 
+            ? clientObj.multiAccounts[platName] 
+            : {
+                email: clientObj.accountEmail || '-',
+                password: clientObj.accountPassword || '-',
+                profile: clientObj.accountProfile || '-',
+                pin: clientObj.accountPin || '-'
+            };
+
+        accountsHtml += `
+            <div style="background: var(--mac-bg); padding: 15px; border-radius: 16px; border: 1px solid var(--mac-border); margin-bottom: 15px; text-align: left;">
+                <div style="font-size: 14px; font-weight: 800; color: var(--mac-text-main); margin-bottom: 12px;">🎬 ${platName.toUpperCase()}</div>
+                <div class="credential-card">
+                    <div class="credential-info"><span class="credential-label">Correo</span><span class="credential-value">${acc.email || '-'}</span></div>
+                    <button class="btn-copy-chip" onclick="window.copyToClipboard('${acc.email || ''}', 'Correo')"><i class='bx bx-copy'></i></button>
+                </div>
+                <div class="credential-card">
+                    <div class="credential-info"><span class="credential-label">Contraseña</span><span class="credential-value">${acc.password || '-'}</span></div>
+                    <button class="btn-copy-chip" onclick="window.copyToClipboard('${acc.password || ''}', 'Clave')"><i class='bx bx-copy'></i></button>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="credential-card" style="margin: 0;">
+                        <div class="credential-info"><span class="credential-label">Perfil N°</span><span class="credential-value">${acc.profile || '-'}</span></div>
+                        <button class="btn-copy-chip" onclick="window.copyToClipboard('${acc.profile || ''}', 'Perfil')"><i class='bx bx-copy'></i></button>
+                    </div>
+                    <div class="credential-card" style="margin: 0;">
+                        <div class="credential-info"><span class="credential-label">PIN Acceso</span><span class="credential-value">${acc.pin || '-'}</span></div>
+                        <button class="btn-copy-chip" onclick="window.copyToClipboard('${acc.pin || ''}', 'PIN')"><i class='bx bx-copy'></i></button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    const vendorPhone = storeUserData.phone ? storeUserData.phone.replace(/[^\d+]/g, '') : '';
+    const renewMsg = encodeURIComponent(`¡Hola! Quisiera renovar mi servicio de ${clientObj.platform}. Nombre: ${clientObj.name}`);
+    const renewUrl = `https://wa.me/${vendorPhone}?text=${renewMsg}`;
+
+    container.innerHTML = `
+        <div class="portal-hero-card">
+            <span class="portal-badge ${badgeClass}"><i class='bx ${badgeIcon}'></i> ${badgeText}</span>
+            <h2 style="margin: 0 0 5px 0; font-size: 22px; color: var(--mac-text-main);">${clientObj.name}</h2>
+            <p style="font-size: 13px; color: var(--mac-text-secondary); margin-top: 0; margin-bottom: 20px;">Vencimiento: <b>${exp.toLocaleDateString('es-ES')}</b></p>
+            ${accountsHtml}
+            ${diffDays <= 3 ? `<a href="${renewUrl}" target="_blank" class="btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; text-decoration: none; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 14px;"><i class='bx bxl-whatsapp' style="font-size: 20px;"></i> Renovar Servicio</a>` : ''}
+        </div>
+    `;
+    container.style.display = 'block';
+};
+
 document.addEventListener('DOMContentLoaded', () => { window.checkClientPortal(); });
-window.checkClientPortal();
 
         // 📱 CONTROLADOR DEL MENÚ LATERAL EN MÓVIL ESTILO SPOTIFY
 window.toggleMobileMenu = () => {
