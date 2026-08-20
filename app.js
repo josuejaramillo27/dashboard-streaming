@@ -326,7 +326,6 @@ onAuthStateChanged(auth, async (user) => {
                         if (!currentUserData.tutorialVisto && window.innerWidth > 768) {
                             setTimeout(() => window.startTutorial(), 1500);
                         }
-                    }
                     } else { 
                         await signOut(auth); 
                         window.showNotification("Tu cuenta está suspendida o pendiente."); 
