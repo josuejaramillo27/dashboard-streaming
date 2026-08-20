@@ -1355,7 +1355,7 @@
     </div>
 </div>
     <div id="waSendOptionsModal" class="modal-overlay" style="display: none; z-index: 10001;">
-    <div class="modal-card" style="max-width: 400px; text-align: center;">
+    <div class="modal-card" style="max-width: 420px; text-align: center;">
         <h3 style="margin-bottom: 10px; font-size: 20px; color: var(--mac-text-main);"><i class='bx bxl-whatsapp'></i> Enviar WhatsApp</h3>
         <p style="font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 20px; margin-top: 0;">Selecciona qué información deseas enviar al cliente.</p>
 
@@ -1373,13 +1373,43 @@
                 <span style="font-size: 13px; font-weight: bold; color: var(--mac-text-main);">¿Qué datos enviarás?</span>
                 <button class="action-btn" id="btnToggleAllWaBoxes" onclick="window.toggleAllWaBoxes()" style="font-size: 11px; padding: 4px 8px; border: 1px solid var(--mac-border); background: var(--mac-surface);">Desmarcar Todo</button>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px; color: var(--mac-text-main);">
-                <label style="display:flex; align-items:center; gap:5px; cursor:pointer;"><input type="checkbox" class="wa-data-chk" value="correo" checked style="width:auto; margin:0;"> Correo</label>
-                <label style="display:flex; align-items:center; gap:5px; cursor:pointer;"><input type="checkbox" class="wa-data-chk" value="pass" checked style="width:auto; margin:0;"> Contraseña</label>
-                <label style="display:flex; align-items:center; gap:5px; cursor:pointer;"><input type="checkbox" class="wa-data-chk" value="perfil" checked style="width:auto; margin:0;"> N° Perfil</label>
-                <label style="display:flex; align-items:center; gap:5px; cursor:pointer;"><input type="checkbox" class="wa-data-chk" value="pin" checked style="width:auto; margin:0;"> PIN</label>
-                <label style="display:flex; align-items:center; gap:5px; cursor:pointer;"><input type="checkbox" class="wa-data-chk" value="fecha" checked style="width:auto; margin:0;"> Fecha Venc.</label>
-                <label style="display:flex; align-items:center; gap:5px; cursor:pointer;"><input type="checkbox" class="wa-data-chk" value="reglas" checked style="width:auto; margin:0;"> Reglas</label>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px;">
+                <label class="wa-chk-card" onclick="window.updateWaChkCard(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); color: var(--mac-text-main); font-weight: 500; transition: all 0.2s;">
+                    <span>📧 Correo</span>
+                    <input type="checkbox" class="wa-data-chk" value="correo" checked style="display:none;">
+                    <i class='bx bx-check-circle wa-chk-icon' style="color: var(--mac-green); font-size: 18px;"></i>
+                </label>
+                
+                <label class="wa-chk-card" onclick="window.updateWaChkCard(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); color: var(--mac-text-main); font-weight: 500; transition: all 0.2s;">
+                    <span>🔑 Contraseña</span>
+                    <input type="checkbox" class="wa-data-chk" value="pass" checked style="display:none;">
+                    <i class='bx bx-check-circle wa-chk-icon' style="color: var(--mac-green); font-size: 18px;"></i>
+                </label>
+                
+                <label class="wa-chk-card" onclick="window.updateWaChkCard(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); color: var(--mac-text-main); font-weight: 500; transition: all 0.2s;">
+                    <span>👤 N° Perfil</span>
+                    <input type="checkbox" class="wa-data-chk" value="perfil" checked style="display:none;">
+                    <i class='bx bx-check-circle wa-chk-icon' style="color: var(--mac-green); font-size: 18px;"></i>
+                </label>
+                
+                <label class="wa-chk-card" onclick="window.updateWaChkCard(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); color: var(--mac-text-main); font-weight: 500; transition: all 0.2s;">
+                    <span>📌 PIN</span>
+                    <input type="checkbox" class="wa-data-chk" value="pin" checked style="display:none;">
+                    <i class='bx bx-check-circle wa-chk-icon' style="color: var(--mac-green); font-size: 18px;"></i>
+                </label>
+                
+                <label class="wa-chk-card" onclick="window.updateWaChkCard(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); color: var(--mac-text-main); font-weight: 500; transition: all 0.2s;">
+                    <span>📅 Fecha Venc.</span>
+                    <input type="checkbox" class="wa-data-chk" value="fecha" checked style="display:none;">
+                    <i class='bx bx-check-circle wa-chk-icon' style="color: var(--mac-green); font-size: 18px;"></i>
+                </label>
+                
+                <label class="wa-chk-card" onclick="window.updateWaChkCard(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); color: var(--mac-text-main); font-weight: 500; transition: all 0.2s;">
+                    <span>⚠️ Reglas</span>
+                    <input type="checkbox" class="wa-data-chk" value="reglas" checked style="display:none;">
+                    <i class='bx bx-check-circle wa-chk-icon' style="color: var(--mac-green); font-size: 18px;"></i>
+                </label>
             </div>
         </div>
 
