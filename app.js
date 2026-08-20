@@ -179,7 +179,10 @@ window.doLogout = async () => {
 onAuthStateChanged(auth, async (user) => {
     // 🛑 Candado de Tienda y Portal (Evita que el Login se superponga a las webs públicas)
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('tienda') || urlParams.get('portal')) return;
+    if (urlParams.get('tienda') || urlParams.get('portal') || urlParams.get('store')) {
+        document.getElementById('authView').style.display = 'none';
+        return;
+    }
 
     if (user) {
         currentUser = user;
@@ -4074,34 +4077,36 @@ document.addEventListener("DOMContentLoaded", () => {
 ========================================================= */
 let portalStoreData = null;
 
+// Verifica si la URL contiene un parámetro de portal público (?portal=)
 window.checkClientPortal = async () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const storeId = urlParams.get('store');
-    const clientId = urlParams.get('client'); // Si le mandas el link directo
+    const portalId = urlParams.get('portal') || urlParams.get('store');
+    const clientId = urlParams.get('client');
 
-    if (!storeId) return false;
+    if (!portalId) return false;
 
-    // Apagamos la vista de administrador y mostramos el portal
-    document.getElementById('authView').style.display = 'none';
-    document.getElementById('appView').style.display = 'none';
-    document.getElementById('adminView').style.display = 'none';
+    // Forzar ocultamiento del Login y las vistas privadas del sistema
+    if (document.getElementById('authView')) document.getElementById('authView').style.display = 'none';
+    if (document.getElementById('appView')) document.getElementById('appView').style.display = 'none';
+    if (document.getElementById('adminView')) document.getElementById('adminView').style.display = 'none';
     if (document.getElementById('publicStoreView')) document.getElementById('publicStoreView').style.display = 'none';
 
     const portalView = document.getElementById('clientPortalView');
     if (portalView) portalView.style.display = 'block';
 
     try {
-        const q = query(collection(db, "users"), where("storeAlias", "==", storeId));
+        // Buscar tienda por Alias personalizado (ej. akazaservicios) o por UID
+        const q = query(collection(db, "users"), where("storeAlias", "==", portalId));
         const snap = await getDocs(q);
         
         if (!snap.empty) { 
             portalStoreData = snap.docs[0].data(); 
             portalStoreData.uid = snap.docs[0].id;
         } else {
-            const docRef = await getDoc(doc(db, "users", storeId));
+            const docRef = await getDoc(doc(db, "users", portalId));
             if (docRef.exists()) {
                 portalStoreData = docRef.data();
-                portalStoreData.uid = storeId;
+                portalStoreData.uid = portalId;
             }
         }
 
@@ -4112,14 +4117,14 @@ window.checkClientPortal = async () => {
 
         document.getElementById('portalStoreName').innerText = portalStoreData.name || "Mi Portal";
         
-        // Magia para el logo dinámico
+        // Carga dinámica del logo del usuario/vendedor
         const logo = document.getElementById('portalStoreLogo');
         if (logo) {
             if (portalStoreData.logoUrl) {
                 logo.src = portalStoreData.logoUrl;
-                logo.style.display = 'block'; // Lo mostramos solo si el vendedor subió un logo
+                logo.style.display = 'block';
             } else {
-                logo.style.display = 'none'; // Lo mantenemos oculto si no tiene logo
+                logo.style.display = 'none';
             }
         }
 
@@ -4129,7 +4134,6 @@ window.checkClientPortal = async () => {
             supportLink.href = `https://wa.me/${vendorPhone}?text=${encodeURIComponent('Hola, necesito ayuda con mis servicios del portal.')}`;
         }
 
-        // Si el cliente entró a través de su link directo, le mostramos sus datos sin pedirle teléfono
         if (clientId) {
             const clientDoc = await getDoc(doc(db, "clients", clientId));
             if (clientDoc.exists() && clientDoc.data().userId === portalStoreData.uid) {
@@ -4200,9 +4204,14 @@ window.copyToClipboard = (text, label) => {
 
 window.openPortalManagerModal = () => {
     const baseUrl = window.location.origin + window.location.pathname;
-    const globalUrl = `${baseUrl}?store=${currentUserData.storeAlias || currentUser.uid}`;
-    document.getElementById('globalPortalUrlInput').value = globalUrl;
-    document.getElementById('portalManagerModal').style.display = 'flex';
+    const portalAlias = currentUserData.storeAlias || currentUser.uid;
+    const globalUrl = `${baseUrl}?portal=${portalAlias}`;
+    
+    const input = document.getElementById('globalPortalUrlInput');
+    if (input) input.value = globalUrl;
+    
+    const modal = document.getElementById('portalManagerModal');
+    if (modal) modal.style.display = 'flex';
 };
 
 window.copyGlobalPortalUrl = () => {
