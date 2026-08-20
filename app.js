@@ -4613,54 +4613,98 @@ window.checkDemoExpiration = (userData) => {
 //  if(window.checkDemoExpiration(currentUserData)) return; 
 //  window.startNewUserTour(); )
 
-// 3. PANEL DE ADMINISTRADOR AVANZADO
+/* =========================================================
+   SISTEMA DE FILTROS Y CONTROL DE ADMIN CORREGIDO
+========================================================= */
 let allAdminUsersList = [];
 let currentAdminFilter = 'all';
-let currentEditingUserId = null;
 
-// Reemplazar la función antigua loadAdminData por esta:
 window.loadAdminData = async () => {
-    const qUsers = await getDocs(collection(db, "users"));
-    allAdminUsersList = [];
-    qUsers.forEach(d => {
-        if(d.data().role !== 'admin') allAdminUsersList.push({ id: d.id, ...d.data() });
-    });
-    window.filterAdminUsers('all');
+    try {
+        const qUsers = await getDocs(collection(db, "users"));
+        allAdminUsersList = [];
+        qUsers.forEach(d => {
+            const data = d.data();
+            // Ignoramos la cuenta principal de admin para no auto-editarse por error
+            if (data.role !== 'admin' && data.email !== 'admin@akaza.com') {
+                allAdminUsersList.push({ id: d.id, ...data });
+            }
+        });
+        window.filterAdminUsers(currentAdminFilter || 'all');
+    } catch (e) {
+        console.error("Error cargando usuarios admin:", e);
+        if (typeof window.showNotification === 'function') {
+            window.showNotification("Error cargando usuarios: " + e.message);
+        }
+    }
 };
 
 window.filterAdminUsers = (filter) => {
     currentAdminFilter = filter;
-    ['All', 'Active', 'Suspended', 'Pro', 'Basic'].forEach(f => {
+
+    // Resetear resaltado en todos los botones de filtro
+    const filterButtons = ['All', 'Active', 'Suspended', 'Pro', 'Basico'];
+    filterButtons.forEach(f => {
         const btn = document.getElementById('btnFilter' + f + 'Users');
         if (btn) btn.classList.remove('active');
     });
-    const actBtn = document.getElementById('btnFilter' + filter.charAt(0).toUpperCase() + filter.slice(1) + 'Users');
-    if (actBtn) actBtn.classList.add('active');
+
+    // Resaltar el botón activo según el filtro seleccionado
+    const capitalizedFilter = filter.charAt(0).toUpperCase() + filter.slice(1);
+    const activeBtn = document.getElementById('btnFilter' + capitalizedFilter + 'Users');
+    if (activeBtn) activeBtn.classList.add('active');
 
     const tbody = document.getElementById('adminTableBody');
+    if (!tbody) return;
     tbody.innerHTML = '';
 
+    // Filtrar lista de usuarios según la categoría
     let filtered = allAdminUsersList;
-    if (filter === 'active') filtered = filtered.filter(u => u.status === 'active' || u.status === 'demo' || u.active === true);
-    if (filter === 'suspended') filtered = filtered.filter(u => u.status === 'suspended' || u.active === false);
-    if (filter === 'pro') filtered = filtered.filter(u => u.plan_actual === 'pro');
-    if (filter === 'basico') filtered = filtered.filter(u => u.plan_actual === 'basico' || !u.plan_actual);
+    if (filter === 'active') {
+        filtered = filtered.filter(u => u.status === 'active' || u.status === 'demo' || u.active === true);
+    } else if (filter === 'suspended') {
+        filtered = filtered.filter(u => u.status === 'suspended' || u.active === false);
+    } else if (filter === 'pro') {
+        filtered = filtered.filter(u => u.plan_actual === 'pro' || u.plan === 'pro');
+    } else if (filter === 'basico') {
+        filtered = filtered.filter(u => u.plan_actual === 'basico' || u.plan === 'basic' || u.plan === 'basico' || !u.plan_actual);
+    }
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--mac-text-secondary); padding:20px;">No se encontraron usuarios en esta categoría.</td></tr>`;
+        return;
+    }
 
     filtered.forEach(u => {
-        const plan = (u.plan_actual || 'basico').toUpperCase();
-        const badgePlan = plan === 'PRO' ? `<span class="portal-badge active" style="padding:2px 8px; font-size:10px;"><i class='bx bxs-diamond'></i> PRO</span>` : `<span class="portal-badge" style="padding:2px 8px; font-size:10px;"><i class='bx bx-bolt-circle'></i> BÁSICO</span>`;
+        const rawPlan = (u.plan_actual || u.plan || 'basico').toLowerCase();
+        const isPro = rawPlan === 'pro';
         
+        const badgePlan = isPro 
+            ? `<span class="portal-badge active" style="padding: 3px 10px; font-size: 11px;"><i class='bx bxs-diamond'></i> PRO</span>`
+            : `<span class="portal-badge" style="padding: 3px 10px; font-size: 11px; background: rgba(255,255,255,0.08); color: var(--mac-text-main); border: 1px solid var(--mac-border);"><i class='bx bx-bolt-circle' style="color: var(--mac-orange);"></i> BÁSICO</span>`;
+
         let statHtml = '';
-        if (u.status === 'suspended' || u.active === false) statHtml = `<span style="color:var(--mac-red); font-weight:bold;">🔴 Suspendido</span>`;
-        else if (u.status === 'demo') statHtml = `<span style="color:var(--mac-orange); font-weight:bold;">⏳ Demo</span>`;
-        else statHtml = `<span style="color:var(--mac-green); font-weight:bold;">🟢 Activo</span>`;
+        if (u.status === 'suspended' || u.active === false) {
+            statHtml = `<span style="color: var(--mac-red); font-weight: bold; display: inline-flex; align-items: center; gap: 4px;"><i class='bx bx-block'></i> Suspendido</span>`;
+        } else if (u.status === 'demo') {
+            statHtml = `<span style="color: var(--mac-orange); font-weight: bold; display: inline-flex; align-items: center; gap: 4px;"><i class='bx bx-time-five'></i> Demo 3H</span>`;
+        } else {
+            statHtml = `<span style="color: var(--mac-green); font-weight: bold; display: inline-flex; align-items: center; gap: 4px;"><i class='bx bx-check-circle'></i> Activo</span>`;
+        }
 
         tbody.innerHTML += `
             <tr>
-                <td><b>${u.name || 'Sin Nombre'}</b><br><small style="color:var(--mac-text-secondary);">${u.email}</small></td>
+                <td>
+                    <b>${u.name || 'Sin Nombre'}</b><br>
+                    <small style="color: var(--mac-text-secondary);">${u.email}</small>
+                </td>
                 <td>${badgePlan}</td>
                 <td>${statHtml}</td>
-                <td><button class="action-btn" onclick="window.openAdminEditUserModal('${u.id}')"><i class='bx bx-edit'></i> Editar</button></td>
+                <td>
+                    <button class="action-btn" onclick="window.openAdminEditUserModal('${u.id}')" style="padding: 6px 12px; font-size: 12px;">
+                        <i class='bx bx-edit-alt'></i> Editar Licencia
+                    </button>
+                </td>
             </tr>
         `;
     });
