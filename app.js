@@ -1302,7 +1302,7 @@ window.renderTable = () => {
     if(document.getElementById('statsPanel').style.display === 'grid') window.toggleStats(true);
 };
 
-/* --- NUEVO SISTEMA AVANZADO DE ENVÍO POR WHATSAPP --- */
+/* --- SISTEMA AVANZADO Y VISUAL DE ENVÍO POR WHATSAPP --- */
 let currentWaClientId = null;
 let currentWaType = null;
 
@@ -1310,7 +1310,7 @@ window.openWaSendModal = (id) => {
     currentWaClientId = id;
     currentWaType = null;
     
-    // Reseteamos el diseño de los botones para que estén deseleccionados
+    // Reset de botones
     document.getElementById('btnWaRenovacion').style.border = '1px solid var(--mac-blue)';
     document.getElementById('btnWaRenovacion').style.background = 'rgba(0, 122, 255, 0.1)';
     document.getElementById('btnWaRenovacion').style.color = 'var(--mac-blue)';
@@ -1319,14 +1319,22 @@ window.openWaSendModal = (id) => {
     document.getElementById('btnWaDatos').style.background = 'rgba(52, 199, 89, 0.1)';
     document.getElementById('btnWaDatos').style.color = 'var(--mac-green)';
     
-    // Ocultar opciones y botón de enviar al inicio
     document.getElementById('waDataOptionsContainer').style.display = 'none';
     document.getElementById('btnConfirmWaSend').style.display = 'none';
     
-    // Asegurarse de que todos los checks estén marcados
-    document.querySelectorAll('.wa-data-chk').forEach(chk => chk.checked = true);
-    document.getElementById('btnToggleAllWaBoxes').innerText = 'Desmarcar Todo';
+    // Marcar visualmente todas las casillas al abrir
+    document.querySelectorAll('.wa-chk-card').forEach(labelEl => {
+        const chk = labelEl.querySelector('.wa-data-chk');
+        const icon = labelEl.querySelector('.wa-chk-icon');
+        chk.checked = true;
+        labelEl.style.border = '1px solid var(--mac-green)';
+        labelEl.style.background = 'rgba(52, 199, 89, 0.15)';
+        labelEl.style.opacity = '1';
+        icon.className = 'bx bx-check-circle wa-chk-icon';
+        icon.style.color = 'var(--mac-green)';
+    });
     
+    document.getElementById('btnToggleAllWaBoxes').innerText = 'Desmarcar Todo';
     document.getElementById('waSendOptionsModal').style.display = 'flex';
 };
 
@@ -1335,7 +1343,6 @@ window.closeWaSendModal = () => {
     currentWaClientId = null;
 };
 
-// Al presionar sobre un tipo de mensaje, lo iluminamos y mostramos sus configuraciones
 window.selectWaType = (type) => {
     currentWaType = type;
     if (type === 'renovacion') {
@@ -1363,20 +1370,59 @@ window.selectWaType = (type) => {
     }
 };
 
+// Actualizar visualmente cada casilla individual al dar clic
+window.updateWaChkCard = (labelEl) => {
+    setTimeout(() => {
+        const chk = labelEl.querySelector('.wa-data-chk');
+        const icon = labelEl.querySelector('.wa-chk-icon');
+        
+        if (chk.checked) {
+            labelEl.style.border = '1px solid var(--mac-green)';
+            labelEl.style.background = 'rgba(52, 199, 89, 0.15)';
+            labelEl.style.opacity = '1';
+            icon.className = 'bx bx-check-circle wa-chk-icon';
+            icon.style.color = 'var(--mac-green)';
+        } else {
+            labelEl.style.border = '1px solid var(--mac-border)';
+            labelEl.style.background = 'var(--mac-surface)';
+            labelEl.style.opacity = '0.5';
+            icon.className = 'bx bx-circle wa-chk-icon';
+            icon.style.color = 'var(--mac-text-secondary)';
+        }
+    }, 10);
+};
+
+// Botón único para Marcar Todo / Desmarcar Todo
 window.toggleAllWaBoxes = () => {
     const btn = document.getElementById('btnToggleAllWaBoxes');
+    const cards = document.querySelectorAll('.wa-chk-card');
     const checkboxes = document.querySelectorAll('.wa-data-chk');
     const allChecked = Array.from(checkboxes).every(c => c.checked);
     
-    if (allChecked) {
-        checkboxes.forEach(c => c.checked = false);
-        btn.innerText = 'Marcar Todo';
-    } else {
-        checkboxes.forEach(c => c.checked = true);
-        btn.innerText = 'Desmarcar Todo';
-    }
+    checkboxes.forEach((c, idx) => {
+        c.checked = !allChecked;
+        const labelEl = cards[idx];
+        const icon = labelEl.querySelector('.wa-chk-icon');
+        
+        if (c.checked) {
+            labelEl.style.border = '1px solid var(--mac-green)';
+            labelEl.style.background = 'rgba(52, 199, 89, 0.15)';
+            labelEl.style.opacity = '1';
+            icon.className = 'bx bx-check-circle wa-chk-icon';
+            icon.style.color = 'var(--mac-green)';
+        } else {
+            labelEl.style.border = '1px solid var(--mac-border)';
+            labelEl.style.background = 'var(--mac-surface)';
+            labelEl.style.opacity = '0.5';
+            icon.className = 'bx bx-circle wa-chk-icon';
+            icon.style.color = 'var(--mac-text-secondary)';
+        }
+    });
+    
+    btn.innerText = !allChecked ? 'Desmarcar Todo' : 'Marcar Todo';
 };
 
+// Confirmación de envío
 window.confirmSendWa = () => {
     if (!currentWaClientId) return;
     const c = clients.find(x => x.id === currentWaClientId);
@@ -1385,7 +1431,6 @@ window.confirmSendWa = () => {
     let num = c.phone.replace(/[^\d+]/g, ''); 
     let finalMsg = '';
 
-    // Transformamos la fecha a lectura bonita
     const exp = new Date(c.date);
     exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
     const dateStr = exp.toLocaleDateString('es-ES');
@@ -1401,14 +1446,12 @@ window.confirmSendWa = () => {
             .replace(/{pago}/g, paymentInfo); 
             
     } else if (currentWaType === 'datos') {
-        // Sacamos en un Array todo lo que el usuario dejó marcado
         const selectedData = Array.from(document.querySelectorAll('.wa-data-chk:checked')).map(chk => chk.value);
         
         let accountData = null;
         let rulesText = "Uso personal, no modificar los datos de acceso.";
-        const firstPlatform = c.platform.split(', ')[0]; // En caso tenga varios, tomamos la primera plataforma
+        const firstPlatform = c.platform.split(', ')[0];
         
-        // Detectar si está en el nuevo modelo multipestaña o clásico
         if (c.multiAccounts && c.multiAccounts[firstPlatform]) {
             accountData = c.multiAccounts[firstPlatform];
         } else {
@@ -1420,11 +1463,9 @@ window.confirmSendWa = () => {
             };
         }
 
-        // Consultamos la regla de Firebase correspondiente a esta plataforma
         const rulesDB = currentUserData.platformRules || {};
         rulesText = rulesDB[firstPlatform] || rulesText;
 
-        // Construimos el bloque del mensaje final (Sólo inyecta lo marcado)
         finalMsg = `*Tus accesos de ${firstPlatform}:*\n\n`;
         if (selectedData.includes('correo')) finalMsg += `📧 *Correo:* ${accountData.email || '-'}\n`;
         if (selectedData.includes('pass')) finalMsg += `🔑 *Clave:* ${accountData.password || '-'}\n`;
@@ -1436,7 +1477,6 @@ window.confirmSendWa = () => {
         if (selectedData.length === 0) return window.showNotification("⚠️ Debes seleccionar al menos un dato para enviar.");
     }
 
-    // Disparo del link hacia la app de WA
     window.open(`https://wa.me/${num}?text=${encodeURIComponent(finalMsg)}`, '_blank'); 
     window.closeWaSendModal();
 };
