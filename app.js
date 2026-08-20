@@ -117,27 +117,28 @@ window.doRegister = async () => {
     btn.disabled = true;
     
     try {
-        const demoPlan = document.getElementById('regDemoPlan').value;
+        // 1. Crea el usuario en Firebase Auth
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
+        
+        // 2. Obtenemos el Token de Identidad (El pasaporte digital del usuario)
         const idToken = await user.getIdToken();
 
+        // 3. Enviamos los datos a tu Bot en DigitalOcean para que él cree el perfil
         const response = await fetch('https://bot.panelagc.com/api/completar-registro', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ idToken: idToken, name: name, phone: phone, country: country })
+            body: JSON.stringify({
+                idToken: idToken,
+                name: name,
+                phone: phone,
+                country: country
+            })
         });
 
-        if (!response.ok) throw new Error("Error del servidor.");
+        if (!response.ok) throw new Error("Error del servidor al asignar perfil.");
 
-        // Forzamos los datos de Demo localmente
-        await updateDoc(doc(db, "users", user.uid), {
-            plan_actual: demoPlan,
-            status: 'demo',
-            createdAtMs: Date.now() // Inicia el reloj de 3 horas
-        });
-
-        window.showNotification("¡Cuenta creada con éxito! Disfruta tu prueba de 3 horas.");
+        window.showNotification("¡Cuenta creada con éxito! Disfruta tu prueba gratuita.");
         
     } catch (e) { 
         window.showNotification("Error Reg: " + e.message); 
@@ -285,52 +286,33 @@ onAuthStateChanged(auth, async (user) => {
                     window.requestNotificationPermission(); 
                 } else { 
                     if (currentUserData.active === true) { 
-                        showView('appView');
-                    
-                    // 🛑 1. Verificación de Demo o Suspensión
-                    if (window.checkDemoExpiration(currentUserData)) return; 
-                    
-                    // 🚀 2. Iniciar el Tour interactivo (solo si es nuevo)
-                    window.startNewUserTour(); 
-                    
-                    if (document.getElementById('userGreeting')) {
-                        document.getElementById('userGreeting').innerText = `Gestión de clientes`; 
-                    }
-                    
-                    // ⚙️ 3. Carga normal de datos del panel
-                    loadUserClients();
-                    window.checkNewNews();
-                    window.requestNotificationPermission(); 
-                    window.renderInventory();
-                    window.syncUserServices();
-                    
-                } else { 
-                    await signOut(auth); 
-                    window.showNotification("Tu cuenta está suspendida o pendiente."); 
-                    showView('authView'); 
-                    window.showLogin();
-                } 
-            }
-        } else { 
-            await signOut(auth); 
+                        showView('appView'); 
+                        if(document.getElementById('userGreeting')) document.getElementById('userGreeting').innerText = `Gestión de clientes`; 
+                        loadUserClients();
+                        window.checkNewNews();
+                        window.requestNotificationPermission(); 
+                        window.renderInventory();
+                        window.syncUserServices();
+                    } else { 
+                        await signOut(auth); 
+                        window.showNotification("Tu cuenta está suspendida o pendiente."); 
+                        showView('authView'); 
+                        window.showLogin();
+                    } 
+                }
+            } else { await signOut(auth); showView('authView'); window.showLogin(); }
+        } catch (e) { 
+            console.error(e); 
+            window.showNotification("ERROR DB: " + e.message); 
             showView('authView'); 
-            window.showLogin(); 
+            window.showLogin();
         }
-    } catch (e) { 
-        console.error(e); 
-        window.showNotification("ERROR DB: " + e.message); 
+    } else { 
+        currentUser = null; currentUserData = null; 
         showView('authView'); 
-        window.showLogin();
+        window.showLogin(); 
+        if(document.getElementById('authSubtitle')) document.getElementById('authSubtitle').innerText = 'Área de Gestión y Control';
     }
-} else { 
-    currentUser = null; 
-    currentUserData = null; 
-    showView('authView'); 
-    window.showLogin(); 
-    if(document.getElementById('authSubtitle')) {
-        document.getElementById('authSubtitle').innerText = 'Área de Gestión y Control';
-    }
-}
 });
 
 window.closeModals = (resetTab = true) => { 
@@ -644,6 +626,7 @@ window.viewAccountData = (id) => {
     document.getElementById('viewAccountModal').style.display = 'flex'; 
 };
 
+window.openManageModal = (id, name, isActive) => { currentManageUserId = id; document.getElementById('manageUserName').innerText = name; document.getElementById('manageAction').value = isActive ? "true" : "false"; document.getElementById('manageDuration').value = "permanent"; window.toggleDurationFields(); document.getElementById('adminManageModal').style.display = 'flex'; };
 window.toggleDurationFields = () => { document.getElementById('temporaryFields').style.display = document.getElementById('manageDuration').value === 'temporary' ? 'flex' : 'none'; };
 window.toggleTempType = () => { document.getElementById('manageDays').style.display = document.getElementById('manageTempType').value === 'days' ? 'block' : 'none'; };
 window.saveManageStatus = async () => {
@@ -656,12 +639,11 @@ window.saveManageStatus = async () => {
 /* --- SISTEMA DE GESTIÓN DE PLANES (ADMIN) --- */
 let currentPlanUserId = null;
 
-window.openPlanModal = (id, name, currentPlan) => {
+window.openPlanModal = (id, name, planActual) => {
     currentPlanUserId = id;
-    const planSelect = document.getElementById('newPlanSelect');
-    if (planSelect) planSelect.value = currentPlan || 'demo';
-    const modal = document.getElementById('planModal');
-    if (modal) modal.style.display = 'flex';
+    document.getElementById('planUserName').innerText = name;
+    document.getElementById('newPlanSelect').value = planActual || 'demo';
+    document.getElementById('planModal').style.display = 'flex';
 };
 
 window.savePlan = async () => {
@@ -672,6 +654,7 @@ window.savePlan = async () => {
 
     const nuevoPlan = document.getElementById('newPlanSelect').value;
     
+    // Asignación matemática de límites según tu modelo de negocio
     let limite = 20;
     let dias = 3;
 
@@ -679,10 +662,11 @@ window.savePlan = async () => {
         limite = 100; 
         dias = 30; 
     } else if (nuevoPlan === 'pro') { 
-        limite = 9999;
+        limite = 9999; // Ilimitado
         dias = 30; 
     }
 
+    // Calculamos la nueva fecha de vencimiento
     const fechaActual = new Date();
     const fechaVencimiento = new Date();
     fechaVencimiento.setDate(fechaActual.getDate() + dias);
@@ -696,7 +680,7 @@ window.savePlan = async () => {
         
         window.showNotification(`Plan ${nuevoPlan.toUpperCase()} activado con éxito 💎`);
         window.closeModals();
-        loadAdminData();
+        loadAdminData(); // Recarga la tabla para ver el cambio instantáneo
     } catch (e) {
         window.showNotification("Error: " + e.message);
     } finally {
@@ -735,9 +719,9 @@ async function loadAdminData() {
             <td data-label="Plan"><strong style="color: ${planColor};">${planDisplay}</strong></td>
             <td data-label="Estado">${statusHtml}${expText}</td>
             <td data-label="Acción" class="actions-cell" style="display: flex; gap: 5px;">
-                <button class="action-btn" onclick="window.openAdminEditUserModal('${id}')"><i class='bx bx-edit-alt'></i> Editar</button>
+                <button class="action-btn" style="border: 1px solid var(--mac-border); background: transparent;" onclick="window.openManageModal('${id}', '${data.name}', ${data.active})">⚙️ Estado</button>
                 <button class="action-btn" style="border: 1px solid var(--mac-blue); color: var(--mac-blue); background: transparent;" onclick="window.openPlanModal('${id}', '${data.name}', '${data.plan_actual || 'demo'}')">💎 Plan</button>
-            </td>`;
+            </td>`; 
         tbody.appendChild(tr);
     });
 
@@ -4535,288 +4519,4 @@ window.checkPlanesView = () => {
     if (btnHelp) btnHelp.href = `https://wa.me/${cleanPhone}?text=${helpMsg}`;
 
     return true;
-};
-
-/* =========================================================
-   SISTEMA DE DEMO (3 HORAS), TOUR Y PANEL ADMIN AVANZADO
-========================================================= */
-
-// 1. TOUR INTERACTIVO
-window.startNewUserTour = () => {
-    if (!currentUser) return;
-    const tourKey = 'tourSeen_' + currentUser.uid;
-    if (localStorage.getItem(tourKey)) return; 
-    if (typeof driver === 'undefined') return;
-
-    const driverObj = driver.js.driver({
-        showProgress: true,
-        animate: true,
-        nextBtnText: 'Siguiente →',
-        prevBtnText: '← Atrás',
-        doneBtnText: '¡Comenzar a trabajar!',
-        steps: [
-            { element: '#clientForm', popover: { title: '📝 Registra Clientes', description: 'Agrega a tus clientes aquí, con sus perfiles, correos y pines.', side: "bottom" } },
-            { element: '.mac-controls', popover: { title: '🌐 Herramientas Top', description: 'Accede a tu Portal de Clientes, Finanzas y Auto-WA desde aquí.', side: "bottom" } },
-            { element: '#mainSidebar', popover: { title: '📌 Menú Principal', description: 'Navega a tu Inventario, Tiendita Web y Configuración del Bot.', side: "right" } }
-        ],
-        onDestroyed: () => { localStorage.setItem(tourKey, 'true'); }
-    });
-    driverObj.drive();
-};
-
-// 2. VERIFICADOR DE DEMO Y BLOQUEO AUTOMÁTICO
-window.checkDemoExpiration = (userData) => {
-    if (!userData || userData.email === "admin@akaza.com" || userData.role === 'admin') return false;
-
-    const now = Date.now();
-    const demoDurationMs = 3 * 60 * 60 * 1000; // 3 Horas
-    const expirationDate = userData.licenseExpiration ? new Date(userData.licenseExpiration).getTime() : 0;
-
-    const isDemoExpired = userData.status === 'demo' && (now - (userData.createdAtMs || 0) > demoDurationMs);
-    const isLicenseExpired = userData.status === 'active' && expirationDate > 0 && now > expirationDate;
-    const isSuspended = userData.status === 'suspended' || userData.active === false;
-
-    if (isSuspended || isDemoExpired || isLicenseExpired) {
-        // Bloquear
-        if (document.getElementById('appView')) document.getElementById('appView').style.display = 'none';
-        
-        const adminPhone = "+51987654321"; // Pon tu número
-        const planName = (userData.plan_actual || 'basico').toUpperCase();
-        const waMsg = encodeURIComponent(`¡Hola! 👋 Mi tiempo de prueba/licencia en A.G.C. ha finalizado. Quisiera adquirir el *PLAN ${planName}* para continuar.`);
-
-        let titleTxt = isDemoExpired ? '⌛ ¡Tu Demo ha Finalizado!' : '🔒 Cuenta Suspendida / Vencida';
-
-        Swal.fire({
-            title: titleTxt,
-            html: `
-                <p style="font-size: 14px; margin-bottom: 15px;">Para seguir utilizando tu panel, tu Tiendita Web y gestionar tus clientes sin interrupción, adquiere tu licencia oficial ahora.</p>
-                <a href="https://wa.me/${adminPhone.replace(/[^\d+]/g, '')}?text=${waMsg}" target="_blank" class="btn-primary" style="display: block; padding: 14px; text-decoration: none; background: #25D366; border-radius: 12px;">
-                    <i class='bx bxl-whatsapp'></i> Hablar con Soporte
-                </a>
-            `,
-            icon: 'warning',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            showConfirmButton: false,
-            background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
-            color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
-        });
-        return true; // Está bloqueado
-    }
-    return false;
-};
-
-// LLAMADA AL BLOQUEO Y AL TOUR DESDE ON AUTH STATE CHANGED
-// (Asegúrate de que en onAuthStateChanged, después de cargar currentUserData, coloques:
-//  if(window.checkDemoExpiration(currentUserData)) return; 
-//  window.startNewUserTour(); )
-
-/* =========================================================
-   SISTEMA DE ADMINISTRACIÓN DE LICENCIAS Y FILTROS (V. FINAL)
-========================================================= */
-let allAdminUsersList = [];
-let currentAdminFilter = 'all';
-let currentEditingUserId = null;
-
-// Carga la lista completa de usuarios desde Firestore
-window.loadAdminData = async () => {
-    try {
-        const qUsers = await getDocs(collection(db, "users"));
-        allAdminUsersList = [];
-        qUsers.forEach(d => {
-            const data = d.data();
-            // Ignorar al admin principal para evitar auto-suspensión
-            if (data.role !== 'admin' && data.email !== 'admin@akaza.com') {
-                allAdminUsersList.push({ id: d.id, ...data });
-            }
-        });
-        window.filterAdminUsers(currentAdminFilter || 'all');
-    } catch (e) {
-        console.error("Error cargando usuarios admin:", e);
-    }
-};
-
-// Filtrar la lista de usuarios en pantalla
-window.filterAdminUsers = (filter) => {
-    currentAdminFilter = filter;
-
-    // 1. Resetear el estado activo de los botones
-    const btnIds = ['All', 'Active', 'Suspended', 'Pro', 'Basico'];
-    btnIds.forEach(f => {
-        const btn = document.getElementById('btnFilter' + f + 'Users');
-        if (btn) btn.classList.remove('active');
-    });
-
-    // 2. Activar el botón seleccionado
-    const capitalizedFilter = filter.charAt(0).toUpperCase() + filter.slice(1);
-    const activeBtn = document.getElementById('btnFilter' + capitalizedFilter + 'Users');
-    if (activeBtn) activeBtn.classList.add('active');
-
-    // 3. Limpiar tabla
-    const tbody = document.getElementById('adminTableBody');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-
-    // 4. Lógica de Filtrado Exacto
-    let filtered = allAdminUsersList;
-    if (filter === 'active') {
-        filtered = filtered.filter(u => u.status === 'active' || u.status === 'demo' || u.active === true);
-    } else if (filter === 'suspended') {
-        filtered = filtered.filter(u => u.status === 'suspended' || u.active === false);
-    } else if (filter === 'pro') {
-        filtered = filtered.filter(u => {
-            const p = (u.plan_actual || u.plan || '').toLowerCase();
-            return p === 'pro';
-        });
-    } else if (filter === 'basico') {
-        filtered = filtered.filter(u => {
-            const p = (u.plan_actual || u.plan || '').toLowerCase();
-            return p === 'basico' || p === 'basic' || p === '';
-        });
-    }
-
-    if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--mac-text-secondary); padding:20px;">No se encontraron usuarios en esta categoría.</td></tr>`;
-        return;
-    }
-
-    // 5. Dibujar Tabla
-    filtered.forEach(u => {
-        const rawPlan = (u.plan_actual || u.plan || 'basico').toLowerCase();
-        const isPro = rawPlan === 'pro';
-        
-        const badgePlan = isPro 
-            ? `<span class="portal-badge active" style="padding: 4px 10px; font-size: 11px;"><i class='bx bxs-diamond'></i> PRO</span>`
-            : `<span class="portal-badge" style="padding: 4px 10px; font-size: 11px; background: rgba(255,255,255,0.08); color: var(--mac-text-main); border: 1px solid var(--mac-border);"><i class='bx bx-bolt-circle' style="color: var(--mac-orange);"></i> BÁSICO</span>`;
-
-        let statHtml = '';
-        if (u.status === 'suspended' || u.active === false) {
-            statHtml = `<span style="color: var(--mac-red); font-weight: bold; display: inline-flex; align-items: center; gap: 4px;"><i class='bx bx-block'></i> Suspendido</span>`;
-        } else if (u.status === 'demo') {
-            statHtml = `<span style="color: var(--mac-orange); font-weight: bold; display: inline-flex; align-items: center; gap: 4px;"><i class='bx bx-time-five'></i> Demo 3H</span>`;
-        } else {
-            statHtml = `<span style="color: var(--mac-green); font-weight: bold; display: inline-flex; align-items: center; gap: 4px;"><i class='bx bx-check-circle'></i> Activo</span>`;
-        }
-
-        // AQUÍ ESTÁ LA MAGIA: El botón llama al NUEVO MODAL (openAdminEditUserModal)
-        tbody.innerHTML += `
-            <tr>
-                <td>
-                    <b>${u.name || 'Sin Nombre'}</b><br>
-                    <small style="color: var(--mac-text-secondary);">${u.email}</small>
-                </td>
-                <td>${badgePlan}</td>
-                <td>${statHtml}</td>
-                <td>
-                    <button class="action-btn" onclick="window.openAdminEditUserModal('${u.id}')" style="padding: 6px 12px; font-size: 12px;">
-                        <i class='bx bx-edit-alt'></i> Editar Licencia
-                    </button>
-                </td>
-            </tr>
-        `;
-    });
-};
-
-// Abrir el modal de edición de un usuario
-window.openAdminEditUserModal = (userId) => {
-    currentEditingUserId = userId;
-    const u = allAdminUsersList.find(x => x.id === userId);
-    if (!u) return;
-
-    const rawPlan = (u.plan_actual || u.plan || 'basico').toLowerCase();
-    document.getElementById('adminUserPlanSelect').value = rawPlan === 'pro' ? 'pro' : 'basico';
-
-    const isSuspended = u.status === 'suspended' || u.active === false;
-    document.getElementById('adminUserStatusSelect').value = isSuspended ? 'suspended' : 'active';
-
-    window.updateAdminDurationOptions();
-    document.getElementById('adminEditUserModal').style.display = 'flex';
-};
-
-// Actualiza las opciones de duración en el modal
-window.updateAdminDurationOptions = () => {
-    const plan = document.getElementById('adminUserPlanSelect').value;
-    const status = document.getElementById('adminUserStatusSelect').value;
-    const durContainer = document.getElementById('adminDurationContainer');
-    const durSelect = document.getElementById('adminUserDurationSelect');
-
-    if (status === 'suspended') {
-        durContainer.style.display = 'none';
-        return;
-    }
-
-    durContainer.style.display = 'block';
-    durSelect.innerHTML = '';
-
-    if (plan === 'pro') {
-        durSelect.innerHTML = `
-            <option value="demo_3h">⏱️ Demo 3 Horas</option>
-            <option value="30_days" selected>📅 Mensual (30 Días)</option>
-        `;
-    } else {
-        durSelect.innerHTML = `
-            <option value="demo_3h">⏱️ Demo 3 Horas</option>
-            <option value="permanent" selected>♾️ Activo Permanente (Pago Único)</option>
-        `;
-    }
-};
-
-// Guardar los cambios en Firebase Firestore
-window.saveAdminUserLicense = async () => {
-    if (!currentEditingUserId) return;
-
-    const btn = document.querySelector('#adminEditUserModal .btn-primary');
-    const origText = btn.innerText;
-    btn.innerText = "Guardando...";
-    btn.disabled = true;
-
-    const plan = document.getElementById('adminUserPlanSelect').value; 
-    const status = document.getElementById('adminUserStatusSelect').value; 
-    const dur = document.getElementById('adminUserDurationSelect').value;
-
-    let updateData = {
-        plan_actual: plan,
-        plan: plan,
-        active: status === 'active',
-        updatedAtMs: Date.now()
-    };
-
-    if (status === 'suspended') {
-        updateData.status = 'suspended';
-    } else {
-        if (dur === 'demo_3h') {
-            updateData.status = 'demo';
-            updateData.createdAtMs = Date.now(); // Reinicia el contador
-            updateData.licenseExpiration = null;
-        } else if (dur === '30_days') {
-            updateData.status = 'active';
-            const expDate = new Date();
-            expDate.setDate(expDate.getDate() + 30);
-            updateData.licenseExpiration = expDate.toISOString();
-        } else if (dur === 'permanent') {
-            updateData.status = 'active';
-            updateData.licenseExpiration = null;
-        }
-    }
-
-    try {
-        await updateDoc(doc(db, "users", currentEditingUserId), updateData);
-
-        // Actualizar la lista en memoria y repintar sin recargar la página
-        const userIndex = allAdminUsersList.findIndex(u => u.id === currentEditingUserId);
-        if (userIndex !== -1) {
-            allAdminUsersList[userIndex] = { ...allAdminUsersList[userIndex], ...updateData };
-        }
-
-        window.showNotification("✅ Licencia guardada correctamente");
-        document.getElementById('adminEditUserModal').style.display = 'none';
-        window.filterAdminUsers(currentAdminFilter);
-        
-    } catch (e) {
-        console.error("Error guardando licencia:", e);
-        window.showNotification("Error: " + e.message);
-    } finally {
-        btn.innerText = origText;
-        btn.disabled = false;
-    }
 };
