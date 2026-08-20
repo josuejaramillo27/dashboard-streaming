@@ -320,6 +320,8 @@
             .news-content-area { padding-left: 0; padding-top: 10px; }
         }
     </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
 </head>
 <body>
 
@@ -368,6 +370,11 @@
             <option value="México">México</option>
             <option value="Argentina">Argentina</option><option value="Chile">Chile</option><option value="Ecuador">Ecuador</option><option value="Bolivia">Bolivia</option><option value="Paraguay">Paraguay</option>
             <option value="Otro País">Otro País...</option>
+        </select>
+        <select id="regPlanDemo" required>
+            <option value="">Selecciona la Demo (3 Horas Gratis)...</option>
+            <option value="basico">Probar Plan Básico</option>
+            <option value="pro">Probar Plan PRO</option>
         </select>
         <input type="tel" id="regPhone" placeholder="WhatsApp (Ej: +51...)" required>
         <input type="email" id="regEmail" placeholder="Correo Electrónico" required>
@@ -884,6 +891,18 @@
     </div>
     
     <h3><i class='bx bx-group'></i> Gestión de Distribuidores</h3>
+    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <select id="adminFilterStatus" onchange="window.toggleAdminPlanFilter()" style="padding: 10px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+            <option value="active">🟢 Cuentas Activas</option>
+            <option value="inactive">🔴 Cuentas Suspendidas</option>
+        </select>
+        <select id="adminFilterPlan" onchange="window.renderAdminUsers()" style="padding: 10px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+            <option value="all">Todos los Planes</option>
+            <option value="pro">Plan PRO</option>
+            <option value="basico">Plan Básico</option>
+        </select>
+    </div>
+    
     <div style="overflow-x:auto; margin-bottom: 40px;">
         <table>
             <thead><tr><th>Nombre</th><th>País</th><th>Correo</th><th>Teléfono</th><th>Plan</th><th>Estado</th><th>Acción</th></tr></thead>
@@ -1420,11 +1439,10 @@
             <option value="temporary">Temporal (Con fecha de caducidad)</option>
         </select>
         <div id="temporaryFields" style="display: none; flex-direction: column; gap: 10px;">
-            <select id="manageTempType" onchange="window.toggleTempType()" style="padding: 10px; border-radius: 8px;">
-                <option value="hours">Por 3 horas (Demo)</option>
-                <option value="days">Por Días</option>
+            <select id="manageTempType" style="padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                <option value="3hours">Por 3 horas (Demo)</option>
+                <option value="30days">Por 30 Días (Suscripción Mensual)</option>
             </select>
-            <input type="number" id="manageDays" placeholder="Cantidad de Días" style="display: none;">
         </div>
         <div style="display: flex; gap: 10px; margin-top: 15px;">
             <button class="btn-primary" onclick="window.saveManageStatus()">Guardar y Aplicar</button>
@@ -1441,7 +1459,6 @@
             <option value="demo">Prueba (Demo)</option>
             <option value="basico">Plan Básico</option>
             <option value="pro">Plan PRO</option>
-            <option value="elite">Plan ELITE</option>
         </select>
         <div style="display: flex; gap: 10px;">
             <button class="btn-primary" style="background: linear-gradient(45deg, #007AFF, #5856D6); border: none;" onclick="window.savePlan()">Guardar Nuevo Plan</button>
