@@ -4073,19 +4073,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 /* =========================================================
-   LÓGICA DEL PORTAL PÚBLICO DE CLIENTES (REDiseño PREMIUM)
+   LÓGICA DEL PORTAL PÚBLICO DE CLIENTES (REDiseño PREMIUM + SEGURIDAD)
 ========================================================= */
 let portalStoreData = null;
 
-// Verifica si la URL contiene un parámetro de portal público (?portal=)
 window.checkClientPortal = async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const portalId = urlParams.get('portal') || urlParams.get('store');
-    const clientId = urlParams.get('client');
 
     if (!portalId) return false;
 
-    // Forzar ocultamiento del Login y las vistas privadas del sistema
     if (document.getElementById('authView')) document.getElementById('authView').style.display = 'none';
     if (document.getElementById('appView')) document.getElementById('appView').style.display = 'none';
     if (document.getElementById('adminView')) document.getElementById('adminView').style.display = 'none';
@@ -4095,7 +4092,6 @@ window.checkClientPortal = async () => {
     if (portalView) portalView.style.display = 'block';
 
     try {
-        // Buscar tienda por Alias personalizado (ej. akazaservicios) o por UID
         const q = query(collection(db, "users"), where("storeAlias", "==", portalId));
         const snap = await getDocs(q);
         
@@ -4117,7 +4113,6 @@ window.checkClientPortal = async () => {
 
         document.getElementById('portalStoreName').innerText = portalStoreData.name || "Mi Portal";
         
-        // Carga dinámica del logo del usuario/vendedor
         const logo = document.getElementById('portalStoreLogo');
         if (logo) {
             if (portalStoreData.logoUrl) {
@@ -4134,13 +4129,7 @@ window.checkClientPortal = async () => {
             supportLink.href = `https://wa.me/${vendorPhone}?text=${encodeURIComponent('Hola, necesito ayuda con mis servicios del portal.')}`;
         }
 
-        if (clientId) {
-            const clientDoc = await getDoc(doc(db, "clients", clientId));
-            if (clientDoc.exists() && clientDoc.data().userId === portalStoreData.uid) {
-                document.getElementById('portalSearchCard').style.display = 'none';
-                window.renderClientPortalData(clientDoc.data(), portalStoreData);
-            }
-        }
+        // Se eliminó la inyección directa por URL para obligar al cliente a poner su Código siempre.
         return true;
     } catch (e) {
         console.error("Error cargando portal:", e);
@@ -4150,7 +4139,9 @@ window.checkClientPortal = async () => {
 
 window.searchPortalByPhone = async () => {
     const phoneInput = document.getElementById('portalPhoneSearchInput').value.trim();
-    if (!phoneInput) return window.showNotification("Ingresa un número de teléfono");
+    const codeInput = document.getElementById('portalCodeSearchInput').value.trim().toUpperCase();
+
+    if (!phoneInput || !codeInput) return window.showNotification("⚠️ Ingresa tu WhatsApp y el Código del portal.");
 
     const btn = document.querySelector('#portalSearchCard .btn-primary');
     const origText = btn.innerHTML;
@@ -4166,8 +4157,8 @@ window.searchPortalByPhone = async () => {
         snap.forEach(d => {
             const c = d.data();
             const cleanDbPhone = c.phone ? c.phone.replace(/[^\d]/g, '') : '';
-            // Validamos que el teléfono coincida
-            if (cleanDbPhone === cleanInputPhone || cleanDbPhone.endsWith(cleanInputPhone)) {
+            // 🔒 Validación Doble: Teléfono Y Código Web Exacto
+            if ((cleanDbPhone === cleanInputPhone || cleanDbPhone.endsWith(cleanInputPhone)) && c.portalCode === codeInput) {
                 matchedClient = c; 
             }
         });
@@ -4176,7 +4167,7 @@ window.searchPortalByPhone = async () => {
             document.getElementById('portalSearchCard').style.display = 'none';
             window.renderClientPortalData(matchedClient, portalStoreData);
         } else {
-            window.showNotification("No se encontraron servicios activos para este número.");
+            window.showNotification("❌ Datos incorrectos. Revisa tu número y código.");
         }
     } catch(e) {
         console.error(e);
@@ -4207,11 +4198,8 @@ window.openPortalManagerModal = () => {
     const portalAlias = currentUserData.storeAlias || currentUser.uid;
     const globalUrl = `${baseUrl}?portal=${portalAlias}`;
     
-    const input = document.getElementById('globalPortalUrlInput');
-    if (input) input.value = globalUrl;
-    
-    const modal = document.getElementById('portalManagerModal');
-    if (modal) modal.style.display = 'flex';
+    document.getElementById('globalPortalUrlInput').value = globalUrl;
+    document.getElementById('portalManagerModal').style.display = 'flex';
 };
 
 window.copyGlobalPortalUrl = () => {
@@ -4219,11 +4207,18 @@ window.copyGlobalPortalUrl = () => {
     window.copyToClipboard(url, "Enlace del Portal");
 };
 
+// Se actualizó para que le envíe el código automáticamente al cliente
 window.sendClientPortalWa = (phone, clientId) => {
+    const c = clients.find(x => x.id === clientId);
+    if (!c) return window.showNotification("Cliente no encontrado.");
+
     const baseUrl = window.location.origin + window.location.pathname;
-    const clientUrl = `${baseUrl}?store=${currentUserData.storeAlias || currentUser.uid}&client=${clientId}`;
+    const portalAlias = currentUserData.storeAlias || currentUser.uid;
+    const clientUrl = `${baseUrl}?portal=${portalAlias}`;
     const cleanPhone = phone.replace(/[^\d+]/g, '');
-    const msg = `¡Hola! 👋 Puedes consultar el estado de tus servicios y tus accesos en tu portal personal aquí:\n\n🔗 ${clientUrl}`;
+    
+    const msg = `¡Hola, *${c.name}*! 👋\n\nPuedes consultar el estado de tus servicios y tus contraseñas en tiempo real desde tu portal web personal.\n\n🔗 *Link:* ${clientUrl}\n📱 *Usuario:* ${c.phone}\n🔑 *Código Web:* ${c.portalCode || 'N/A'}\n\n_Guarda este mensaje para ver tus accesos cuando quieras._`;
+    
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
 };
 
@@ -4270,25 +4265,29 @@ window.renderClientPortalData = (clientObj, storeUserData) => {
                 pin: clientObj.accountPin || '-'
             };
 
+        // CORRECCIÓN VISUAL: Añadidos estilos flex-shrink y max-content a los botones de copiar
         accountsHtml += `
             <div style="background: var(--mac-bg); padding: 15px; border-radius: 16px; border: 1px solid var(--mac-border); margin-bottom: 15px; text-align: left;">
                 <div style="font-size: 14px; font-weight: 800; color: var(--mac-text-main); margin-bottom: 12px;">🎬 ${platName.toUpperCase()}</div>
+                
                 <div class="credential-card">
                     <div class="credential-info"><span class="credential-label">Correo</span><span class="credential-value">${acc.email || '-'}</span></div>
-                    <button class="btn-copy-chip" onclick="window.copyToClipboard('${acc.email || ''}', 'Correo')"><i class='bx bx-copy'></i></button>
+                    <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap;" onclick="window.copyToClipboard('${acc.email || ''}', 'Correo')"><i class='bx bx-copy'></i> Copiar</button>
                 </div>
+                
                 <div class="credential-card">
                     <div class="credential-info"><span class="credential-label">Contraseña</span><span class="credential-value">${acc.password || '-'}</span></div>
-                    <button class="btn-copy-chip" onclick="window.copyToClipboard('${acc.password || ''}', 'Clave')"><i class='bx bx-copy'></i></button>
+                    <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap;" onclick="window.copyToClipboard('${acc.password || ''}', 'Clave')"><i class='bx bx-copy'></i> Copiar</button>
                 </div>
+                
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div class="credential-card" style="margin: 0;">
+                    <div class="credential-card" style="margin: 0; align-items: center;">
                         <div class="credential-info"><span class="credential-label">Perfil N°</span><span class="credential-value">${acc.profile || '-'}</span></div>
-                        <button class="btn-copy-chip" onclick="window.copyToClipboard('${acc.profile || ''}', 'Perfil')"><i class='bx bx-copy'></i></button>
+                        <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.profile || ''}', 'Perfil')"><i class='bx bx-copy'></i></button>
                     </div>
-                    <div class="credential-card" style="margin: 0;">
+                    <div class="credential-card" style="margin: 0; align-items: center;">
                         <div class="credential-info"><span class="credential-label">PIN Acceso</span><span class="credential-value">${acc.pin || '-'}</span></div>
-                        <button class="btn-copy-chip" onclick="window.copyToClipboard('${acc.pin || ''}', 'PIN')"><i class='bx bx-copy'></i></button>
+                        <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.pin || ''}', 'PIN')"><i class='bx bx-copy'></i></button>
                     </div>
                 </div>
             </div>
