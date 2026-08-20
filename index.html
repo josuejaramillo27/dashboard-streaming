@@ -1377,45 +1377,6 @@
             <div id="dynamicWaPlatformsContainer" style="display: flex; flex-direction: column; gap: 15px;">
             </div>
         </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px;">
-                <label class="wa-chk-card" onclick="window.updateWaChkCard(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); color: var(--mac-text-main); font-weight: 500; transition: all 0.2s;">
-                    <span>📧 Correo</span>
-                    <input type="checkbox" class="wa-data-chk" value="correo" checked style="display:none;">
-                    <i class='bx bx-check-circle wa-chk-icon' style="color: var(--mac-green); font-size: 18px;"></i>
-                </label>
-                
-                <label class="wa-chk-card" onclick="window.updateWaChkCard(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); color: var(--mac-text-main); font-weight: 500; transition: all 0.2s;">
-                    <span>🔑 Contraseña</span>
-                    <input type="checkbox" class="wa-data-chk" value="pass" checked style="display:none;">
-                    <i class='bx bx-check-circle wa-chk-icon' style="color: var(--mac-green); font-size: 18px;"></i>
-                </label>
-                
-                <label class="wa-chk-card" onclick="window.updateWaChkCard(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); color: var(--mac-text-main); font-weight: 500; transition: all 0.2s;">
-                    <span>👤 N° Perfil</span>
-                    <input type="checkbox" class="wa-data-chk" value="perfil" checked style="display:none;">
-                    <i class='bx bx-check-circle wa-chk-icon' style="color: var(--mac-green); font-size: 18px;"></i>
-                </label>
-                
-                <label class="wa-chk-card" onclick="window.updateWaChkCard(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); color: var(--mac-text-main); font-weight: 500; transition: all 0.2s;">
-                    <span>📌 PIN</span>
-                    <input type="checkbox" class="wa-data-chk" value="pin" checked style="display:none;">
-                    <i class='bx bx-check-circle wa-chk-icon' style="color: var(--mac-green); font-size: 18px;"></i>
-                </label>
-                
-                <label class="wa-chk-card" onclick="window.updateWaChkCard(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); color: var(--mac-text-main); font-weight: 500; transition: all 0.2s;">
-                    <span>📅 Fecha Venc.</span>
-                    <input type="checkbox" class="wa-data-chk" value="fecha" checked style="display:none;">
-                    <i class='bx bx-check-circle wa-chk-icon' style="color: var(--mac-green); font-size: 18px;"></i>
-                </label>
-                
-                <label class="wa-chk-card" onclick="window.updateWaChkCard(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); color: var(--mac-text-main); font-weight: 500; transition: all 0.2s;">
-                    <span>⚠️ Reglas</span>
-                    <input type="checkbox" class="wa-data-chk" value="reglas" checked style="display:none;">
-                    <i class='bx bx-check-circle wa-chk-icon' style="color: var(--mac-green); font-size: 18px;"></i>
-                </label>
-            </div>
-        </div>
 
         <div style="display: flex; gap: 10px; margin-top: 20px;">
             <button class="btn-primary" id="btnConfirmWaSend" style="display: none; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); border:none;" onclick="window.confirmSendWa()">Enviar Mensaje <i class='bx bx-send'></i></button>
