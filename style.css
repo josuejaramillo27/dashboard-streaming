@@ -1227,3 +1227,108 @@ body.dark-mode .bottom-nav { background: linear-gradient(to top, rgba(0, 0, 0, 1
     color: white;
     border-color: var(--mac-blue);
 }
+
+/* =========================================================
+   ESTILOS Y ANIMACIONES TIPO TELEGRAM (PLANES A.G.C.)
+========================================================= */
+
+/* Emojis con Animación de Flotado Suave */
+.tg-emoji {
+    display: inline-block;
+    animation: floatEmoji 3s ease-in-out infinite alternate;
+}
+
+@keyframes floatEmoji {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-5px) rotate(4deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+}
+
+/* Resplandor del Logo AGC */
+.tg-logo-glow {
+    filter: drop-shadow(0 0 12px rgba(94, 92, 230, 0.4));
+    animation: logoPulse 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes logoPulse {
+    0% { filter: drop-shadow(0 0 8px rgba(94, 92, 230, 0.3)); transform: scale(1); }
+    100% { filter: drop-shadow(0 0 20px rgba(94, 92, 230, 0.6)); transform: scale(1.03); }
+}
+
+/* Tarjeta Bento de Plan */
+.tg-plan-card {
+    background: var(--mac-surface) !important;
+    border: 1px solid var(--mac-border) !important;
+    backdrop-filter: var(--glass-blur) !important;
+    -webkit-backdrop-filter: var(--glass-blur) !important;
+    border-radius: 24px !important;
+    padding: 25px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: var(--glass-shadow);
+}
+
+.tg-plan-card:hover {
+    transform: translateY(-6px);
+}
+
+/* Tarjeta PRO destacada con Borde de Neón */
+.tg-plan-card.pro {
+    border: 1px solid rgba(94, 92, 230, 0.5) !important;
+    box-shadow: 0 15px 40px rgba(94, 92, 230, 0.2) !important;
+}
+
+/* Insignias Badges */
+.tg-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    width: fit-content;
+}
+
+.tg-badge.basic {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--mac-text-main);
+    border: 1px solid var(--mac-border);
+}
+
+.tg-badge.pro {
+    background: rgba(94, 92, 230, 0.2);
+    color: var(--mac-blue);
+    border: 1px solid rgba(94, 92, 230, 0.5);
+    box-shadow: 0 0 12px rgba(94, 92, 230, 0.3);
+}
+
+/* Lista de características */
+.tg-feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0 0;
+}
+
+.tg-feature-list li {
+    font-size: 13px;
+    color: var(--mac-text-main);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.4;
+}
+
+.tg-feature-list.disabled li {
+    color: var(--mac-text-secondary);
+    opacity: 0.6;
+}
+
+.tg-feature-list.pro-list li {
+    font-weight: 500;
+}
