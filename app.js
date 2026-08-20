@@ -4111,9 +4111,16 @@ window.checkClientPortal = async () => {
         }
 
         document.getElementById('portalStoreName').innerText = portalStoreData.name || "Mi Portal";
+        
+        // Magia para el logo dinámico
         const logo = document.getElementById('portalStoreLogo');
-        if (logo && portalStoreData.logoUrl) {
-            logo.src = portalStoreData.logoUrl;
+        if (logo) {
+            if (portalStoreData.logoUrl) {
+                logo.src = portalStoreData.logoUrl;
+                logo.style.display = 'block'; // Lo mostramos solo si el vendedor subió un logo
+            } else {
+                logo.style.display = 'none'; // Lo mantenemos oculto si no tiene logo
+            }
         }
 
         const vendorPhone = portalStoreData.phone ? portalStoreData.phone.replace(/[^\d+]/g, '') : '';
