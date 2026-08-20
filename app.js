@@ -4628,7 +4628,7 @@ window.startTutorial = () => {
         nextBtnText: 'Siguiente &rarr;',
         prevBtnText: '&larr; Atrás',
         doneBtnText: '¡Comenzar a Vender! 🚀',
-        popoverClass: isDark ? 'driverjs-theme-dark' : '',
+        popoverClass: 'driverjs-theme-dark',
         steps: [
             { popover: { title: '¡Bienvenido a A.G.C.!', description: 'Vamos a dar un paseo rápido por tu nuevo panel de control.' } },
             { element: '#homeSection .header-top', popover: { title: 'Finanzas', description: 'Aquí podrás ver tu utilidad neta y métricas clave en tiempo real.' } },
