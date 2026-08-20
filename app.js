@@ -1290,7 +1290,7 @@ window.renderTable = () => {
         <td data-label="Vencimiento">${c.expDate.toLocaleDateString('es-ES')}</td>
         <td data-label="Estado"><span class="status ${c.statusCat}">${stText}</span></td>
         <td data-label="Acciones" class="actions-cell">
-            <button class="action-btn btn-wa" onclick="window.sendWA('${c.phone}', '${c.name}', '${c.platform}', '${c.expDate.toLocaleDateString('es-ES')}')"><i class='bx bxl-whatsapp'></i> WA</button>
+            <button class="action-btn btn-wa" onclick="window.openWaSendModal('${c.id}')"><i class='bx bxl-whatsapp'></i> WA</button>
             <button class="action-btn" style="background: rgba(175, 82, 222, 0.15); color: #AF52DE; font-weight: bold;" onclick="window.downloadTicket('${c.id}', event)"><i class='bx bx-receipt'></i> Recibo</button>
             <button class="action-btn" style="background: rgba(0, 122, 255, 0.15); color: #007AFF; font-weight: bold;" onclick="window.openLinkModal('${c.id}', '${c.platform}')" title="Vincular a Matriz"><i class='bx bx-link'></i></button>
             ${c.statusCat !== 'active' ? `<button class="action-btn btn-renew" onclick="window.renewClient('${c.id}')"><i class='bx bx-refresh'></i></button>` : ''}
@@ -1302,18 +1302,143 @@ window.renderTable = () => {
     if(document.getElementById('statsPanel').style.display === 'grid') window.toggleStats(true);
 };
 
-window.sendWA = (phone, name, platform, dateStr) => { 
-    let num = phone.replace(/[^\d+]/g, ''); 
-    let baseMsg = currentUserData.waTemplate || "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*.\nPagos: {pago}";
-    let paymentInfo = currentUserData.waPaymentInfo || "(Pregúntame por mis métodos de pago)";
+/* --- NUEVO SISTEMA AVANZADO DE ENVÍO POR WHATSAPP --- */
+let currentWaClientId = null;
+let currentWaType = null;
+
+window.openWaSendModal = (id) => {
+    currentWaClientId = id;
+    currentWaType = null;
     
-    let finalMsg = baseMsg
-        .replace(/{nombre}/g, name)
-        .replace(/{plataforma}/g, platform)
-        .replace(/{fecha}/g, dateStr)
-        .replace(/{pago}/g, paymentInfo); 
+    // Reseteamos el diseño de los botones para que estén deseleccionados
+    document.getElementById('btnWaRenovacion').style.border = '1px solid var(--mac-blue)';
+    document.getElementById('btnWaRenovacion').style.background = 'rgba(0, 122, 255, 0.1)';
+    document.getElementById('btnWaRenovacion').style.color = 'var(--mac-blue)';
+    
+    document.getElementById('btnWaDatos').style.border = '1px solid var(--mac-green)';
+    document.getElementById('btnWaDatos').style.background = 'rgba(52, 199, 89, 0.1)';
+    document.getElementById('btnWaDatos').style.color = 'var(--mac-green)';
+    
+    // Ocultar opciones y botón de enviar al inicio
+    document.getElementById('waDataOptionsContainer').style.display = 'none';
+    document.getElementById('btnConfirmWaSend').style.display = 'none';
+    
+    // Asegurarse de que todos los checks estén marcados
+    document.querySelectorAll('.wa-data-chk').forEach(chk => chk.checked = true);
+    document.getElementById('btnToggleAllWaBoxes').innerText = 'Desmarcar Todo';
+    
+    document.getElementById('waSendOptionsModal').style.display = 'flex';
+};
+
+window.closeWaSendModal = () => {
+    document.getElementById('waSendOptionsModal').style.display = 'none';
+    currentWaClientId = null;
+};
+
+// Al presionar sobre un tipo de mensaje, lo iluminamos y mostramos sus configuraciones
+window.selectWaType = (type) => {
+    currentWaType = type;
+    if (type === 'renovacion') {
+        document.getElementById('btnWaRenovacion').style.border = '2px solid var(--mac-blue)';
+        document.getElementById('btnWaRenovacion').style.background = 'var(--mac-blue)';
+        document.getElementById('btnWaRenovacion').style.color = 'white';
         
+        document.getElementById('btnWaDatos').style.border = '1px solid var(--mac-green)';
+        document.getElementById('btnWaDatos').style.background = 'rgba(52, 199, 89, 0.1)';
+        document.getElementById('btnWaDatos').style.color = 'var(--mac-green)';
+        
+        document.getElementById('waDataOptionsContainer').style.display = 'none';
+        document.getElementById('btnConfirmWaSend').style.display = 'block';
+    } else {
+        document.getElementById('btnWaDatos').style.border = '2px solid var(--mac-green)';
+        document.getElementById('btnWaDatos').style.background = 'var(--mac-green)';
+        document.getElementById('btnWaDatos').style.color = 'white';
+        
+        document.getElementById('btnWaRenovacion').style.border = '1px solid var(--mac-blue)';
+        document.getElementById('btnWaRenovacion').style.background = 'rgba(0, 122, 255, 0.1)';
+        document.getElementById('btnWaRenovacion').style.color = 'var(--mac-blue)';
+        
+        document.getElementById('waDataOptionsContainer').style.display = 'block';
+        document.getElementById('btnConfirmWaSend').style.display = 'block';
+    }
+};
+
+window.toggleAllWaBoxes = () => {
+    const btn = document.getElementById('btnToggleAllWaBoxes');
+    const checkboxes = document.querySelectorAll('.wa-data-chk');
+    const allChecked = Array.from(checkboxes).every(c => c.checked);
+    
+    if (allChecked) {
+        checkboxes.forEach(c => c.checked = false);
+        btn.innerText = 'Marcar Todo';
+    } else {
+        checkboxes.forEach(c => c.checked = true);
+        btn.innerText = 'Desmarcar Todo';
+    }
+};
+
+window.confirmSendWa = () => {
+    if (!currentWaClientId) return;
+    const c = clients.find(x => x.id === currentWaClientId);
+    if (!c) return window.showNotification("Cliente no encontrado");
+    
+    let num = c.phone.replace(/[^\d+]/g, ''); 
+    let finalMsg = '';
+
+    // Transformamos la fecha a lectura bonita
+    const exp = new Date(c.date);
+    exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
+    const dateStr = exp.toLocaleDateString('es-ES');
+
+    if (currentWaType === 'renovacion') {
+        let baseMsg = currentUserData.waTemplate || "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*.\nPagos: {pago}";
+        let paymentInfo = currentUserData.waPaymentInfo || "(Pregúntame por mis métodos de pago)";
+        
+        finalMsg = baseMsg
+            .replace(/{nombre}/g, c.name)
+            .replace(/{plataforma}/g, c.platform)
+            .replace(/{fecha}/g, dateStr)
+            .replace(/{pago}/g, paymentInfo); 
+            
+    } else if (currentWaType === 'datos') {
+        // Sacamos en un Array todo lo que el usuario dejó marcado
+        const selectedData = Array.from(document.querySelectorAll('.wa-data-chk:checked')).map(chk => chk.value);
+        
+        let accountData = null;
+        let rulesText = "Uso personal, no modificar los datos de acceso.";
+        const firstPlatform = c.platform.split(', ')[0]; // En caso tenga varios, tomamos la primera plataforma
+        
+        // Detectar si está en el nuevo modelo multipestaña o clásico
+        if (c.multiAccounts && c.multiAccounts[firstPlatform]) {
+            accountData = c.multiAccounts[firstPlatform];
+        } else {
+            accountData = {
+                email: c.accountEmail || '-',
+                password: c.accountPassword || '-',
+                profile: c.accountProfile || '-',
+                pin: c.accountPin || '-'
+            };
+        }
+
+        // Consultamos la regla de Firebase correspondiente a esta plataforma
+        const rulesDB = currentUserData.platformRules || {};
+        rulesText = rulesDB[firstPlatform] || rulesText;
+
+        // Construimos el bloque del mensaje final (Sólo inyecta lo marcado)
+        finalMsg = `*Tus accesos de ${firstPlatform}:*\n\n`;
+        if (selectedData.includes('correo')) finalMsg += `📧 *Correo:* ${accountData.email || '-'}\n`;
+        if (selectedData.includes('pass')) finalMsg += `🔑 *Clave:* ${accountData.password || '-'}\n`;
+        if (selectedData.includes('perfil')) finalMsg += `👤 *N° Perfil:* ${accountData.profile || '-'}\n`;
+        if (selectedData.includes('pin')) finalMsg += `📌 *PIN:* ${accountData.pin || '-'}\n`;
+        if (selectedData.includes('fecha')) finalMsg += `📅 *Vencimiento:* ${dateStr}\n`;
+        if (selectedData.includes('reglas')) finalMsg += `\n⚠️ *Reglas:* ${rulesText}\n`;
+        
+        if (selectedData.length === 0) return window.showNotification("⚠️ Debes seleccionar al menos un dato para enviar.");
+    }
+
+    // Disparo del link hacia la app de WA
     window.open(`https://wa.me/${num}?text=${encodeURIComponent(finalMsg)}`, '_blank'); 
+    window.closeWaSendModal();
 };
 /* --- MANEJO DE MENÚS DESPLEGABLES --- */
 window.toggleSettingsMenu = (e) => {
@@ -1793,7 +1918,7 @@ window.openMobileClientModal = (id) => {
     const mcActions = document.getElementById('mcActions');
     if (mcActions) {
         mcActions.innerHTML = `
-            <button class="action-btn btn-wa" style="padding:12px; font-size:14px;" onclick="window.sendWA('${c.phone}', '${safeName}', '${safePlatform}', '${exp.toLocaleDateString('es-ES')}')"><i class='bx bxl-whatsapp'></i> WhatsApp</button>
+            <button class="action-btn btn-wa" style="padding:12px; font-size:14px;" onclick="window.closeModals(); window.openWaSendModal('${c.id}')"><i class='bx bxl-whatsapp'></i> WhatsApp</button>
             <button class="action-btn" style="padding:12px; font-size:14px; background: rgba(175, 82, 222, 0.15); color: #AF52DE; font-weight: bold;" onclick="window.downloadTicket('${c.id}', event)"><i class='bx bx-receipt'></i> Recibo</button>
             <button class="action-btn" style="padding:12px; font-size:14px; background: rgba(0, 122, 255, 0.15); color: #007AFF; font-weight: bold;" onclick="window.closeModals(); window.openLinkModal('${c.id}', '${safePlatform}')"><i class='bx bx-link'></i> Vincular</button>
             <button class="action-btn" style="padding:12px; font-size:14px; color: var(--mac-text-main);" onclick="window.closeModals(); window.startEdit('${c.id}')"><i class='bx bx-edit-alt'></i> Editar</button>
