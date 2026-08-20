@@ -1083,6 +1083,35 @@ window.saveClientData = async () => {
         btn.innerText = origBtnText;
         btn.disabled = false;
     }
+    // 💡 NOTIFICACIÓN ÚNICA EN LA VIDA PARA EDUCAR AL USUARIO SOBRE EL PORTAL
+    const tipKey = 'portalTipSeen_' + currentUser.uid;
+    if (!localStorage.getItem(tipKey)) {
+        localStorage.setItem(tipKey, 'true'); // Guardar que ya se le mostró
+        
+        Swal.fire({
+            title: '🌐 ¡Nueva Opción Profesional!',
+            html: `
+                <p style="font-size: 14px; color: var(--mac-text-main); margin-bottom: 12px;">
+                    ¡Cliente guardado exitosamente! 🎉
+                </p>
+                <p style="font-size: 13px; color: var(--mac-text-secondary); line-height: 1.5; margin-bottom: 15px;">
+                    Ahora puedes enviarle su <b>Portal Web de Cliente</b> en vez de mandarle textos largos. Tu cliente podrá ver sus credenciales y vencimiento en tiempo real con su <b>Código Web</b>.
+                </p>
+                <div style="background: rgba(94, 92, 230, 0.1); border: 1px solid #5e5ce6; padding: 12px; border-radius: 12px; text-align: left; font-size: 12px; color: var(--mac-text-main);">
+                    💡 <b>¿Cómo usarlo?</b><br>
+                    Presiona el botón de <b>WhatsApp (WA)</b> en la tabla y elige la opción <b>"Enlace del Portal + Código Web"</b> para enviárselo en 1 solo clic.
+                </div>
+                <p style="font-size: 11px; color: var(--mac-text-secondary); margin-top: 15px; font-style: italic;">
+                    *(Esta ventana informativa solo aparecerá esta vez)*
+                </p>
+            `,
+            icon: 'info',
+            confirmButtonText: '¡Entendido, excelente!',
+            confirmButtonColor: '#5e5ce6',
+            background: 'var(--mac-surface, #1c1c1e)',
+            color: 'var(--mac-text-main, #ffffff)'
+        });
+    }
 };
 
 window.deleteClient = async (id) => { 
