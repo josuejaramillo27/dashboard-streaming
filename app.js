@@ -3693,21 +3693,25 @@ window.renderMasterAccounts = async () => {
             let perfilesHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;">`;
 
             for (let i = 1; i <= acc.maxProfiles; i++) {
-                // NUEVA LÓGICA MULTI-PLATAFORMA
-                const clienteEnPerfil = clientesDeEstaCuenta.find(c => {
-                    let pName = null;
-                    if (c.multiAccounts) {
-                        // Buscamos específicamente la plataforma de ESTA matriz
-                        const linkedAcc = Object.values(c.multiAccounts).find(a => a.masterAccountId === accId || c.linkedMasterId === accId);
-                        if (linkedAcc) pName = linkedAcc.profile;
-                    } else {
-                        pName = c.accountProfile;
-                    }
-                    if (!pName) return false;
-                    
-                    const numeroEncontrado = String(pName).match(/\d+/); 
-                    return numeroEncontrado && parseInt(numeroEncontrado[0]) === i;
-                });
+                // NUEVA LÓGICA MULTI-PLATAFORMA Y MULTI-PERFIL
+            const clienteEnPerfil = clientesDeEstaCuenta.find(c => {
+                let pName = null;
+                if (c.multiAccounts) {
+                    // Buscamos específicamente la plataforma de ESTA matriz
+                    const linkedAcc = Object.values(c.multiAccounts).find(a => a.masterAccountId === accId || c.linkedMasterId === accId);
+                    if (linkedAcc) pName = linkedAcc.profile;
+                } else {
+                    pName = c.accountProfile;
+                }
+                if (!pName) return false;
+                
+                // 🔥 MAGIA: Extrae TODOS los números separados por comas o letras (Ej: "1, 2, 4")
+                const numerosEncontrados = String(pName).match(/\d+/g); 
+                if (!numerosEncontrados) return false;
+                
+                // Verifica si la ranura actual (i) coincide con ALGUNO de los números comprados
+                return numerosEncontrados.some(num => parseInt(num) === i);
+            });
 
                 if (clienteEnPerfil) {
                     perfilesHTML += `
