@@ -1107,6 +1107,14 @@ window.saveClientData = async () => {
 
         let generatedPortalCode = Math.random().toString(36).substring(2, 6).toUpperCase();
         
+        // 🔥 MAGIA: Buscar si el teléfono ya tiene un código asignado en tu base de clientes
+        const cleanPhoneToSave = phone.replace(/[^\d]/g, '');
+        const existingClientWithPhone = clients.find(c => (c.phone ? c.phone.replace(/[^\d]/g, '') : '') === cleanPhoneToSave);
+        
+        if (existingClientWithPhone && existingClientWithPhone.portalCode) {
+            generatedPortalCode = existingClientWithPhone.portalCode; // Recicla el código de su compra anterior
+        }
+        
         const data = { 
             userId: currentUser.uid, 
             name: document.getElementById('clientName').value, 
@@ -4221,6 +4229,7 @@ let portalStoreData = null;
 window.checkClientPortal = async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const portalId = urlParams.get('portal') || urlParams.get('store');
+    const clientId = urlParams.get('client');
 
     if (!portalId) return false;
 
@@ -4270,7 +4279,31 @@ window.checkClientPortal = async () => {
             supportLink.href = `https://wa.me/${vendorPhone}?text=${encodeURIComponent('Hola, necesito ayuda con mis servicios del portal.')}`;
         }
 
-        // Se eliminó la inyección directa por URL para obligar al cliente a poner su Código siempre.
+        if (clientId) {
+            const clientDoc = await getDoc(doc(db, "clients", clientId));
+            if (clientDoc.exists() && clientDoc.data().userId === portalStoreData.uid) {
+                const baseClient = clientDoc.data();
+                
+                // Buscar si tiene otros servicios con el mismo código y teléfono
+                const cleanInputPhone = baseClient.phone ? baseClient.phone.replace(/[^\d]/g, '') : '';
+                const codeInput = baseClient.portalCode;
+                
+                const qAll = query(collection(db, "clients"), where("userId", "==", portalStoreData.uid));
+                const snapAll = await getDocs(qAll);
+                
+                let matchedClients = [];
+                snapAll.forEach(d => {
+                    const c = d.data();
+                    const cleanDbPhone = c.phone ? c.phone.replace(/[^\d]/g, '') : '';
+                    if ((cleanDbPhone === cleanInputPhone || cleanDbPhone.endsWith(cleanInputPhone)) && c.portalCode === codeInput) {
+                        matchedClients.push(c); 
+                    }
+                });
+
+                document.getElementById('portalSearchCard').style.display = 'none';
+                window.renderClientPortalData(matchedClients, portalStoreData);
+            }
+        }
         return true;
     } catch (e) {
         console.error("Error cargando portal:", e);
@@ -4294,19 +4327,19 @@ window.searchPortalByPhone = async () => {
         const q = query(collection(db, "clients"), where("userId", "==", portalStoreData.uid));
         const snap = await getDocs(q);
 
-        let matchedClient = null;
+        let matchedClients = [];
         snap.forEach(d => {
             const c = d.data();
             const cleanDbPhone = c.phone ? c.phone.replace(/[^\d]/g, '') : '';
-            // 🔒 Validación Doble: Teléfono Y Código Web Exacto
+            // Validar teléfono y código para apilar todas sus compras
             if ((cleanDbPhone === cleanInputPhone || cleanDbPhone.endsWith(cleanInputPhone)) && c.portalCode === codeInput) {
-                matchedClient = c; 
+                matchedClients.push(c); 
             }
         });
 
-        if (matchedClient) {
+        if (matchedClients.length > 0) {
             document.getElementById('portalSearchCard').style.display = 'none';
-            window.renderClientPortalData(matchedClient, portalStoreData);
+            window.renderClientPortalData(matchedClients, portalStoreData);
         } else {
             window.showNotification("❌ Datos incorrectos. Revisa tu número y código.");
         }
@@ -4363,91 +4396,99 @@ window.sendClientPortalWa = (phone, clientId) => {
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
 };
 
-window.renderClientPortalData = (clientObj, storeUserData) => {
+window.renderClientPortalData = (clientsArray, storeUserData) => {
     const container = document.getElementById('portalClientResults');
     container.innerHTML = '';
     
-    const now = new Date();
-    const exp = new Date(clientObj.date);
-    exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
-    
-    const diffTime = exp.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    let badgeClass = 'active';
-    let badgeIcon = 'bx-check-circle';
-    let badgeText = `Activo (${diffDays} días restantes)`;
-    
-    if (diffDays <= 0) {
-        badgeClass = 'expired';
-        badgeIcon = 'bx-x-circle';
-        badgeText = '¡SERVICIO VENCIDO!';
-    } else if (diffDays <= 3) {
-        badgeClass = 'warning';
-        badgeIcon = 'bx-time-five';
-        badgeText = `⚠️ Por vencer (${diffDays} días restantes)`;
-    }
+    if (!clientsArray || clientsArray.length === 0) return;
 
-    let platformsList = [];
-    if (clientObj.multiAccounts && Object.keys(clientObj.multiAccounts).length > 0) {
-        platformsList = Object.keys(clientObj.multiAccounts);
-    } else {
-        platformsList = clientObj.platform ? clientObj.platform.split(',').map(p => p.trim()) : ['Servicio'];
-    }
+    let fullHtml = '';
 
-    let accountsHtml = '';
-    platformsList.forEach(platName => {
-        let acc = clientObj.multiAccounts && clientObj.multiAccounts[platName] 
-            ? clientObj.multiAccounts[platName] 
-            : {
-                email: clientObj.accountEmail || '-',
-                password: clientObj.accountPassword || '-',
-                profile: clientObj.accountProfile || '-',
-                pin: clientObj.accountPin || '-'
-            };
+    // Dibujamos una tarjeta completa por cada registro encontrado
+    clientsArray.forEach(clientObj => {
+        const now = new Date();
+        const exp = new Date(clientObj.date);
+        exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
+        
+        const diffTime = exp.getTime() - now.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        let badgeClass = 'active';
+        let badgeIcon = 'bx-check-circle';
+        let badgeText = `Activo (${diffDays} días restantes)`;
+        
+        if (diffDays <= 0) {
+            badgeClass = 'expired';
+            badgeIcon = 'bx-x-circle';
+            badgeText = '¡SERVICIO VENCIDO!';
+        } else if (diffDays <= 3) {
+            badgeClass = 'warning';
+            badgeIcon = 'bx-time-five';
+            badgeText = `⚠️ Por vencer (${diffDays} días restantes)`;
+        }
 
-        // CORRECCIÓN VISUAL: Añadidos estilos flex-shrink y max-content a los botones de copiar
-        accountsHtml += `
-            <div style="background: var(--mac-bg); padding: 15px; border-radius: 16px; border: 1px solid var(--mac-border); margin-bottom: 15px; text-align: left;">
-                <div style="font-size: 14px; font-weight: 800; color: var(--mac-text-main); margin-bottom: 12px;">🎬 ${platName.toUpperCase()}</div>
-                
-                <div class="credential-card">
-                    <div class="credential-info"><span class="credential-label">Correo</span><span class="credential-value">${acc.email || '-'}</span></div>
-                    <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap;" onclick="window.copyToClipboard('${acc.email || ''}', 'Correo')"><i class='bx bx-copy'></i> Copiar</button>
-                </div>
-                
-                <div class="credential-card">
-                    <div class="credential-info"><span class="credential-label">Contraseña</span><span class="credential-value">${acc.password || '-'}</span></div>
-                    <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap;" onclick="window.copyToClipboard('${acc.password || ''}', 'Clave')"><i class='bx bx-copy'></i> Copiar</button>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div class="credential-card" style="margin: 0; align-items: center;">
-                        <div class="credential-info"><span class="credential-label">Perfil N°</span><span class="credential-value">${acc.profile || '-'}</span></div>
-                        <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.profile || ''}', 'Perfil')"><i class='bx bx-copy'></i></button>
+        let platformsList = [];
+        if (clientObj.multiAccounts && Object.keys(clientObj.multiAccounts).length > 0) {
+            platformsList = Object.keys(clientObj.multiAccounts);
+        } else {
+            platformsList = clientObj.platform ? clientObj.platform.split(',').map(p => p.trim()) : ['Servicio'];
+        }
+
+        let accountsHtml = '';
+        platformsList.forEach(platName => {
+            let acc = clientObj.multiAccounts && clientObj.multiAccounts[platName] 
+                ? clientObj.multiAccounts[platName] 
+                : {
+                    email: clientObj.accountEmail || '-',
+                    password: clientObj.accountPassword || '-',
+                    profile: clientObj.accountProfile || '-',
+                    pin: clientObj.accountPin || '-'
+                };
+
+            accountsHtml += `
+                <div style="background: var(--mac-bg); padding: 15px; border-radius: 16px; border: 1px solid var(--mac-border); margin-bottom: 15px; text-align: left;">
+                    <div style="font-size: 14px; font-weight: 800; color: var(--mac-text-main); margin-bottom: 12px;">🎬 ${platName.toUpperCase()}</div>
+                    
+                    <div class="credential-card">
+                        <div class="credential-info"><span class="credential-label">Correo</span><span class="credential-value">${acc.email || '-'}</span></div>
+                        <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap;" onclick="window.copyToClipboard('${acc.email || ''}', 'Correo')"><i class='bx bx-copy'></i> Copiar</button>
                     </div>
-                    <div class="credential-card" style="margin: 0; align-items: center;">
-                        <div class="credential-info"><span class="credential-label">PIN Acceso</span><span class="credential-value">${acc.pin || '-'}</span></div>
-                        <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.pin || ''}', 'PIN')"><i class='bx bx-copy'></i></button>
+                    
+                    <div class="credential-card">
+                        <div class="credential-info"><span class="credential-label">Contraseña</span><span class="credential-value">${acc.password || '-'}</span></div>
+                        <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap;" onclick="window.copyToClipboard('${acc.password || ''}', 'Clave')"><i class='bx bx-copy'></i> Copiar</button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="credential-card" style="margin: 0; align-items: center;">
+                            <div class="credential-info"><span class="credential-label">Perfil N°</span><span class="credential-value">${acc.profile || '-'}</span></div>
+                            <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.profile || ''}', 'Perfil')"><i class='bx bx-copy'></i></button>
+                        </div>
+                        <div class="credential-card" style="margin: 0; align-items: center;">
+                            <div class="credential-info"><span class="credential-label">PIN Acceso</span><span class="credential-value">${acc.pin || '-'}</span></div>
+                            <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.pin || ''}', 'PIN')"><i class='bx bx-copy'></i></button>
+                        </div>
                     </div>
                 </div>
+            `;
+        });
+
+        const vendorPhone = storeUserData.phone ? storeUserData.phone.replace(/[^\d+]/g, '') : '';
+        const renewMsg = encodeURIComponent(`¡Hola! Quisiera renovar mi servicio de ${clientObj.platform}. Nombre: ${clientObj.name}`);
+        const renewUrl = `https://wa.me/${vendorPhone}?text=${renewMsg}`;
+
+        fullHtml += `
+            <div class="portal-hero-card" style="margin-bottom: 20px;">
+                <span class="portal-badge ${badgeClass}"><i class='bx ${badgeIcon}'></i> ${badgeText}</span>
+                <h2 style="margin: 0 0 5px 0; font-size: 22px; color: var(--mac-text-main);">${clientObj.name}</h2>
+                <p style="font-size: 13px; color: var(--mac-text-secondary); margin-top: 0; margin-bottom: 20px;">Vencimiento: <b>${exp.toLocaleDateString('es-ES')}</b></p>
+                ${accountsHtml}
+                ${diffDays <= 3 ? `<a href="${renewUrl}" target="_blank" class="btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; text-decoration: none; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 14px;"><i class='bx bxl-whatsapp' style="font-size: 20px;"></i> Renovar Servicio</a>` : ''}
             </div>
         `;
     });
 
-    const vendorPhone = storeUserData.phone ? storeUserData.phone.replace(/[^\d+]/g, '') : '';
-    const renewMsg = encodeURIComponent(`¡Hola! Quisiera renovar mi servicio de ${clientObj.platform}. Nombre: ${clientObj.name}`);
-    const renewUrl = `https://wa.me/${vendorPhone}?text=${renewMsg}`;
-
-    container.innerHTML = `
-        <div class="portal-hero-card">
-            <span class="portal-badge ${badgeClass}"><i class='bx ${badgeIcon}'></i> ${badgeText}</span>
-            <h2 style="margin: 0 0 5px 0; font-size: 22px; color: var(--mac-text-main);">${clientObj.name}</h2>
-            <p style="font-size: 13px; color: var(--mac-text-secondary); margin-top: 0; margin-bottom: 20px;">Vencimiento: <b>${exp.toLocaleDateString('es-ES')}</b></p>
-            ${accountsHtml}
-            ${diffDays <= 3 ? `<a href="${renewUrl}" target="_blank" class="btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; text-decoration: none; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 14px;"><i class='bx bxl-whatsapp' style="font-size: 20px;"></i> Renovar Servicio</a>` : ''}
-        </div>
-    `;
+    container.innerHTML = fullHtml;
     container.style.display = 'block';
 };
 
