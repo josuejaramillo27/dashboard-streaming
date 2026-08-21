@@ -1793,6 +1793,19 @@ window.downloadTicket = async (clientId, event) => {
             const fileName = `Recibo_${c.name.replace(/\s+/g, '_')}.png`;
             const file = new File([blob], fileName, { type: "image/png" });
 
+            // Función interna para forzar descarga si el navegador bloquea el menú
+            const forceDownload = () => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = fileName;
+                link.href = url;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                window.showNotification("✅ Recibo descargado en tu dispositivo");
+            };
+
             // Detectamos si es celular (soporta menú de compartir nativo)
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
                 try {
@@ -1803,19 +1816,13 @@ window.downloadTicket = async (clientId, event) => {
                     });
                     window.showNotification("✅ Menú de compartir abierto");
                 } catch (err) {
-                    console.warn("El usuario canceló el menú de compartir", err);
+                    console.warn("El menú de compartir fue bloqueado (posible demora por datos móviles). Forzando descarga...", err);
+                    // ¡AQUÍ ESTÁ LA MAGIA! Si falla por demora en datos, fuerza la descarga directa.
+                    forceDownload();
                 }
             } else {
                 // Modo PC o Navegadores antiguos (Descarga Directa)
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.download = fileName;
-                link.href = url;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-                window.showNotification("✅ Recibo descargado al instante");
+                forceDownload();
             }
         }, 'image/png');
 
