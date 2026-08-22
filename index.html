@@ -872,7 +872,25 @@
                         <!-- Se inyectan dinámicamente -->
                     </div>
                 </div>
-
+                <!-- NUEVA SECCIÓN: MÉTODOS DE PAGO -->
+                <div style="margin-top: 20px; border-top: 1px dashed var(--mac-border); padding-top: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div>
+                            <label style="font-size: 14px; font-weight: bold; color: var(--mac-blue); display: block;">
+                                <i class='bx bx-wallet'></i> Mis Métodos de Pago
+                            </label>
+                            <p style="font-size: 12px; color: var(--mac-text-secondary); margin-top: 0; margin-bottom: 0;">
+                                Agrega hasta 5 opciones para que tus clientes paguen desde tu Tiendita.
+                            </p>
+                        </div>
+                        <button type="button" class="action-btn" style="background: rgba(0, 122, 255, 0.1); color: var(--mac-blue); border: 1px solid var(--mac-blue); padding: 6px 12px; border-radius: 8px; font-size: 12px;" onclick="window.addPaymentMethod()">
+                            <i class='bx bx-plus'></i> Agregar
+                        </button>
+                    </div>
+                    <div id="paymentMethodsContainer" style="display: flex; flex-direction: column; gap: 15px;">
+                        <!-- Aquí se inyectan las tarjetas de pago con JS -->
+                    </div>
+                </div>
                 <div style="margin-top: 20px; border-top: 1px dashed var(--mac-border); padding-top: 15px;">
                     <label style="font-size: 13px; font-weight: bold; color: var(--mac-text-secondary);">Automatización de WhatsApp (Bot):</label>
                     <button class="btn-secondary" style="width: 100%; margin-top: 5px; padding: 12px; background: rgba(52, 199, 89, 0.1); color: var(--mac-green); border: 1px solid var(--mac-green);" onclick="window.vincularBot()">
@@ -965,10 +983,6 @@
             Variables de Recordatorio: <strong style="color: var(--mac-blue);">{nombre}</strong> | <strong style="color: var(--mac-blue);">{plataforma}</strong> | <strong style="color: var(--mac-blue);">{fecha}</strong> | <strong style="color: var(--mac-green);">{pago}</strong><br>
             Variables de Entrega: <strong style="color: var(--mac-orange);">{correo}</strong> | <strong style="color: var(--mac-orange);">{pass}</strong> | <strong style="color: var(--mac-orange);">{profile}</strong> | <strong style="color: var(--mac-orange);">{pin}</strong> | <strong style="color: var(--mac-orange);">{reglas}</strong>
         </p>
-        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Tus datos de pago (Yape, Plin, Binance):</label>
-        <input type="text" id="editWaPayment" placeholder="Ej: Yape: 999... / Binance Pay: 123..." style="margin-bottom: 15px; background: var(--mac-bg);">
-        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Mensaje de Bienvenida Automático:</label>
-        <textarea id="editWaWelcome" rows="3" style="width: 100%; margin-bottom: 15px; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none;"></textarea>
         <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Mensaje de Renovación Automática:</label>
         <textarea id="editWaMessage" rows="4" style="width: 100%; margin-bottom: 15px; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none;"></textarea>
         <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Mensaje de Entrega de Cuenta Nueva:</label>
