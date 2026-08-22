@@ -421,12 +421,9 @@ window.closeModals = (resetTab = true) => {
 window.openWaModal = () => { 
     const defaultMsg = "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*. Para renovar, usa estos datos:\n\n{pago}"; 
     const defaultDelivery = `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tu nueva cuenta de *{plataforma}*:\n\n📧 *Correo:* {correo}\n🔑 *Clave:* {pass}\n📌 *PIN:* {pin}\n\n📅 *Vence el:* {fecha}\n\n⚠️ *Reglas:* {reglas}\n\n¡Que disfrutes el contenido! 🍿`;
-    const defaultWelcome = "¡Hola! 👋 Bienvenido.\n\nPara ver nuestro catálogo de streaming y precios actualizados, por favor escribe el comando:\n👉 */servicios*";
-    document.getElementById('editWaWelcome').value = currentUserData.waWelcomeMessage || defaultWelcome;
 
     document.getElementById('editWaMessage').value = currentUserData.waTemplate || defaultMsg; 
     document.getElementById('editWaDeliveryMessage').value = currentUserData.waDeliveryMessage || defaultDelivery; 
-    document.getElementById('editWaPayment').value = currentUserData.waPaymentInfo || ''; 
     
     document.getElementById('waModal').style.display = 'flex'; 
 };
@@ -437,15 +434,11 @@ window.saveWaMessage = async () => {
     try { 
         await updateDoc(doc(db, "users", currentUser.uid), { 
             waTemplate: document.getElementById('editWaMessage').value,
-            waDeliveryMessage: document.getElementById('editWaDeliveryMessage').value,
-            waWelcomeMessage: document.getElementById('editWaWelcome').value,
-            waPaymentInfo: document.getElementById('editWaPayment').value,
+            waDeliveryMessage: document.getElementById('editWaDeliveryMessage').value
         }); 
         
         currentUserData.waTemplate = document.getElementById('editWaMessage').value;
         currentUserData.waDeliveryMessage = document.getElementById('editWaDeliveryMessage').value;
-        currentUserData.waPaymentInfo = document.getElementById('editWaPayment').value;
-        currentUserData.waWelcomeMessage = document.getElementById('editWaWelcome').value;
         
         window.showNotification("Configuración de WhatsApp guardada."); 
         window.closeModals();
@@ -455,21 +448,84 @@ window.saveWaMessage = async () => {
         btn.innerText = "Guardar Configuración"; btn.disabled = false;
     }
 };
+let localPaymentMethods = []; // Memoria temporal para métodos de pago
+
 window.openProfileModal = () => { 
     document.getElementById('editProfileName').value = currentUserData.name || ''; 
     document.getElementById('editProfileCountry').value = currentUserData.country || ''; 
     document.getElementById('editProfilePhone').value = currentUserData.phone || ''; 
     document.getElementById('editProfileAlias').value = currentUserData.storeAlias || ''; 
     document.getElementById('editReferencesLink').value = currentUserData.referencesLink || '';
-    
+    if (typeof window.renderCustomServicesChips === 'function') window.renderCustomServicesChips();
+
+    // Cargar los métodos de pago en memoria temporal y dibujar
+    localPaymentMethods = currentUserData.paymentMethods ? JSON.parse(JSON.stringify(currentUserData.paymentMethods)) : [];
+    window.renderPaymentMethods();
+
     const profileModal = document.getElementById('profileModal');
-    
-    // Aseguramos que se abra correctamente independientemente del CSS del PC
     if (window.innerWidth <= 768) {
         profileModal.style.setProperty('display', 'flex', 'important');
     } else {
         profileModal.style.display = 'flex';
     }
+};
+
+window.renderPaymentMethods = () => {
+    const container = document.getElementById('paymentMethodsContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    if (localPaymentMethods.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); font-size:12px; margin: 10px 0;">No tienes métodos de pago configurados. Añade uno para tu Tiendita.</p>';
+        return;
+    }
+
+    localPaymentMethods.forEach((method, index) => {
+        const div = document.createElement('div');
+        div.style.cssText = "background: var(--mac-bg); border: 1px solid var(--mac-border); border-radius: 12px; padding: 15px;";
+        
+        div.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="font-size: 13px; font-weight: bold; color: var(--mac-text-main);">Método ${index + 1}</span>
+                <button type="button" onclick="window.removePaymentMethod(${index})" style="background: rgba(255,59,48,0.1); color: var(--mac-red); border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 12px;"><i class='bx bx-trash'></i> Quitar</button>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div>
+                    <label style="font-size: 11px; color: var(--mac-text-secondary);">Tipo (Banco/Billetera):</label>
+                    <input type="text" placeholder="Ej: Yape, Plin, Binance..." value="${method.bank || ''}" oninput="localPaymentMethods[${index}].bank = this.value" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="font-size: 11px; color: var(--mac-text-secondary);">Número / Celular:</label>
+                    <input type="text" placeholder="Ej: 999 888 777" value="${method.number || ''}" oninput="localPaymentMethods[${index}].number = this.value" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px; box-sizing: border-box;">
+                </div>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 11px; color: var(--mac-text-secondary);">Nombre del Titular:</label>
+                <input type="text" placeholder="Ej: Juan Pérez" value="${method.holder || ''}" oninput="localPaymentMethods[${index}].holder = this.value" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px; box-sizing: border-box;">
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div style="flex: 1;">
+                    <label style="font-size: 11px; color: var(--mac-text-secondary);">QR de Pago (Opcional):</label>
+                    <input type="file" accept="image/*" id="qrUpload_${index}" style="width: 100%; padding: 6px; font-size: 11px; background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 6px; box-sizing: border-box; color: var(--mac-text-main);">
+                </div>
+                ${method.qrUrl ? `<img src="${method.qrUrl}" style="width: 45px; height: 45px; border-radius: 8px; object-fit: cover; border: 1px solid var(--mac-border); flex-shrink: 0;">` : ''}
+            </div>
+        `;
+        container.appendChild(div);
+    });
+};
+
+window.addPaymentMethod = () => {
+    if (localPaymentMethods.length >= 5) {
+        return window.showNotification("⚠️ Solo puedes tener hasta 5 métodos de pago.");
+    }
+    localPaymentMethods.push({ bank: '', number: '', holder: '', qrUrl: null });
+    window.renderPaymentMethods();
+};
+
+window.removePaymentMethod = (index) => {
+    localPaymentMethods.splice(index, 1);
+    window.renderPaymentMethods();
 };
 
 window.saveProfile = async () => { 
@@ -500,18 +556,32 @@ window.saveProfile = async () => {
             bannerUrl = await getDownloadURL(storageRefBanner);
         }
 
+        // 🔥 SUBIR QRs de métodos de pago a Firebase
+        for (let i = 0; i < localPaymentMethods.length; i++) {
+            const qrInput = document.getElementById(`qrUpload_${i}`);
+            if (qrInput && qrInput.files.length > 0) {
+                const qrFile = qrInput.files[0];
+                const storageRefQR = ref(storage, `qrs/${currentUser.uid}_qr_${Date.now()}_${i}`);
+                await uploadBytes(storageRefQR, qrFile);
+                localPaymentMethods[i].qrUrl = await getDownloadURL(storageRefQR);
+            }
+        }
+
         let rawAlias = document.getElementById('editProfileAlias').value;
         let finalAlias = rawAlias.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
         let refInput = document.getElementById('editReferencesLink');
         let referencesLink = refInput ? refInput.value.trim() : '';
 
+        // Guardar todo en Firebase
         await updateDoc(doc(db, "users", currentUser.uid), { 
             name: name, country: country, currency: getCurrencyForCountry(country), 
             phone: phone, logoUrl: logoUrl, bannerUrl: bannerUrl, storeAlias: finalAlias,
-            referencesLink: referencesLink
+            referencesLink: referencesLink,
+            paymentMethods: localPaymentMethods 
         });
         
+        // Actualizar la memoria global
         currentUserData.storeAlias = finalAlias; 
         currentUserData.name = name;
         currentUserData.country = country;
@@ -519,10 +589,12 @@ window.saveProfile = async () => {
         currentUserData.logoUrl = logoUrl;
         currentUserData.bannerUrl = bannerUrl;
         currentUserData.referencesLink = referencesLink;
+        currentUserData.paymentMethods = JSON.parse(JSON.stringify(localPaymentMethods)); 
+
         globalCurrency = getCurrencyForCountry(country);
         currentUserData.currency = globalCurrency;
 
-        // Actualización DOM blindada
+        // Actualización DOM
         const brandSidebar = document.getElementById('brandNameSidebar');
         if (brandSidebar) brandSidebar.innerText = name || 'Mi Panel';
         
@@ -541,7 +613,7 @@ window.saveProfile = async () => {
         const priceInput = document.getElementById('clientPrice');
         if (priceInput) priceInput.placeholder = `Precio de Venta (${globalCurrency})`;
 
-        window.showNotification("Perfil y Logo guardados."); 
+        window.showNotification("Perfil y Métodos de Pago guardados."); 
         window.closeModals();
         
         if (document.getElementById('tableBody')) window.renderTable();
@@ -550,7 +622,7 @@ window.saveProfile = async () => {
     } catch(e) { 
         window.showNotification("Error: " + e.message); 
     } finally {
-        if(btn) { btn.innerText = "Guardar y Actualizar"; btn.disabled = false; }
+        if(btn) { btn.innerText = "Guardar Perfil"; btn.disabled = false; }
     }
 };
 
