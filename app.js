@@ -2896,7 +2896,7 @@ if (item.badgeOption) {
 
         const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}" alt="${item.platform}">` : `<div style="width:100%; height:100%; background:var(--mac-gray); display:flex; align-items:center; justify-content:center;"><i class='bx bx-play-circle' style='font-size:48px; color:var(--mac-text-secondary); opacity:0.3;'></i></div>`;
 
-        let btnHTML = isAgotado ? `<span class="status expired" style="padding:10px 16px; border-radius:20px; font-weight:800; font-size:13px; text-transform:none; letter-spacing:0;">Agotado</span>` : `<a href="${waLink}" target="_blank" class="btn-wa" style="text-decoration:none; padding:10px 18px; border-radius:20px; font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:4px; margin:0;"><i class='bx bxl-whatsapp' style='font-size:16px;'></i> Comprar</a>`;
+        let btnHTML = isAgotado ? `<span class="status expired" style="padding:10px 16px; border-radius:20px; font-weight:800; font-size:13px; text-transform:none; letter-spacing:0;">Agotado</span>` : `<button onclick="window.openCheckoutModal('${item.id}')" class="btn-wa" style="border:none; cursor:pointer; text-decoration:none; padding:10px 18px; border-radius:20px; font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:4px; margin:0;"><i class='bx bx-cart' style='font-size:16px;'></i> Comprar</button>`;
 
         const card = document.createElement('div');
         card.className = `store-product-card ${isAgotado ? 'is-agotado' : ''}`;
@@ -3011,6 +3011,119 @@ const checkPublicStore = async () => {
         } catch (e) {
             console.error("Error cargando la tienda pública:", e);
         }
+    }
+};
+
+let currentCheckoutItem = null;
+
+window.openCheckoutModal = (itemId) => {
+    const data = window.publicStoreDataCache;
+    const catalog = window.publicCatalogCache || [];
+    currentCheckoutItem = catalog.find(i => i.id === itemId);
+    
+    if (!currentCheckoutItem) return;
+
+    document.getElementById('checkoutItemName').innerText = currentCheckoutItem.platform;
+    document.getElementById('checkoutItemPrice').innerText = `${data.currency || 'S/'}${currentCheckoutItem.price.toFixed(2)}`;
+    
+    const pmContainer = document.getElementById('checkoutPaymentMethods');
+    pmContainer.innerHTML = '';
+    
+    const methods = data.paymentMethods || [];
+    if (methods.length === 0) {
+        pmContainer.innerHTML = '<p style="font-size: 12px; color: var(--mac-red); text-align: center;">El vendedor aún no ha configurado métodos de pago.</p>';
+    } else {
+        methods.forEach((m, idx) => {
+            const qrHtml = m.qrUrl ? `<div style="text-align: center; margin-top: 10px;"><img src="${m.qrUrl}" style="width: 140px; height: 140px; border-radius: 12px; border: 1px solid var(--mac-border); object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"><p style="font-size: 10px; color: var(--mac-text-secondary); margin-top: 4px; font-weight: bold;">ESCANEAR QR</p></div>` : '';
+            
+            const itemHtml = `
+                <div style="background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 10px; overflow: hidden; transition: all 0.2s;">
+                    <div onclick="window.togglePaymentAccordion(${idx})" style="padding: 12px 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.03);">
+                        <strong style="font-size: 14px; color: var(--mac-text-main);"><i class='bx bxs-bank'></i> ${m.bank}</strong>
+                        <i class='bx bx-chevron-down' id="pmIcon_${idx}" style="font-size: 18px; color: var(--mac-text-secondary);"></i>
+                    </div>
+                    <div id="pmDetails_${idx}" style="display: none; padding: 15px; border-top: 1px solid var(--mac-border); background: var(--mac-bg);">
+                        <p style="margin: 0 0 8px 0; font-size: 13px; color: var(--mac-text-secondary);">Titular: <strong style="color: var(--mac-text-main);">${m.holder}</strong></p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mac-gray); padding: 8px 12px; border-radius: 8px; border: 1px dashed var(--mac-border);">
+                            <span style="font-size: 15px; font-weight: 900; color: var(--mac-blue); letter-spacing: 1px;">${m.number}</span>
+                            <button class="action-btn" style="background: transparent; border: 1px solid var(--mac-border); color: var(--mac-text-main); padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: bold;" onclick="window.copyToClipboard('${m.number}', 'Número de ${m.bank}')"><i class='bx bx-copy'></i> Copiar</button>
+                        </div>
+                        ${qrHtml}
+                    </div>
+                </div>
+            `;
+            pmContainer.innerHTML += itemHtml;
+        });
+    }
+
+    document.getElementById('checkoutPhone').value = '';
+    document.getElementById('checkoutReceipt').value = '';
+    document.getElementById('checkoutModal').style.display = 'flex';
+};
+
+window.togglePaymentAccordion = (idx) => {
+    const details = document.getElementById(`pmDetails_${idx}`);
+    const icon = document.getElementById(`pmIcon_${idx}`);
+    if (details.style.display === 'none') {
+        details.style.display = 'block';
+        icon.className = 'bx bx-chevron-up';
+    } else {
+        details.style.display = 'none';
+        icon.className = 'bx bx-chevron-down';
+    }
+};
+
+window.submitCheckout = async () => {
+    const phone = document.getElementById('checkoutPhone').value.trim();
+    const fileInput = document.getElementById('checkoutReceipt');
+    const file = fileInput.files.length > 0 ? fileInput.files[0] : null;
+
+    if (!phone || !phone.startsWith('+')) return window.showNotification("⚠️ Ingresa tu WhatsApp incluyendo el código de país (Ej: +51...)");
+    if (!file) return window.showNotification("⚠️ Sube la foto o captura de tu comprobante de pago.");
+
+    const btn = document.getElementById('btnSubmitCheckout');
+    const origText = btn.innerHTML;
+    btn.innerHTML = "Procesando... <i class='bx bx-loader-alt bx-spin'></i>";
+    btn.disabled = true;
+
+    try {
+        const data = window.publicStoreDataCache;
+        const vendedorId = data.uid;
+        
+        // 1. Subir el comprobante a Firebase Storage
+        const storageRef = ref(storage, `comprobantes/${vendedorId}_${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        const comprobanteUrl = await getDownloadURL(storageRef);
+
+        // 2. Guardar el pedido en Firestore (Para resucitar 'Ventas Pendientes')
+        await addDoc(collection(db, "pedidos"), {
+            vendedorId: vendedorId,
+            clienteNumero: phone,
+            tipo: currentCheckoutItem.type || 'Servicio',
+            plataforma: currentCheckoutItem.platform,
+            precio: currentCheckoutItem.price,
+            comprobanteUrl: comprobanteUrl,
+            estado: 'pendiente',
+            fecha: new Date().toISOString()
+        });
+
+        document.getElementById('checkoutModal').style.display = 'none';
+        
+        Swal.fire({
+            icon: 'success',
+            title: '¡Pago Enviado!',
+            html: '<p style="font-size:14px; color:var(--mac-text-secondary);">El vendedor verificará tu comprobante en su panel.<br><br><b>Te llegará un mensaje automático a WhatsApp con tus accesos en breve.</b></p>',
+            confirmButtonText: '¡Excelente!',
+            confirmButtonColor: '#34C759',
+            background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+            color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+        });
+
+    } catch (error) {
+        window.showNotification("Error enviando el pago: " + error.message);
+    } finally {
+        btn.innerHTML = origText;
+        btn.disabled = false;
     }
 };
 
@@ -3332,31 +3445,40 @@ window.openPedidosModal = async () => {
             const div = document.createElement('div');
             div.style.cssText = "background:var(--mac-bg); padding:15px; border-radius:10px; border:1px solid var(--mac-border);";
             div.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px;">
                     <div>
-                        <strong style="color:var(--mac-blue); font-size:15px;">Comprobante Recibido</strong><br>
-                        <span style="color:var(--mac-text-main); font-size:13px;">📞 Número: ${pedido.clienteNumero}</span>
-                        <span style="display:block; font-size:11px; color:var(--mac-text-secondary);">Tipo: ${pedido.tipo.toUpperCase()}</span>
+                        <strong style="color:var(--mac-blue); font-size:16px;"><i class='bx bx-cart-add'></i> ${pedido.plataforma}</strong><br>
+                        <span style="color:var(--mac-text-main); font-size:13px; font-weight: 600;">📞 WA: ${pedido.clienteNumero}</span>
+                        <span style="display:block; font-size:12px; color:var(--mac-text-secondary); margin-top:2px;">Tipo: ${pedido.tipo.toUpperCase()} | Monto esperado: <b style="color:var(--mac-green);">${globalCurrency}${pedido.precio.toFixed(2)}</b></span>
                     </div>
-                    <button class="action-btn btn-del" onclick="window.rechazarPedido('${pId}')" title="Rechazar"><i class='bx bx-x'></i></button>
+                    <button class="action-btn btn-del" onclick="window.rechazarPedido('${pId}')" title="Rechazar Comprobante Falso"><i class='bx bx-x'></i></button>
                 </div>
                 
+                <!-- EL COMPROBANTE VISUAL -->
+                <div style="text-align: center; margin-bottom: 15px; background: rgba(0,0,0,0.02); padding: 10px; border-radius: 8px;">
+                    <a href="${pedido.comprobanteUrl}" target="_blank" title="Ver comprobante en grande">
+                        <img src="${pedido.comprobanteUrl}" style="height: 140px; border-radius: 8px; object-fit: contain; border: 1px solid var(--mac-border); box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    </a>
+                    <p style="font-size:10px; color:var(--mac-text-secondary); margin:4px 0 0 0; font-weight:bold;"><i class='bx bx-zoom-in'></i> Clic en la foto para agrandar</p>
+                </div>
+                
+                <label style="font-size: 11px; font-weight:bold; color:var(--mac-text-secondary);">Elige qué cuenta(s) despachar:</label>
                 <div id="cuentas_container_${pId}">
                     <select class="select_acc_${pId}" style="width:100%; margin-bottom:5px; padding:8px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border);">
                         ${window.opcionesCuentasGlobal}
                     </select>
                 </div>
                 
-                <button class="action-btn" style="color:var(--mac-blue); font-size:12px; margin-bottom:10px; font-weight:bold; background:transparent; border:none; padding:0; cursor:pointer;" onclick="window.addSelectToPedido('${pId}')">
-                    + Añadir otra cuenta (Combos)
+                <button class="action-btn" style="color:var(--mac-blue); font-size:12px; margin-bottom:12px; font-weight:bold; background:transparent; border:none; padding:0; cursor:pointer;" onclick="window.addSelectToPedido('${pId}')">
+                    + Añadir otra cuenta al despacho
                 </button>
                 
-                <div style="margin-bottom:10px;">
-                    <input type="number" id="precio_venta_${pId}" placeholder="Precio Total Cobrado (Ej: 30.00)" style="width:100%; padding:8px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border);">
+                <div style="margin-bottom:15px;">
+                    <input type="number" id="precio_venta_${pId}" placeholder="Confirma Precio Total Cobrado" value="${pedido.precio}" style="width:100%; padding:10px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border); font-weight:bold;">
                 </div>
 
-                <button class="btn-primary" style="width:100%; background:var(--mac-green); border:none;" onclick="window.aprobarVenta('${pId}', '${pedido.clienteNumero}')">
-                    <i class='bx bx-check-circle'></i> Aprobar y Enviar WhatsApp
+                <button class="btn-primary" style="width:100%; background:var(--mac-green); border:none; padding:14px; font-size:14px; font-weight:bold;" onclick="window.aprobarVenta('${pId}', '${pedido.clienteNumero}')">
+                    <i class='bx bx-check-shield'></i> Aprobar y Entregar Automático
                 </button>
             `;
             list.appendChild(div);
