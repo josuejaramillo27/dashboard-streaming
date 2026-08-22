@@ -2933,7 +2933,7 @@ const checkPublicStore = async () => {
             storeView.style.display = 'flex';
             storeView.style.flexDirection = 'column';
             storeView.style.minHeight = '100vh';
-            storeView.style.justifyContent = 'center';
+            storeView.style.justifyContent = 'center'; // Esto agrupa todo en el medio
         }
         try {
             let data = null;
@@ -3014,7 +3014,15 @@ const checkPublicStore = async () => {
                     refBtn.style.display = 'none'; // Se oculta si no hay link
                 }
             }
+            // 🔥 Cuando el catálogo carga con éxito, movemos todo hacia arriba
+            const storeViewEl = document.getElementById('publicStoreView');
+            if (storeViewEl) {
+                storeViewEl.style.justifyContent = 'flex-start';
+                storeViewEl.style.paddingTop = '30px'; 
+            }
 
+            // Primer renderizado general automático
+            window.renderPublicCatalog('Todos');
             // Primer renderizado general automático
             window.renderPublicCatalog('Todos');
 
