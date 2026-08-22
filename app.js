@@ -3146,7 +3146,7 @@ window.submitCheckout = async () => {
         Swal.fire({
             icon: 'success',
             title: '¡Pago Enviado!',
-            html: '<p style="font-size:14px; color:var(--mac-text-secondary);">El vendedor verificará tu comprobante en su panel.<br><br><b>Te llegará un mensaje automático a WhatsApp con tus accesos en breve.</b></p>',
+            html: '<p style="font-size:14px; color:var(--mac-text-secondary);">El vendedor verificará tu comprobante.<br><br><b>Te llegará un mensaje automático a WhatsApp con tus accesos en breve.</b></p>',
             confirmButtonText: '¡Excelente!',
             confirmButtonColor: '#34C759',
             background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
