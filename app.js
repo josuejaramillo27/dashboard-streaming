@@ -2929,12 +2929,8 @@ const checkPublicStore = async () => {
         document.getElementById('adminView').style.display = 'none';
         
         const storeView = document.getElementById('publicStoreView');
-        if (storeView) {
-            storeView.style.display = 'flex';
-            storeView.style.flexDirection = 'column';
-            storeView.style.minHeight = '100vh';
-            storeView.style.justifyContent = 'center'; // Esto agrupa todo en el medio
-        }
+        storeView.style.display = 'block';
+        
         try {
             let data = null;
             const q = query(collection(db, "users"), where("storeAlias", "==", storeId));
