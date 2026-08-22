@@ -341,9 +341,11 @@
         .store-toggle-checkbox:checked + .store-toggle-label { background-color: var(--mac-green, #34C759); }
         .store-toggle-checkbox:checked + .store-toggle-label::before { content: 'ABIERTA'; left: 12px; right: auto; }
         .store-toggle-checkbox:checked + .store-toggle-label::after { left: calc(100% - 32px); }
-        /* OCULTAR ETIQUETA INLINE EN PC */
+        /* OCULTAR ETIQUETAS Y ELEMENTOS MOVILES EN PC */
         @media (min-width: 769px) {
             .mobile-inline-badge { display: none !important; }
+            .mobile-date-label { display: none !important; }
+            .date-wrapper { display: contents; } /* Hace que el contenedor sea fantasma en PC */
         }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
