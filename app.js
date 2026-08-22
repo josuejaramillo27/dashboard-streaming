@@ -1515,7 +1515,12 @@ window.renderTable = () => {
         const tr = document.createElement('tr');
         tr.innerHTML = `<td data-label="Cliente" onclick="if(window.innerWidth <= 768) window.openMobileClientModal('${c.id}')">
             <div class="client-profile">
-                <span style="color:${c.color || 'var(--mac-text-main)'}; font-weight: 800; font-size: 15px; letter-spacing: 0.5px;">${c.name}</span>${loyatyHtml}${notesIcon}<br>${tagHtml}
+                <!-- 🔥 FIX: ESTADO VISIBLE JUNTO AL NOMBRE EN CELULAR Y PC -->
+                <span style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px;">
+                    <span style="color:${c.color || 'var(--mac-text-main)'}; font-weight: 800; font-size: 15px; letter-spacing: 0.5px;">${c.name}</span>
+                    <span class="status ${c.statusCat}" style="font-size: 10px; padding: 2px 6px; border-radius: 6px; line-height: 1;">${stText}</span>
+                </span>
+                ${loyatyHtml}${notesIcon}<br>${tagHtml}
             </div>
         </td>
         <td data-label="Plataformas" style="font-weight: 500;">${c.platform}${deviceIndicator}</td>
