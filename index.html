@@ -319,6 +319,28 @@
             .news-sidebar { flex: 0 0 auto; max-height: 160px; border-right: none; border-bottom: 1px solid var(--mac-border); padding-right: 0; padding-bottom: 10px; }
             .news-content-area { padding-left: 0; padding-top: 10px; }
         }
+        /* EL INTERRUPTOR DE TIENDA (ON/OFF) */
+        .store-toggle-checkbox { display: none; }
+        .store-toggle-label {
+            position: relative; display: inline-block; width: 110px; height: 36px;
+            background-color: var(--mac-red, #FF3B30); border-radius: 20px;
+            cursor: pointer; transition: background-color 0.3s;
+            box-shadow: inset 0 1px 4px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1);
+        }
+        .store-toggle-label::before {
+            content: 'CERRADA'; position: absolute; right: 12px; top: 50%;
+            transform: translateY(-50%); color: white; font-size: 11px;
+            font-weight: 800; letter-spacing: 0.5px; transition: 0.3s;
+        }
+        .store-toggle-label::after {
+            content: ''; position: absolute; top: 2px; left: 2px;
+            width: 30px; height: 30px; background-color: white;
+            border-radius: 50%; transition: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .store-toggle-checkbox:checked + .store-toggle-label { background-color: var(--mac-green, #34C759); }
+        .store-toggle-checkbox:checked + .store-toggle-label::before { content: 'ABIERTA'; left: 12px; right: auto; }
+        .store-toggle-checkbox:checked + .store-toggle-label::after { left: calc(100% - 32px); }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
     <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
@@ -577,7 +599,11 @@
                 <input type="number" id="clientCost" placeholder="Costo" step="0.1" required>
                 <input type="text" id="clientProviderName" placeholder="Nombre Proveedor">
                 <input type="number" id="clientPrice" placeholder="Precio" step="0.1" required>
-                <input type="date" id="expirationDate" required>
+                <!-- 🔥 FIX CELULAR: Contenedor y Label para la fecha -->
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary); padding-left: 5px;">Fecha de Vencimiento:</label>
+                    <input type="date" id="expirationDate" required style="width: 100%; box-sizing: border-box; margin: 0; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                </div>
                 <div id="actionButtonsContainer" style="grid-column: 1 / -1;">
                     <button type="button" class="btn-primary" style="padding: 12px; font-size: 15px;" onclick="window.saveClientData()">Guardar Cliente</button>
                 </div>
@@ -717,11 +743,11 @@
                         <h2 style="margin: 0; font-size: 24px; color: var(--mac-text-main);"><i class='bx bx-store-alt'></i> Mi Tiendita Web</h2>
                         <p style="color:var(--mac-text-secondary); font-size:14px; margin:5px 0 0 0;">Tu catálogo público y automatizado.</p>
                     </div>
-                    <!-- 🔥 NUEVO: SWITCH DE TIENDA ABIERTA/CERRADA -->
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; background: var(--mac-surface); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-border);">
-                        <span style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Estado:</span>
-                        <input type="checkbox" id="storeActiveToggle" onchange="window.toggleStoreActive(this)" style="accent-color: var(--mac-green); width: 18px; height: 18px; cursor: pointer;">
-                    </label>
+                    <!-- 🔥 NUEVO: SWITCH DE TIENDA ESTILO APP -->
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="storeActiveToggle" class="store-toggle-checkbox" onchange="window.toggleStoreActive(this)">
+                        <label for="storeActiveToggle" class="store-toggle-label"></label>
+                    </div>
                 </div>
                 
                 <div style="flex-grow: 1; overflow-y: auto; padding-right: 10px;">
