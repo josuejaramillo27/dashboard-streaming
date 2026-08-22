@@ -2454,7 +2454,6 @@ window.checkNewNews = async () => {
 window.openStoreModal = () => {
     const plan = currentUserData.plan_actual || 'demo';
     
-    // 🔓 BÁSICO TAMBIÉN ENTRA
     if (plan !== 'basico' && plan !== 'pro' && plan !== 'elite') {
         window.closeModals(true); 
         Swal.fire({
@@ -2469,6 +2468,10 @@ window.openStoreModal = () => {
     const aliasOrUid = currentUserData.storeAlias || currentUser.uid;
     document.getElementById('storeLinkInput').value = window.location.origin + window.location.pathname + "?tienda=" + aliasOrUid;
     
+    // 🔥 ACTUALIZAR EL SWITCH DE ESTADO
+    const storeToggle = document.getElementById('storeActiveToggle');
+    if (storeToggle) storeToggle.checked = currentUserData.storeActive !== false; // true por defecto
+
     const externalUrl = currentUserData.externalStoreUrl;
     if (externalUrl && externalUrl.trim() !== '') {
         document.getElementById('externalCatalogSetup').style.display = 'none';
@@ -2486,47 +2489,46 @@ window.openStoreModal = () => {
     document.getElementById('storeModal').style.display = 'flex';
 };
 
-// PEGA ESTAS DOS FUNCIONES NUEVAS JUSTO DEBAJO:
+// 🔥 NUEVA FUNCIÓN: Apagar o Prender la tienda
+window.toggleStoreActive = async (checkbox) => {
+    try {
+        const isActive = checkbox.checked;
+        await updateDoc(doc(db, "users", currentUser.uid), { storeActive: isActive });
+        currentUserData.storeActive = isActive;
+        window.showNotification(isActive ? "Tienda Abierta 🟢" : "Tienda Cerrada 🔴");
+    } catch(e) { 
+        window.showNotification("Error guardando el estado: " + e.message); 
+        checkbox.checked = !checkbox.checked; // Revierte si hay error
+    }
+};
 
 window.saveExternalStore = async () => {
     const url = document.getElementById('storeExternalInput').value.trim();
     if (!url) return window.showNotification("Por favor, ingresa un link válido.");
     if (!url.startsWith('http')) return window.showNotification("⚠️ El link debe empezar con http:// o https://");
-    
     try {
         await updateDoc(doc(db, "users", currentUser.uid), { externalStoreUrl: url });
-        currentUserData.externalStoreUrl = url; // Actualizamos la memoria
-        
+        currentUserData.externalStoreUrl = url; 
         document.getElementById('storeExternalInput').value = '';
         window.showNotification("¡Catálogo externo vinculado con éxito! 🔗");
-        
-        // Recargamos el modal para que se apliquen los cambios visuales
         window.openStoreModal(); 
-    } catch(e) { 
-        window.showNotification("Error: " + e.message); 
-    }
+    } catch(e) { window.showNotification("Error: " + e.message); }
 };
 
 window.removeExternalStore = async () => {
     try {
-        // Borramos el campo en Firebase
         await updateDoc(doc(db, "users", currentUser.uid), { externalStoreUrl: null });
-        currentUserData.externalStoreUrl = null; // Limpiamos la memoria
-        
+        currentUserData.externalStoreUrl = null; 
         window.showNotification("Catálogo desvinculado. Tiendita interna reactivada 🏪");
-        
-        // Recargamos el modal
         window.openStoreModal();
-    } catch(e) { 
-        window.showNotification("Error: " + e.message); 
-    }
+    } catch(e) { window.showNotification("Error: " + e.message); }
 };
+
 window.handleStoreTypeChange = () => {
     const isAutoStock = document.getElementById('storeAutoStock').checked;
-    if (isAutoStock) {
-        window.toggleStoreStockFields();
-    }
+    if (isAutoStock) window.toggleStoreStockFields();
 };
+
 window.toggleStoreStockFields = () => {
     const isChecked = document.getElementById('storeAutoStock').checked;
     const configDiv = document.getElementById('storeStockConfig');
@@ -2537,18 +2539,15 @@ window.toggleStoreStockFields = () => {
     if (isChecked) {
         configDiv.style.display = 'flex';
         const listContainer = document.getElementById('storeStockPlatformsList');
-        listContainer.innerHTML = ''; // Limpiar selectores previos
-
+        listContainer.innerHTML = ''; 
         if (type === 'Combo') {
             label.innerText = 'Selecciona las plataformas del inventario que integran este Combo:';
             if (addComboBtn) addComboBtn.style.display = 'inline-flex';
-            // Para combo, creamos al menos 2 filas de selección por defecto
             window.addStoreStockSelectRow();
             window.addStoreStockSelectRow();
         } else {
             label.innerText = 'Selecciona la plataforma del inventario vinculada a este servicio:';
             if (addComboBtn) addComboBtn.style.display = 'none';
-            // Para servicio único, 1 sola fila
             window.addStoreStockSelectRow();
         }
     } else {
@@ -2558,7 +2557,6 @@ window.toggleStoreStockFields = () => {
     }
 };
 
-// 3. Agrega una fila de selector de plataforma al contenedor de stock
 window.addStoreStockSelectRow = () => {
     const listContainer = document.getElementById('storeStockPlatformsList');
     const stock = currentUserData.inventory || [];
@@ -2576,7 +2574,6 @@ window.addStoreStockSelectRow = () => {
     });
     selectHTML += `</select>`;
 
-    // Botón para borrar fila si hay más de 1 selector
     const removeBtnHTML = listContainer.children.length > 0 ? 
         `<button type="button" class="action-btn btn-del" style="padding: 4px 8px; font-size: 11px;" onclick="this.parentElement.remove(); window.updateStoreStockCount();"><i class='bx bx-trash'></i></button>` : '';
 
@@ -2591,46 +2588,36 @@ window.updateStoreStockCount = () => {
     const selectedPlatforms = Array.from(selects).map(s => s.value).filter(val => val !== '');
     
     if (selectedPlatforms.length === 0) {
-        countText.innerText = '0 disp.';
-        countText.style.color = 'var(--mac-text-secondary)';
-        return;
+        countText.innerText = '0 disp.'; countText.style.color = 'var(--mac-text-secondary)'; return;
     }
 
     const stock = currentUserData.inventory || [];
     const type = document.getElementById('storeType') ? document.getElementById('storeType').value : 'Servicio';
 
     if (type === 'Combo') {
-        // En un combo, el stock es el MÍNIMO de todas las plataformas seleccionadas
         const counts = selectedPlatforms.map(plat => stock.filter(i => i.status === 'libre' && i.platform === plat).length);
         const minStock = Math.min(...counts);
-        
-        countText.innerText = `${minStock} Combos disp.`;
-        countText.style.color = minStock > 0 ? 'var(--mac-green)' : 'var(--mac-red)';
+        countText.innerText = `${minStock} Combos disp.`; countText.style.color = minStock > 0 ? 'var(--mac-green)' : 'var(--mac-red)';
     } else {
-        // Servicio único: stock de la primera plataforma
         const count = stock.filter(i => i.status === 'libre' && i.platform === selectedPlatforms[0]).length;
-        countText.innerText = `${count} disp.`;
-        countText.style.color = count > 0 ? 'var(--mac-green)' : 'var(--mac-red)';
+        countText.innerText = `${count} disp.`; countText.style.color = count > 0 ? 'var(--mac-green)' : 'var(--mac-red)';
     }
 };
 
-// 2. GESTIÓN DEL CATÁLOGO INTERNO (Con Combos y Estado Agotado)
 window.addStoreItem = async () => {
     const type = document.getElementById('storeType') ? document.getElementById('storeType').value : 'Servicio';
     const plat = document.getElementById('storePlatform').value.trim();
     const price = document.getElementById('storePrice').value;
     const desc = document.getElementById('storeDesc') ? document.getElementById('storeDesc').value.trim() : '';
-
     const autoStock = document.getElementById('storeAutoStock').checked;
     const badgeOption = document.getElementById('storeBadgeOption').value;
 
-    // Obtenemos todas las plataformas seleccionadas en el formulario
     const selects = document.querySelectorAll('.store-stock-select');
     const stockPlatforms = Array.from(selects).map(s => s.value).filter(val => val !== '');
 
     if (!plat || !price) return window.showNotification("Completa plataforma y precio");
-    if (autoStock && stockPlatforms.length === 0) {
-        return window.showNotification("⚠️ Debes seleccionar al menos una plataforma del inventario para conectar el stock.");
+    if (autoStock && stockPlatforms.length === 0 && badgeOption !== 'a_pedido') {
+        return window.showNotification("⚠️ Selecciona una plataforma del inventario para conectar el stock.");
     }
 
     const btn = document.querySelector('#storeModal .btn-primary');
@@ -2652,19 +2639,14 @@ window.addStoreItem = async () => {
             id: 'item_' + Date.now(), 
             platform: plat, 
             price: parseFloat(price), 
-            desc: desc, 
-            imgUrl: imgUrl,
-            type: type, 
-            autoStock: autoStock, 
-            stockPlatforms: stockPlatforms, // Lista de plataformas vinculadas (Array)
-            badgeOption: badgeOption,
-            status: 'disponible' 
+            desc: desc, imgUrl: imgUrl, type: type, 
+            autoStock: autoStock, stockPlatforms: stockPlatforms,
+            badgeOption: badgeOption, status: 'disponible' 
         });
 
         await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
         currentUserData.storeCatalog = catalog;
 
-        // Limpieza del formulario
         document.getElementById('storePlatform').value = '';
         document.getElementById('storePrice').value = '';
         if (document.getElementById('storeDesc')) document.getElementById('storeDesc').value = '';
@@ -2672,14 +2654,10 @@ window.addStoreItem = async () => {
         document.getElementById('storeAutoStock').checked = false;
         document.getElementById('storeBadgeOption').value = '';
         window.toggleStoreStockFields();
-
         window.renderStoreItems();
         window.showNotification("✅ Producto añadido al catálogo");
-    } catch(e) { 
-        window.showNotification("Error: " + e.message); 
-    } finally { 
-        btn.innerHTML = "<i class='bx bx-plus'></i>"; btn.disabled = false; 
-    }
+    } catch(e) { window.showNotification("Error: " + e.message); } 
+    finally { btn.innerHTML = "<i class='bx bx-plus'></i>"; btn.disabled = false; }
 };
 
 window.renderStoreItems = () => {
@@ -2693,7 +2671,9 @@ window.renderStoreItems = () => {
     }
 
     catalog.forEach((item, index) => {
-        const isAgotado = item.status === 'agotado';
+        let isAgotado = item.status === 'agotado';
+        if (item.badgeOption === 'a_pedido') isAgotado = false; // A Pedido ignora el botón de agotado
+        
         const statusBadge = isAgotado ? `<span style="background:var(--mac-red); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold;">AGOTADO</span>` : `<span style="background:var(--mac-green); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold;">DISPONIBLE</span>`;
         const typeBadge = item.type === 'Combo' ? `<span style="background:var(--mac-orange); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold; margin-right:5px;"><i class='bx bx-gift'></i> COMBO</span>` : '';
 
@@ -2716,84 +2696,60 @@ window.renderStoreItems = () => {
         list.appendChild(div);
     });
 };
+
 window.editStoreItem = async (index) => {
     let catalog = currentUserData.storeCatalog || [];
     let item = catalog[index];
-
     if (!item) return;
 
-    // Abrimos el modal de SweetAlert adaptado a tu modo oscuro/claro
     const { value: formValues } = await Swal.fire({
         title: 'Editar Producto',
         html: `
             <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Nombre del Servicio/Combo:</label>
                 <input id="swal-plat" class="swal2-input" style="margin:0; width: 100%; box-sizing:border-box;" value="${item.platform}">
-                
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Precio:</label>
                 <input id="swal-price" type="number" step="0.1" class="swal2-input" style="margin:0; width: 100%; box-sizing:border-box;" value="${item.price}">
-                
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Descripción:</label>
                 <input id="swal-desc" class="swal2-input" style="margin:0; width: 100%; box-sizing:border-box;" value="${item.desc || ''}">
-
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Cambiar Imagen (Opcional):</label>
                 <input type="file" id="swal-img" accept="image/*" style="margin:0; width: 100%; padding: 10px; font-size: 12px; border: 1px solid var(--mac-border); border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
             </div>
         `,
-        focusConfirm: false,
-        showCancelButton: true,
-        confirmButtonText: 'Guardar Cambios',
-        cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#007AFF',
-        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
-        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
+        focusConfirm: false, showCancelButton: true, confirmButtonText: 'Guardar Cambios', cancelButtonText: 'Cancelar', confirmButtonColor: '#007AFF',
+        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff', color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
         preConfirm: () => {
             const plat = document.getElementById('swal-plat').value.trim();
             const price = parseFloat(document.getElementById('swal-price').value);
             const desc = document.getElementById('swal-desc').value.trim();
             const fileInput = document.getElementById('swal-img');
             const file = fileInput && fileInput.files.length > 0 ? fileInput.files[0] : null;
-
-            if (!plat || isNaN(price)) {
-                Swal.showValidationMessage('El nombre y el precio son obligatorios');
-                return false;
-            }
-
+            if (!plat || isNaN(price)) { Swal.showValidationMessage('El nombre y el precio son obligatorios'); return false; }
             return { platform: plat, price: price, desc: desc, file: file };
         }
     });
 
-    // Si el usuario le dio a "Guardar Cambios" y no canceló
     if (formValues) {
-        let newImgUrl = item.imgUrl || ""; // Mantiene la foto vieja por defecto
-
+        let newImgUrl = item.imgUrl || ""; 
         try {
-            // Si seleccionó una nueva foto, la subimos primero a Firebase Storage
             if (formValues.file) {
                 window.showNotification("⏳ Subiendo nueva imagen...");
                 const storageRef = ref(storage, `store_images/${currentUser.uid}_${Date.now()}_${formValues.file.name}`);
                 const snapshot = await uploadBytes(storageRef, formValues.file);
                 newImgUrl = await getDownloadURL(snapshot.ref);
             }
-
-            // 1. Modificamos el objeto en la memoria local
             catalog[index].platform = formValues.platform;
             catalog[index].price = formValues.price;
             catalog[index].desc = formValues.desc;
-            catalog[index].imgUrl = newImgUrl; // Guardamos la foto (nueva o mantenemos la vieja)
-
-            // 2. Lo enviamos a Firebase
+            catalog[index].imgUrl = newImgUrl; 
             await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
             currentUserData.storeCatalog = catalog;
-            
-            // 3. Volvemos a dibujar la lista y avisamos
             window.renderStoreItems();
             window.showNotification("✅ Producto editado correctamente");
-        } catch(e) {
-            window.showNotification("Error al editar: " + e.message);
-        }
+        } catch(e) { window.showNotification("Error al editar: " + e.message); }
     }
 };
+
 window.toggleStoreItemStatus = async (index) => {
     let catalog = currentUserData.storeCatalog || [];
     catalog[index].status = catalog[index].status === 'agotado' ? 'disponible' : 'agotado';
@@ -2818,14 +2774,14 @@ window.copyStoreLink = () => {
     const link = document.getElementById('storeLinkInput').value;
     navigator.clipboard.writeText(link).then(() => window.showNotification("¡Link copiado! Pégalo en tu Instagram/WhatsApp."));
 };
+
 window.openProductDesc = (title, desc) => {
     document.getElementById('descModalTitle').innerText = title;
     document.getElementById('descModalText').innerText = desc;
     document.getElementById('productDescModal').style.display = 'flex';
 };
-// Funciones auxiliares para controlar el filtrado de categorías en tiempo real
+
 window.filterStore = (type) => {
-    // Alterna la clase activa en la interfaz visual de los chips
     document.querySelectorAll('.chip-btn').forEach(btn => {
         btn.classList.remove('active');
         if (btn.textContent.includes('Combos') && type === 'Combo') btn.classList.add('active');
@@ -2844,7 +2800,9 @@ window.renderPublicCatalog = (filterType) => {
     const data = window.publicStoreDataCache;
     if (!data) return;
 
-    // Filtrado analítico en base al Chip seleccionado
+    // 🔥 VALIDAR SI LA TIENDA ESTÁ ENCENDIDA
+    const isStoreOpen = data.storeActive !== false; // por defecto es true
+
     const itemsFiltrados = catalog.filter(item => {
         if (filterType === 'Todos') return true;
         return item.type === filterType;
@@ -2858,58 +2816,61 @@ window.renderPublicCatalog = (filterType) => {
     itemsFiltrados.forEach(item => {
         const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
         let isAgotado = item.status === 'agotado';
+        let stockHtml = '';
         
-        // 1. CÁLCULO DE STOCK EN VIVO (SERVICIO ÚNICO O COMBOS MULTI-PLATAFORMA)
-let stockHtml = '';
-if (item.autoStock && item.stockPlatforms && item.stockPlatforms.length > 0 && data.inventory) {
-    const stock = data.inventory || [];
+        // 🔥 LÓGICA DE STOCK Y ETIQUETA "A PEDIDO"
+        if (item.badgeOption === 'a_pedido') {
+            isAgotado = false; // A Pedido no se agota
+            stockHtml = `<span style="font-size:10px; color:var(--mac-blue); display:block; margin-top:6px; font-weight:bold;"><i class='bx bx-package'></i> Disponible a pedido</span>`;
+        } else if (item.autoStock && item.stockPlatforms && item.stockPlatforms.length > 0 && data.inventory) {
+            const stock = data.inventory || [];
+            if (item.type === 'Combo') {
+                const counts = item.stockPlatforms.map(p => stock.filter(i => i.status === 'libre' && i.platform === p).length);
+                const comboDisponible = Math.min(...counts); 
+                if (comboDisponible === 0) isAgotado = true; 
+                const colorStock = comboDisponible > 2 ? 'var(--mac-green)' : (comboDisponible > 0 ? 'var(--mac-orange)' : 'var(--mac-red)');
+                stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold;"><i class='bx bx-box'></i> Stock Combo: <span style="color:${colorStock};">${comboDisponible} disp.</span></span>`;
+            } else {
+                const cantidadLibre = stock.filter(i => i.status === 'libre' && i.platform === item.stockPlatforms[0]).length;
+                if (cantidadLibre === 0) isAgotado = true;
+                const colorStock = cantidadLibre > 2 ? 'var(--mac-green)' : (cantidadLibre > 0 ? 'var(--mac-orange)' : 'var(--mac-red)');
+                stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold;"><i class='bx bx-box'></i> Stock en vivo: <span style="color:${colorStock};">${cantidadLibre} disp.</span></span>`;
+            }
+        }
 
-    if (item.type === 'Combo') {
-        // Calcula cuántas unidades de cada plataforma hay en stock libre
-        const counts = item.stockPlatforms.map(p => stock.filter(i => i.status === 'libre' && i.platform === p).length);
-        const comboDisponible = Math.min(...counts); // El combo depende de la menor disponibilidad
+        // 2. ETIQUETAS Y EMOJIS DE TIENDA
+        let typeBadgeHtml = item.type === 'Combo' ? `<div class="store-vibrant-badge badge-combo"><i class='bx bx-gift'></i> Combo</div>` : '';
 
-        if (comboDisponible === 0) isAgotado = true; // Auto-Agotado
-
-        const colorStock = comboDisponible > 2 ? 'var(--mac-green)' : (comboDisponible > 0 ? 'var(--mac-orange)' : 'var(--mac-red)');
-        stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold;"><i class='bx bx-box'></i> Stock Combo: <span style="color:${colorStock};">${comboDisponible} disp.</span></span>`;
-    } else {
-        // Servicio Único
-        const cantidadLibre = stock.filter(i => i.status === 'libre' && i.platform === item.stockPlatforms[0]).length;
-        if (cantidadLibre === 0) isAgotado = true;
-
-        const colorStock = cantidadLibre > 2 ? 'var(--mac-green)' : (cantidadLibre > 0 ? 'var(--mac-orange)' : 'var(--mac-red)');
-        stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold;"><i class='bx bx-box'></i> Stock en vivo: <span style="color:${colorStock};">${cantidadLibre} disp.</span></span>`;
-    }
-}
-
-// 2. ETIQUETAS Y EMOJIS DE TIENDA
-let typeBadgeHtml = item.type === 'Combo' ? `<div class="store-vibrant-badge badge-combo"><i class='bx bx-gift'></i> Combo</div>` : '';
-
-if (item.badgeOption) {
-    if (item.badgeOption === 'oferta') {
-        typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta"><i class='bx bxs-flame'></i> Oferta Especial</div>`;
-    } else if (item.badgeOption === 'poco_stock') {
-        typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #FF9500 0%, #FF5E00 100%);"><i class='bx bx-error-alt'></i> Poco Stock</div>`;
-    } else if (item.badgeOption === 'tiempo_limitado') {
-        typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #AF52DE 0%, #5856D6 100%);"><i class='bx bxs-time-five'></i> Tiempo Limitado</div>`;
-    } else if (item.badgeOption === 'nuevo') {
-        typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #34C759 0%, #28CD41 100%);"><i class='bx bxs-star'></i> Nuevo Ingreso</div>`;
-    }
-}
-        const numLimpio = data.phone.replace(/[^\d+]/g, '');
-        const msg = encodeURIComponent(`/comprar ${item.platform.toLowerCase()}`);
-        const waLink = `https://wa.me/${numLimpio}?text=${msg}`;
+        if (item.badgeOption) {
+            if (item.badgeOption === 'oferta') {
+                typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta"><i class='bx bxs-flame'></i> Oferta Especial</div>`;
+            } else if (item.badgeOption === 'poco_stock') {
+                typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #FF9500 0%, #FF5E00 100%);"><i class='bx bx-error-alt'></i> Poco Stock</div>`;
+            } else if (item.badgeOption === 'tiempo_limitado') {
+                typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #AF52DE 0%, #5856D6 100%);"><i class='bx bxs-time-five'></i> Tiempo Limitado</div>`;
+            } else if (item.badgeOption === 'nuevo') {
+                typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #34C759 0%, #28CD41 100%);"><i class='bx bxs-star'></i> Nuevo Ingreso</div>`;
+            } else if (item.badgeOption === 'a_pedido') {
+                typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #007AFF 0%, #0056b3 100%);"><i class='bx bx-package'></i> A Pedido</div>`;
+            }
+        }
 
         const titleSafe = item.platform.replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : 'Sin detalles adicionales.';
-
         const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}" alt="${item.platform}">` : `<div style="width:100%; height:100%; background:var(--mac-gray); display:flex; align-items:center; justify-content:center;"><i class='bx bx-play-circle' style='font-size:48px; color:var(--mac-text-secondary); opacity:0.3;'></i></div>`;
 
-        let btnHTML = isAgotado ? `<span class="status expired" style="padding:10px 16px; border-radius:20px; font-weight:800; font-size:13px; text-transform:none; letter-spacing:0;">Agotado</span>` : `<button onclick="window.openCheckoutModal('${item.id}')" class="btn-wa" style="border:none; cursor:pointer; text-decoration:none; padding:10px 18px; border-radius:20px; font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:4px; margin:0;"><i class='bx bx-cart' style='font-size:16px;'></i> Comprar</button>`;
+        // 🔥 CONTROL DEL BOTÓN DE COMPRA SEGÚN ESTADO DE TIENDA
+        let btnHTML = '';
+        if (!isStoreOpen) {
+            btnHTML = `<span class="status expired" style="padding:10px 16px; border-radius:20px; font-weight:800; font-size:13px; text-transform:none; letter-spacing:0; background: var(--mac-gray); color: var(--mac-text-secondary);"><i class='bx bx-store-alt'></i> Tienda Cerrada</span>`;
+        } else if (isAgotado) {
+            btnHTML = `<span class="status expired" style="padding:10px 16px; border-radius:20px; font-weight:800; font-size:13px; text-transform:none; letter-spacing:0;">Agotado</span>`;
+        } else {
+            btnHTML = `<button onclick="window.openCheckoutModal('${item.id}')" class="btn-wa" style="border:none; cursor:pointer; text-decoration:none; padding:10px 18px; border-radius:20px; font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:4px; margin:0;"><i class='bx bx-cart' style='font-size:16px;'></i> Comprar</button>`;
+        }
 
         const card = document.createElement('div');
-        card.className = `store-product-card ${isAgotado ? 'is-agotado' : ''}`;
+        card.className = `store-product-card ${isAgotado || !isStoreOpen ? 'is-agotado' : ''}`;
         card.innerHTML = `
             ${typeBadgeHtml}
             <div class="store-product-visual" onclick="window.openProductDesc('${titleSafe}', '${descSafe}')">
@@ -2920,7 +2881,7 @@ if (item.badgeOption) {
                 <div class="store-product-info">
                     <strong class="store-product-title">${item.platform}</strong>
                     <span class="store-product-price">${priceStr}</span>
-                    ${stockHtml} <!-- AQUÍ SE INYECTA EL STOCK EN VIVO -->
+                    ${stockHtml} 
                 </div>
                 <div class="store-product-action">${btnHTML}</div>
             </div>
@@ -3604,6 +3565,8 @@ window.aprobarVenta = async (pedidoId, numeroCliente) => {
             cuentasEntregar.push(acc);
         }
 
+        let primerClienteId = null; // Capturaremos el ID para el autocompletado
+
         // Bucle de creación (Separación Inteligente para la Matriz)
         for (let cuenta of cuentasEntregar) {
             let matrizAsignada = null;
@@ -3611,7 +3574,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente) => {
             const snapMatriz = await getDocs(qMatriz);
             if (!snapMatriz.empty) matrizAsignada = snapMatriz.docs[0].id;
 
-            await addDoc(collection(db, "clients"), {
+            const docRef = await addDoc(collection(db, "clients"), {
                 userId: currentUser.uid,
                 name: "Cliente Nuevo", 
                 phone: numeroBonito, 
@@ -3627,6 +3590,8 @@ window.aprobarVenta = async (pedidoId, numeroCliente) => {
                 linkedMasterId: matrizAsignada, 
                 color: macPalette[Math.floor(Math.random() * macPalette.length)]
             });
+            
+            if (!primerClienteId) primerClienteId = docRef.id;
 
             cuenta.rules = rulesDB[cuenta.platform] || "Uso personal, no modificar los datos de acceso.";
             stock = stock.map(item => item.id === cuenta.id ? { ...item, status: 'vendida' } : item);
@@ -3635,6 +3600,9 @@ window.aprobarVenta = async (pedidoId, numeroCliente) => {
         await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
         currentUserData.inventory = stock;
         await updateDoc(doc(db, "pedidos", pedidoId), { estado: "aprobado" });
+
+        window.renderInventory(); 
+        loadUserClients(); 
 
         // 🔥 LÓGICA DE ENTREGA: BOT PARA PRO, WHATSAPP PARA BÁSICO
         const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
@@ -3661,21 +3629,54 @@ window.aprobarVenta = async (pedidoId, numeroCliente) => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payloadEntrega)
-            }).then(res => console.log("Señal de entrega procesada por el bot"))
-              .catch(err => console.error("Error de red al contactar al bot:", err));
+            }).catch(err => console.error("Error de red al contactar al bot:", err));
               
-            window.showNotification("✅ ¡Venta aprobada! Tu bot enviará la cuenta en breve.");
+            Swal.fire({
+                icon: 'success',
+                title: '¡Venta Aprobada!',
+                html: '<p style="color:var(--mac-text-secondary);">El Bot ya le está enviando la cuenta al cliente de forma automática.</p><p style="margin-top:10px; font-size:14px; font-weight:bold;">¿Deseas completar el nombre y los detalles del cliente ahora?</p>',
+                confirmButtonColor: '#34C759',
+                confirmButtonText: 'Completar Datos',
+                showCancelButton: true,
+                cancelButtonText: 'Más Tarde',
+                background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+                color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+            }).then((result) => {
+                if (result.isConfirmed && primerClienteId) {
+                    window.closeModals(true);
+                    window.switchMainTab('clientes');
+                    window.startEdit(primerClienteId);
+                } else {
+                    window.openPedidosModal(); 
+                }
+            });
+
         } else {
-            // PLAN BÁSICO/DEMO: Abrir WhatsApp Web/App para que el vendedor lo envíe
+            // PLAN BÁSICO/DEMO: Botón directo a WhatsApp
             const cleanPhone = numeroCliente.replace(/[^\d+]/g, '');
             const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(textoFinal)}`;
-            window.open(waUrl, '_blank');
-            window.showNotification("✅ ¡Venta aprobada! Se abrió WhatsApp para que envíes la cuenta.");
+            
+            Swal.fire({
+                icon: 'success',
+                title: '¡Venta Aprobada!',
+                html: `<div style="margin-bottom:15px;"><a href="${waUrl}" target="_blank" style="display:inline-block; background:#25D366; color:white; padding:10px 15px; border-radius:8px; text-decoration:none; font-weight:bold;"><i class="bx bxl-whatsapp"></i> Enviar Accesos (Clic Aquí)</a></div><p style="margin-top:10px; font-size:14px; font-weight:bold;">2. ¿Deseas completar el nombre y detalles del cliente ahora?</p>`,
+                confirmButtonText: 'Completar Datos',
+                confirmButtonColor: '#007AFF',
+                showCancelButton: true,
+                cancelButtonText: 'Más Tarde',
+                allowOutsideClick: false,
+                background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+                color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+            }).then((result) => {
+                if (result.isConfirmed && primerClienteId) {
+                    window.closeModals(true);
+                    window.switchMainTab('clientes');
+                    window.startEdit(primerClienteId);
+                } else {
+                    window.openPedidosModal(); 
+                }
+            });
         }
-
-        window.renderInventory(); 
-        loadUserClients(); 
-        window.openPedidosModal(); 
 
     } catch (e) {
         console.error(e);
