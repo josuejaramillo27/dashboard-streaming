@@ -1012,10 +1012,9 @@ window.saveNews = async () => {
                 titulo: title, 
                 desc: desc, 
                 img: imgUrl 
-                // No tocamos la fecha original para que no se altere el orden
             });
             window.showNotification("Noticia actualizada con éxito ✏️");
-            window.cancelEditNews(); // Resetea formulario y variables
+            window.cancelEditNews(); 
         } else {
             // MODO CREACIÓN
             await addDoc(collection(db, "news"), { 
@@ -1025,6 +1024,17 @@ window.saveNews = async () => {
                 fechaIso: new Date().toISOString(),
                 isPinned: false
             });
+            
+            // 🔥 EL GATILLO DEL MEGÁFONO (Avisa al bot para que haga sonar los celulares)
+            fetch('https://bot.panelagc.com/api/notificar-noticia', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    titulo: '📢 Nueva Noticia A.G.C.',
+                    cuerpo: title
+                })
+            }).catch(e => console.error("Error al notificar al bot:", e));
+
             window.showNotification("Noticia publicada con éxito 📢");
             document.getElementById('newsInputTitle').value = ''; 
             document.getElementById('newsInputDesc').value = ''; 
