@@ -2936,10 +2936,16 @@ const checkPublicStore = async () => {
             const q = query(collection(db, "users"), where("storeAlias", "==", storeId));
             const snap = await getDocs(q);
             
-            if (!snap.empty) { data = snap.docs[0].data(); } 
+            if (!snap.empty) { 
+                data = snap.docs[0].data(); 
+                data.uid = snap.docs[0].id; // 🔥 FIX: Atrapa el ID oculto del vendedor
+            } 
             else {
                 const docRef = await getDoc(doc(db, "users", storeId));
-                if (docRef.exists()) data = docRef.data();
+                if (docRef.exists()) {
+                    data = docRef.data();
+                    data.uid = docRef.id; // 🔥 FIX: Atrapa el ID oculto del vendedor
+                }
             }
 
             if (!data) {
@@ -3033,27 +3039,18 @@ window.openCheckoutModal = (itemId) => {
     if (methods.length === 0) {
         pmContainer.innerHTML = '<p style="font-size: 12px; color: var(--mac-red); text-align: center;">El vendedor aún no ha configurado métodos de pago.</p>';
     } else {
+        // 🔥 DISEÑO BINANCE P2P: Un solo Select elegante
+        let selectHtml = `<select id="pmSelectDropdown" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 14px; font-weight: bold; outline: none; margin-bottom: 10px;" onchange="window.showPaymentDetails(this.value)">`;
+        selectHtml += `<option value="">-- Elige un método de pago --</option>`;
         methods.forEach((m, idx) => {
-            const qrHtml = m.qrUrl ? `<div style="text-align: center; margin-top: 10px;"><img src="${m.qrUrl}" style="width: 140px; height: 140px; border-radius: 12px; border: 1px solid var(--mac-border); object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"><p style="font-size: 10px; color: var(--mac-text-secondary); margin-top: 4px; font-weight: bold;">ESCANEAR QR</p></div>` : '';
-            
-            const itemHtml = `
-                <div style="background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 10px; overflow: hidden; transition: all 0.2s;">
-                    <div onclick="window.togglePaymentAccordion(${idx})" style="padding: 12px 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.03);">
-                        <strong style="font-size: 14px; color: var(--mac-text-main);"><i class='bx bxs-bank'></i> ${m.bank}</strong>
-                        <i class='bx bx-chevron-down' id="pmIcon_${idx}" style="font-size: 18px; color: var(--mac-text-secondary);"></i>
-                    </div>
-                    <div id="pmDetails_${idx}" style="display: none; padding: 15px; border-top: 1px solid var(--mac-border); background: var(--mac-bg);">
-                        <p style="margin: 0 0 8px 0; font-size: 13px; color: var(--mac-text-secondary);">Titular: <strong style="color: var(--mac-text-main);">${m.holder}</strong></p>
-                        <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mac-gray); padding: 8px 12px; border-radius: 8px; border: 1px dashed var(--mac-border);">
-                            <span style="font-size: 15px; font-weight: 900; color: var(--mac-blue); letter-spacing: 1px;">${m.number}</span>
-                            <button class="action-btn" style="background: transparent; border: 1px solid var(--mac-border); color: var(--mac-text-main); padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: bold;" onclick="window.copyToClipboard('${m.number}', 'Número de ${m.bank}')"><i class='bx bx-copy'></i> Copiar</button>
-                        </div>
-                        ${qrHtml}
-                    </div>
-                </div>
-            `;
-            pmContainer.innerHTML += itemHtml;
+            selectHtml += `<option value="${idx}">🏦 ${m.bank}</option>`;
         });
+        selectHtml += `</select>`;
+        
+        // Contenedor donde aparecerán los detalles del banco elegido
+        selectHtml += `<div id="pmDetailsContainer" style="display:none; background: var(--mac-bg); padding: 15px; border-radius: 10px; border: 1px dashed var(--mac-border);"></div>`;
+        
+        pmContainer.innerHTML = selectHtml;
     }
 
     document.getElementById('checkoutPhone').value = '';
@@ -3061,15 +3058,52 @@ window.openCheckoutModal = (itemId) => {
     document.getElementById('checkoutModal').style.display = 'flex';
 };
 
-window.togglePaymentAccordion = (idx) => {
-    const details = document.getElementById(`pmDetails_${idx}`);
-    const icon = document.getElementById(`pmIcon_${idx}`);
-    if (details.style.display === 'none') {
-        details.style.display = 'block';
-        icon.className = 'bx bx-chevron-up';
-    } else {
-        details.style.display = 'none';
-        icon.className = 'bx bx-chevron-down';
+// 🔥 NUEVA FUNCIÓN: Muestra los datos según lo que elija en la lista
+window.showPaymentDetails = (idx) => {
+    const container = document.getElementById('pmDetailsContainer');
+    if (idx === "") {
+        container.style.display = 'none'; // Si no elige nada, oculta los datos
+        return;
+    }
+    
+    const data = window.publicStoreDataCache;
+    const m = data.paymentMethods[idx];
+    
+    let qrBtn = '';
+    if (m.qrUrl) {
+        // 🔥 BOTÓN DE DESCARGA en lugar de mostrar la imagen
+        qrBtn = `<button class="btn-secondary" style="width: 100%; margin-top: 15px; font-size: 13px; font-weight: bold; background: rgba(0, 122, 255, 0.1); border: 1px solid var(--mac-blue); color: var(--mac-blue);" onclick="window.descargarQR('${m.qrUrl}', '${m.bank}')"><i class='bx bx-download'></i> Descargar QR de Pago</button>`;
+    }
+
+    container.innerHTML = `
+        <p style="margin: 0 0 8px 0; font-size: 13px; color: var(--mac-text-secondary);">Titular: <strong style="color: var(--mac-text-main);">${m.holder}</strong></p>
+        <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mac-gray); padding: 8px 12px; border-radius: 8px; border: 1px dashed var(--mac-border);">
+            <span style="font-size: 16px; font-weight: 900; color: var(--mac-blue); letter-spacing: 1px;">${m.number}</span>
+            <button class="action-btn" style="background: transparent; border: 1px solid var(--mac-border); color: var(--mac-text-main); padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: bold;" onclick="window.copyToClipboard('${m.number}', 'Número de ${m.bank}')"><i class='bx bx-copy'></i> Copiar</button>
+        </div>
+        ${qrBtn}
+    `;
+    container.style.display = 'block';
+};
+
+// 🔥 NUEVA FUNCIÓN: Descarga el QR forzosamente a la galería del cliente
+window.descargarQR = async (url, banco) => {
+    try {
+        window.showNotification("⏳ Descargando QR...");
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = `QR_${banco}_Pago.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+        window.showNotification("✅ QR Guardado en tu dispositivo");
+    } catch (e) {
+        // Plan B: Si el navegador bloquea descargas silenciosas (algunos Iphones), se lo abre en pestaña nueva
+        window.open(url, '_blank');
     }
 };
 
@@ -3088,14 +3122,14 @@ window.submitCheckout = async () => {
 
     try {
         const data = window.publicStoreDataCache;
-        const vendedorId = data.uid;
+        const vendedorId = data.uid; // El error ya no ocurrirá aquí gracias a la Corrección 1
         
         // 1. Subir el comprobante a Firebase Storage
         const storageRef = ref(storage, `comprobantes/${vendedorId}_${Date.now()}_${file.name}`);
         await uploadBytes(storageRef, file);
         const comprobanteUrl = await getDownloadURL(storageRef);
 
-        // 2. Guardar el pedido en Firestore (Para resucitar 'Ventas Pendientes')
+        // 2. Guardar el pedido en Firestore
         await addDoc(collection(db, "pedidos"), {
             vendedorId: vendedorId,
             clienteNumero: phone,
@@ -3126,7 +3160,6 @@ window.submitCheckout = async () => {
         btn.disabled = false;
     }
 };
-
 // --- SISTEMA DE REGLAS POR PLATAFORMA ---
 window.openRulesModal = () => {
     document.getElementById('rulesModal').style.display = 'flex';
