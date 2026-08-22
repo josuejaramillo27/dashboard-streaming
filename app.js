@@ -2929,8 +2929,12 @@ const checkPublicStore = async () => {
         document.getElementById('adminView').style.display = 'none';
         
         const storeView = document.getElementById('publicStoreView');
-        storeView.style.display = 'block';
-
+        if (storeView) {
+            storeView.style.display = 'flex';
+            storeView.style.flexDirection = 'column';
+            storeView.style.minHeight = '100vh';
+            storeView.style.justifyContent = 'center';
+        }
         try {
             let data = null;
             const q = query(collection(db, "users"), where("storeAlias", "==", storeId));
@@ -3618,23 +3622,43 @@ window.aprobarVenta = async (pedidoId, numeroCliente) => {
         currentUserData.inventory = stock;
         await updateDoc(doc(db, "pedidos", pedidoId), { estado: "aprobado" });
 
-        // EL DISPARO AL BOT (Cuentas Agrupadas)
-        const payloadEntrega = {
-            distribuidorId: currentUser.uid,
-            numeroCliente: numeroCliente, 
-            cuentas: cuentasEntregar, 
-            fechaVencimiento: dateWhatsApp,
-            mensajeEntrega: currentUserData.waDeliveryMessage || "" 
-        };
+        // 🔥 LÓGICA DE ENTREGA: BOT PARA PRO, WHATSAPP PARA BÁSICO
+        const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
+        
+        let bloqueCuentas = "";
+        cuentasEntregar.forEach((c, index) => { 
+            bloqueCuentas += `\n🍿 *CUENTA ${index + 1}: ${c.platform}*\n📧 *Correo:* ${c.email}\n🔑 *Clave:* ${c.pass}\n👤 *Perfil:* ${c.profile || '1'}\n📌 *PIN:* ${c.pin || 'N/A'}\n⚠️ *Reglas:* ${c.rules}\n`; 
+        });
 
-        fetch('https://bot.panelagc.com/api/entregar-cuenta', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payloadEntrega)
-        }).then(res => console.log("Señal de entrega procesada por el servidor"))
-          .catch(err => console.error("Error de red al contactar al bot:", err));
+        let textoFinal = currentUserData.waDeliveryMessage || `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tus cuentas:\n{bloqueCuentas}\n📅 *Vence el:* {fecha}\n\n¡Que disfrutes el contenido! 🍿`;
+        textoFinal = textoFinal.includes('{correo}') ? `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tus cuentas:\n${bloqueCuentas}\n📅 *Vence el:* ${dateWhatsApp}\n\n¡Que disfrutes el contenido! 🍿` : textoFinal.replace(/{bloqueCuentas}/g, bloqueCuentas).replace(/{fecha}/g, dateWhatsApp || '');
 
-        window.showNotification("✅ ¡Entrega completada con éxito!");
+        if (plan === 'pro' || plan === 'elite') {
+            // PLAN PRO: Mandar orden silenciosa al Bot
+            const payloadEntrega = {
+                distribuidorId: currentUser.uid,
+                numeroCliente: numeroCliente, 
+                cuentas: cuentasEntregar, 
+                fechaVencimiento: dateWhatsApp,
+                mensajeEntrega: currentUserData.waDeliveryMessage || "" 
+            };
+
+            fetch('https://bot.panelagc.com/api/entregar-cuenta', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payloadEntrega)
+            }).then(res => console.log("Señal de entrega procesada por el bot"))
+              .catch(err => console.error("Error de red al contactar al bot:", err));
+              
+            window.showNotification("✅ ¡Venta aprobada! Tu bot enviará la cuenta en breve.");
+        } else {
+            // PLAN BÁSICO/DEMO: Abrir WhatsApp Web/App para que el vendedor lo envíe
+            const cleanPhone = numeroCliente.replace(/[^\d+]/g, '');
+            const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(textoFinal)}`;
+            window.open(waUrl, '_blank');
+            window.showNotification("✅ ¡Venta aprobada! Se abrió WhatsApp para que envíes la cuenta.");
+        }
+
         window.renderInventory(); 
         loadUserClients(); 
         window.openPedidosModal(); 
