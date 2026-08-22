@@ -458,9 +458,13 @@ window.openProfileModal = () => {
     document.getElementById('editReferencesLink').value = currentUserData.referencesLink || '';
     if (typeof window.renderCustomServicesChips === 'function') window.renderCustomServicesChips();
 
-    // Cargar los métodos de pago en memoria temporal y dibujar
-    localPaymentMethods = currentUserData.paymentMethods ? JSON.parse(JSON.stringify(currentUserData.paymentMethods)) : [];
-    window.renderPaymentMethods();
+    // 🛠️ FIX: Dibujar métodos de pago sin borrar el progreso
+    const container = document.getElementById('paymentMethodsContainer');
+    if (container) {
+        container.innerHTML = ''; 
+        const methods = currentUserData.paymentMethods || [];
+        methods.forEach(m => window.addPaymentMethodUI(m));
+    }
 
     const profileModal = document.getElementById('profileModal');
     if (window.innerWidth <= 768) {
@@ -470,62 +474,55 @@ window.openProfileModal = () => {
     }
 };
 
-window.renderPaymentMethods = () => {
+window.addPaymentMethodUI = (data = null) => {
     const container = document.getElementById('paymentMethodsContainer');
-    if (!container) return;
-    container.innerHTML = '';
-    
-    if (localPaymentMethods.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); font-size:12px; margin: 10px 0;">No tienes métodos de pago configurados. Añade uno para tu Tiendita.</p>';
-        return;
+    if (container.children.length >= 5) {
+        return window.showNotification("⚠️ Solo puedes tener hasta 5 métodos de pago.");
     }
 
-    localPaymentMethods.forEach((method, index) => {
-        const div = document.createElement('div');
-        div.style.cssText = "background: var(--mac-bg); border: 1px solid var(--mac-border); border-radius: 12px; padding: 15px;";
-        
-        div.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <span style="font-size: 13px; font-weight: bold; color: var(--mac-text-main);">Método ${index + 1}</span>
-                <button type="button" onclick="window.removePaymentMethod(${index})" style="background: rgba(255,59,48,0.1); color: var(--mac-red); border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 12px;"><i class='bx bx-trash'></i> Quitar</button>
+    const div = document.createElement('div');
+    div.className = 'payment-method-card'; // Clase clave para guardar todo junto
+    div.style.cssText = "background: var(--mac-bg); border: 1px solid var(--mac-border); border-radius: 12px; padding: 15px; margin-bottom: 10px;";
+    
+    const bank = data ? data.bank : '';
+    const num = data ? data.number : '';
+    const holder = data ? data.holder : '';
+    const qrUrl = data ? data.qrUrl : '';
+
+    // El botón Quitar ahora tiene "width: max-content !important;" para arreglar el bug visual
+    div.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <span style="font-size: 13px; font-weight: bold; color: var(--mac-text-main);">Método de Pago</span>
+            <button type="button" onclick="this.closest('.payment-method-card').remove()" style="width: max-content !important; background: rgba(255,59,48,0.1); color: var(--mac-red); border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;"><i class='bx bx-trash'></i> Quitar</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+            <div>
+                <label style="font-size: 11px; color: var(--mac-text-secondary);">Tipo (Banco/Billetera):</label>
+                <input type="text" class="pm-bank" placeholder="Ej: Yape, Plin, Binance..." value="${bank}" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px; box-sizing: border-box;">
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                <div>
-                    <label style="font-size: 11px; color: var(--mac-text-secondary);">Tipo (Banco/Billetera):</label>
-                    <input type="text" placeholder="Ej: Yape, Plin, Binance..." value="${method.bank || ''}" oninput="localPaymentMethods[${index}].bank = this.value" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px; box-sizing: border-box;">
-                </div>
-                <div>
-                    <label style="font-size: 11px; color: var(--mac-text-secondary);">Número / Celular:</label>
-                    <input type="text" placeholder="Ej: 999 888 777" value="${method.number || ''}" oninput="localPaymentMethods[${index}].number = this.value" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px; box-sizing: border-box;">
-                </div>
+            <div>
+                <label style="font-size: 11px; color: var(--mac-text-secondary);">Número / Celular:</label>
+                <input type="text" class="pm-number" placeholder="Ej: 999 888 777" value="${num}" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px; box-sizing: border-box;">
             </div>
-            <div style="margin-bottom: 10px;">
-                <label style="font-size: 11px; color: var(--mac-text-secondary);">Nombre del Titular:</label>
-                <input type="text" placeholder="Ej: Juan Pérez" value="${method.holder || ''}" oninput="localPaymentMethods[${index}].holder = this.value" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px; box-sizing: border-box;">
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label style="font-size: 11px; color: var(--mac-text-secondary);">Nombre del Titular:</label>
+            <input type="text" class="pm-holder" placeholder="Ej: Juan Pérez" value="${holder}" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px; box-sizing: border-box;">
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="flex: 1;">
+                <label style="font-size: 11px; color: var(--mac-text-secondary);">QR de Pago (Opcional):</label>
+                <input type="file" accept="image/*" class="pm-qr-file" style="width: 100%; padding: 6px; font-size: 11px; background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 6px; box-sizing: border-box; color: var(--mac-text-main);">
             </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <div style="flex: 1;">
-                    <label style="font-size: 11px; color: var(--mac-text-secondary);">QR de Pago (Opcional):</label>
-                    <input type="file" accept="image/*" id="qrUpload_${index}" style="width: 100%; padding: 6px; font-size: 11px; background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 6px; box-sizing: border-box; color: var(--mac-text-main);">
-                </div>
-                ${method.qrUrl ? `<img src="${method.qrUrl}" style="width: 45px; height: 45px; border-radius: 8px; object-fit: cover; border: 1px solid var(--mac-border); flex-shrink: 0;">` : ''}
-            </div>
-        `;
-        container.appendChild(div);
-    });
+            <input type="hidden" class="pm-qr-url" value="${qrUrl}">
+            ${qrUrl ? `<img src="${qrUrl}" style="width: 45px; height: 45px; border-radius: 8px; object-fit: cover; border: 1px solid var(--mac-border); flex-shrink: 0;">` : ''}
+        </div>
+    `;
+    container.appendChild(div);
 };
 
 window.addPaymentMethod = () => {
-    if (localPaymentMethods.length >= 5) {
-        return window.showNotification("⚠️ Solo puedes tener hasta 5 métodos de pago.");
-    }
-    localPaymentMethods.push({ bank: '', number: '', holder: '', qrUrl: null });
-    window.renderPaymentMethods();
-};
-
-window.removePaymentMethod = (index) => {
-    localPaymentMethods.splice(index, 1);
-    window.renderPaymentMethods();
+    window.addPaymentMethodUI();
 };
 
 window.saveProfile = async () => { 
@@ -556,14 +553,28 @@ window.saveProfile = async () => {
             bannerUrl = await getDownloadURL(storageRefBanner);
         }
 
-        // 🔥 SUBIR QRs de métodos de pago a Firebase
-        for (let i = 0; i < localPaymentMethods.length; i++) {
-            const qrInput = document.getElementById(`qrUpload_${i}`);
-            if (qrInput && qrInput.files.length > 0) {
-                const qrFile = qrInput.files[0];
-                const storageRefQR = ref(storage, `qrs/${currentUser.uid}_qr_${Date.now()}_${i}`);
-                await uploadBytes(storageRefQR, qrFile);
-                localPaymentMethods[i].qrUrl = await getDownloadURL(storageRefQR);
+        // 🔥 LECTURA INTELIGENTE: Extraer todos los métodos de pago del HTML al mismo tiempo
+        const pmCards = document.querySelectorAll('.payment-method-card');
+        let newPaymentMethods = [];
+        
+        for (let i = 0; i < pmCards.length; i++) {
+            const card = pmCards[i];
+            const bank = card.querySelector('.pm-bank').value.trim();
+            const number = card.querySelector('.pm-number').value.trim();
+            const holder = card.querySelector('.pm-holder').value.trim();
+            const qrFileInput = card.querySelector('.pm-qr-file');
+            let qrUrl = card.querySelector('.pm-qr-url').value; 
+
+            // Solo guarda el método si tiene datos
+            if (bank || number) {
+                // Si el usuario subió una foto nueva para este QR
+                if (qrFileInput && qrFileInput.files.length > 0) {
+                    const qrFile = qrFileInput.files[0];
+                    const storageRefQR = ref(storage, `qrs/${currentUser.uid}_qr_${Date.now()}_${i}`);
+                    await uploadBytes(storageRefQR, qrFile);
+                    qrUrl = await getDownloadURL(storageRefQR);
+                }
+                newPaymentMethods.push({ bank, number, holder, qrUrl });
             }
         }
 
@@ -573,12 +584,12 @@ window.saveProfile = async () => {
         let refInput = document.getElementById('editReferencesLink');
         let referencesLink = refInput ? refInput.value.trim() : '';
 
-        // Guardar todo en Firebase
+        // Guardar absolutamente todo en Firebase de un solo tiro
         await updateDoc(doc(db, "users", currentUser.uid), { 
             name: name, country: country, currency: getCurrencyForCountry(country), 
             phone: phone, logoUrl: logoUrl, bannerUrl: bannerUrl, storeAlias: finalAlias,
             referencesLink: referencesLink,
-            paymentMethods: localPaymentMethods 
+            paymentMethods: newPaymentMethods 
         });
         
         // Actualizar la memoria global
@@ -589,7 +600,7 @@ window.saveProfile = async () => {
         currentUserData.logoUrl = logoUrl;
         currentUserData.bannerUrl = bannerUrl;
         currentUserData.referencesLink = referencesLink;
-        currentUserData.paymentMethods = JSON.parse(JSON.stringify(localPaymentMethods)); 
+        currentUserData.paymentMethods = newPaymentMethods; 
 
         globalCurrency = getCurrencyForCountry(country);
         currentUserData.currency = globalCurrency;
