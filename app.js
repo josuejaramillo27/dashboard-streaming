@@ -4123,26 +4123,32 @@ window.renderMasterAccounts = async () => {
             let perfilesHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;">`;
 
             for (let i = 1; i <= acc.maxProfiles; i++) {
-                // NUEVA LÓGICA MULTI-PLATAFORMA Y MULTI-PERFIL
+                // NUEVA LÓGICA MULTI-PLATAFORMA Y MULTI-PERFIL CORREGIDA
             const clienteEnPerfil = clientesDeEstaCuenta.find(c => {
                 let pName = null;
                 if (c.multiAccounts) {
-                    // Buscamos específicamente la plataforma de ESTA matriz
-                    const linkedAcc = Object.values(c.multiAccounts).find(a => a.masterAccountId === accId || c.linkedMasterId === accId);
-                    if (linkedAcc) pName = linkedAcc.profile;
+                    // 🔥 Búsqueda exacta: Solo mirar la cuenta vinculada a ESTA matriz
+                    const linkedAcc = Object.values(c.multiAccounts).find(a => a.masterAccountId === accId);
+                    
+                    if (linkedAcc) {
+                        pName = linkedAcc.profile;
+                    } else if (c.linkedMasterId === accId && c.multiAccounts[acc.platform]) {
+                        // Fallback de seguridad para clientes antiguos
+                        pName = c.multiAccounts[acc.platform].profile;
+                    }
                 } else {
                     pName = c.accountProfile;
                 }
+                
                 if (!pName) return false;
                 
-                // 🔥 MAGIA: Extrae TODOS los números separados por comas o letras (Ej: "1, 2, 4")
+                // Extrae todos los números (Soporta múltiples perfiles separados por comas)
                 const numerosEncontrados = String(pName).match(/\d+/g); 
                 if (!numerosEncontrados) return false;
                 
-                // Verifica si la ranura actual (i) coincide con ALGUNO de los números comprados
+                // Verifica si la ranura actual (i) coincide
                 return numerosEncontrados.some(num => parseInt(num) === i);
             });
-
                 if (clienteEnPerfil) {
                     perfilesHTML += `
                         <div style="background: rgba(255, 159, 10, 0.08); border: 1px solid var(--mac-orange); padding: 10px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; min-height: 85px;">
