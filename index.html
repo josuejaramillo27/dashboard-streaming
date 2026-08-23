@@ -828,9 +828,9 @@
                                     <label style="font-size: 11px; color: var(--mac-text-secondary); display: block; margin-bottom: 4px;">Imagen de portada (Opcional):</label>
                                     <input type="file" id="storeImg" accept="image/*" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 12px;">
                                 </div>
-                                <div style="display: flex; gap: 10px;">
-                                    <input type="text" id="storeDesc" placeholder="Descripción (Ej: 1 Perfil de cada uno)" style="flex: 1;">
-                                    <button class="btn-primary" style="width: auto; padding: 0 20px;" onclick="window.addStoreItem()"><i class='bx bx-plus'></i></button>
+                                <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                    <textarea id="storeDesc" placeholder="Descripción del producto...&#10;(Puedes usar la tecla Enter para hacer saltos de línea)" style="flex: 1; padding: 10px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 13px; font-family: inherit; resize: vertical; min-height: 42px;"></textarea>
+                                    <button class="btn-primary" style="width: auto; padding: 12px 20px; height: 42px; border-radius: 8px;" onclick="window.addStoreItem()"><i class='bx bx-plus'></i></button>
                                 </div>
                             </div>
                         </div>
