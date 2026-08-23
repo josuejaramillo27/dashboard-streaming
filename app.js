@@ -3660,32 +3660,51 @@ window.aprobarVenta = async (pedidoId, numeroCliente) => {
     const precioTotal = parseFloat(document.getElementById(`precio_venta_${pedidoId}`).value) || 0;
     const precioDividido = precioTotal / cuentasIds.length;
 
+   // 🔥 NUEVA ALERTA: PREGUNTAR POR LOS MESES PAGADOS
    const confirmacion = await Swal.fire({
-        title: '¿Confirmar Entrega?',
-        text: `Se enviarán ${cuentasIds.length} cuenta(s) al cliente por WhatsApp.`,
+        title: 'Confirmar Vencimiento',
+        html: `
+            <p style="color:var(--mac-text-secondary); font-size:14px; margin-bottom: 15px;">Se enviarán ${cuentasIds.length} cuenta(s) al cliente.</p>
+            <div style="text-align: left; background: var(--mac-bg); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border);">
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">¿Por cuántos meses pagó el cliente?</label>
+                <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+                    <input type="number" id="swal-meses-venta" class="swal2-input" value="1" min="1" style="margin: 0; flex: 1; text-align: center; font-size: 18px; font-weight: bold;">
+                    <span style="font-size: 14px; color: var(--mac-text-secondary); font-weight: bold;">Mes(es)</span>
+                </div>
+                <small style="color: var(--mac-text-secondary); font-size: 11px; display: block; margin-top: 8px;">* El sistema sumará 30 días automáticamente por cada mes ingresado.</small>
+            </div>
+        `,
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: '<i class="bx bx-send"></i> Sí, Aprobar y Enviar',
+        confirmButtonText: '<i class="bx bx-send"></i> Aprobar y Enviar',
         cancelButtonText: 'Cancelar',
         confirmButtonColor: '#34C759',
         cancelButtonColor: '#FF3B30',
         background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
-        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
+        preConfirm: () => {
+            const meses = document.getElementById('swal-meses-venta').value;
+            return parseInt(meses) || 1;
+        }
     });
 
     if (!confirmacion.isConfirmed) return;
+    const mesesContratados = confirmacion.value;
 
     try {
         window.showNotification("⏳ Procesando entrega...");
 
         let stock = currentUserData.inventory || [];
         let cuentasEntregar = [];
+        
+        // 🔥 NUEVO CÁLCULO DE FECHA BASADO EN MESES x 30
         const h = new Date(); 
-        h.setMonth(h.getMonth() + 1); 
+        h.setDate(h.getDate() + (mesesContratados * 30)); 
+        
         const dateFirebase = `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}-${String(h.getDate()).padStart(2,'0')}`; 
         const dateWhatsApp = h.toLocaleDateString('es-ES'); 
         
-        // 🔥 CORRECCIÓN: Purificamos el número para evitar dobles ++
+        // Purificamos el número de WhatsApp (Corrige el error de "++51")
         const numeroLimpio = numeroCliente.replace(/[^\d]/g, '');
         const numeroBonito = "+" + numeroLimpio;
         const rulesDB = currentUserData.platformRules || {};
@@ -3716,6 +3735,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente) => {
                 accountPin: cuenta.pin,          
                 accountProfile: cuenta.profile || "1",
                 accountUnits: 1,
+                accountMonths: mesesContratados, // 🔥 Guarda los meses contratados
                 cost: 0,
                 price: precioDividido, 
                 date: dateFirebase,
@@ -3751,7 +3771,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente) => {
             // PLAN PRO: Mandar orden silenciosa al Bot
             const payloadEntrega = {
                 distribuidorId: currentUser.uid,
-                // 🔥 CORRECCIÓN: Entregamos el número 100% limpio al Bot
+                // 🔥 CORRECCIÓN: Formato estricto que exige el Bot de WhatsApp
                 numeroCliente: numeroLimpio + '@s.whatsapp.net', 
                 cuentas: cuentasEntregar, 
                 fechaVencimiento: dateWhatsApp,
@@ -3786,8 +3806,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente) => {
 
         } else {
             // PLAN BÁSICO/DEMO: Apertura directa a WhatsApp
-            const cleanPhone = numeroCliente.replace(/[^\d]/g, ''); // Limpiamos signos de más o espacios
-            const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(textoFinal)}`;
+            const waUrl = `https://wa.me/${numeroLimpio}?text=${encodeURIComponent(textoFinal)}`;
             
             // 🔥 CORRECCIÓN: Abre la ventana de WhatsApp automáticamente
             window.open(waUrl, '_blank'); 
@@ -3819,7 +3838,6 @@ window.aprobarVenta = async (pedidoId, numeroCliente) => {
         window.showNotification("Error: " + e.message);
     }
 };
-
 /* ========================================== MÓDULO DE CUENTAS MATRICES (ESTILO MATRIZ) ========================================== */
 let variablesEnlaceMatriz = { masterId: null, profileNum: null };
 let editingMasterId = null; 
