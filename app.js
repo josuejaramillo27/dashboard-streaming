@@ -181,7 +181,45 @@ window.doResetPassword = async () => {
     const email = document.getElementById('resetEmail').value; if(!email) return window.showNotification("Ingresa tu correo");
     try { await sendPasswordResetEmail(auth, email); window.showNotification("Link enviado a tu correo"); window.showLogin(); } catch (e) { window.showNotification("Error Reset: " + e.message); }
 };
+/* --- BOTÓN NUCLEAR: FORZAR ACTUALIZACIÓN Y LIMPIAR CACHÉ --- */
+window.forceAppUpdate = async () => {
+    // 1. Mostrar estado de carga
+    window.showNotification("🧹 Limpiando caché profundo...");
+    const btn = document.getElementById('btnForceUpdate');
+    if (btn) {
+        const origHtml = btn.innerHTML;
+        btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> <span>Limpiando...</span>";
+        btn.style.pointerEvents = 'none';
+    }
 
+    try {
+        // 2. Aniquilar a los Service Workers (Los culpables de guardar el caché en PWA)
+        if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (let registration of registrations) {
+                await registration.unregister();
+            }
+        }
+
+        // 3. Vaciar la API de Caché del navegador (Imágenes, CSS, JS viejos)
+        if ('caches' in window) {
+            const cacheNames = await caches.keys();
+            for (let cacheName of cacheNames) {
+                await caches.delete(cacheName);
+            }
+        }
+
+        // 4. Forzar recarga bruta engañando al navegador con una marca de tiempo
+        setTimeout(() => {
+            window.location.href = window.location.pathname + '?v=' + new Date().getTime();
+        }, 800);
+
+    } catch (error) {
+        console.error("Error al limpiar caché:", error);
+        // Plan B de emergencia si falla la limpieza profunda
+        window.location.href = window.location.pathname + '?v=' + new Date().getTime();
+    }
+};
 window.doLogout = async () => {
     clients = []; currentUser = null; currentUserData = null; document.getElementById('tableBody').innerHTML = ''; showView('authView'); window.showLogin();
     try { await signOut(auth); window.showNotification("Sesión cerrada"); } catch (e) { console.error(e); }
