@@ -785,6 +785,9 @@
         <label style="font-size: 12px; font-weight: bold; color: var(--mac-blue); cursor: pointer; flex: 1; min-width: 200px;">
             <input type="checkbox" id="storeAutoStock" onchange="window.toggleStoreStockFields()" style="width: auto; margin-right: 5px;"> Conectar al Stock de Inventario
         </label>
+        <label style="font-size: 12px; font-weight: bold; color: var(--mac-orange); cursor: pointer; flex: 1; min-width: 200px;">
+            <input type="checkbox" id="storeRequiresInvite" style="width: auto; margin-right: 5px;"> Venta por Invitación (Pide correo)
+        </label>
         <div style="flex: 1; min-width: 150px;">
             <label style="font-size: 10px; color: var(--mac-text-secondary); display: block;">Etiqueta de Tienda (Opcional):</label>
             <select id="storeBadgeOption" style="padding: 6px; font-size: 11px; width: 100%; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border);">
@@ -1542,6 +1545,10 @@
             <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                     <h4 style="margin: 0 0 10px 0; font-size: 13px; color: var(--mac-orange);"><i class='bx bx-receipt'></i> 2. Envía tu Comprobante:</h4>
+                    <div id="checkoutEmailContainer" style="display: none; flex-direction: column; gap: 8px; margin-bottom: 15px;">
+            <label style="font-size: 12px; font-weight: bold; color: var(--mac-orange);">📩 Correo para recibir la invitación:</label>
+            <input type="email" id="checkoutClientEmail" placeholder="Ej: micorreo@gmail.com" style="width: 100%; padding: 14px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box; font-size: 14px;">
+        </div>
                     <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
                         <input type="tel" id="checkoutPhone" placeholder="Tu WhatsApp (Ej: +51999888777)" style="width: 100%; padding: 14px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box; font-size: 14px;">
                         
