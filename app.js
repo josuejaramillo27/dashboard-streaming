@@ -486,7 +486,8 @@ window.saveWaMessage = async () => {
         btn.innerText = "Guardar Configuración"; btn.disabled = false;
     }
 };
-let localPaymentMethods = []; // Memoria temporal para métodos de pago
+// 🔥 NUEVO SISTEMA DE MEMORIA TEMPORAL PARA MÉTODOS DE PAGO
+let tempPaymentMethods = []; 
 
 window.openProfileModal = () => { 
     document.getElementById('editProfileName').value = currentUserData.name || ''; 
@@ -496,13 +497,9 @@ window.openProfileModal = () => {
     document.getElementById('editReferencesLink').value = currentUserData.referencesLink || '';
     if (typeof window.renderCustomServicesChips === 'function') window.renderCustomServicesChips();
 
-    // 🛠️ FIX: Dibujar métodos de pago sin borrar el progreso
-    const container = document.getElementById('paymentMethodsContainer');
-    if (container) {
-        container.innerHTML = ''; 
-        const methods = currentUserData.paymentMethods || [];
-        methods.forEach(m => window.addPaymentMethodUI(m));
-    }
+    // Clonar los métodos actuales a la memoria temporal
+    tempPaymentMethods = (currentUserData.paymentMethods || []).map(m => ({ ...m, isEditing: false }));
+    window.renderPaymentMethodsList();
 
     const profileModal = document.getElementById('profileModal');
     if (window.innerWidth <= 768) {
@@ -512,55 +509,131 @@ window.openProfileModal = () => {
     }
 };
 
-window.addPaymentMethodUI = (data = null) => {
+window.renderPaymentMethodsList = () => {
     const container = document.getElementById('paymentMethodsContainer');
-    if (container.children.length >= 5) {
-        return window.showNotification("⚠️ Solo puedes tener hasta 5 métodos de pago.");
-    }
-
-    const div = document.createElement('div');
-    div.className = 'payment-method-card'; // Clase clave para guardar todo junto
-    div.style.cssText = "background: var(--mac-bg); border: 1px solid var(--mac-border); border-radius: 12px; padding: 15px; margin-bottom: 10px;";
+    if (!container) return;
+    container.innerHTML = '';
     
-    const bank = data ? data.bank : '';
-    const num = data ? data.number : '';
-    const holder = data ? data.holder : '';
-    const qrUrl = data ? data.qrUrl : '';
+    tempPaymentMethods.forEach((m, idx) => {
+        if (m.isEditing) {
+            // MODO EDICIÓN: Muestra el formulario para llenar los datos
+            const div = document.createElement('div');
+            div.style.cssText = "background: var(--mac-bg); border: 1px solid var(--mac-blue); border-radius: 12px; padding: 15px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,122,255,0.1);";
+            
+            // Permite previsualizar la foto temporal si acaba de subir una
+            let imgPreview = m.qrUrl ? `<img src="${m.qrUrl}" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid var(--mac-border); flex-shrink: 0;">` : '';
 
-    // El botón Quitar ahora tiene "width: max-content !important;" para arreglar el bug visual
-    div.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-size: 13px; font-weight: bold; color: var(--mac-text-main);">Método de Pago</span>
-            <button type="button" onclick="this.closest('.payment-method-card').remove()" style="width: max-content !important; background: rgba(255,59,48,0.1); color: var(--mac-red); border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;"><i class='bx bx-trash'></i> Quitar</button>
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-            <div>
-                <label style="font-size: 11px; color: var(--mac-text-secondary);">Tipo (Banco/Billetera):</label>
-                <input type="text" class="pm-bank" placeholder="Ej: Yape, Plin, Binance..." value="${bank}" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px; box-sizing: border-box;">
-            </div>
-            <div>
-                <label style="font-size: 11px; color: var(--mac-text-secondary);">Número / Celular:</label>
-                <input type="text" class="pm-number" placeholder="Ej: 999 888 777" value="${num}" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px; box-sizing: border-box;">
-            </div>
-        </div>
-        <div style="margin-bottom: 10px;">
-            <label style="font-size: 11px; color: var(--mac-text-secondary);">Nombre del Titular:</label>
-            <input type="text" class="pm-holder" placeholder="Ej: Juan Pérez" value="${holder}" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px; box-sizing: border-box;">
-        </div>
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <div style="flex: 1;">
-                <label style="font-size: 11px; color: var(--mac-text-secondary);">QR de Pago (Opcional):</label>
-                <input type="file" accept="image/*" class="pm-qr-file" style="width: 100%; padding: 6px; font-size: 11px; background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 6px; box-sizing: border-box; color: var(--mac-text-main);">
-            </div>
-            <input type="hidden" class="pm-qr-url" value="${qrUrl}">
-            ${qrUrl ? `<img src="${qrUrl}" style="width: 45px; height: 45px; border-radius: 8px; object-fit: cover; border: 1px solid var(--mac-border); flex-shrink: 0;">` : ''}
-        </div>
-    `;
-    container.appendChild(div);
+            div.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 13px; font-weight: bold; color: var(--mac-blue);">${!m.bank ? 'Nuevo Método de Pago' : 'Editando Método'}</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <div>
+                        <label style="font-size: 11px; color: var(--mac-text-secondary);">Tipo (Banco/Billetera):</label>
+                        <input type="text" id="pmBank_${idx}" placeholder="Ej: Yape, Plin..." value="${m.bank || ''}" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; color: var(--mac-text-secondary);">Número / Celular:</label>
+                        <input type="text" id="pmNumber_${idx}" placeholder="Ej: 999 888 777" value="${m.number || ''}" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px; box-sizing: border-box;">
+                    </div>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label style="font-size: 11px; color: var(--mac-text-secondary);">Nombre del Titular:</label>
+                    <input type="text" id="pmHolder_${idx}" placeholder="Ej: Juan Pérez" value="${m.holder || ''}" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px; box-sizing: border-box;">
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; color: var(--mac-text-secondary);">QR de Pago (Opcional):</label>
+                        <input type="file" accept="image/*" id="pmQrFile_${idx}" style="width: 100%; padding: 6px; font-size: 11px; background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 6px; box-sizing: border-box; color: var(--mac-text-main);">
+                    </div>
+                    ${imgPreview}
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="btn-primary" style="flex: 1; padding: 10px; font-size: 12px;" onclick="window.confirmPaymentMethod(${idx})"><i class='bx bx-check'></i> Confirmar Método</button>
+                    <button type="button" class="btn-secondary" style="padding: 10px; font-size: 12px;" onclick="window.cancelPaymentMethod(${idx})">Cancelar</button>
+                </div>
+            `;
+            container.appendChild(div);
+        } else {
+            // MODO RESUMEN: Muestra la tarjetita compacta y elegante
+            const div = document.createElement('div');
+            div.style.cssText = "background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 10px; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;";
+            
+            const iconHtml = (m.qrUrl || m.fileObj) 
+                ? `<div style="width: 35px; height: 35px; background: rgba(0, 122, 255, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--mac-blue); border: 1px solid var(--mac-blue);"><i class='bx bx-qr-scan'></i></div>` 
+                : `<div style="width: 35px; height: 35px; background: var(--mac-bg); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--mac-text-secondary); border: 1px solid var(--mac-border);"><i class='bx bxs-bank'></i></div>`;
+
+            div.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    ${iconHtml}
+                    <div>
+                        <strong style="color: var(--mac-text-main); font-size: 14px; display: block;">${m.bank}</strong>
+                        <span style="color: var(--mac-text-secondary); font-size: 12px;">${m.number} ${m.holder ? '- ' + m.holder : ''}</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <button type="button" class="action-btn" style="padding: 6px; font-size: 14px; color: var(--mac-blue); border: 1px solid var(--mac-blue); background: transparent;" onclick="window.editPaymentMethod(${idx})"><i class='bx bx-edit'></i></button>
+                    <button type="button" class="action-btn btn-del" style="padding: 6px; font-size: 14px;" onclick="window.deletePaymentMethod(${idx})"><i class='bx bx-trash'></i></button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+    });
 };
 
 window.addPaymentMethod = () => {
-    window.addPaymentMethodUI();
+    if (tempPaymentMethods.length >= 5) return window.showNotification("⚠️ Solo puedes tener hasta 5 métodos.");
+    // Crea un formulario en blanco al final
+    tempPaymentMethods.push({ bank: '', number: '', holder: '', qrUrl: '', isEditing: true });
+    window.renderPaymentMethodsList();
+};
+
+window.editPaymentMethod = (idx) => {
+    tempPaymentMethods[idx].isEditing = true;
+    window.renderPaymentMethodsList();
+};
+
+window.cancelPaymentMethod = (idx) => {
+    const m = tempPaymentMethods[idx];
+    if (!m.bank && !m.number) {
+        // Era uno nuevo y lo canceló, lo borramos de la lista
+        tempPaymentMethods.splice(idx, 1);
+    } else {
+        // Lo estaba editando pero se arrepintió, vuelve a modo resumen
+        m.isEditing = false;
+    }
+    window.renderPaymentMethodsList();
+};
+
+window.deletePaymentMethod = (idx) => {
+    tempPaymentMethods.splice(idx, 1);
+    window.renderPaymentMethodsList();
+};
+
+window.confirmPaymentMethod = (idx) => {
+    const bank = document.getElementById(`pmBank_${idx}`).value.trim();
+    const number = document.getElementById(`pmNumber_${idx}`).value.trim();
+    const holder = document.getElementById(`pmHolder_${idx}`).value.trim();
+    const fileInput = document.getElementById(`pmQrFile_${idx}`);
+
+    if (!bank || !number) {
+        return window.showNotification("⚠️ Ingresa al menos el Banco y el Número.");
+    }
+
+    const m = tempPaymentMethods[idx];
+    m.bank = bank;
+    m.number = number;
+    m.holder = holder;
+    
+    // Si acaba de subir una foto, la guardamos temporalmente en memoria
+    if (fileInput && fileInput.files.length > 0) {
+        m.fileObj = fileInput.files[0];
+        // Creamos una URL temporal para que la vea de inmediato si vuelve a editar
+        m.qrUrl = URL.createObjectURL(m.fileObj); 
+    }
+
+    m.isEditing = false;
+    window.renderPaymentMethodsList();
 };
 
 window.saveProfile = async () => { 
@@ -591,29 +664,38 @@ window.saveProfile = async () => {
             bannerUrl = await getDownloadURL(storageRefBanner);
         }
 
-        // 🔥 LECTURA INTELIGENTE: Extraer todos los métodos de pago del HTML al mismo tiempo
-        const pmCards = document.querySelectorAll('.payment-method-card');
-        let newPaymentMethods = [];
+        // 🔥 PROCESAR Y SUBIR LOS MÉTODOS DE PAGO CONFIRMADOS
+        let finalPaymentMethods = [];
         
-        for (let i = 0; i < pmCards.length; i++) {
-            const card = pmCards[i];
-            const bank = card.querySelector('.pm-bank').value.trim();
-            const number = card.querySelector('.pm-number').value.trim();
-            const holder = card.querySelector('.pm-holder').value.trim();
-            const qrFileInput = card.querySelector('.pm-qr-file');
-            let qrUrl = card.querySelector('.pm-qr-url').value; 
-
-            // Solo guarda el método si tiene datos
-            if (bank || number) {
-                // Si el usuario subió una foto nueva para este QR
-                if (qrFileInput && qrFileInput.files.length > 0) {
-                    const qrFile = qrFileInput.files[0];
-                    const storageRefQR = ref(storage, `qrs/${currentUser.uid}_qr_${Date.now()}_${i}`);
-                    await uploadBytes(storageRefQR, qrFile);
-                    qrUrl = await getDownloadURL(storageRefQR);
-                }
-                newPaymentMethods.push({ bank, number, holder, qrUrl });
+        for (let i = 0; i < tempPaymentMethods.length; i++) {
+            let m = tempPaymentMethods[i];
+            
+            // Por si le dio a "Guardar Perfil" olvidando confirmar un método que estaba abierto
+            if (m.isEditing) {
+                 m.bank = document.getElementById(`pmBank_${i}`).value.trim();
+                 m.number = document.getElementById(`pmNumber_${i}`).value.trim();
+                 m.holder = document.getElementById(`pmHolder_${i}`).value.trim();
+                 const fInput = document.getElementById(`pmQrFile_${i}`);
+                 if (fInput && fInput.files.length > 0) m.fileObj = fInput.files[0];
             }
+            
+            if (!m.bank && !m.number) continue; // Ignora los vacíos
+
+            let finalQrUrl = m.qrUrl;
+            
+            // Si hay un archivo File esperando, lo subimos a Firebase
+            if (m.fileObj) {
+                const storageRefQR = ref(storage, `qrs/${currentUser.uid}_qr_${Date.now()}_${i}`);
+                await uploadBytes(storageRefQR, m.fileObj);
+                finalQrUrl = await getDownloadURL(storageRefQR);
+            }
+
+            finalPaymentMethods.push({
+                bank: m.bank,
+                number: m.number,
+                holder: m.holder,
+                qrUrl: finalQrUrl
+            });
         }
 
         let rawAlias = document.getElementById('editProfileAlias').value;
@@ -627,7 +709,7 @@ window.saveProfile = async () => {
             name: name, country: country, currency: getCurrencyForCountry(country), 
             phone: phone, logoUrl: logoUrl, bannerUrl: bannerUrl, storeAlias: finalAlias,
             referencesLink: referencesLink,
-            paymentMethods: newPaymentMethods 
+            paymentMethods: finalPaymentMethods // 🔥 Se guarda el arreglo limpio
         });
         
         // Actualizar la memoria global
@@ -638,7 +720,7 @@ window.saveProfile = async () => {
         currentUserData.logoUrl = logoUrl;
         currentUserData.bannerUrl = bannerUrl;
         currentUserData.referencesLink = referencesLink;
-        currentUserData.paymentMethods = newPaymentMethods; 
+        currentUserData.paymentMethods = finalPaymentMethods; 
 
         globalCurrency = getCurrencyForCountry(country);
         currentUserData.currency = globalCurrency;
@@ -2723,10 +2805,10 @@ window.renderStoreItems = () => {
         const titleSafe = item.platform.replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n').replace(/\r/g, '') : 'Sin detalles adicionales.';
 
-        const div = document.createElement('div');
-        div.style.cssText = `display:flex; justify-content:space-between; align-items:center; background:var(--mac-surface); padding:10px; border-radius:8px; border:1px solid var(--mac-border); opacity: ${isAgotado ? '0.7' : '1'};`;
+        // 🔥 FIX: Un solo div con el diseño correcto
         const div = document.createElement('div');
         div.style.cssText = `display:flex; justify-content:space-between; align-items:center; background:var(--mac-surface); padding:10px; border-radius:8px; border:1px solid var(--mac-border); opacity: ${isAgotado ? '0.7' : '1'}; gap: 10px;`;
+        
         div.innerHTML = `
             <div style="flex:1; min-width:0; overflow:hidden;">
                 ${typeBadge}
