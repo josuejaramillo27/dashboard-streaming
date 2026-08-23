@@ -3054,7 +3054,7 @@ const checkPublicStore = async () => {
             }
             
             const plan = data.plan_actual || 'demo';
-            if ((plan !== 'pro' && plan !== 'elite') || data.active === false) {
+            if ((plan !== 'pro' && plan !== 'basico') || data.active === false) {
                 document.getElementById('publicStoreName').innerText = "Tienda inactiva";
                 document.getElementById('publicStoreCatalog').innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary);">Este distribuidor no tiene su catálogo habilitado en este momento.</p>';
                 return;
@@ -3748,7 +3748,8 @@ window.aprobarVenta = async (pedidoId, numeroCliente) => {
             // PLAN PRO: Mandar orden silenciosa al Bot
             const payloadEntrega = {
                 distribuidorId: currentUser.uid,
-                numeroCliente: numeroCliente, 
+                // 🔥 CORRECCIÓN: Formato estricto que exige el Bot de WhatsApp
+                numeroCliente: numeroCliente.replace(/[^\d]/g, '') + '@s.whatsapp.net', 
                 cuentas: cuentasEntregar, 
                 fechaVencimiento: dateWhatsApp,
                 mensajeEntrega: currentUserData.waDeliveryMessage || "" 
@@ -3781,14 +3782,17 @@ window.aprobarVenta = async (pedidoId, numeroCliente) => {
             });
 
         } else {
-            // PLAN BÁSICO/DEMO: Botón directo a WhatsApp
-            const cleanPhone = numeroCliente.replace(/[^\d+]/g, '');
+            // PLAN BÁSICO/DEMO: Apertura directa a WhatsApp
+            const cleanPhone = numeroCliente.replace(/[^\d]/g, ''); // Limpiamos signos de más o espacios
             const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(textoFinal)}`;
+            
+            // 🔥 CORRECCIÓN: Abre la ventana de WhatsApp automáticamente
+            window.open(waUrl, '_blank'); 
             
             Swal.fire({
                 icon: 'success',
                 title: '¡Venta Aprobada!',
-                html: `<div style="margin-bottom:15px;"><a href="${waUrl}" target="_blank" style="display:inline-block; background:#25D366; color:white; padding:10px 15px; border-radius:8px; text-decoration:none; font-weight:bold;"><i class="bx bxl-whatsapp"></i> Enviar Accesos (Clic Aquí)</a></div><p style="margin-top:10px; font-size:14px; font-weight:bold;">2. ¿Deseas completar el nombre y detalles del cliente ahora?</p>`,
+                html: `<div style="margin-bottom:15px;"><a href="${waUrl}" target="_blank" style="display:inline-block; background:#25D366; color:white; padding:10px 15px; border-radius:8px; text-decoration:none; font-weight:bold;"><i class="bx bxl-whatsapp"></i> Reenviar Accesos (Clic Aquí)</a></div><p style="margin-top:10px; font-size:14px; font-weight:bold;">2. ¿Deseas completar el nombre y detalles del cliente ahora?</p>`,
                 confirmButtonText: 'Completar Datos',
                 confirmButtonColor: '#007AFF',
                 showCancelButton: true,
