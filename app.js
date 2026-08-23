@@ -2720,14 +2720,19 @@ window.renderStoreItems = () => {
         const statusBadge = isAgotado ? `<span style="background:var(--mac-red); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold;">AGOTADO</span>` : `<span style="background:var(--mac-green); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold;">DISPONIBLE</span>`;
         const typeBadge = item.type === 'Combo' ? `<span style="background:var(--mac-orange); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold; margin-right:5px;"><i class='bx bx-gift'></i> COMBO</span>` : '';
 
+        const titleSafe = item.platform.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n').replace(/\r/g, '') : 'Sin detalles adicionales.';
+        
+        const descBtn = `<button class="action-btn" style="background: rgba(0, 122, 255, 0.08); border: none; color: var(--mac-blue); font-size: 11px; padding: 4px 10px; border-radius: 8px; margin: 4px 0; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-weight: 600;" onclick="window.openProductDesc('${titleSafe}', '${descSafe}')"><i class='bx bx-menu-alt-left'></i> Ver Descripción</button>`;
+
         const div = document.createElement('div');
         div.style.cssText = `display:flex; justify-content:space-between; align-items:center; background:var(--mac-surface); padding:10px; border-radius:8px; border:1px solid var(--mac-border); opacity: ${isAgotado ? '0.7' : '1'};`;
         div.innerHTML = `
             <div style="flex:1; padding-right:10px;">
                 ${typeBadge}
                 <strong style="color:var(--mac-text-main); font-size:14px;">${item.platform}</strong><br>
-                <span style="color:var(--mac-text-secondary); font-size:12px; display:block; margin:4px 0;">${item.desc || ''}</span>
-                <span style="color:var(--mac-green); font-size:13px; font-weight:bold;">${globalCurrency}${item.price.toFixed(2)}</span>
+                ${descBtn}
+                <span style="color:var(--mac-green); font-size:13px; font-weight:bold; display:block; margin-top:2px;">${globalCurrency}${item.price.toFixed(2)}</span>
                 <div style="margin-top: 5px;">${statusBadge}</div>
             </div>
             <div style="display:flex; flex-direction:column; gap:5px; min-width: 100px;">
@@ -2754,7 +2759,7 @@ window.editStoreItem = async (index) => {
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Precio:</label>
                 <input id="swal-price" type="number" step="0.1" class="swal2-input" style="margin:0; width: 100%; box-sizing:border-box;" value="${item.price}">
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Descripción:</label>
-                <input id="swal-desc" class="swal2-input" style="margin:0; width: 100%; box-sizing:border-box;" value="${item.desc || ''}">
+                <textarea id="swal-desc" class="swal2-textarea" style="margin: 5px 0 0 0; width: 100%; box-sizing:border-box; padding: 10px; border-radius: 8px; font-size: 14px; min-height: 80px;" placeholder="Admite saltos de línea...">${item.desc || ''}</textarea>
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Cambiar Imagen (Opcional):</label>
                 <input type="file" id="swal-img" accept="image/*" style="margin:0; width: 100%; padding: 10px; font-size: 12px; border: 1px solid var(--mac-border); border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
             </div>
@@ -2899,7 +2904,10 @@ window.renderPublicCatalog = (filterType) => {
         }
 
         const titleSafe = item.platform.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : 'Sin detalles adicionales.';
+        const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n').replace(/\r/g, '') : 'Sin detalles adicionales.';
+        
+        const descBtnPublic = `<button class="action-btn" style="background: rgba(134, 134, 139, 0.1); border: 1px solid var(--mac-border); color: var(--mac-text-secondary); font-size: 11px; padding: 4px 10px; border-radius: 12px; margin: 6px 0; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-weight: 600;" onclick="window.openProductDesc('${titleSafe}', '${descSafe}')"><i class='bx bx-info-circle'></i> Leer Descripción</button>`;
+
         const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}" alt="${item.platform}">` : `<div style="width:100%; height:100%; background:var(--mac-gray); display:flex; align-items:center; justify-content:center;"><i class='bx bx-play-circle' style='font-size:48px; color:var(--mac-text-secondary); opacity:0.3;'></i></div>`;
 
         // 🔥 CONTROL DEL BOTÓN DE COMPRA SEGÚN ESTADO DE TIENDA
@@ -2924,6 +2932,7 @@ window.renderPublicCatalog = (filterType) => {
                 <div class="store-product-info">
                     <strong class="store-product-title">${item.platform}</strong>
                     <span class="store-product-price">${priceStr}</span>
+                    ${descBtnPublic}
                     ${stockHtml} 
                 </div>
                 <div class="store-product-action">${btnHTML}</div>
