@@ -548,9 +548,9 @@ window.renderPaymentMethodsList = () => {
                     </div>
                     ${imgPreview}
                 </div>
-                <div style="display: flex; gap: 10px;">
-                    <button type="button" class="btn-primary" style="flex: 1; padding: 10px; font-size: 12px;" onclick="window.confirmPaymentMethod(${idx})"><i class='bx bx-check'></i> Confirmar Método</button>
-                    <button type="button" class="btn-secondary" style="padding: 10px; font-size: 12px;" onclick="window.cancelPaymentMethod(${idx})">Cancelar</button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button type="button" class="btn-primary" style="width: 100%; margin: 0; padding: 10px; font-size: 12px; white-space: nowrap;" onclick="window.confirmPaymentMethod(${idx})"><i class='bx bx-check'></i> Confirmar</button>
+                    <button type="button" class="btn-secondary" style="width: 100%; margin: 0; padding: 10px; font-size: 12px; white-space: nowrap;" onclick="window.cancelPaymentMethod(${idx})">Cancelar</button>
                 </div>
             `;
             container.appendChild(div);
