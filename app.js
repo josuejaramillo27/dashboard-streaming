@@ -2725,15 +2725,17 @@ window.renderStoreItems = () => {
 
         const div = document.createElement('div');
         div.style.cssText = `display:flex; justify-content:space-between; align-items:center; background:var(--mac-surface); padding:10px; border-radius:8px; border:1px solid var(--mac-border); opacity: ${isAgotado ? '0.7' : '1'};`;
+        const div = document.createElement('div');
+        div.style.cssText = `display:flex; justify-content:space-between; align-items:center; background:var(--mac-surface); padding:10px; border-radius:8px; border:1px solid var(--mac-border); opacity: ${isAgotado ? '0.7' : '1'}; gap: 10px;`;
         div.innerHTML = `
-            <div style="flex:1; padding-right:10px;">
+            <div style="flex:1; min-width:0; overflow:hidden;">
                 ${typeBadge}
-                <strong style="color:var(--mac-text-main); font-size:14px;">${item.platform}</strong><br>
+                <strong style="color:var(--mac-text-main); font-size:14px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.platform}</strong>
                 <span style="color:var(--mac-text-secondary); font-size:12px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; white-space:pre-wrap; margin:4px 0;">${item.desc || ''}</span>
                 <span style="color:var(--mac-green); font-size:13px; font-weight:bold; display:block; margin-top:2px;">${globalCurrency}${item.price.toFixed(2)}</span>
                 <div style="margin-top: 5px;">${statusBadge}</div>
             </div>
-            <div style="display:flex; flex-direction:column; gap:5px; min-width: 100px;">
+            <div style="display:flex; flex-direction:column; gap:5px; width: 100px; flex-shrink: 0;">
                 <button class="action-btn" style="border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 11px; padding: 4px; border-radius:6px; background:transparent;" onclick="window.toggleStoreItemStatus(${index})">🔄 Cambiar Estado</button>
                 <button class="action-btn" style="border: 1px solid var(--mac-blue); color: var(--mac-blue); font-size: 11px; padding: 4px; border-radius:6px; background:transparent;" onclick="window.editStoreItem(${index})"><i class='bx bx-edit'></i> Editar</button>
                 <button class="action-btn btn-del" style="padding: 4px; font-size: 11px; border-radius:6px;" onclick="window.deleteStoreItem(${index})"><i class='bx bx-trash'></i> Borrar</button>
@@ -2867,7 +2869,7 @@ window.renderPublicCatalog = (filterType) => {
         // 🔥 LÓGICA DE STOCK Y ETIQUETA "A PEDIDO"
         if (item.badgeOption === 'a_pedido') {
             isAgotado = false; // A Pedido no se agota
-            stockHtml = `<span style="font-size:10px; color:var(--mac-blue); display:block; margin-top:6px; font-weight:bold;"><i class='bx bx-package'></i> Disponible a pedido</span>`;
+            stockHtml = `<span style="font-size:10px; color:var(--mac-blue); display:block; margin-top:6px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><i class='bx bx-package'></i> Disponible a pedido</span>`;
         } else if (item.autoStock && item.stockPlatforms && item.stockPlatforms.length > 0 && data.inventory) {
             const stock = data.inventory || [];
             if (item.type === 'Combo') {
@@ -2875,12 +2877,12 @@ window.renderPublicCatalog = (filterType) => {
                 const comboDisponible = Math.min(...counts); 
                 if (comboDisponible === 0) isAgotado = true; 
                 const colorStock = comboDisponible > 2 ? 'var(--mac-green)' : (comboDisponible > 0 ? 'var(--mac-orange)' : 'var(--mac-red)');
-                stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold;"><i class='bx bx-box'></i> Stock Combo: <span style="color:${colorStock};">${comboDisponible} disp.</span></span>`;
+                stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><i class='bx bx-box'></i> Stock Combo: <span style="color:${colorStock};">${comboDisponible} disp.</span></span>`;
             } else {
                 const cantidadLibre = stock.filter(i => i.status === 'libre' && i.platform === item.stockPlatforms[0]).length;
                 if (cantidadLibre === 0) isAgotado = true;
                 const colorStock = cantidadLibre > 2 ? 'var(--mac-green)' : (cantidadLibre > 0 ? 'var(--mac-orange)' : 'var(--mac-red)');
-                stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold;"><i class='bx bx-box'></i> Stock en vivo: <span style="color:${colorStock};">${cantidadLibre} disp.</span></span>`;
+                stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><i class='bx bx-box'></i> Stock en vivo: <span style="color:${colorStock};">${cantidadLibre} disp.</span></span>`;
             }
         }
 
@@ -2924,13 +2926,13 @@ window.renderPublicCatalog = (filterType) => {
                 ${imgHTML}
                 <div class="store-product-visual-overlay"><span class="view-desc-hint"><i class='bx bx-zoom-in'></i> Detalles</span></div>
             </div>
-            <div class="store-product-glass-footer">
-                <div class="store-product-info">
-                    <strong class="store-product-title">${item.platform}</strong>
-                    <span class="store-product-price">${priceStr}</span>
+            <div class="store-product-glass-footer" style="display:flex; justify-content:space-between; align-items:center; gap:10px; width:100%; box-sizing:border-box;">
+                <div class="store-product-info" style="flex:1; min-width:0; overflow:hidden;">
+                    <strong class="store-product-title" style="display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${item.platform}</strong>
+                    <span class="store-product-price" style="display:block; margin-top:2px;">${priceStr}</span>
                     ${stockHtml} 
                 </div>
-                <div class="store-product-action">${btnHTML}</div>
+                <div class="store-product-action" style="flex-shrink:0;">${btnHTML}</div>
             </div>
         `;
         catalogBox.appendChild(card);
