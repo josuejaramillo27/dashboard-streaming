@@ -3761,7 +3761,7 @@ window.deleteMasterAccount = async (id) => {
     });
 };
 
-// 4. GUARDAR (CREAR O ACTUALIZAR) Y SINCRONIZAR
+// 4. GUARDAR (CREAR O ACTUALIZAR), SINCRONIZAR Y AVISAR POR BOT
 window.saveMasterAccount = async () => {
     const platform = document.getElementById('matPlatform').value;
     const email = document.getElementById('matEmail').value.trim();
@@ -3775,8 +3775,9 @@ window.saveMasterAccount = async () => {
     if (!email || !pass) return window.showNotification("⚠️ Escribe el correo y clave de la cuenta.");
 
     try {
+        const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
+        
         if (!editingMasterId) {
-            const plan = currentUserData.plan_actual || 'demo';
             const qMatCount = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
             const snapMatCount = await getDocs(qMatCount);
             if (snapMatCount.size >= 20 && plan === 'basico') {
@@ -3785,26 +3786,29 @@ window.saveMasterAccount = async () => {
         }
 
         if (editingMasterId) {
-            // Actualizamos la matriz
+            // 1. Actualizamos la matriz en Firebase
             await updateDoc(doc(db, "masterAccounts", editingMasterId), { platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName });
             window.showNotification("✅ Cuenta Matriz actualizada");
 
-            // --- INICIO NUEVA LÓGICA: Sincronizar clientes vinculados ---
+            // 2. Sincronizamos clientes vinculados y preparamos la lista para el Bot
             const qCli = query(collection(db, "clients"), where("userId", "==", currentUser.uid));
             const snapCli = await getDocs(qCli);
             const updatePromises = [];
+            let clientesParaAvisar = []; // 🔥 LA LISTA NEGRA PARA EL BOT
             
             snapCli.forEach(d => {
                 const c = d.data();
                 let needsUpdate = false;
                 let mAccounts = c.multiAccounts || {};
                 let rootUpdates = {};
+                let datosAviso = null;
                 
                 // Actualizar si usaba el sistema antiguo de enlace
                 if (c.linkedMasterId === editingMasterId) {
                     rootUpdates.accountEmail = email;
                     rootUpdates.accountPassword = pass;
                     needsUpdate = true;
+                    datosAviso = { name: c.name, phone: c.phone, platform: c.platform, email: email, pass: pass, profile: c.accountProfile, pin: c.accountPin };
                 }
                 
                 // Actualizar si usa el sistema nuevo (multipestaña)
@@ -3814,28 +3818,48 @@ window.saveMasterAccount = async () => {
                             mAccounts[platKey].email = email;
                             mAccounts[platKey].password = pass;
                             needsUpdate = true;
+                            datosAviso = { name: c.name, phone: c.phone, platform: platKey, email: email, pass: pass, profile: mAccounts[platKey].profile, pin: mAccounts[platKey].pin };
                         }
                     }
                 }
                 
-                // Si este cliente pertenece a la matriz, preparamos la actualización
+                // Si este cliente pertenece a la matriz, guardamos en BD y lo metemos a la lista del Bot
                 if (needsUpdate) {
                     let finalUpdate = { ...rootUpdates };
                     if (c.multiAccounts) finalUpdate.multiAccounts = mAccounts;
                     updatePromises.push(updateDoc(doc(db, "clients", d.id), finalUpdate));
+                    if (datosAviso) clientesParaAvisar.push(datosAviso);
                 }
             });
             
+            // 3. Ejecutar actualizaciones en Firebase
             if (updatePromises.length > 0) {
                 await Promise.all(updatePromises);
-                if (typeof loadUserClients === 'function') loadUserClients(); // Recarga la tabla de clientes para que veas el cambio
+                if (typeof loadUserClients === 'function') loadUserClients(); // Recarga la tabla de clientes
+                
+                // 🔥 4. EL GATILLO DEL BOT (Solo Plan PRO/Elite)
+                if ((plan === 'pro' || plan === 'elite') && clientesParaAvisar.length > 0) {
+                    fetch('https://bot.panelagc.com/api/actualizar-credenciales', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            distribuidorId: currentUser.uid,
+                            clientes: clientesParaAvisar
+                        })
+                    }).catch(e => console.error("Error al contactar al bot para actualizar:", e));
+                    
+                    setTimeout(() => {
+                        window.showNotification(`🤖 Bot avisando a ${clientesParaAvisar.length} cliente(s) sobre el cambio de clave.`);
+                    }, 1500); // Pequeño retraso para que no se superponga con el aviso de "Matriz actualizada"
+                }
             }
-            // --- FIN NUEVA LÓGICA ---
 
         } else {
+            // MODO CREACIÓN
             await addDoc(collection(db, "masterAccounts"), { userId: currentUser.uid, platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName, timestamp: Date.now() });
             window.showNotification("✅ Cuenta Matriz registrada con éxito");
         }
+        
         document.getElementById('masterAccountModal').style.display = 'none';
         editingMasterId = null;
         window.renderMasterAccounts();
