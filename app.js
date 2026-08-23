@@ -3684,7 +3684,10 @@ window.aprobarVenta = async (pedidoId, numeroCliente) => {
         h.setMonth(h.getMonth() + 1); 
         const dateFirebase = `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}-${String(h.getDate()).padStart(2,'0')}`; 
         const dateWhatsApp = h.toLocaleDateString('es-ES'); 
-        const numeroBonito = "+" + numeroCliente.split('@')[0].split(':')[0];
+        
+        // 🔥 CORRECCIÓN: Purificamos el número para evitar dobles ++
+        const numeroLimpio = numeroCliente.replace(/[^\d]/g, '');
+        const numeroBonito = "+" + numeroLimpio;
         const rulesDB = currentUserData.platformRules || {};
 
         // Validamos que todas existan
@@ -3748,8 +3751,8 @@ window.aprobarVenta = async (pedidoId, numeroCliente) => {
             // PLAN PRO: Mandar orden silenciosa al Bot
             const payloadEntrega = {
                 distribuidorId: currentUser.uid,
-                // 🔥 CORRECCIÓN: Formato estricto que exige el Bot de WhatsApp
-                numeroCliente: numeroCliente.replace(/[^\d]/g, '') + '@s.whatsapp.net', 
+                // 🔥 CORRECCIÓN: Entregamos el número 100% limpio al Bot
+                numeroCliente: numeroLimpio + '@s.whatsapp.net', 
                 cuentas: cuentasEntregar, 
                 fechaVencimiento: dateWhatsApp,
                 mensajeEntrega: currentUserData.waDeliveryMessage || "" 
