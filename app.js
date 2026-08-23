@@ -490,23 +490,21 @@ window.saveWaMessage = async () => {
 let tempPaymentMethods = []; 
 
 window.openProfileModal = () => { 
+    // 1. Carga los datos de texto del perfil
     document.getElementById('editProfileName').value = currentUserData.name || ''; 
     document.getElementById('editProfileCountry').value = currentUserData.country || ''; 
     document.getElementById('editProfilePhone').value = currentUserData.phone || ''; 
     document.getElementById('editProfileAlias').value = currentUserData.storeAlias || ''; 
     document.getElementById('editReferencesLink').value = currentUserData.referencesLink || '';
-    if (typeof window.renderCustomServicesChips === 'function') window.renderCustomServicesChips();
+    
+    // 2. Carga los chips de servicios personalizados
+    if (typeof window.renderCustomServicesChips === 'function') {
+        window.renderCustomServicesChips();
+    }
 
-    // Clonar los métodos actuales a la memoria temporal
+    // 🔥 3. CARGA LOS MÉTODOS DE PAGO DESDE FIREBASE
     tempPaymentMethods = (currentUserData.paymentMethods || []).map(m => ({ ...m, isEditing: false }));
     window.renderPaymentMethodsList();
-
-    const profileModal = document.getElementById('profileModal');
-    if (window.innerWidth <= 768) {
-        profileModal.style.setProperty('display', 'flex', 'important');
-    } else {
-        profileModal.style.display = 'flex';
-    }
 };
 
 window.renderPaymentMethodsList = () => {
@@ -5056,15 +5054,6 @@ window.removeCustomService = async (index) => {
     window.showNotification("🗑️ Servicio eliminado de tu lista");
 };
 
-// Modificamos el perfil para que pinte los chips al entrar
-window.openProfileModal = () => { 
-    document.getElementById('editProfileName').value = currentUserData.name || ''; 
-    document.getElementById('editProfileCountry').value = currentUserData.country || ''; 
-    document.getElementById('editProfilePhone').value = currentUserData.phone || ''; 
-    document.getElementById('editProfileAlias').value = currentUserData.storeAlias || ''; 
-    document.getElementById('editReferencesLink').value = currentUserData.referencesLink || '';
-    if (typeof window.renderCustomServicesChips === 'function') window.renderCustomServicesChips();
-};
 
 /* =========================================================
    LÓGICA PÚBLICA DE PLANES Y LICENCIAS (?planes=true)
