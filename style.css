@@ -1448,9 +1448,33 @@ body.dark-mode .bottom-nav { background: linear-gradient(to top, rgba(0, 0, 0, 1
     padding: 25px 20px; border-bottom: 1px solid var(--mac-border);
     display: flex; justify-content: space-between; align-items: center;
 }
-.cart-header h3 { margin: 0; font-size: 20px; color: var(--mac-text-main); display: flex; align-items: center; gap: 8px; font-weight: 800; }
-.cart-header button { background: transparent; border: none; font-size: 32px; color: var(--mac-text-secondary); cursor: pointer; padding: 0; transition: 0.2s; }
-.cart-header button:hover { color: var(--mac-red); transform: rotate(90deg); }
+.cart-header h3 { 
+    margin: 0; 
+    font-size: 20px; 
+    color: var(--mac-text-main); 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    font-weight: 800; 
+    white-space: nowrap; /* 🔥 FIX 1: Obliga al texto a quedarse en una sola línea */
+}
+.cart-header button { 
+    background: transparent; 
+    border: none; 
+    font-size: 32px; 
+    color: var(--mac-text-secondary); 
+    cursor: pointer; 
+    padding: 0; 
+    margin: 0;
+    transition: 0.2s; 
+    width: auto !important; /* 🔥 FIX 2: Anula el 100% de ancho global */
+    line-height: 1; /* Centra la X perfectamente */
+    flex-shrink: 0;
+}
+.cart-header button:hover { 
+    color: var(--mac-red); 
+    transform: rotate(90deg); 
+}
 
 .cart-items { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
 .cart-item { display: flex; gap: 12px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 16px; border: 1px solid var(--mac-border); position: relative; align-items: center; }
