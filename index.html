@@ -32,13 +32,6 @@
         .bottom-nav { display: flex; justify-content: space-between !important; align-items: center; padding: 0 !important; }
         .bottom-nav .nav-item { flex: 1; text-align: center; padding: 12px 0 !important; margin: 0 !important; display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; border: none; }
 
-        /* --- DISEÑO TIENDITA PC --- */
-        @media (min-width: 768px) {
-            #publicStoreView { max-width: 900px !important; }
-            #publicStoreCatalog { display: grid !important; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-            #publicStoreCatalog > div { margin-bottom: 0 !important; height: 100%; }
-        }
-
         /* ALERTAS AL FRENTE */
         #toast { z-index: 999999 !important; position: fixed !important; }
         .swal2-container { z-index: 999999 !important; }
@@ -347,74 +340,6 @@
             .mobile-date-label { display: none !important; }
             .date-wrapper { display: contents; } /* Hace que el contenedor sea fantasma en PC */
         }
-        /* ==========================================================================
-   DISEÑO DE TIENDITA: TARJETAS GIGANTES Y CUADRADO PERFECTO (COVER)
-   ========================================================================== */
-        
-/* 1. PC: Tarjetas gigantes (2 por fila para que ocupen mucho espacio) */
-@media (min-width: 768px) {
-    #publicStoreView { max-width: 1000px !important; }
-    #publicStoreCatalog { 
-        display: grid !important; 
-        grid-template-columns: repeat(2, 1fr) !important; /* Obliga a que sean enormes */
-        gap: 30px !important; 
-    }
-}
-
-/* 2. CELULAR: 1 tarjeta por fila ocupando todo el ancho */
-@media (max-width: 767px) {
-    #publicStoreCatalog { 
-        display: grid !important; 
-        grid-template-columns: 1fr !important; 
-        gap: 25px !important; 
-    }
-}
-
-/* 3. Estructura general de la tarjeta */
-.store-product-card {
-    display: flex !important;
-    flex-direction: column !important;
-    height: 100% !important; 
-    background: var(--mac-surface) !important;
-    border-radius: 16px !important;
-    overflow: hidden !important;
-    border: 1px solid var(--mac-border) !important;
-}
-
-/* 4. Contenedor de la Imagen (🔥 Cuadrado Perfecto Inquebrantable) */
-.store-product-visual {
-    width: 100% !important;
-    aspect-ratio: 1 / 1 !important; /* Fuerza el cuadrado */
-    display: block !important; /* Mejor que flex para respetar el aspecto en móviles */
-    position: relative !important;
-    background: var(--mac-bg) !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: hidden !important;
-}
-
-/* 5. La Imagen: TAPAR TODO EL ESPACIO SIN SOBRAS */
-.store-product-visual img {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important; /* 🔥 ESTA ES LA MAGIA: Tapa todo el recuadro */
-    border-radius: 16px 16px 0 0 !important;
-}
-
-/* 6. Contenedor de Textos (Más amplio) */
-.store-product-glass-footer {
-    flex: 1 !important; 
-    display: flex !important;
-    flex-direction: column !important; 
-    justify-content: space-between !important;
-    padding: 20px !important; /* Más espacio interior */
-    width: 100% !important;
-    box-sizing: border-box !important;
-    border-top: 1px solid var(--mac-border) !important;
-}
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
     <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
