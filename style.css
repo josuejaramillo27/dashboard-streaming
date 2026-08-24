@@ -769,10 +769,12 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
     }
     
     /* Forzamos cuadrícula bento adaptada a 1 columna limpia en celulares */
+    @media (max-width: 768px) {
     #publicStoreCatalog {
+        display: grid !important;
         grid-template-columns: 1fr !important;
-        gap: 25px !important;
-        padding: 0 !important;
+        gap: 24px !important; /* 🔥 ESTO CREA EL ESPACIO PERFECTO ENTRE CADA TARJETA EN CELULAR */
+        padding: 0 5px !important;
     }
 }
 
