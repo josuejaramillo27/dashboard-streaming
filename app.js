@@ -3298,6 +3298,18 @@ window.submitCheckout = async () => {
             fecha: new Date().toISOString()
         });
 
+        // 🔥 NUEVO: GATILLAR NOTIFICACIÓN AL VENDEDOR (DISPARA EL PUSH)
+        fetch('https://bot.panelagc.com/api/notificar-venta', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                vendedorId: vendedorId,
+                plataforma: currentCheckoutItem.platform,
+                precio: currentCheckoutItem.price.toFixed(2),
+                moneda: data.currency || 'S/'
+            })
+        }).catch(err => console.error("Error enviando alerta de venta:", err));
+
         document.getElementById('checkoutModal').style.display = 'none';
         
         Swal.fire({
