@@ -1794,7 +1794,23 @@ window.updateWaChkCard = (labelEl) => {
         }
     }, 10);
 };
-
+window.toggleSwalChk = (labelEl) => {
+    setTimeout(() => {
+        const chk = labelEl.querySelector('input[type="checkbox"]');
+        const icon = labelEl.querySelector('i');
+        if (chk.checked) {
+            labelEl.style.border = '1px solid var(--mac-green)';
+            labelEl.style.background = 'rgba(52, 199, 89, 0.15)';
+            icon.className = 'bx bx-check-circle';
+            icon.style.color = 'var(--mac-green)';
+        } else {
+            labelEl.style.border = '1px solid var(--mac-border)';
+            labelEl.style.background = 'var(--mac-surface)';
+            icon.className = 'bx bx-circle';
+            icon.style.color = 'var(--mac-text-secondary)';
+        }
+    }, 10);
+};
 window.toggleAllWaBoxes = () => {
     const btn = document.getElementById('btnToggleAllWaBoxes');
     const cards = document.querySelectorAll('.wa-chk-card');
@@ -3762,28 +3778,52 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
 
     const precioTotal = parseFloat(document.getElementById(`precio_venta_${pedidoId}`).value) || 0;
 
-    // 🔥 NUEVA VENTANITA UNIFICADA (MESES + DATOS A ENVIAR)
+    // 🔥 NUEVA VENTANITA UNIFICADA (MESES EN LÍNEA + TARJETAS DE DATOS)
     const confirmacion = await Swal.fire({
         title: 'Configurar Entrega',
         html: `
             <div style="text-align: left; display: flex; flex-direction: column; gap: 15px;">
-                <div style="background: var(--mac-bg); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border);">
-                    <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">¿Por cuántos meses pagó el cliente?</label>
-                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
-                        <input type="number" id="swal-meses-venta" class="swal2-input" value="1" min="1" style="margin: 0; flex: 1; text-align: center; font-size: 18px; font-weight: bold;">
-                        <span style="font-size: 14px; color: var(--mac-text-secondary); font-weight: bold;">Mes(es)</span>
+                
+                <!-- BLOQUE 1: Meses (Todo en una fila) -->
+                <div style="background: var(--mac-bg); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border); display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                    <label style="font-size: 13px; font-weight: bold; color: var(--mac-text-main); margin: 0;">¿Por cuántos meses pagó?</label>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="number" id="swal-meses-venta" value="1" min="1" style="width: 55px; text-align: center; font-size: 16px; font-weight: bold; padding: 6px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); outline: none;">
+                        <span style="font-size: 13px; color: var(--mac-text-secondary); font-weight: bold;">Mes(es)</span>
                     </div>
                 </div>
                 
+                <!-- BLOQUE 2: Datos a enviar (Tarjetas Premium) -->
                 <div style="background: var(--mac-bg); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border);">
-                    <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main); margin-bottom: 10px; display: block;">¿Qué datos enviarás al cliente por WhatsApp?</label>
+                    <label style="font-size: 13px; font-weight: bold; color: var(--mac-text-main); margin-bottom: 12px; display: block;">¿Qué datos enviarás por WhatsApp?</label>
+                    
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--mac-text-main); cursor: pointer;"><input type="checkbox" id="chk-correo" checked> Correo</label>
-                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--mac-text-main); cursor: pointer;"><input type="checkbox" id="chk-pass" checked> Contraseña</label>
-                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--mac-text-main); cursor: pointer;"><input type="checkbox" id="chk-perfil" checked> N° Perfil</label>
-                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--mac-text-main); cursor: pointer;"><input type="checkbox" id="chk-pin" checked> PIN</label>
+                        <label onclick="window.toggleSwalChk(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); transition: all 0.2s;">
+                            <span style="font-size: 13px; color: var(--mac-text-main); font-weight: bold;">📧 Correo</span>
+                            <input type="checkbox" id="chk-correo" checked style="display:none;">
+                            <i class='bx bx-check-circle' style="color: var(--mac-green); font-size: 18px;"></i>
+                        </label>
+                        
+                        <label onclick="window.toggleSwalChk(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); transition: all 0.2s;">
+                            <span style="font-size: 13px; color: var(--mac-text-main); font-weight: bold;">🔑 Clave</span>
+                            <input type="checkbox" id="chk-pass" checked style="display:none;">
+                            <i class='bx bx-check-circle' style="color: var(--mac-green); font-size: 18px;"></i>
+                        </label>
+                        
+                        <label onclick="window.toggleSwalChk(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); transition: all 0.2s;">
+                            <span style="font-size: 13px; color: var(--mac-text-main); font-weight: bold;">👤 N° Perfil</span>
+                            <input type="checkbox" id="chk-perfil" checked style="display:none;">
+                            <i class='bx bx-check-circle' style="color: var(--mac-green); font-size: 18px;"></i>
+                        </label>
+                        
+                        <label onclick="window.toggleSwalChk(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); transition: all 0.2s;">
+                            <span style="font-size: 13px; color: var(--mac-text-main); font-weight: bold;">📌 PIN</span>
+                            <input type="checkbox" id="chk-pin" checked style="display:none;">
+                            <i class='bx bx-check-circle' style="color: var(--mac-green); font-size: 18px;"></i>
+                        </label>
                     </div>
-                    <p style="font-size: 10px; color: var(--mac-text-secondary); margin: 8px 0 0 0; line-height: 1.3;">* El sistema siempre guardará todos los datos completos en tu panel por seguridad.</p>
+                    
+                    <p style="font-size: 10px; color: var(--mac-text-secondary); margin: 10px 0 0 0; line-height: 1.3;">* El sistema siempre guardará todos los datos completos en tu panel por seguridad.</p>
                 </div>
             </div>
         `,
