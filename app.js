@@ -3149,16 +3149,20 @@ window.renderPublicCatalog = (filterType) => {
     const data = window.publicStoreDataCache;
     if (!data) return;
 
-    // 🔥 VALIDAR SI LA TIENDA ESTÁ ENCENDIDA
-    const isStoreOpen = data.storeActive !== false; // por defecto es true
+    window.currentStoreFilter = filterType || window.currentStoreFilter || 'Todos';
+    const isStoreOpen = data.storeActive !== false; 
 
+    // 🔥 FILTRO COMBINADO (Pestañas + Buscador Spotlight)
+    const searchTerm = document.getElementById('publicStoreSearchInput') ? document.getElementById('publicStoreSearchInput').value.toLowerCase() : '';
+    
     const itemsFiltrados = catalog.filter(item => {
-        if (filterType === 'Todos') return true;
-        return item.type === filterType;
+        const matchCategory = window.currentStoreFilter === 'Todos' || item.type === window.currentStoreFilter;
+        const matchSearch = item.platform.toLowerCase().includes(searchTerm) || (item.desc && item.desc.toLowerCase().includes(searchTerm));
+        return matchCategory && matchSearch;
     });
 
     if (itemsFiltrados.length === 0) {
-        catalogBox.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); width: 100%; grid-column: 1/-1; padding: 40px 0; font-weight: 500;">No hay productos disponibles en esta sección por el momento.</p>';
+        catalogBox.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); width: 100%; grid-column: 1/-1; padding: 40px 0; font-weight: 500;">No hay productos que coincidan con la búsqueda.</p>';
         return;
     }
 
@@ -3204,71 +3208,6 @@ window.renderPublicCatalog = (filterType) => {
                 typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #AF52DE 0%, #5856D6 100%); margin-left: 5px;"><i class='bx bxs-time-five'></i> Tiempo Limitado</div>`;
             } else if (item.badgeOption === 'nuevo') {
                 typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #34C759 0%, #28CD41 100%); margin-left: 5px;"><i class='bx bxs-star'></i> Nuevo Ingreso</div>`;
-            } else if (item.badgeOpwindow.renderPublicCatalog = (filterType) => {
-    const catalogBox = document.getElementById('publicStoreCatalog');
-    if (!catalogBox) return;
-    catalogBox.innerHTML = '';
-    
-    const catalog = window.publicCatalogCache || [];
-    const data = window.publicStoreDataCache;
-    if (!data) return;
-
-    window.currentStoreFilter = filterType || window.currentStoreFilter || 'Todos';
-    const isStoreOpen = data.storeActive !== false; 
-
-    // 🔥 FILTRO COMBINADO (Pestañas + Buscador Spotlight)
-    const searchTerm = document.getElementById('publicStoreSearchInput') ? document.getElementById('publicStoreSearchInput').value.toLowerCase() : '';
-    
-    const itemsFiltrados = catalog.filter(item => {
-        const matchCategory = window.currentStoreFilter === 'Todos' || item.type === window.currentStoreFilter;
-        const matchSearch = item.platform.toLowerCase().includes(searchTerm) || (item.desc && item.desc.toLowerCase().includes(searchTerm));
-        return matchCategory && matchSearch;
-    });
-
-    if (itemsFiltrados.length === 0) {
-        catalogBox.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); width: 100%; grid-column: 1/-1; padding: 40px 0; font-weight: 500;">No hay productos que coincidan con la búsqueda.</p>';
-        return;
-    }
-
-    itemsFiltrados.forEach(item => {
-        const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
-        let isAgotado = item.status === 'agotado';
-        let stockHtml = '';
-        
-        if (item.badgeOption === 'a_pedido') {
-            isAgotado = false; // A Pedido no se agota
-            stockHtml = `<span style="font-size:10px; color:var(--mac-blue); display:block; margin-top:6px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><i class='bx bx-package'></i> Disponible a pedido</span>`;
-        } else if (item.autoStock && item.stockPlatforms && item.stockPlatforms.length > 0 && data.inventory) {
-            const stock = data.inventory || [];
-            if (item.type === 'Combo') {
-                const counts = item.stockPlatforms.map(p => stock.filter(i => i.status === 'libre' && i.platform === p).length);
-                const comboDisponible = Math.min(...counts); 
-                if (comboDisponible === 0) isAgotado = true; 
-                const colorStock = comboDisponible > 2 ? 'var(--mac-green)' : (comboDisponible > 0 ? 'var(--mac-orange)' : 'var(--mac-red)');
-                stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><i class='bx bx-box'></i> Stock Combo: <span style="color:${colorStock};">${comboDisponible} disp.</span></span>`;
-            } else {
-                const cantidadLibre = stock.filter(i => i.status === 'libre' && i.platform === item.stockPlatforms[0]).length;
-                if (cantidadLibre === 0) isAgotado = true;
-                const colorStock = cantidadLibre > 2 ? 'var(--mac-green)' : (cantidadLibre > 0 ? 'var(--mac-orange)' : 'var(--mac-red)');
-                stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><i class='bx bx-box'></i> Stock en vivo: <span style="color:${colorStock};">${cantidadLibre} disp.</span></span>`;
-            }
-        }
-
-        let typeBadgeHtml = item.type === 'Combo' ? `<div class="store-vibrant-badge badge-combo"><i class='bx bx-gift'></i> Combo</div>` : '';
-
-        if (item.requiresInvite) {
-            typeBadgeHtml += `<div class="store-vibrant-badge" style="background:var(--mac-orange); color:white; margin-left: 5px;"><i class='bx bx-envelope'></i> Invitación</div>`;
-        }
-
-        if (item.badgeOption) {
-            if (item.badgeOption === 'oferta') {
-                typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="margin-left: 5px;"><i class='bx bxs-flame'></i> Oferta Especial</div>`;
-            } else if (item.badgeOption === 'poco_stock') {
-                typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #FF9500 0%, #FF5E00 100%); margin-left: 5px;"><i class='bx bx-error-alt'></i> Poco Stock</div>`;
-            } else if (item.badgeOption === 'tiempo_limitado') {
-                typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #AF52DE 0%, #5856D6 100%); margin-left: 5px;"><i class='bx bxs-time-five'></i> Tiempo Limitado</div>`;
-            } else if (item.badgeOption === 'nuevo') {
-                typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #34C759 0%, #28CD41 100%); margin-left: 5px;"><i class='bx bxs-star'></i> Nuevo Ingreso</div>`;
             } else if (item.badgeOption === 'a_pedido' && !item.requiresInvite) {
                 typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #007AFF 0%, #0056b3 100%); margin-left: 5px;"><i class='bx bx-package'></i> A Pedido</div>`;
             }
@@ -3276,6 +3215,7 @@ window.renderPublicCatalog = (filterType) => {
 
         const titleSafe = item.platform.replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n').replace(/\r/g, '') : 'Sin detalles adicionales.';
+        
         const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}" alt="${item.platform}">` : `<div style="width:100%; height:100%; background:var(--mac-gray); display:flex; align-items:center; justify-content:center;"><i class='bx bx-play-circle' style='font-size:48px; color:var(--mac-text-secondary); opacity:0.3;'></i></div>`;
 
         let btnHTML = '';
@@ -3284,7 +3224,7 @@ window.renderPublicCatalog = (filterType) => {
         } else if (isAgotado) {
             btnHTML = `<span class="status expired" style="padding:10px; border-radius:12px; font-weight:800; font-size:12px;">Agotado</span>`;
         } else {
-            // 🔥 AHORA AGREGA AL CARRITO EN LUGAR DE IR DIRECTO AL CHECKOUT
+            // 🔥 AHORA AGREGA AL CARRITO EN LUGAR DE IR DIRECTO AL CHECKOUT (Botón circular elegante)
             btnHTML = `<button onclick="window.addToCart('${item.id}')" class="btn-wa" style="border:none; cursor:pointer; padding:0; border-radius:14px; display:inline-flex; align-items:center; justify-content:center; margin:0; width: 48px; height: 48px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important; color: white !important;"><i class='bx bx-cart-add' style='margin:0; font-size: 24px;'></i></button>`;
         }
 
@@ -3300,6 +3240,7 @@ window.renderPublicCatalog = (filterType) => {
                 <div class="store-product-visual-overlay"><span class="view-desc-hint"><i class='bx bx-zoom-in'></i> Detalles</span></div>
             </div>
             
+            <!-- 🔥 DISEÑO EN 2 LÍNEAS (TÍTULO ARRIBA, PRECIO Y BOTÓN ABAJO) -->
             <div class="store-product-glass-footer">
                 <div style="width: 100%; margin-bottom: 12px;">
                     <strong class="store-product-title" style="display:block; font-size:18px; line-height:1.3; color: var(--mac-text-main); word-break: break-word;">${item.platform}</strong>
