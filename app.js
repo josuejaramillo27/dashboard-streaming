@@ -3037,8 +3037,9 @@ window.renderPublicCatalog = (filterType) => {
             </div>
             <div class="store-product-glass-footer" style="display:flex; justify-content:space-between; align-items:center; gap:10px; width:100%; box-sizing:border-box;">
                 <div class="store-product-info" style="flex:1; min-width:0; overflow:hidden;">
-                    <strong class="store-product-title" style="display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${item.platform}</strong>
-                    <span class="store-product-price" style="display:block; margin-top:2px;">${priceStr}</span>
+                    <!-- 🔥 CORRECCIÓN: Quitamos la línea única y dejamos que ocupe hasta 2 líneas elegantes si sobra espacio -->
+                    <strong class="store-product-title" style="display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; white-space:normal; font-size:15px; line-height:1.2; width:100%;">${item.platform}</strong>
+                    <span class="store-product-price" style="display:block; margin-top:4px;">${priceStr}</span>
                     ${stockHtml} 
                 </div>
                 <div class="store-product-action" style="flex-shrink:0;">${btnHTML}</div>
