@@ -1385,6 +1385,25 @@
         <p style="font-size: 11px; color: var(--mac-text-secondary); opacity: 0.6;">POTENCIADO POR PANEL A.G.C.</p>
     </div>
 </div>
+    <div id="cartPanelOverlay" class="cart-overlay" onclick="window.toggleCartPanel()"></div>
+<div id="cartPanel" class="cart-panel">
+    <div class="cart-header">
+        <h3><i class='bx bx-shopping-bag'></i> Tu Carrito</h3>
+        <button onclick="window.toggleCartPanel()"><i class='bx bx-x'></i></button>
+    </div>
+    <div id="cartItemsContainer" class="cart-items">
+        <!-- Los productos aparecerán aquí -->
+    </div>
+    <div class="cart-footer">
+        <div class="cart-total">
+            <span>Total a pagar:</span>
+            <span id="cartTotalPrice">S/ 0.00</span>
+        </div>
+        <button class="btn-primary" style="width: 100%; padding: 16px; border-radius: 16px; font-size: 16px; font-weight: 800; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); border: none; box-shadow: 0 8px 20px rgba(0, 122, 255, 0.3);" onclick="window.openCheckoutFromCart()">
+            Proceder al Pago <i class='bx bx-right-arrow-alt'></i>
+        </button>
+    </div>
+</div>
     <div id="planesPublicView" class="container" style="display: none; max-width: 900px; margin: 20px auto; padding: 15px;">
     
     <div style="text-align: center; margin-bottom: 30px;">
