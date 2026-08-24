@@ -2776,16 +2776,33 @@ window.addStoreItem = async () => {
         document.getElementById('storePrice').value = '';
         if (document.getElementById('storeDesc')) document.getElementById('storeDesc').value = '';
         if (fileInput) fileInput.value = '';
+        
+        // Reset de checkboxes
         document.getElementById('storeAutoStock').checked = false;
         if(document.getElementById('storeRequiresInvite')) document.getElementById('storeRequiresInvite').checked = false;
+        
+        // 🔥 Apagar las luces de las tarjetas visuales
+        document.querySelectorAll('.store-toggle-card').forEach(label => {
+            label.style.border = '1px solid var(--mac-border)';
+            label.style.background = 'var(--mac-surface)';
+            const icon = label.querySelector('.store-toggle-icon');
+            if(icon) {
+                icon.className = 'bx bx-circle store-toggle-icon';
+                icon.style.color = 'var(--mac-text-secondary)';
+            }
+        });
+
         document.getElementById('storeBadgeOption').value = '';
         window.toggleStoreStockFields();
         window.renderStoreItems();
         window.showNotification("✅ Producto añadido al catálogo");
-    } catch(e) { window.showNotification("Error: " + e.message); } 
-    finally { btn.innerHTML = "<i class='bx bx-plus'></i>"; btn.disabled = false; }
+    } catch(e) { 
+        window.showNotification("Error: " + e.message); 
+    } finally { 
+        btn.innerHTML = "<i class='bx bx-plus'></i>"; 
+        btn.disabled = false; 
+    }
 };
-
 window.renderStoreItems = () => {
     const list = document.getElementById('storeItemsList');
     list.innerHTML = '';
