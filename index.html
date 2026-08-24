@@ -348,35 +348,61 @@
             .date-wrapper { display: contents; } /* Hace que el contenedor sea fantasma en PC */
         }
         /* ==========================================================================
-           CORRECCIONES VISUALES DE LA TIENDITA (PC Y MÓVIL)
+           CORRECCIONES VISUALES DE LA TIENDITA (PC Y MÓVIL) DEFINITIVAS
            ========================================================================== */
+        
+        /* 1. Hacer el catálogo y el recuadro mucho más grandes en PC */
+        @media (min-width: 768px) {
+            #publicStoreView { max-width: 1100px !important; }
+            #publicStoreCatalog { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)) !important; }
+            .store-product-visual { height: 260px !important; } /* Cuadrado gigante establecido para PC */
+            .store-product-card { min-height: 420px !important; }
+        }
+
+        /* 2. Cuadrado establecido para celulares */
+        @media (max-width: 767px) {
+            .store-product-visual { height: 180px !important; }
+        }
+
+        /* 3. Estructura de la Tarjeta */
         .store-product-card {
             display: flex !important;
             flex-direction: column !important;
-            justify-content: space-between !important;
+            justify-content: flex-start !important;
             height: 100% !important; 
-            min-height: 280px !important; /* Da más espacio vertical en PC */
             overflow: hidden !important;
+            background: var(--mac-surface) !important;
         }
+
+        /* 4. El recuadro de la imagen (Dimensiones fijas y SIN fondo negro) */
         .store-product-visual {
-            flex: 1 1 auto !important; /* Ocupa el espacio sin aplastar el texto */
             width: 100% !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
-            background: rgba(0,0,0,0.15) !important;
+            /* 🔥 ADIÓS A LOS ESPACIOS EN NEGRO: Fondo transparente */
+            background: transparent !important; 
+            padding: 10px !important;
+            box-sizing: border-box !important;
         }
+
+        /* 5. Comportamiento de la Imagen */
         .store-product-visual img {
             width: 100% !important;
             height: 100% !important;
-            max-height: 220px !important; /* Evita que crezca infinitamente en PC */
-            object-fit: contain !important; /* 👈 MAGIA: Muestra la foto entera sin recortes en Celular */
+            /* 🔥 MAGIA: Achica o agranda la imagen pero la muestra 100% COMPLETA sin recortes */
+            object-fit: contain !important; 
+            border-radius: 8px !important;
         }
+
+        /* 6. Textos y Botones (Siempre visibles y ajustables) */
         .store-product-glass-footer {
-            flex: 0 0 auto !important; /* Protege el footer para que NUNCA se esconda */
-            padding: 12px 15px !important;
+            flex: 1 !important; 
+            display: flex !important;
+            padding: 18px 15px !important;
             width: 100% !important;
             box-sizing: border-box !important;
+            border-top: 1px solid var(--mac-border) !important;
         }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
