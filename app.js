@@ -31,7 +31,31 @@ let editingNewsId = null;
 let editingNewsOldImg = null;
 
 const macPalette = ['#FF2D55', '#5856D6', '#FF9500', '#34C759', '#007AFF', '#AF52DE', '#FF3B30', '#FFCC00', '#5AC8FA'];
-const getCurrencyForCountry = (country) => { const dict = { "Perú": "S/", "España": "€", "México": "$" }; return dict[country] || "$"; };
+const getCurrencyForCountry = (country) => { 
+    const dict = { 
+        "Perú": "S/", 
+        "Colombia": "COP $",
+        "México": "MXN $",
+        "Argentina": "ARS $",
+        "Chile": "CLP $",
+        "Ecuador": "$", // Dolarizado
+        "Bolivia": "Bs.",
+        "Venezuela": "Bs.",
+        "Paraguay": "Gs.",
+        "Uruguay": "$U",
+        "España": "€",
+        "Costa Rica": "₡",
+        "Panamá": "B/.", // O $
+        "República Dominicana": "RD$",
+        "Guatemala": "Q",
+        "Honduras": "L",
+        "El Salvador": "$", // Dolarizado
+        "Nicaragua": "C$",
+        "Puerto Rico": "$",
+        "Cuba": "CUP $"
+    }; 
+    return dict[country] || "USD $"; // Por defecto USD si es "Otro País"
+};
 const updateThemeIcon = () => { 
     const isDark = document.body.classList.contains('dark-mode'); 
     document.querySelectorAll('.theme-toggle').forEach(btn => { 
