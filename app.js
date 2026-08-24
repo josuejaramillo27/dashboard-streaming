@@ -2733,6 +2733,7 @@ window.addStoreItem = async () => {
     const price = document.getElementById('storePrice').value;
     const desc = document.getElementById('storeDesc') ? document.getElementById('storeDesc').value.trim() : '';
     const autoStock = document.getElementById('storeAutoStock').checked;
+    const requiresInvite = document.getElementById('storeRequiresInvite') ? document.getElementById('storeRequiresInvite').checked : false;
     const badgeOption = document.getElementById('storeBadgeOption').value;
 
     const selects = document.querySelectorAll('.store-stock-select');
@@ -2764,6 +2765,7 @@ window.addStoreItem = async () => {
             price: parseFloat(price), 
             desc: desc, imgUrl: imgUrl, type: type, 
             autoStock: autoStock, stockPlatforms: stockPlatforms,
+            requiresInvite: requiresInvite,
             badgeOption: badgeOption, status: 'disponible' 
         });
 
@@ -2775,6 +2777,7 @@ window.addStoreItem = async () => {
         if (document.getElementById('storeDesc')) document.getElementById('storeDesc').value = '';
         if (fileInput) fileInput.value = '';
         document.getElementById('storeAutoStock').checked = false;
+        if(document.getElementById('storeRequiresInvite')) document.getElementById('storeRequiresInvite').checked = false;
         document.getElementById('storeBadgeOption').value = '';
         window.toggleStoreStockFields();
         window.renderStoreItems();
@@ -2838,8 +2841,11 @@ window.editStoreItem = async (index) => {
                 <input id="swal-plat" class="swal2-input" style="margin:0; width: 100%; box-sizing:border-box;" value="${item.platform}">
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Precio:</label>
                 <input id="swal-price" type="number" step="0.1" class="swal2-input" style="margin:0; width: 100%; box-sizing:border-box;" value="${item.price}">
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-orange); margin-top: 10px;">
+                    <input type="checkbox" id="swal-invite" ${item.requiresInvite ? 'checked' : ''}> Venta por Invitación
+                </label>
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Descripción:</label>
-                <textarea id="swal-desc" class="swal2-textarea" style="margin: 5px 0 0 0; width: 100%; box-sizing:border-box; padding: 10px; border-radius: 8px; font-size: 14px; min-height: 80px;" placeholder="Admite saltos de línea...">${item.desc || ''}</textarea>
+                <textarea id="swal-desc" class="swal2-textarea" style="margin: 5px 0 0 0; width: 100%; box-sizing:border-box; padding: 10px; border-radius: 8px; font-size: 14px; min-height: 80px;">${item.desc || ''}</textarea>
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Cambiar Imagen (Opcional):</label>
                 <input type="file" id="swal-img" accept="image/*" style="margin:0; width: 100%; padding: 10px; font-size: 12px; border: 1px solid var(--mac-border); border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
             </div>
@@ -2849,11 +2855,12 @@ window.editStoreItem = async (index) => {
         preConfirm: () => {
             const plat = document.getElementById('swal-plat').value.trim();
             const price = parseFloat(document.getElementById('swal-price').value);
+            const invite = document.getElementById('swal-invite').checked;
             const desc = document.getElementById('swal-desc').value.trim();
             const fileInput = document.getElementById('swal-img');
             const file = fileInput && fileInput.files.length > 0 ? fileInput.files[0] : null;
             if (!plat || isNaN(price)) { Swal.showValidationMessage('El nombre y el precio son obligatorios'); return false; }
-            return { platform: plat, price: price, desc: desc, file: file };
+            return { platform: plat, price: price, desc: desc, requiresInvite: invite, file: file };
         }
     });
 
@@ -2869,6 +2876,7 @@ window.editStoreItem = async (index) => {
             catalog[index].platform = formValues.platform;
             catalog[index].price = formValues.price;
             catalog[index].desc = formValues.desc;
+            catalog[index].requiresInvite = formValues.requiresInvite;
             catalog[index].imgUrl = newImgUrl; 
             await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
             currentUserData.storeCatalog = catalog;
@@ -2877,7 +2885,6 @@ window.editStoreItem = async (index) => {
         } catch(e) { window.showNotification("Error al editar: " + e.message); }
     }
 };
-
 window.toggleStoreItemStatus = async (index) => {
     let catalog = currentUserData.storeCatalog || [];
     catalog[index].status = catalog[index].status === 'agotado' ? 'disponible' : 'agotado';
@@ -2969,17 +2976,22 @@ window.renderPublicCatalog = (filterType) => {
         // 2. ETIQUETAS Y EMOJIS DE TIENDA
         let typeBadgeHtml = item.type === 'Combo' ? `<div class="store-vibrant-badge badge-combo"><i class='bx bx-gift'></i> Combo</div>` : '';
 
+        // 🔥 NUEVA ETIQUETA: VENTA POR INVITACIÓN
+        if (item.requiresInvite) {
+            typeBadgeHtml += `<div class="store-vibrant-badge" style="background:var(--mac-orange); color:white; margin-left: 5px;"><i class='bx bx-envelope'></i> Invitación</div>`;
+        }
+
         if (item.badgeOption) {
             if (item.badgeOption === 'oferta') {
-                typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta"><i class='bx bxs-flame'></i> Oferta Especial</div>`;
+                typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="margin-left: 5px;"><i class='bx bxs-flame'></i> Oferta Especial</div>`;
             } else if (item.badgeOption === 'poco_stock') {
-                typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #FF9500 0%, #FF5E00 100%);"><i class='bx bx-error-alt'></i> Poco Stock</div>`;
+                typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #FF9500 0%, #FF5E00 100%); margin-left: 5px;"><i class='bx bx-error-alt'></i> Poco Stock</div>`;
             } else if (item.badgeOption === 'tiempo_limitado') {
-                typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #AF52DE 0%, #5856D6 100%);"><i class='bx bxs-time-five'></i> Tiempo Limitado</div>`;
+                typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #AF52DE 0%, #5856D6 100%); margin-left: 5px;"><i class='bx bxs-time-five'></i> Tiempo Limitado</div>`;
             } else if (item.badgeOption === 'nuevo') {
-                typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #34C759 0%, #28CD41 100%);"><i class='bx bxs-star'></i> Nuevo Ingreso</div>`;
-            } else if (item.badgeOption === 'a_pedido') {
-                typeBadgeHtml = `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #007AFF 0%, #0056b3 100%);"><i class='bx bx-package'></i> A Pedido</div>`;
+                typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #34C759 0%, #28CD41 100%); margin-left: 5px;"><i class='bx bxs-star'></i> Nuevo Ingreso</div>`;
+            } else if (item.badgeOption === 'a_pedido' && !item.requiresInvite) {
+                typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #007AFF 0%, #0056b3 100%); margin-left: 5px;"><i class='bx bx-package'></i> A Pedido</div>`;
             }
         }
 
@@ -3140,6 +3152,13 @@ window.openCheckoutModal = (itemId) => {
     document.getElementById('checkoutItemName').innerText = currentCheckoutItem.platform;
     document.getElementById('checkoutItemPrice').innerText = `${data.currency || 'S/'}${currentCheckoutItem.price.toFixed(2)}`;
     
+    // Si requiere invitación, pedimos correo
+    const emailContainer = document.getElementById('checkoutEmailContainer');
+    if(emailContainer) {
+        emailContainer.style.display = currentCheckoutItem.requiresInvite ? 'flex' : 'none';
+        document.getElementById('checkoutClientEmail').value = '';
+    }
+
     const pmContainer = document.getElementById('checkoutPaymentMethods');
     pmContainer.innerHTML = '';
     
@@ -3147,17 +3166,11 @@ window.openCheckoutModal = (itemId) => {
     if (methods.length === 0) {
         pmContainer.innerHTML = '<p style="font-size: 12px; color: var(--mac-red); text-align: center;">El vendedor aún no ha configurado métodos de pago.</p>';
     } else {
-        // 🔥 DISEÑO BINANCE P2P: Un solo Select elegante
         let selectHtml = `<select id="pmSelectDropdown" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 14px; font-weight: bold; outline: none; margin-bottom: 10px;" onchange="window.showPaymentDetails(this.value)">`;
         selectHtml += `<option value="">-- Elige un método de pago --</option>`;
-        methods.forEach((m, idx) => {
-            selectHtml += `<option value="${idx}">🏦 ${m.bank}</option>`;
-        });
+        methods.forEach((m, idx) => { selectHtml += `<option value="${idx}">🏦 ${m.bank}</option>`; });
         selectHtml += `</select>`;
-        
-        // Contenedor donde aparecerán los detalles del banco elegido
         selectHtml += `<div id="pmDetailsContainer" style="display:none; background: var(--mac-bg); padding: 15px; border-radius: 10px; border: 1px dashed var(--mac-border);"></div>`;
-        
         pmContainer.innerHTML = selectHtml;
     }
 
@@ -3221,7 +3234,13 @@ window.submitCheckout = async () => {
     const file = fileInput.files.length > 0 ? fileInput.files[0] : null;
 
     if (!phone || !phone.startsWith('+')) return window.showNotification("⚠️ Ingresa tu WhatsApp incluyendo el código de país (Ej: +51...)");
-    if (!file) return window.showNotification("⚠️ Sube la foto o captura de tu comprobante de pago.");
+    if (!file) return window.showNotification("⚠️ Sube la foto de tu comprobante de pago.");
+
+    let clienteCorreo = '';
+    if (currentCheckoutItem.requiresInvite) {
+        clienteCorreo = document.getElementById('checkoutClientEmail').value.trim();
+        if (!clienteCorreo) return window.showNotification("⚠️ Debes ingresar tu correo para recibir la invitación.");
+    }
 
     const btn = document.getElementById('btnSubmitCheckout');
     const origText = btn.innerHTML;
@@ -3230,14 +3249,12 @@ window.submitCheckout = async () => {
 
     try {
         const data = window.publicStoreDataCache;
-        const vendedorId = data.uid; // El error ya no ocurrirá aquí gracias a la Corrección 1
+        const vendedorId = data.uid; 
         
-        // 1. Subir el comprobante a Firebase Storage
         const storageRef = ref(storage, `comprobantes/${vendedorId}_${Date.now()}_${file.name}`);
         await uploadBytes(storageRef, file);
         const comprobanteUrl = await getDownloadURL(storageRef);
 
-        // 2. Guardar el pedido en Firestore
         await addDoc(collection(db, "pedidos"), {
             vendedorId: vendedorId,
             clienteNumero: phone,
@@ -3245,6 +3262,8 @@ window.submitCheckout = async () => {
             plataforma: currentCheckoutItem.platform,
             precio: currentCheckoutItem.price,
             comprobanteUrl: comprobanteUrl,
+            requiereInvitacion: currentCheckoutItem.requiresInvite || false,
+            clienteCorreo: clienteCorreo,
             estado: 'pendiente',
             fecha: new Date().toISOString()
         });
@@ -3254,19 +3273,14 @@ window.submitCheckout = async () => {
         Swal.fire({
             icon: 'success',
             title: '¡Pago Enviado!',
-            html: '<p style="font-size:14px; color:var(--mac-text-secondary);">El vendedor verificará tu comprobante.<br><br><b>Te llegará un mensaje automático a WhatsApp con tus accesos en breve.</b></p>',
-            confirmButtonText: '¡Excelente!',
+            html: '<p style="font-size:14px; color:var(--mac-text-secondary);">El vendedor verificará tu comprobante en breve.</p>',
             confirmButtonColor: '#34C759',
             background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
             color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
         });
 
-    } catch (error) {
-        window.showNotification("Error enviando el pago: " + error.message);
-    } finally {
-        btn.innerHTML = origText;
-        btn.disabled = false;
-    }
+    } catch (error) { window.showNotification("Error: " + error.message); } 
+    finally { btn.innerHTML = origText; btn.disabled = false; }
 };
 // --- SISTEMA DE REGLAS POR PLATAFORMA ---
 window.openRulesModal = () => {
@@ -3566,22 +3580,58 @@ window.openPedidosModal = async () => {
         const snapshot = await getDocs(q);
         
         if (snapshot.empty) {
-            list.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); margin-top:20px;">No tienes ventas pendientes de aprobar.</p>';
+            list.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); margin-top:20px;">No tienes ventas pendientes.</p>';
             return;
         }
 
         list.innerHTML = '';
+        
+        // 1. Obtener Cuentas libres (para compras normales)
         const inventarioLimpio = (currentUserData.inventory || []).filter(i => i.status === 'libre');
-
-        // Guardamos las opciones globalmente para poder clonarlas en los combos
         window.opcionesCuentasGlobal = `<option value="">-- Selecciona una cuenta para entregar --</option>`;
         inventarioLimpio.forEach(acc => {
             window.opcionesCuentasGlobal += `<option value="${acc.id}">[${acc.platform} - ${acc.type}] ${acc.email} ${acc.type === 'Perfil' ? '(P: '+acc.profile+')' : ''}</option>`;
         });
 
+        // 2. Obtener Matrices (para compras por invitación)
+        const qMat = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
+        const snapMat = await getDocs(qMat);
+        let opcionesMatricesGlobal = `<option value="">-- Elige la Cuenta Matriz --</option>`;
+        snapMat.forEach(d => {
+            const m = d.data();
+            opcionesMatricesGlobal += `<option value="${d.id}">[${m.platform}] ${m.email}</option>`;
+        });
+
         snapshot.forEach(docSnap => {
             const pedido = docSnap.data();
             const pId = docSnap.id;
+
+            // HTML Dinámico (Invitación vs Normal)
+            let dynamicControls = '';
+            if (pedido.requiereInvitacion) {
+                dynamicControls = `
+                    <p style="font-size: 13px; color: var(--mac-orange); font-weight: bold; margin-bottom:10px; background: rgba(255, 149, 0, 0.1); padding: 8px; border-radius: 6px;"><i class='bx bx-envelope'></i> Correo cliente: ${pedido.clienteCorreo}</p>
+                    <label style="font-size: 11px; font-weight:bold; color:var(--mac-text-secondary);">¿En qué Matriz vas a guardar este registro?</label>
+                    <div id="cuentas_container_${pId}">
+                        <select class="select_matriz_${pId}" style="width:100%; margin-bottom:5px; padding:8px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border);">
+                            ${opcionesMatricesGlobal}
+                        </select>
+                        <input type="text" id="input_perfil_${pId}" placeholder="N° Perfil / Espacio (Opcional)" style="width:100%; padding:8px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border); margin-bottom:10px;">
+                    </div>
+                `;
+            } else {
+                dynamicControls = `
+                    <label style="font-size: 11px; font-weight:bold; color:var(--mac-text-secondary);">Elige qué cuenta(s) despachar:</label>
+                    <div id="cuentas_container_${pId}">
+                        <select class="select_acc_${pId}" style="width:100%; margin-bottom:5px; padding:8px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border);">
+                            ${window.opcionesCuentasGlobal}
+                        </select>
+                    </div>
+                    <button class="action-btn" style="color:var(--mac-blue); font-size:12px; margin-bottom:12px; font-weight:bold; background:transparent; border:none; padding:0; cursor:pointer;" onclick="window.addSelectToPedido('${pId}')">
+                        + Añadir otra cuenta al despacho
+                    </button>
+                `;
+            }
 
             const div = document.createElement('div');
             div.style.cssText = "background:var(--mac-bg); padding:15px; border-radius:10px; border:1px solid var(--mac-border);";
@@ -3590,35 +3640,24 @@ window.openPedidosModal = async () => {
                     <div>
                         <strong style="color:var(--mac-blue); font-size:16px;"><i class='bx bx-cart-add'></i> ${pedido.plataforma}</strong><br>
                         <span style="color:var(--mac-text-main); font-size:13px; font-weight: 600;">📞 WA: ${pedido.clienteNumero}</span>
-                        <span style="display:block; font-size:12px; color:var(--mac-text-secondary); margin-top:2px;">Tipo: ${pedido.tipo.toUpperCase()} | Monto esperado: <b style="color:var(--mac-green);">${globalCurrency}${pedido.precio.toFixed(2)}</b></span>
+                        <span style="display:block; font-size:12px; color:var(--mac-text-secondary); margin-top:2px;">Tipo: ${pedido.tipo.toUpperCase()} | Monto: <b style="color:var(--mac-green);">${globalCurrency}${pedido.precio.toFixed(2)}</b></span>
                     </div>
-                    <button class="action-btn btn-del" onclick="window.rechazarPedido('${pId}')" title="Rechazar Comprobante Falso"><i class='bx bx-x'></i></button>
+                    <button class="action-btn btn-del" onclick="window.rechazarPedido('${pId}')"><i class='bx bx-x'></i></button>
                 </div>
                 
-                <!-- EL COMPROBANTE VISUAL -->
                 <div style="text-align: center; margin-bottom: 15px; background: rgba(0,0,0,0.02); padding: 10px; border-radius: 8px;">
-                    <a href="${pedido.comprobanteUrl}" target="_blank" title="Ver comprobante en grande">
-                        <img src="${pedido.comprobanteUrl}" style="height: 140px; border-radius: 8px; object-fit: contain; border: 1px solid var(--mac-border); box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    <a href="${pedido.comprobanteUrl}" target="_blank">
+                        <img src="${pedido.comprobanteUrl}" style="height: 140px; border-radius: 8px; object-fit: contain; border: 1px solid var(--mac-border);">
                     </a>
-                    <p style="font-size:10px; color:var(--mac-text-secondary); margin:4px 0 0 0; font-weight:bold;"><i class='bx bx-zoom-in'></i> Clic en la foto para agrandar</p>
                 </div>
                 
-                <label style="font-size: 11px; font-weight:bold; color:var(--mac-text-secondary);">Elige qué cuenta(s) despachar:</label>
-                <div id="cuentas_container_${pId}">
-                    <select class="select_acc_${pId}" style="width:100%; margin-bottom:5px; padding:8px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border);">
-                        ${window.opcionesCuentasGlobal}
-                    </select>
-                </div>
-                
-                <button class="action-btn" style="color:var(--mac-blue); font-size:12px; margin-bottom:12px; font-weight:bold; background:transparent; border:none; padding:0; cursor:pointer;" onclick="window.addSelectToPedido('${pId}')">
-                    + Añadir otra cuenta al despacho
-                </button>
+                ${dynamicControls}
                 
                 <div style="margin-bottom:15px;">
                     <input type="number" id="precio_venta_${pId}" placeholder="Confirma Precio Total Cobrado" value="${pedido.precio}" style="width:100%; padding:10px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border); font-weight:bold;">
                 </div>
 
-                <button class="btn-primary" style="width:100%; background:var(--mac-green); border:none; padding:14px; font-size:14px; font-weight:bold;" onclick="window.aprobarVenta('${pId}', '${pedido.clienteNumero}')">
+                <button class="btn-primary" style="width:100%; background:var(--mac-green); border:none; padding:14px; font-size:14px; font-weight:bold;" onclick="window.aprobarVenta('${pId}', '${pedido.clienteNumero}', ${pedido.requiereInvitacion ? 'true' : 'false'}, '${pedido.clienteCorreo || ''}', '${pedido.plataforma}')">
                     <i class='bx bx-check-shield'></i> Aprobar y Entregar Automático
                 </button>
             `;
@@ -3651,27 +3690,34 @@ window.rechazarPedido = async (pedidoId) => {
 };
 
 // 3. Aprobar y Liberar Cuenta(s) (SISTEMA DE COMBOS)
-window.aprobarVenta = async (pedidoId, numeroCliente) => {
-    const selects = document.querySelectorAll(`.select_acc_${pedidoId}`);
-    const cuentasIds = Array.from(selects).map(s => s.value).filter(val => val !== "");
-    
-    if (cuentasIds.length === 0) return window.showNotification("⚠️ Debes seleccionar al menos una cuenta del inventario para entregar.");
-    
-    const precioTotal = parseFloat(document.getElementById(`precio_venta_${pedidoId}`).value) || 0;
-    const precioDividido = precioTotal / cuentasIds.length;
+window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, clienteCorreo, plataforma) => {
+    let cuentasIds = [];
+    let matrizId = null;
+    let perfilMatriz = '';
 
-   // 🔥 NUEVA ALERTA: PREGUNTAR POR LOS MESES PAGADOS
-   const confirmacion = await Swal.fire({
+    // Validar según el tipo de pedido
+    if (requiereInvitacion) {
+        matrizId = document.querySelector(`.select_matriz_${pedidoId}`).value;
+        if (!matrizId) return window.showNotification("⚠️ Selecciona la Cuenta Matriz donde registrarás al cliente.");
+        perfilMatriz = document.getElementById(`input_perfil_${pedidoId}`).value.trim();
+    } else {
+        const selects = document.querySelectorAll(`.select_acc_${pedidoId}`);
+        cuentasIds = Array.from(selects).map(s => s.value).filter(val => val !== "");
+        if (cuentasIds.length === 0) return window.showNotification("⚠️ Debes seleccionar al menos una cuenta del inventario para entregar.");
+    }
+
+    const precioTotal = parseFloat(document.getElementById(`precio_venta_${pedidoId}`).value) || 0;
+
+    // 🔥 PREGUNTAR POR LOS MESES PAGADOS
+    const confirmacion = await Swal.fire({
         title: 'Confirmar Vencimiento',
         html: `
-            <p style="color:var(--mac-text-secondary); font-size:14px; margin-bottom: 15px;">Se enviarán ${cuentasIds.length} cuenta(s) al cliente.</p>
             <div style="text-align: left; background: var(--mac-bg); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border);">
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">¿Por cuántos meses pagó el cliente?</label>
                 <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
                     <input type="number" id="swal-meses-venta" class="swal2-input" value="1" min="1" style="margin: 0; flex: 1; text-align: center; font-size: 18px; font-weight: bold;">
                     <span style="font-size: 14px; color: var(--mac-text-secondary); font-weight: bold;">Mes(es)</span>
                 </div>
-                <small style="color: var(--mac-text-secondary); font-size: 11px; display: block; margin-top: 8px;">* El sistema sumará 30 días automáticamente por cada mes ingresado.</small>
             </div>
         `,
         icon: 'question',
@@ -3683,8 +3729,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente) => {
         background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
         color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
         preConfirm: () => {
-            const meses = document.getElementById('swal-meses-venta').value;
-            return parseInt(meses) || 1;
+            return parseInt(document.getElementById('swal-meses-venta').value) || 1;
         }
     });
 
@@ -3697,145 +3742,141 @@ window.aprobarVenta = async (pedidoId, numeroCliente) => {
         let stock = currentUserData.inventory || [];
         let cuentasEntregar = [];
         
-        // 🔥 NUEVO CÁLCULO DE FECHA BASADO EN MESES x 30
+        // Calcular fecha
         const h = new Date(); 
         h.setDate(h.getDate() + (mesesContratados * 30)); 
-        
         const dateFirebase = `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}-${String(h.getDate()).padStart(2,'0')}`; 
         const dateWhatsApp = h.toLocaleDateString('es-ES'); 
         
-        // Purificamos el número de WhatsApp (Corrige el error de "++51")
         const numeroLimpio = numeroCliente.replace(/[^\d]/g, '');
         const numeroBonito = "+" + numeroLimpio;
         const rulesDB = currentUserData.platformRules || {};
+        
+        let primerClienteId = null;
+        let textoFinal = "";
 
-        // Validamos que todas existan
-        for (let id of cuentasIds) {
-            const acc = stock.find(c => c.id === id);
-            if (!acc) return window.showNotification("Error: Una de las cuentas ya no está en el inventario.");
-            cuentasEntregar.push(acc);
-        }
-
-        let primerClienteId = null; // Capturaremos el ID para el autocompletado
-
-        // Bucle de creación (Separación Inteligente para la Matriz)
-        for (let cuenta of cuentasEntregar) {
-            let matrizAsignada = null;
-            const qMatriz = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid), where("email", "==", cuenta.email));
-            const snapMatriz = await getDocs(qMatriz);
-            if (!snapMatriz.empty) matrizAsignada = snapMatriz.docs[0].id;
-
+        if (requiereInvitacion) {
+            // LÓGICA DE INVITACIÓN DIRECTA
+            const rulesText = rulesDB[plataforma] || "";
+            const multiAcc = {};
+            multiAcc[plataforma] = window.getDefaultAccData();
+            multiAcc[plataforma].email = clienteCorreo;
+            multiAcc[plataforma].profile = perfilMatriz;
+            multiAcc[plataforma].months = mesesContratados;
+            multiAcc[plataforma].masterAccountId = matrizId;
+            multiAcc[plataforma].saleType = 'Perfil';
+            
             const docRef = await addDoc(collection(db, "clients"), {
                 userId: currentUser.uid,
                 name: "Cliente Nuevo", 
                 phone: numeroBonito, 
-                platform: cuenta.platform,
-                accountEmail: cuenta.email,      
-                accountPassword: cuenta.pass,    
-                accountPin: cuenta.pin,          
-                accountProfile: cuenta.profile || "1",
+                platform: plataforma,
+                accountEmail: clienteCorreo,      
+                accountPassword: "",    
+                accountPin: "",          
+                accountProfile: perfilMatriz,
                 accountUnits: 1,
-                accountMonths: mesesContratados, // 🔥 Guarda los meses contratados
+                accountMonths: mesesContratados,
                 cost: 0,
-                price: precioDividido, 
+                price: precioTotal, 
                 date: dateFirebase,
-                linkedMasterId: matrizAsignada, 
+                linkedMasterId: matrizId, 
+                multiAccounts: multiAcc,
                 color: macPalette[Math.floor(Math.random() * macPalette.length)]
             });
-            
-            if (!primerClienteId) primerClienteId = docRef.id;
+            primerClienteId = docRef.id;
 
-            cuenta.rules = rulesDB[cuenta.platform] || "Uso personal, no modificar los datos de acceso.";
-            stock = stock.map(item => item.id === cuenta.id ? { ...item, status: 'vendida' } : item);
+            let reglasStr = rulesText ? `\n⚠️ *Reglas:* ${rulesText}` : "";
+            textoFinal = `🎉 *¡Gracias por tu compra!*\n\nLa invitación de *${plataforma}* ha sido enviada con éxito a tu correo: *${clienteCorreo}*.\n\n📅 *Vence el:* ${dateWhatsApp}${reglasStr}\n\n¡Revisa tu bandeja de entrada y acepta la invitación para empezar a disfrutar del servicio! 🍿`;
+
+        } else {
+            // LÓGICA TRADICIONAL (INVENTARIO)
+            for (let id of cuentasIds) {
+                const acc = stock.find(c => c.id === id);
+                if (!acc) return window.showNotification("Error: Una cuenta ya no está en stock.");
+                cuentasEntregar.push(acc);
+            }
+
+            const precioDividido = precioTotal / cuentasIds.length;
+            for (let cuenta of cuentasEntregar) {
+                let matrizAsignada = null;
+                const qMatriz = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid), where("email", "==", cuenta.email));
+                const snapMatriz = await getDocs(qMatriz);
+                if (!snapMatriz.empty) matrizAsignada = snapMatriz.docs[0].id;
+
+                const docRef = await addDoc(collection(db, "clients"), {
+                    userId: currentUser.uid,
+                    name: "Cliente Nuevo", phone: numeroBonito, platform: cuenta.platform,
+                    accountEmail: cuenta.email, accountPassword: cuenta.pass,    
+                    accountPin: cuenta.pin, accountProfile: cuenta.profile || "1",
+                    accountUnits: 1, accountMonths: mesesContratados, cost: 0, price: precioDividido, 
+                    date: dateFirebase, linkedMasterId: matrizAsignada, 
+                    color: macPalette[Math.floor(Math.random() * macPalette.length)]
+                });
+                
+                if (!primerClienteId) primerClienteId = docRef.id;
+                cuenta.rules = rulesDB[cuenta.platform] || "Uso personal, no modificar los datos de acceso.";
+                stock = stock.map(item => item.id === cuenta.id ? { ...item, status: 'vendida' } : item);
+            }
+            await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
+            currentUserData.inventory = stock;
+
+            let bloqueCuentas = "";
+            cuentasEntregar.forEach((c, index) => { 
+                bloqueCuentas += `\n🍿 *CUENTA ${index + 1}: ${c.platform}*\n📧 *Correo:* ${c.email}\n🔑 *Clave:* ${c.pass}\n👤 *Perfil:* ${c.profile || '1'}\n📌 *PIN:* ${c.pin || 'N/A'}\n⚠️ *Reglas:* ${c.rules}\n`; 
+            });
+            textoFinal = currentUserData.waDeliveryMessage || `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tus cuentas:\n{bloqueCuentas}\n📅 *Vence el:* {fecha}\n\n¡Que disfrutes el contenido! 🍿`;
+            textoFinal = textoFinal.includes('{correo}') ? `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tus cuentas:\n${bloqueCuentas}\n📅 *Vence el:* ${dateWhatsApp}\n\n¡Que disfrutes el contenido! 🍿` : textoFinal.replace(/{bloqueCuentas}/g, bloqueCuentas).replace(/{fecha}/g, dateWhatsApp || '');
         }
 
-        await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
-        currentUserData.inventory = stock;
         await updateDoc(doc(db, "pedidos", pedidoId), { estado: "aprobado" });
-
         window.renderInventory(); 
         loadUserClients(); 
 
-        // 🔥 LÓGICA DE ENTREGA: BOT PARA PRO, WHATSAPP PARA BÁSICO
         const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
-        
-        let bloqueCuentas = "";
-        cuentasEntregar.forEach((c, index) => { 
-            bloqueCuentas += `\n🍿 *CUENTA ${index + 1}: ${c.platform}*\n📧 *Correo:* ${c.email}\n🔑 *Clave:* ${c.pass}\n👤 *Perfil:* ${c.profile || '1'}\n📌 *PIN:* ${c.pin || 'N/A'}\n⚠️ *Reglas:* ${c.rules}\n`; 
-        });
-
-        let textoFinal = currentUserData.waDeliveryMessage || `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tus cuentas:\n{bloqueCuentas}\n📅 *Vence el:* {fecha}\n\n¡Que disfrutes el contenido! 🍿`;
-        textoFinal = textoFinal.includes('{correo}') ? `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tus cuentas:\n${bloqueCuentas}\n📅 *Vence el:* ${dateWhatsApp}\n\n¡Que disfrutes el contenido! 🍿` : textoFinal.replace(/{bloqueCuentas}/g, bloqueCuentas).replace(/{fecha}/g, dateWhatsApp || '');
 
         if (plan === 'pro' || plan === 'elite') {
-            // PLAN PRO: Mandar orden silenciosa al Bot
             const payloadEntrega = {
                 distribuidorId: currentUser.uid,
-                // 🔥 CORRECCIÓN: Formato estricto que exige el Bot de WhatsApp
                 numeroCliente: numeroLimpio + '@s.whatsapp.net', 
-                cuentas: cuentasEntregar, 
+                cuentas: requiereInvitacion ? [{platform: plataforma}] : cuentasEntregar, 
                 fechaVencimiento: dateWhatsApp,
-                mensajeEntrega: currentUserData.waDeliveryMessage || "" 
+                mensajeEntrega: textoFinal
             };
 
             fetch('https://bot.panelagc.com/api/entregar-cuenta', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payloadEntrega)
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payloadEntrega)
             }).catch(err => console.error("Error de red al contactar al bot:", err));
               
             Swal.fire({
-                icon: 'success',
-                title: '¡Venta Aprobada!',
-                html: '<p style="color:var(--mac-text-secondary);">El Bot ya le está enviando la cuenta al cliente de forma automática.</p><p style="margin-top:10px; font-size:14px; font-weight:bold;">¿Deseas completar el nombre y los detalles del cliente ahora?</p>',
-                confirmButtonColor: '#34C759',
-                confirmButtonText: 'Completar Datos',
-                showCancelButton: true,
-                cancelButtonText: 'Más Tarde',
-                background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
-                color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+                icon: 'success', title: '¡Venta Aprobada!',
+                html: '<p style="color:var(--mac-text-secondary);">El Bot ya le está enviando la información al cliente.</p><p style="margin-top:10px; font-size:14px; font-weight:bold;">¿Deseas completar el nombre del cliente ahora?</p>',
+                confirmButtonColor: '#34C759', confirmButtonText: 'Completar Datos', showCancelButton: true, cancelButtonText: 'Más Tarde',
+                background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff', color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
             }).then((result) => {
                 if (result.isConfirmed && primerClienteId) {
-                    window.closeModals(true);
-                    window.switchMainTab('clientes');
-                    window.startEdit(primerClienteId);
-                } else {
-                    window.openPedidosModal(); 
-                }
+                    window.closeModals(true); window.switchMainTab('clientes'); window.startEdit(primerClienteId);
+                } else { window.openPedidosModal(); }
             });
 
         } else {
-            // PLAN BÁSICO/DEMO: Apertura directa a WhatsApp
             const waUrl = `https://wa.me/${numeroLimpio}?text=${encodeURIComponent(textoFinal)}`;
-            
-            // 🔥 CORRECCIÓN: Abre la ventana de WhatsApp automáticamente
             window.open(waUrl, '_blank'); 
             
             Swal.fire({
-                icon: 'success',
-                title: '¡Venta Aprobada!',
-                html: `<div style="margin-bottom:15px;"><a href="${waUrl}" target="_blank" style="display:inline-block; background:#25D366; color:white; padding:10px 15px; border-radius:8px; text-decoration:none; font-weight:bold;"><i class="bx bxl-whatsapp"></i> Reenviar Accesos (Clic Aquí)</a></div><p style="margin-top:10px; font-size:14px; font-weight:bold;">2. ¿Deseas completar el nombre y detalles del cliente ahora?</p>`,
-                confirmButtonText: 'Completar Datos',
-                confirmButtonColor: '#007AFF',
-                showCancelButton: true,
-                cancelButtonText: 'Más Tarde',
-                allowOutsideClick: false,
-                background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
-                color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+                icon: 'success', title: '¡Venta Aprobada!',
+                html: `<div style="margin-bottom:15px;"><a href="${waUrl}" target="_blank" style="display:inline-block; background:#25D366; color:white; padding:10px 15px; border-radius:8px; text-decoration:none; font-weight:bold;"><i class="bx bxl-whatsapp"></i> Reenviar Accesos (Clic Aquí)</a></div><p style="margin-top:10px; font-size:14px; font-weight:bold;">2. ¿Deseas completar el nombre del cliente ahora?</p>`,
+                confirmButtonText: 'Completar Datos', confirmButtonColor: '#007AFF', showCancelButton: true, cancelButtonText: 'Más Tarde', allowOutsideClick: false,
+                background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff', color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
             }).then((result) => {
                 if (result.isConfirmed && primerClienteId) {
-                    window.closeModals(true);
-                    window.switchMainTab('clientes');
-                    window.startEdit(primerClienteId);
-                } else {
-                    window.openPedidosModal(); 
-                }
+                    window.closeModals(true); window.switchMainTab('clientes'); window.startEdit(primerClienteId);
+                } else { window.openPedidosModal(); }
             });
         }
 
     } catch (e) {
-        console.error(e);
-        window.showNotification("Error: " + e.message);
+        console.error(e); window.showNotification("Error: " + e.message);
     }
 };
 /* ========================================== MÓDULO DE CUENTAS MATRICES (ESTILO MATRIZ) ========================================== */
