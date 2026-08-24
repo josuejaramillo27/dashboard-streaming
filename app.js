@@ -4025,25 +4025,31 @@ window.saveMasterAccount = async () => {
                 
                 // Actualizar si usaba el sistema antiguo de enlace
                 if (c.linkedMasterId === editingMasterId) {
-                    rootUpdates.accountEmail = email;
-                    rootUpdates.accountPassword = pass;
-                    needsUpdate = true;
-                    datosAviso = { name: c.name, phone: c.phone, platform: c.platform, email: email, pass: pass, profile: c.accountProfile, pin: c.accountPin };
+                    // 🔥 FIX: Solo actualizar y avisar si REALMENTE cambió el correo o la clave
+                    if (c.accountEmail !== email || c.accountPassword !== pass) {
+                        rootUpdates.accountEmail = email;
+                        rootUpdates.accountPassword = pass;
+                        needsUpdate = true;
+                        datosAviso = { name: c.name, phone: c.phone, platform: c.platform, email: email, pass: pass, profile: c.accountProfile, pin: c.accountPin };
+                    }
                 }
                 
                 // Actualizar si usa el sistema nuevo (multipestaña)
                 if (c.multiAccounts) {
                     for (let platKey in mAccounts) {
                         if (mAccounts[platKey].masterAccountId === editingMasterId) {
-                            mAccounts[platKey].email = email;
-                            mAccounts[platKey].password = pass;
-                            needsUpdate = true;
-                            datosAviso = { name: c.name, phone: c.phone, platform: platKey, email: email, pass: pass, profile: mAccounts[platKey].profile, pin: mAccounts[platKey].pin };
+                            // 🔥 FIX: Solo actualizar y avisar si REALMENTE cambió el correo o la clave
+                            if (mAccounts[platKey].email !== email || mAccounts[platKey].password !== pass) {
+                                mAccounts[platKey].email = email;
+                                mAccounts[platKey].password = pass;
+                                needsUpdate = true;
+                                datosAviso = { name: c.name, phone: c.phone, platform: platKey, email: email, pass: pass, profile: mAccounts[platKey].profile, pin: mAccounts[platKey].pin };
+                            }
                         }
                     }
                 }
                 
-                // Si este cliente pertenece a la matriz, guardamos en BD y lo metemos a la lista del Bot
+                // Si este cliente pertenece a la matriz y hubo cambios, guardamos en BD y lo metemos a la lista del Bot
                 if (needsUpdate) {
                     let finalUpdate = { ...rootUpdates };
                     if (c.multiAccounts) finalUpdate.multiAccounts = mAccounts;
