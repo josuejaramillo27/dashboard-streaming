@@ -782,24 +782,28 @@
                             <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Añadir un producto o combo:</label>
 <div style="background: rgba(0, 122, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed var(--mac-blue); display: flex; flex-direction: column; gap: 10px;">
     <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-        <label style="font-size: 12px; font-weight: bold; color: var(--mac-blue); cursor: pointer; flex: 1; min-width: 200px;">
-            <input type="checkbox" id="storeAutoStock" onchange="window.toggleStoreStockFields()" style="width: auto; margin-right: 5px;"> Conectar al Stock de Inventario
-        </label>
-        <label style="font-size: 12px; font-weight: bold; color: var(--mac-orange); cursor: pointer; flex: 1; min-width: 200px;">
-            <input type="checkbox" id="storeRequiresInvite" style="width: auto; margin-right: 5px;"> Venta por Invitación (Pide correo)
-        </label>
+        <label class="store-toggle-card" onclick="window.updateStoreToggleUI(this, 'storeAutoStock')" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; flex: 1; min-width: 200px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-blue); font-weight: bold; font-size: 12px; transition: all 0.2s;">
+        <span><i class='bx bx-box'></i> Conectar al Inventario</span>
+        <input type="checkbox" id="storeAutoStock" onchange="window.toggleStoreStockFields()" style="display:none;">
+        <i class='bx bx-circle store-toggle-icon' style="color: var(--mac-text-secondary); font-size: 18px;"></i>
+    </label>
+        <label class="store-toggle-card" onclick="window.updateStoreToggleUI(this, 'storeRequiresInvite')" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; flex: 1; min-width: 200px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-orange); font-weight: bold; font-size: 12px; transition: all 0.2s;">
+        <span><i class='bx bx-envelope'></i> Venta por Invitación</span>
+        <input type="checkbox" id="storeRequiresInvite" style="display:none;">
+        <i class='bx bx-circle store-toggle-icon' style="color: var(--mac-text-secondary); font-size: 18px;"></i>
+    </label>
         <div style="flex: 1; min-width: 150px;">
-            <label style="font-size: 10px; color: var(--mac-text-secondary); display: block;">Etiqueta de Tienda (Opcional):</label>
-            <select id="storeBadgeOption" style="padding: 6px; font-size: 11px; width: 100%; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border);">
-                <option value="">Ninguna</option>
-                <option value="oferta">🔥 Oferta Especial</option>
-                <option value="poco_stock">⚠️ Poco Stock</option>
-                <option value="tiempo_limitado">⏳ Por Tiempo Limitado</option>
-                <option value="nuevo">✨ Nuevo Ingreso</option>
-                <option value="a_pedido">📦 A Pedido (Sin stock previo)</option>
-            </select>
-        </div>
+        <label style="font-size: 10px; color: var(--mac-text-secondary); display: block;">Etiqueta de Tienda (Opcional):</label>
+        <select id="storeBadgeOption" style="padding: 6px; font-size: 11px; width: 100%; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border);">
+            <option value="">Ninguna</option>
+            <option value="oferta">🔥 Oferta Especial</option>
+            <option value="poco_stock">⚠️ Poco Stock</option>
+            <option value="tiempo_limitado">⏳ Por Tiempo Limitado</option>
+            <option value="nuevo">✨ Nuevo Ingreso</option>
+            <option value="a_pedido">📦 A Pedido (Sin stock previo)</option>
+        </select>
     </div>
+</div>
     
     <div id="storeStockConfig" style="display: none; flex-direction: column; gap: 8px; border-top: 1px dashed rgba(0, 122, 255, 0.3); padding-top: 10px;">
         <label id="storeStockLabel" style="font-size: 11px; color: var(--mac-text-secondary);">¿Qué plataforma(s) del inventario componen este producto?</label>
