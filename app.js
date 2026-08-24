@@ -5201,3 +5201,29 @@ window.closeTermsModal = () => {
     const modal = document.getElementById('termsModal');
     if (modal) modal.style.display = 'none';
 };
+
+// Actualiza visualmente las tarjetas de Conectar Inventario y Venta por Invitación
+window.updateStoreToggleUI = (labelEl, inputId) => {
+    setTimeout(() => {
+        const chk = document.getElementById(inputId);
+        const icon = labelEl.querySelector('.store-toggle-icon');
+        if (!chk || !icon) return;
+        
+        // Define colores: Azul para Inventario, Naranja para Invitación
+        const isStock = inputId === 'storeAutoStock';
+        const activeColor = isStock ? 'var(--mac-blue)' : 'var(--mac-orange)';
+        const activeBg = isStock ? 'rgba(0, 122, 255, 0.15)' : 'rgba(255, 149, 0, 0.15)';
+        
+        if (chk.checked) {
+            labelEl.style.border = `1px solid ${activeColor}`;
+            labelEl.style.background = activeBg;
+            icon.className = 'bx bx-check-circle store-toggle-icon';
+            icon.style.color = activeColor;
+        } else {
+            labelEl.style.border = '1px solid var(--mac-border)';
+            labelEl.style.background = 'var(--mac-surface)';
+            icon.className = 'bx bx-circle store-toggle-icon';
+            icon.style.color = 'var(--mac-text-secondary)';
+        }
+    }, 10);
+};
