@@ -3020,11 +3020,12 @@ window.renderPublicCatalog = (filterType) => {
         // 🔥 CONTROL DEL BOTÓN DE COMPRA SEGÚN ESTADO DE TIENDA
         let btnHTML = '';
         if (!isStoreOpen) {
-            btnHTML = `<span class="status expired" style="padding:10px 16px; border-radius:20px; font-weight:800; font-size:13px; text-transform:none; letter-spacing:0; background: var(--mac-gray); color: var(--mac-text-secondary);"><i class='bx bx-store-alt'></i> Tienda Cerrada</span>`;
+            btnHTML = `<span class="status expired" style="padding:10px 16px; border-radius:12px; font-weight:800; font-size:12px; text-transform:none; letter-spacing:0; background: var(--mac-gray); color: var(--mac-text-secondary);"><i class='bx bx-store-alt'></i> Cerrada</span>`;
         } else if (isAgotado) {
-            btnHTML = `<span class="status expired" style="padding:10px 16px; border-radius:20px; font-weight:800; font-size:13px; text-transform:none; letter-spacing:0;">Agotado</span>`;
+            btnHTML = `<span class="status expired" style="padding:10px 16px; border-radius:12px; font-weight:800; font-size:12px; text-transform:none; letter-spacing:0;">Agotado</span>`;
         } else {
-            btnHTML = `<button onclick="window.openCheckoutModal('${item.id}')" class="btn-wa" style="border:none; cursor:pointer; text-decoration:none; padding:10px 18px; border-radius:20px; font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:4px; margin:0;"><i class='bx bx-cart' style='font-size:16px;'></i> Comprar</button>`;
+            // 🔥 BOTÓN REDUCIDO SOLO AL CARRITO
+            btnHTML = `<button onclick="window.openCheckoutModal('${item.id}')" class="btn-wa" style="border:none; cursor:pointer; text-decoration:none; padding:0; border-radius:14px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; margin:0; width: 48px; height: 48px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);"><i class='bx bx-cart' style='margin:0; font-size: 24px;'></i></button>`;
         }
 
         const card = document.createElement('div');
@@ -3035,14 +3036,26 @@ window.renderPublicCatalog = (filterType) => {
                 ${imgHTML}
                 <div class="store-product-visual-overlay"><span class="view-desc-hint"><i class='bx bx-zoom-in'></i> Detalles</span></div>
             </div>
-            <div class="store-product-glass-footer" style="display:flex; justify-content:space-between; align-items:center; gap:10px; width:100%; box-sizing:border-box;">
-                <div class="store-product-info" style="flex:1; min-width:0; overflow:hidden;">
-                    <!-- 🔥 CORRECCIÓN: Quitamos la línea única y dejamos que ocupe hasta 2 líneas elegantes si sobra espacio -->
-                    <strong class="store-product-title" style="display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; white-space:normal; font-size:15px; line-height:1.2; width:100%;">${item.platform}</strong>
-                    <span class="store-product-price" style="display:block; margin-top:4px;">${priceStr}</span>
-                    ${stockHtml} 
+            
+            <!-- 🔥 NUEVO DISEÑO EN 2 LÍNEAS -->
+            <div class="store-product-glass-footer">
+                
+                <!-- LÍNEA 1: Título Ocupando Todo -->
+                <div style="width: 100%; margin-bottom: 12px;">
+                    <strong class="store-product-title" style="display:block; font-size:18px; line-height:1.3; color: var(--mac-text-main); word-break: break-word;">${item.platform}</strong>
                 </div>
-                <div class="store-product-action" style="flex-shrink:0;">${btnHTML}</div>
+                
+                <!-- LÍNEA 2: Precio/Stock (Izquierda) y Botón de Carrito (Derecha) -->
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; width:100%;">
+                    <div class="store-product-info" style="display:flex; flex-direction:column; gap:4px;">
+                        <span class="store-product-price" style="font-size: 20px; font-weight: 900; color: var(--mac-green);">${priceStr}</span>
+                        ${stockHtml} 
+                    </div>
+                    <div class="store-product-action" style="flex-shrink:0;">
+                        ${btnHTML}
+                    </div>
+                </div>
+                
             </div>
         `;
         catalogBox.appendChild(card);
