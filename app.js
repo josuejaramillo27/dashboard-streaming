@@ -74,7 +74,19 @@ function showView(viewId) {
 window.showLogin = () => { document.getElementById('loginForm').style.display='flex'; document.getElementById('registerForm').style.display='none'; document.getElementById('resetForm').style.display='none'; document.getElementById('authSubtitle').innerText='Iniciar Sesión'; }
 window.showRegister = () => { document.getElementById('loginForm').style.display='none'; document.getElementById('registerForm').style.display='flex'; document.getElementById('resetForm').style.display='none'; document.getElementById('authSubtitle').innerText='Crear Cuenta'; }
 window.showReset = () => { document.getElementById('loginForm').style.display='none'; document.getElementById('registerForm').style.display='none'; document.getElementById('resetForm').style.display='flex'; document.getElementById('authSubtitle').innerText='Recuperar Contraseña'; }
-
+window.goToRegisterFromPlanes = () => {
+    // 1. Ocultar la vista del catálogo de planes
+    document.getElementById('planesPublicView').style.display = 'none';
+    
+    // 2. Limpiar la URL (Quitar ?planes=true) para que no vuelva a atrapar la pantalla
+    const url = new URL(window.location);
+    url.searchParams.delete('planes');
+    window.history.pushState({}, '', url);
+    
+    // 3. Mandar al usuario directo a crear su cuenta
+    showView('authView');
+    window.showRegister();
+};
 window.togglePassword = (inputId, btn) => {
     const input = document.getElementById(inputId);
     if (input.type === "password") { input.type = "text"; btn.innerText = "🙈"; } 
@@ -3305,7 +3317,7 @@ window.submitCheckout = async () => {
             body: JSON.stringify({
                 vendedorId: vendedorId,
                 plataforma: currentCheckoutItem.platform,
-                precio: currentCheckoutItem.price.toFixed(2),
+                precio: currentCheckoutItem.price,
                 moneda: data.currency || 'S/'
             })
         }).catch(err => console.error("Error enviando alerta de venta:", err));
@@ -3750,15 +3762,28 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
 
     const precioTotal = parseFloat(document.getElementById(`precio_venta_${pedidoId}`).value) || 0;
 
-    // 🔥 PREGUNTAR POR LOS MESES PAGADOS
+    // 🔥 NUEVA VENTANITA UNIFICADA (MESES + DATOS A ENVIAR)
     const confirmacion = await Swal.fire({
-        title: 'Confirmar Vencimiento',
+        title: 'Configurar Entrega',
         html: `
-            <div style="text-align: left; background: var(--mac-bg); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border);">
-                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">¿Por cuántos meses pagó el cliente?</label>
-                <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
-                    <input type="number" id="swal-meses-venta" class="swal2-input" value="1" min="1" style="margin: 0; flex: 1; text-align: center; font-size: 18px; font-weight: bold;">
-                    <span style="font-size: 14px; color: var(--mac-text-secondary); font-weight: bold;">Mes(es)</span>
+            <div style="text-align: left; display: flex; flex-direction: column; gap: 15px;">
+                <div style="background: var(--mac-bg); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border);">
+                    <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">¿Por cuántos meses pagó el cliente?</label>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+                        <input type="number" id="swal-meses-venta" class="swal2-input" value="1" min="1" style="margin: 0; flex: 1; text-align: center; font-size: 18px; font-weight: bold;">
+                        <span style="font-size: 14px; color: var(--mac-text-secondary); font-weight: bold;">Mes(es)</span>
+                    </div>
+                </div>
+                
+                <div style="background: var(--mac-bg); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border);">
+                    <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main); margin-bottom: 10px; display: block;">¿Qué datos enviarás al cliente por WhatsApp?</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--mac-text-main); cursor: pointer;"><input type="checkbox" id="chk-correo" checked> Correo</label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--mac-text-main); cursor: pointer;"><input type="checkbox" id="chk-pass" checked> Contraseña</label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--mac-text-main); cursor: pointer;"><input type="checkbox" id="chk-perfil" checked> N° Perfil</label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--mac-text-main); cursor: pointer;"><input type="checkbox" id="chk-pin" checked> PIN</label>
+                    </div>
+                    <p style="font-size: 10px; color: var(--mac-text-secondary); margin: 8px 0 0 0; line-height: 1.3;">* El sistema siempre guardará todos los datos completos en tu panel por seguridad.</p>
                 </div>
             </div>
         `,
@@ -3771,12 +3796,19 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
         background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
         color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
         preConfirm: () => {
-            return parseInt(document.getElementById('swal-meses-venta').value) || 1;
+            return {
+                meses: parseInt(document.getElementById('swal-meses-venta').value) || 1,
+                sendCorreo: document.getElementById('chk-correo').checked,
+                sendPass: document.getElementById('chk-pass').checked,
+                sendPerfil: document.getElementById('chk-perfil').checked,
+                sendPin: document.getElementById('chk-pin').checked
+            };
         }
     });
 
     if (!confirmacion.isConfirmed) return;
-    const mesesContratados = confirmacion.value;
+    const mesesContratados = confirmacion.value.meses;
+    const opcEnvio = confirmacion.value; // Guardamos qué casillas marcó
 
     try {
         window.showNotification("⏳ Procesando entrega...");
@@ -3865,10 +3897,22 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
 
             let bloqueCuentas = "";
             cuentasEntregar.forEach((c, index) => { 
-                bloqueCuentas += `\n🍿 *CUENTA ${index + 1}: ${c.platform}*\n📧 *Correo:* ${c.email}\n🔑 *Clave:* ${c.pass}\n👤 *Perfil:* ${c.profile || '1'}\n📌 *PIN:* ${c.pin || 'N/A'}\n⚠️ *Reglas:* ${c.rules}\n`; 
+                bloqueCuentas += `\n🍿 *CUENTA ${index + 1}: ${c.platform}*\n`;
+                if (opcEnvio.sendCorreo) bloqueCuentas += `📧 *Correo:* ${c.email}\n`;
+                if (opcEnvio.sendPass) bloqueCuentas += `🔑 *Clave:* ${c.pass}\n`;
+                if (opcEnvio.sendPerfil) bloqueCuentas += `👤 *Perfil:* ${c.profile || '1'}\n`;
+                if (opcEnvio.sendPin) bloqueCuentas += `📌 *PIN:* ${c.pin || 'N/A'}\n`;
+                bloqueCuentas += `⚠️ *Reglas:* ${c.rules}\n`; 
             });
-            textoFinal = currentUserData.waDeliveryMessage || `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tus cuentas:\n{bloqueCuentas}\n📅 *Vence el:* {fecha}\n\n¡Que disfrutes el contenido! 🍿`;
-            textoFinal = textoFinal.includes('{correo}') ? `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tus cuentas:\n${bloqueCuentas}\n📅 *Vence el:* ${dateWhatsApp}\n\n¡Que disfrutes el contenido! 🍿` : textoFinal.replace(/{bloqueCuentas}/g, bloqueCuentas).replace(/{fecha}/g, dateWhatsApp || '');
+
+            let templateMsg = currentUserData.waDeliveryMessage || `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tus cuentas:\n{bloqueCuentas}\n📅 *Vence el:* {fecha}\n\n¡Que disfrutes el contenido! 🍿`;
+
+            // Verificamos si el usuario borró la variable {bloqueCuentas} de su plantilla
+            if (!templateMsg.includes('{bloqueCuentas}')) {
+                templateMsg = `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tus cuentas:\n{bloqueCuentas}\n📅 *Vence el:* {fecha}\n\n¡Que disfrutes el contenido! 🍿`;
+            }
+
+            textoFinal = templateMsg.replace(/{bloqueCuentas}/g, bloqueCuentas).replace(/{fecha}/g, dateWhatsApp || '');
         }
 
         await updateDoc(doc(db, "pedidos", pedidoId), { estado: "aprobado" });
