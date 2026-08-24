@@ -3037,18 +3037,17 @@ window.renderPublicCatalog = (filterType) => {
                 <div class="store-product-visual-overlay"><span class="view-desc-hint"><i class='bx bx-zoom-in'></i> Detalles</span></div>
             </div>
             
-            <!-- 🔥 NUEVO DISEÑO EN 2 LÍNEAS -->
             <div class="store-product-glass-footer">
                 
-                <!-- LÍNEA 1: Título Ocupando Todo (Si es largo, bajará de línea solo) -->
-                <div style="width: 100%; margin-bottom: 12px;">
-                    <strong class="store-product-title" style="display:block; font-size:18px; line-height:1.3; color: var(--mac-text-main); word-break: break-word;">${item.platform}</strong>
+                <!-- LÍNEA 1: Título Ocupando Toda la Parte Superior -->
+                <div style="width: 100%; margin-bottom: 15px;">
+                    <strong class="store-product-title" style="display:block; font-size:22px; line-height:1.2; color: var(--mac-text-main); word-break: break-word;">${item.platform}</strong>
                 </div>
                 
-                <!-- LÍNEA 2: Precio/Stock (Izquierda) y Botón de Carrito (Derecha) -->
-                <div style="display:flex; justify-content:space-between; align-items:flex-end; width:100%; margin-top: auto;">
+                <!-- LÍNEA 2: Precio (Izquierda) y Botón de Comprar (Derecha) -->
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; width:100%;">
                     <div class="store-product-info" style="display:flex; flex-direction:column; gap:4px;">
-                        <span class="store-product-price" style="font-size: 22px; font-weight: 900; color: var(--mac-green);">${priceStr}</span>
+                        <span class="store-product-price" style="font-size: 24px; font-weight: 900; color: var(--mac-green);">${priceStr}</span>
                         ${stockHtml} 
                     </div>
                     <div class="store-product-action" style="flex-shrink:0;">
