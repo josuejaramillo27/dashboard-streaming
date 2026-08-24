@@ -1407,3 +1407,71 @@ body.dark-mode .bottom-nav { background: linear-gradient(to top, rgba(0, 0, 0, 1
     background-color: rgba(255, 255, 255, 0.1) !important;
     color: #ffffff !important;
 }
+
+/* =========================================================
+   SISTEMA DE CARRITO Y COMPARTIR (UI PREMIUM)
+========================================================= */
+/* Botón Flotante del Carrito */
+.floating-cart {
+    position: fixed; bottom: 85px; right: 25px; /* Arriba del botón de soporte */
+    background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); color: white;
+    width: 60px; height: 60px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; cursor: pointer; box-shadow: 0 10px 25px rgba(0, 122, 255, 0.4);
+    z-index: 999997; transition: transform 0.3s;
+}
+.floating-cart:hover { transform: scale(1.1) translateY(-5px); }
+.cart-badge {
+    position: absolute; top: -2px; right: -2px;
+    background: var(--mac-red); color: white;
+    font-size: 12px; font-weight: 900; width: 22px; height: 22px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--mac-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+/* Panel Deslizable del Carrito */
+.cart-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+    z-index: 999998; opacity: 0; visibility: hidden; transition: 0.3s;
+}
+.cart-overlay.active { opacity: 1; visibility: visible; }
+.cart-panel {
+    position: fixed; top: 0; right: -100%; width: 380px; max-width: 100vw; height: 100vh;
+    background: var(--mac-surface); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+    z-index: 999999; box-shadow: -15px 0 40px rgba(0,0,0,0.3);
+    transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex; flex-direction: column; border-left: 1px solid var(--mac-border);
+}
+.cart-panel.active { right: 0; }
+.cart-header {
+    padding: 25px 20px; border-bottom: 1px solid var(--mac-border);
+    display: flex; justify-content: space-between; align-items: center;
+}
+.cart-header h3 { margin: 0; font-size: 20px; color: var(--mac-text-main); display: flex; align-items: center; gap: 8px; font-weight: 800; }
+.cart-header button { background: transparent; border: none; font-size: 32px; color: var(--mac-text-secondary); cursor: pointer; padding: 0; transition: 0.2s; }
+.cart-header button:hover { color: var(--mac-red); transform: rotate(90deg); }
+
+.cart-items { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+.cart-item { display: flex; gap: 12px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 16px; border: 1px solid var(--mac-border); position: relative; align-items: center; }
+.cart-item img { width: 65px; height: 65px; border-radius: 12px; object-fit: cover; border: 1px solid var(--mac-border); }
+.cart-item-info { flex: 1; display: flex; flex-direction: column; justify-content: center; padding-right: 25px; }
+.cart-item-title { font-size: 15px; font-weight: 800; color: var(--mac-text-main); margin-bottom: 4px; line-height: 1.2; }
+.cart-item-price { font-size: 16px; font-weight: 900; color: var(--mac-green); }
+.cart-item-remove { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); background: rgba(255,59,48,0.1); color: var(--mac-red); border: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; font-size: 16px; }
+.cart-item-remove:hover { background: var(--mac-red); color: white; }
+
+.cart-footer { padding: 25px 20px; border-top: 1px solid var(--mac-border); background: var(--mac-surface); }
+.cart-total { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 16px; font-weight: bold; color: var(--mac-text-secondary); }
+.cart-total span:last-child { color: var(--mac-text-main); font-size: 26px; font-weight: 900; }
+
+/* Botón Compartir (Aparece sobre las tarjetas de la tienda) */
+.store-share-btn {
+    position: absolute; top: 12px; right: 12px; z-index: 10;
+    background: rgba(25, 25, 30, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2); color: white;
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; cursor: pointer; transition: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+.store-share-btn:hover { background: rgba(0, 122, 255, 0.8); border-color: var(--mac-blue); transform: scale(1.15) translateY(-2px); }
