@@ -347,6 +347,37 @@
             .mobile-date-label { display: none !important; }
             .date-wrapper { display: contents; } /* Hace que el contenedor sea fantasma en PC */
         }
+        /* ==========================================================================
+           CORRECCIONES VISUALES DE LA TIENDITA (PC Y MÓVIL)
+           ========================================================================== */
+        .store-product-card {
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            height: 100% !important; 
+            min-height: 280px !important; /* Da más espacio vertical en PC */
+            overflow: hidden !important;
+        }
+        .store-product-visual {
+            flex: 1 1 auto !important; /* Ocupa el espacio sin aplastar el texto */
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: rgba(0,0,0,0.15) !important;
+        }
+        .store-product-visual img {
+            width: 100% !important;
+            height: 100% !important;
+            max-height: 220px !important; /* Evita que crezca infinitamente en PC */
+            object-fit: contain !important; /* 👈 MAGIA: Muestra la foto entera sin recortes en Celular */
+        }
+        .store-product-glass-footer {
+            flex: 0 0 auto !important; /* Protege el footer para que NUNCA se esconda */
+            padding: 12px 15px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
     <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
