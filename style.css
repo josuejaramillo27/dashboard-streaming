@@ -584,16 +584,18 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
 /* =========================================================
    TARJETAS DE PRODUCTO: ESTILO APP STORE / BENTO BOX
 ========================================================= */
-#publicStoreCatalog {
-    margin-top: 40px !important;
-    padding: 0 20px 40px 20px !important;
-    display: grid !important;
-    /* 🔥 FIX: Cambiamos de 3 a 2 columnas para que crezcan */
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 30px !important;
-    max-width: 1050px !important; 
-    margin-left: auto !important;
-    margin-right: auto !important;
+/* 1. PC: Tarjetas gigantes (3 por fila) */
+@media (min-width: 768px) {
+    #publicStoreView { max-width: 1100px !important; } /* Aumentamos espacio global */
+    
+    #publicStoreCatalog { 
+        display: grid !important; 
+        grid-template-columns: repeat(3, 1fr) !important; /* 🔥 AQUÍ cambiamos de 2 a 3 */
+        gap: 30px !important; 
+        max-width: 1000px !important; /* Le damos más espacio para que entren 3 */
+        margin-left: auto !important; 
+        margin-right: auto !important; 
+    }
 }
 
 .store-product-card {
