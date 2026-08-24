@@ -348,23 +348,16 @@
             .date-wrapper { display: contents; } /* Hace que el contenedor sea fantasma en PC */
         }
         /* ==========================================================================
-           CORRECCIONES VISUALES DE LA TIENDITA (PC Y MÓVIL) DEFINITIVAS
+           NUEVO DISEÑO DE PRODUCTOS (CUADRADO PERFECTO Y TEXTOS EN 2 LÍNEAS)
            ========================================================================== */
         
-        /* 1. Hacer el catálogo y el recuadro mucho más grandes en PC */
+        /* 1. Catálogo más grande y ordenado en PC */
         @media (min-width: 768px) {
             #publicStoreView { max-width: 1100px !important; }
-            #publicStoreCatalog { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)) !important; }
-            .store-product-visual { height: 260px !important; } /* Cuadrado gigante establecido para PC */
-            .store-product-card { min-height: 420px !important; }
+            #publicStoreCatalog { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important; }
         }
 
-        /* 2. Cuadrado establecido para celulares */
-        @media (max-width: 767px) {
-            .store-product-visual { height: 180px !important; }
-        }
-
-        /* 3. Estructura de la Tarjeta */
+        /* 2. Estructura de la Tarjeta */
         .store-product-card {
             display: flex !important;
             flex-direction: column !important;
@@ -372,34 +365,35 @@
             height: 100% !important; 
             overflow: hidden !important;
             background: var(--mac-surface) !important;
+            border-radius: 16px !important;
         }
 
-        /* 4. El recuadro de la imagen (Dimensiones fijas y SIN fondo negro) */
+        /* 3. El recuadro de la imagen (CUADRADO PERFECTO AUTOMÁTICO) */
         .store-product-visual {
             width: 100% !important;
+            aspect-ratio: 1 / 1 !important; /* 🔥 MAGIA: Esto hace que crezca en celular y sea un cuadrado exacto siempre */
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
-            /* 🔥 ADIÓS A LOS ESPACIOS EN NEGRO: Fondo transparente */
             background: transparent !important; 
-            padding: 10px !important;
+            padding: 0 !important; /* Sin espacios, la imagen pegará hasta los bordes */
             box-sizing: border-box !important;
         }
 
-        /* 5. Comportamiento de la Imagen */
+        /* 4. Comportamiento de la Imagen */
         .store-product-visual img {
             width: 100% !important;
             height: 100% !important;
-            /* 🔥 MAGIA: Achica o agranda la imagen pero la muestra 100% COMPLETA sin recortes */
-            object-fit: contain !important; 
-            border-radius: 8px !important;
+            object-fit: cover !important; /* Llenará el cuadrado sin dejar franjas transparentes */
+            border-radius: 16px 16px 0 0 !important;
         }
 
-        /* 6. Textos y Botones (Siempre visibles y ajustables) */
+        /* 5. Contenedor de Textos (Alineado en Columna) */
         .store-product-glass-footer {
             flex: 1 !important; 
             display: flex !important;
-            padding: 18px 15px !important;
+            flex-direction: column !important; /* Permite que el título vaya arriba y lo demás abajo */
+            padding: 16px !important;
             width: 100% !important;
             box-sizing: border-box !important;
             border-top: 1px solid var(--mac-border) !important;
