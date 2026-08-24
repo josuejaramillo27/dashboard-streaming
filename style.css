@@ -584,15 +584,15 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
 /* =========================================================
    TARJETAS DE PRODUCTO: ESTILO APP STORE / BENTO BOX
 ========================================================= */
-/* 1. PC: Tarjetas gigantes (3 por fila) */
+/* 1. PC: Tarjetas (3 por fila) */
 @media (min-width: 768px) {
-    #publicStoreView { max-width: 1100px !important; } /* Aumentamos espacio global */
+    #publicStoreView { max-width: 1100px !important; }
     
     #publicStoreCatalog { 
         display: grid !important; 
-        grid-template-columns: repeat(3, 1fr) !important; /* 🔥 AQUÍ cambiamos de 2 a 3 */
+        grid-template-columns: repeat(3, 1fr) !important; /* 🔥 FIX: 3 servicios por fila */
         gap: 30px !important; 
-        max-width: 1000px !important; /* Le damos más espacio para que entren 3 */
+        max-width: 1000px !important; 
         margin-left: auto !important; 
         margin-right: auto !important; 
     }
@@ -600,11 +600,11 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
 
 .store-product-card {
     position: relative !important;
-    height: auto !important; /* 🔥 Permite que crezca hacia abajo sin aplastar */
+    height: auto !important; 
     background: var(--mac-surface) !important;
     border: 1px solid var(--mac-border) !important;
     border-radius: 28px !important;
-    overflow: hidden !important; 
+    overflow: visible !important; /* 🔥 FIX ETIQUETA: 'visible' permite que la etiqueta flote sin cortarse */
     display: flex !important;
     flex-direction: column !important;
     box-shadow: var(--glass-shadow) !important;
@@ -630,9 +630,9 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
 .store-product-visual {
     position: relative !important;
     width: 100% !important;
-    padding-top: 100% !important; /* 🔥 Fuerza matemáticamente el cuadrado */
-    border-radius: 28px 28px 0 0 !important;
-    overflow: hidden !important;
+    padding-top: 100% !important; 
+    border-radius: 28px 28px 0 0 !important; /* Curvas perfectas solo arriba */
+    overflow: hidden !important; /* Esto evita que la imagen cuadrada se salga de la curva */
     z-index: 1;
     cursor: pointer;
     display: block !important;
@@ -645,7 +645,7 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
     left: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    object-fit: cover !important; /* 🔥 Tapa todo el cuadrado sin dejar borde */
+    object-fit: cover !important; 
     transition: transform 0.5s ease !important;
 }
 
@@ -676,7 +676,7 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
 
 /* ❄️ FRANJA CRISTALINA INFERIOR (GLASSMORPHISM) */
 .store-product-glass-footer {
-    flex: 1 !important; /* 🔥 Empuja y llena el resto de la tarjeta */
+    flex: 1 !important; 
     width: 100% !important;
     padding: 20px !important;
     box-sizing: border-box !important;
@@ -684,6 +684,8 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
     background: var(--mac-dropdown-bg) !important;
     backdrop-filter: var(--glass-blur) !important;
     -webkit-backdrop-filter: var(--glass-blur) !important;
+    
+    border-radius: 0 0 28px 28px !important; /* 🔥 FIX CURVAS: Para mantener las esquinas redondas de abajo */
     
     display: flex !important;
     flex-direction: column !important;
