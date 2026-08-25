@@ -835,24 +835,38 @@
         <p style="font-size: 10px; color: var(--mac-text-secondary); margin: 0;">* El stock disponible del combo se calcula automáticamente según la plataforma con menor cantidad libre.</p>
     </div>
 </div>
-                            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
-                                <div style="display: flex; gap: 10px;">
-                                    <select id="storeType" onchange="window.handleStoreTypeChange()" style="flex: 1; padding: 8px; border-radius: 6px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
-                                    <option value="Servicio">Servicio Único</option>
-                                    <option value="Combo">🎁 Combo</option>
-                                    </select>
-                                    <input type="text" id="storePlatform" placeholder="Ej: Combo Disney+Max" style="flex: 2;">
-                                    <input type="number" id="storePrice" placeholder="Precio" style="flex: 1;">
-                                </div>
-                                <div>
-                                    <label style="font-size: 11px; color: var(--mac-text-secondary); display: block; margin-bottom: 4px;">Imagen de portada (Opcional):</label>
-                                    <input type="file" id="storeImg" accept="image/*" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 12px;">
-                                </div>
-                                <div style="display: flex; gap: 10px; align-items: flex-start;">
-                                    <textarea id="storeDesc" placeholder="Descripción del producto...&#10;(Puedes usar la tecla Enter para hacer saltos de línea)" style="flex: 1; padding: 10px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 13px; font-family: inherit; resize: vertical; min-height: 42px;"></textarea>
-                                    <button class="btn-primary" style="width: auto; padding: 12px 20px; height: 42px; border-radius: 8px;" onclick="window.addStoreItem()"><i class='bx bx-plus'></i></button>
-                                </div>
-                            </div>
+                            <!-- 📱 FORMULARIO REORGANIZADO PARA MÓVILES Y PC -->
+<div style="display: flex; flex-direction: column; gap: 14px; margin-top: 15px;">
+    
+    <!-- Fila 1: Nombre del Producto (Ocupa todo el ancho) -->
+    <div>
+        <input type="text" id="storePlatform" placeholder="Nombre del Servicio o Combo" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 14px; box-sizing: border-box;">
+    </div>
+
+    <!-- Fila 2: Tipo y Precio (Mitad y Mitad para respirar mejor) -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <select id="storeType" onchange="window.handleStoreTypeChange()" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 14px; outline: none;">
+            <option value="Servicio">Servicio Único</option>
+            <option value="Combo">🎁 Combo</option>
+        </select>
+        <input type="number" id="storePrice" placeholder="Precio final" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 14px; box-sizing: border-box;">
+    </div>
+
+    <!-- Fila 3: Imagen -->
+    <div>
+        <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary); display: block; margin-bottom: 6px;">Imagen de portada (Opcional):</label>
+        <input type="file" id="storeImg" accept="image/*" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 13px; box-sizing: border-box;">
+    </div>
+
+    <!-- Fila 4: Descripción y Botón (Apilados para celular) -->
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+        <textarea id="storeDesc" placeholder="Descripción del producto...&#10;(Usa la tecla 'Enter' para saltos de línea)" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 14px; font-family: inherit; resize: vertical; min-height: 80px; box-sizing: border-box; outline: none;"></textarea>
+        
+        <button class="btn-primary" style="width: 100%; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); border: none; box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);" onclick="window.addStoreItem()">
+            <i class='bx bx-plus-circle' style="font-size: 22px;"></i> Añadir al Catálogo
+        </button>
+    </div>
+</div>
                         </div>
 
                         <div id="storeItemsList" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; margin-bottom: 15px;"></div>
