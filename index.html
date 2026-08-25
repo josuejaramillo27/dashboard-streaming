@@ -246,24 +246,25 @@
             .dashboard-section.modal-overlay { position: relative !important; background: transparent !important; z-index: 1 !important; width: 100% !important; }
             .dashboard-section .modal-card { width: 100% !important; max-width: 100% !important; border: none !important; box-shadow: none !important; background: transparent !important; padding-bottom: 20px !important; }
 
-            /* 3. EL BOTÓN DE CERRAR: Al final del contenido (Scroll natural) */
+            /* 3. EL BOTÓN DE CERRAR: Al final del contenido, con figura elegante y centrado */
             .dashboard-section .mobile-only-btn { 
                 display: block !important; 
-                position: relative !important; /* 🪄 Magia: Vuelve al flujo normal de la página */
+                position: relative !important; 
                 bottom: auto !important;
                 left: auto !important;
                 transform: none !important; 
-                width: 100% !important; 
+                width: max-content !important; /* 🪄 Magia: El botón solo será tan ancho como la palabra "Cerrar" + el padding */
+                min-width: 150px !important; /* Ancho mínimo para que no se vea ridículamente pequeño */
                 z-index: 10 !important;
-                margin: 20px 0 0 0 !important; 
-                box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important; 
-                border-radius: 14px !important;
+                margin: 25px auto 0 auto !important; /* 🪄 Magia: Lo empuja hacia abajo y lo centra horizontalmente en la pantalla */
+                box-shadow: 0 8px 25px rgba(0,0,0,0.35) !important; /* Sombra un poco más difusa y premium */
+                border-radius: 20px !important; /* Bordes más redondeados estilo botón de pastilla iOS */
                 font-weight: 800 !important; 
                 background: #1c1c1e !important; 
                 border: 1px solid #38383a !important; 
                 color: #ffffff !important; 
-                padding: 16px !important;
-                font-size: 16px !important;
+                padding: 14px 30px !important; /* Más relleno a los lados que arriba/abajo */
+                font-size: 15px !important;
             }
 
             /* 4. PERMITIR SCROLL NATURAL (Las listas ahora se adaptan sin cruzarse) */
