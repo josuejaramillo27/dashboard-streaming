@@ -246,33 +246,34 @@
             .dashboard-section.modal-overlay { position: relative !important; background: transparent !important; z-index: 1 !important; width: 100% !important; }
             .dashboard-section .modal-card { width: 100% !important; max-width: 100% !important; border: none !important; box-shadow: none !important; background: transparent !important; padding-bottom: 20px !important; }
 
-            /* 3. EL BOTÓN DE CERRAR: Al final del contenido, con figura elegante y centrado */
+            /* 3. EL BOTÓN DE CERRAR: Tamaño normal y apilado debajo */
             .dashboard-section .mobile-only-btn { 
                 display: block !important; 
                 position: relative !important; 
                 bottom: auto !important;
                 left: auto !important;
                 transform: none !important; 
-                width: max-content !important; /* 🪄 Magia: El botón solo será tan ancho como la palabra "Cerrar" + el padding */
-                min-width: 150px !important; /* Ancho mínimo para que no se vea ridículamente pequeño */
+                width: 100% !important; /* Ocupa el ancho normal */
                 z-index: 10 !important;
-                margin: 25px auto 0 auto !important; /* 🪄 Magia: Lo empuja hacia abajo y lo centra horizontalmente en la pantalla */
-                box-shadow: 0 8px 25px rgba(0,0,0,0.35) !important; /* Sombra un poco más difusa y premium */
-                border-radius: 20px !important; /* Bordes más redondeados estilo botón de pastilla iOS */
+                margin: 0 !important; 
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important; 
+                border-radius: 12px !important;
                 font-weight: 800 !important; 
                 background: #1c1c1e !important; 
                 border: 1px solid #38383a !important; 
                 color: #ffffff !important; 
-                padding: 14px 30px !important; /* Más relleno a los lados que arriba/abajo */
+                padding: 14px !important;
                 font-size: 15px !important;
             }
 
-            /* 4. PERMITIR SCROLL NATURAL (Las listas ahora se adaptan sin cruzarse) */
-            .dashboard-section .modal-card { 
-                height: auto !important; 
-                min-height: 100vh !important; 
-                padding-bottom: 90px !important; 
+            /* 🔥 MAGIA: Obliga a que el botón Cerrar se ponga DEBAJO del botón Copiar */
+            #storeModal .modal-card > div:last-child {
+                flex-direction: column !important;
+                gap: 12px !important;
             }
+
+            /* 4. PERMITIR SCROLL NATURAL */
+            .dashboard-section .modal-card { height: auto !important; min-height: 100vh !important; padding-bottom: 100px !important; }
             .dashboard-section .modal-card > div[style*="overflow-y: auto"] { overflow: visible !important; max-height: none !important; }
             
             #inventoryModal .modal-card > div:nth-child(2) > div { min-width: 100% !important; max-width: 100% !important; margin-bottom: 15px; }
@@ -284,8 +285,8 @@
                 padding-right: 0 !important; 
             }
             
-            /* Separación específica para el botón Copiar Link en la Tiendita */
-            #btnCopyInternalLink { margin-bottom: 80px !important; width: 100% !important; }
+            /* 🔥 FIX: Quitamos el margen gigante invisible que deformaba al botón Cerrar */
+            #btnCopyInternalLink { margin-bottom: 0 !important; width: 100% !important; }
             
             /* Ajustes estéticos de Inventario en celular */
             #inventoryList > div { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; width: 100% !important; }
