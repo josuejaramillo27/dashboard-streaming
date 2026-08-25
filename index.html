@@ -246,21 +246,20 @@
             .dashboard-section.modal-overlay { position: relative !important; background: transparent !important; z-index: 1 !important; width: 100% !important; }
             .dashboard-section .modal-card { width: 100% !important; max-width: 100% !important; border: none !important; box-shadow: none !important; background: transparent !important; padding-bottom: 20px !important; }
 
-            /* 3. EL BOTÓN DE CERRAR: Fijo, Opaco y con Sombra para que no se mezcle */
+            /* 3. EL BOTÓN DE CERRAR: Al final del contenido (Scroll natural) */
             .dashboard-section .mobile-only-btn { 
                 display: block !important; 
-                position: fixed !important;
-                bottom: 20px !important;
-                left: 50% !important;
-                transform: translateX(-50%) !important; 
-                width: calc(100vw - 30px) !important;
-                z-index: 99999 !important;
-                margin: 0 !important;
-                /* Sombra fuerte ultra-oscura para aislarlo del texto que pasa por debajo */
-                box-shadow: 0 -15px 40px rgba(0,0,0,0.95), 0 4px 15px rgba(0,0,0,0.5) !important; 
+                position: relative !important; /* 🪄 Magia: Vuelve al flujo normal de la página */
+                bottom: auto !important;
+                left: auto !important;
+                transform: none !important; 
+                width: 100% !important; 
+                z-index: 10 !important;
+                margin: 20px 0 0 0 !important; 
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important; 
                 border-radius: 14px !important;
                 font-weight: 800 !important; 
-                background: #1c1c1e !important; /* Fondo sólido forzado */
+                background: #1c1c1e !important; 
                 border: 1px solid #38383a !important; 
                 color: #ffffff !important; 
                 padding: 16px !important;
@@ -268,8 +267,11 @@
             }
 
             /* 4. PERMITIR SCROLL NATURAL (Las listas ahora se adaptan sin cruzarse) */
-            /* Apagamos el límite de altura forzado para que el padding inferior sí funcione */
-            .dashboard-section .modal-card { height: auto !important; min-height: 100vh !important; padding-bottom: 120px !important; }
+            .dashboard-section .modal-card { 
+                height: auto !important; 
+                min-height: 100vh !important; 
+                padding-bottom: 90px !important; 
+            }
             .dashboard-section .modal-card > div[style*="overflow-y: auto"] { overflow: visible !important; max-height: none !important; }
             
             #inventoryModal .modal-card > div:nth-child(2) > div { min-width: 100% !important; max-width: 100% !important; margin-bottom: 15px; }
