@@ -1559,7 +1559,7 @@ body.dark-mode .bottom-nav { background: linear-gradient(to top, rgba(0, 0, 0, 1
 /* =========================================================
    LOGIN INMERSIVO: CENTRADO PERFECTO, SIN RECUADRO Y SIN SCROLL
 ========================================================= */
-.login-container {
+.login-container:not([style*="display: none"]) {
     /* 1. Matamos el recuadro gris/cristal */
     background: transparent !important;
     backdrop-filter: none !important;
