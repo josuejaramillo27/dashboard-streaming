@@ -1559,17 +1559,17 @@ body.dark-mode .bottom-nav { background: linear-gradient(to top, rgba(0, 0, 0, 1
 /* =========================================================
    LOGIN INMERSIVO: CENTRADO PERFECTO, SIN RECUADRO Y SIN SCROLL
 ========================================================= */
-.login-container:not([style*="display: none"]) {
-    /* 1. Matamos el recuadro gris/cristal */
+.login-container {
+    /* Matamos el recuadro gris/cristal */
     background: transparent !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     border: none !important;
     box-shadow: none !important;
     
-    /* 2. Centrado absoluto y eliminación de barra de scroll */
-    margin: 0 auto !important; /* Elimina los márgenes que causaban el scroll */
-    min-height: 100dvh !important; /* 'dvh' respeta la pantalla exacta del celular */
+    /* Centrado absoluto y pantalla completa */
+    margin: 0 auto !important; 
+    min-height: 100dvh !important; 
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
@@ -1578,7 +1578,12 @@ body.dark-mode .bottom-nav { background: linear-gradient(to top, rgba(0, 0, 0, 1
     box-sizing: border-box !important;
 }
 
-/* 3. Flotamos el botón de Modo Oscuro a la esquina para que no empuje el logo */
+/* 🔥 LA REGLA MAESTRA QUE FUERZA SU DESAPARICIÓN */
+#authView[style*="none"] {
+    display: none !important;
+}
+
+/* Posición de elementos internos */
 .login-container .header-top {
     position: absolute !important;
     top: 25px !important;
@@ -1587,14 +1592,12 @@ body.dark-mode .bottom-nav { background: linear-gradient(to top, rgba(0, 0, 0, 1
     width: auto !important;
 }
 
-/* 4. Aseguramos que los inputs no se vean gigantes en PC */
 .login-container .auth-form {
     width: 100% !important;
     max-width: 360px !important;
     margin: 0 auto !important;
 }
 
-/* 5. Ajuste óptico del logo para que el centrado se sienta simétrico */
 .login-container > div:nth-child(2) {
     margin-top: -30px !important; 
 }
