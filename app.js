@@ -2851,7 +2851,7 @@ window.addStoreItem = async () => {
     } catch(e) { 
         window.showNotification("Error: " + e.message); 
     } finally { 
-        btn.innerHTML = "<i class='bx bx-plus'></i>"; 
+        btn.innerHTML = "<i class='bx bx-plus-circle' style='font-size: 22px;'></i> Añadir al Catálogo"; 
         btn.disabled = false; 
     }
 };
