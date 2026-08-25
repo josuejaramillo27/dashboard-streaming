@@ -272,9 +272,18 @@
                 gap: 12px !important;
             }
 
-            /* 4. PERMITIR SCROLL NATURAL */
-            .dashboard-section .modal-card { height: auto !important; min-height: 100vh !important; padding-bottom: 100px !important; }
-            .dashboard-section .modal-card > div[style*="overflow-y: auto"] { overflow: visible !important; max-height: none !important; }
+            /* 4. PERMITIR SCROLL NATURAL Y ELIMINAR DOBLE BARRA */
+.dashboard-section .modal-card { 
+    height: auto !important; 
+    min-height: 100vh !important; 
+    max-height: none !important; /* Mata el límite del 90% */
+    overflow: visible !important; /* Apaga la barra de scroll interna */
+    padding-bottom: 100px !important; 
+}
+.dashboard-section .modal-card > div[style*="overflow-y: auto"] { 
+    overflow: visible !important; 
+    max-height: none !important; 
+}
             
             #inventoryModal .modal-card > div:nth-child(2) > div { min-width: 100% !important; max-width: 100% !important; margin-bottom: 15px; }
             
