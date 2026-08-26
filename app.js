@@ -1500,30 +1500,82 @@ window.renewClient = async (id) => {
     let fechaAntigua = new Date(year, month - 1, day);
     const antiguaFechaBonita = fechaAntigua.toLocaleDateString('es-ES');
 
-    const { value: result } = await Swal.fire({
+    // Variables globales temporales para que el modal sepa qué estamos haciendo
+    window.currentRenewType = 'mes'; // Por defecto seleccionamos 'mes a mes'
+    window.currentRenewBaseDate = fechaAntigua;
+
+    // 1. Función para actualizar los números en tiempo real al escribir
+    window.updateRenewDates = () => {
+        let meses = parseInt(document.getElementById('swal-renew-months').value) || 1;
+        
+        // Cálculo Mes a Mes (De fecha a fecha)
+        let dMes = new Date(window.currentRenewBaseDate);
+        dMes.setMonth(dMes.getMonth() + meses);
+        document.getElementById('date-mes').innerText = dMes.toLocaleDateString('es-ES');
+
+        // Cálculo 30 Días Exactos
+        let d30 = new Date(window.currentRenewBaseDate);
+        d30.setDate(d30.getDate() + (30 * meses));
+        document.getElementById('date-30d').innerText = d30.toLocaleDateString('es-ES');
+    };
+
+    // 2. Función para iluminar la tarjeta que el usuario seleccione
+    window.selectRenewOpt = (type) => {
+        window.currentRenewType = type;
+        const cardMes = document.getElementById('optMesAMes');
+        const card30d = document.getElementById('opt30Dias');
+        
+        if(type === 'mes') {
+            cardMes.style.border = '2px solid var(--mac-blue)';
+            cardMes.style.background = 'rgba(0, 122, 255, 0.15)';
+            
+            card30d.style.border = '1px solid var(--mac-border)';
+            card30d.style.background = 'var(--mac-bg)';
+        } else {
+            card30d.style.border = '2px solid var(--mac-blue)';
+            card30d.style.background = 'rgba(0, 122, 255, 0.15)';
+            
+            cardMes.style.border = '1px solid var(--mac-border)';
+            cardMes.style.background = 'var(--mac-bg)';
+        }
+    };
+
+    // Calculamos los valores iniciales (1 mes)
+    let initMes = new Date(fechaAntigua); initMes.setMonth(initMes.getMonth() + 1);
+    let init30d = new Date(fechaAntigua); init30d.setDate(init30d.getDate() + 30);
+
+    const { value: confirmacion } = await Swal.fire({
         title: '🔄 Renovar Servicio',
         html: `
-            <p style="color: var(--mac-text-secondary); font-size: 14px; margin-bottom: 10px;">
-                Vencimiento actual: <strong>${antiguaFechaBonita}</strong><br>
-                Elige cómo deseas calcular el nuevo vencimiento:
+            <p style="color: var(--mac-text-secondary); font-size: 14px; margin-bottom: 15px;">
+                Vencimiento actual: <strong style="color: var(--mac-text-main);">${antiguaFechaBonita}</strong>
             </p>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
-                
-                <!-- Opción 1: Por Meses -->
-                <div style="background: var(--mac-bg); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.3s;">
-                    <label style="font-size: 11px; color: var(--mac-text-secondary); font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Añadir Meses</label>
-                    <div style="display:flex; align-items:center; gap: 8px;">
-                        <input type="number" id="swal-renew-months" value="1" min="1" max="99" oninput="document.getElementById('swal-renew-date').value=''" style="width: 50px; text-align: center; font-size: 18px; font-weight: bold; padding: 6px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-blue); outline: none;">
-                        <span style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">(30 días)</span>
-                    </div>
-                </div>
-                
-                <!-- Opción 2: Fecha Exacta -->
-                <div style="background: var(--mac-bg); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.3s;">
-                    <label style="font-size: 11px; color: var(--mac-text-secondary); font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Hasta Fecha Exacta</label>
-                    <input type="date" id="swal-renew-date" onchange="document.getElementById('swal-renew-months').value=''" style="width: 100%; text-align: center; font-size: 13px; font-weight: bold; padding: 8px 5px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-blue); outline: none; box-sizing: border-box;">
+            
+            <!-- Selector de cantidad de meses -->
+            <div style="display:flex; align-items:center; justify-content:center; gap: 10px; margin-bottom: 20px;">
+                <label style="font-size: 14px; font-weight: bold; color: var(--mac-text-main);">Renovar por:</label>
+                <!-- Limitado a 2 dígitos máximo -->
+                <input type="number" id="swal-renew-months" value="1" min="1" max="99" oninput="window.updateRenewDates()" style="width: 60px; text-align: center; font-size: 18px; font-weight: bold; padding: 8px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-blue); outline: none;">
+                <label style="font-size: 14px; font-weight: bold; color: var(--mac-text-main);">mes(es)</label>
+            </div>
+
+            <p style="font-size: 11px; color: var(--mac-text-secondary); font-weight: bold; text-transform: uppercase; margin-bottom: 10px;">Selecciona la modalidad de cálculo:</p>
+
+            <!-- Tarjetas Interactivas -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <!-- Tarjeta 1: Fecha a Fecha -->
+                <div id="optMesAMes" onclick="window.selectRenewOpt('mes')" style="cursor: pointer; background: rgba(0, 122, 255, 0.15); padding: 15px 10px; border-radius: 12px; border: 2px solid var(--mac-blue); transition: 0.2s; display: flex; flex-direction: column; align-items: center;">
+                    <span style="font-size: 12px; font-weight: bold; color: var(--mac-text-main); margin-bottom: 5px;">📆 Fecha a Fecha</span>
+                    <span style="font-size: 10px; color: var(--mac-text-secondary);">(Ej: 22/8 al 22/9)</span>
+                    <strong id="date-mes" style="font-size: 16px; color: var(--mac-blue); margin-top: 8px;">${initMes.toLocaleDateString('es-ES')}</strong>
                 </div>
 
+                <!-- Tarjeta 2: 30 Días Exactos -->
+                <div id="opt30Dias" onclick="window.selectRenewOpt('30d')" style="cursor: pointer; background: var(--mac-bg); padding: 15px 10px; border-radius: 12px; border: 1px solid var(--mac-border); transition: 0.2s; display: flex; flex-direction: column; align-items: center;">
+                    <span style="font-size: 12px; font-weight: bold; color: var(--mac-text-main); margin-bottom: 5px;">🔢 30 Días Exactos</span>
+                    <span style="font-size: 10px; color: var(--mac-text-secondary);">(Multiplica por 30)</span>
+                    <strong id="date-30d" style="font-size: 16px; color: var(--mac-blue); margin-top: 8px;">${init30d.toLocaleDateString('es-ES')}</strong>
+                </div>
             </div>
         `,
         showCancelButton: true,
@@ -1534,39 +1586,24 @@ window.renewClient = async (id) => {
         background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
         color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
         preConfirm: () => {
-            const months = document.getElementById('swal-renew-months').value;
-            const exactDate = document.getElementById('swal-renew-date').value;
+            // Evaluamos la selección al presionar Confirmar
+            const meses = parseInt(document.getElementById('swal-renew-months').value) || 1;
+            let finalDate = new Date(window.currentRenewBaseDate);
             
-            // Verificamos cuál de los dos cuadros llenó el usuario
-            if (exactDate) {
-                return { type: 'date', value: exactDate };
-            } else if (months && parseInt(months) > 0) {
-                return { type: 'months', value: parseInt(months) };
+            if (window.currentRenewType === 'mes') {
+                finalDate.setMonth(finalDate.getMonth() + meses);
             } else {
-                Swal.showValidationMessage('Ingresa la cantidad de meses o selecciona una fecha exacta.');
-                return false;
+                finalDate.setDate(finalDate.getDate() + (30 * meses));
             }
+            return finalDate;
         }
     });
 
-    if (result) {
-        let fechaNueva;
-        
-        // Calculamos la nueva fecha según la opción elegida
-        if (result.type === 'months') {
-            const dias = result.value * 30;
-            fechaNueva = new Date(fechaAntigua);
-            fechaNueva.setDate(fechaNueva.getDate() + dias);
-        } else {
-            const [y, m, d] = result.value.split('-');
-            fechaNueva = new Date(y, m - 1, d);
-        }
-        
-        // Transformamos de vuelta al formato que acepta Firebase
+    if (confirmacion) {
+        let fechaNueva = confirmacion; // Recibimos la fecha exacta calculada
         const strFirebase = `${fechaNueva.getFullYear()}-${String(fechaNueva.getMonth()+1).padStart(2,'0')}-${String(fechaNueva.getDate()).padStart(2,'0')}`;
         const bonitaNueva = fechaNueva.toLocaleDateString('es-ES');
 
-        // Ejecuta la función auxiliar que guarda en BD y manda al bot (la que configuramos antes)
         aplicarRenovacionFirebase(id, strFirebase, bonitaNueva, c);
     }
 };
