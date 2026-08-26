@@ -5709,3 +5709,55 @@ document.addEventListener('click', () => {
         tr.style.zIndex = '1';
     });
 });
+
+/* =========================================================
+   🤖 ASISTENTE INTELIGENTE CONTEXTUAL
+========================================================= */
+window.openAssistant = () => {
+    const panel = document.getElementById('aiAssistantPanel');
+    const msgEl = document.getElementById('aiContextMessage');
+    
+    // 1. Detectar en qué sección está el usuario
+    let activeSection = 'home'; // Por defecto
+    
+    if (document.getElementById('adminView').style.display === 'block') {
+        activeSection = 'admin';
+    } else if (document.getElementById('inventoryModal').classList.contains('active-section') || document.getElementById('inventoryModal').style.display === 'flex') {
+        activeSection = 'inventory';
+    } else if (document.getElementById('storeModal').classList.contains('active-section') || document.getElementById('storeModal').style.display === 'flex') {
+        activeSection = 'store';
+    } else if (document.getElementById('pedidosModal').classList.contains('active-section') || document.getElementById('pedidosModal').style.display === 'flex') {
+        activeSection = 'pedidos';
+    } else if (document.getElementById('profileSection').classList.contains('active-section')) {
+        activeSection = 'profile';
+    } else if (document.getElementById('accountsTableContainer').style.display === 'block') {
+        activeSection = 'matrices';
+    } else {
+        activeSection = 'clientes';
+    }
+
+    // 2. Base de conocimientos (Respuestas predeterminadas por sección)
+    const baseConocimientos = {
+        'clientes': `<b>📍 Estás en: Mis Clientes</b><br><br>Aquí administras a tus clientes finales.<br><br>💡 <b>Tip de uso:</b> Usa el botón <b>"⚙️ Opciones"</b> para renovar meses, copiar credenciales al instante, o enviarle a tu cliente su Link de Portal Web.`,
+        
+        'matrices': `<b>📍 Estás en: Cuentas Matrices</b><br><br>Aquí organizas el stock de tus pantallas.<br><br>💡 <b>Tip de uso:</b> Añade una cuenta completa aquí (ej: Netflix de 5 perfiles). El panel te mostrará cuántos espacios te quedan. Usa <b>"Asignar"</b> para vender un perfil libre directamente a un cliente.`,
+        
+        'inventory': `<b>📍 Estás en: Inventario</b><br><br>Esta es tu "bodega" de cuentas libres.<br><br>💡 <b>Tip de uso:</b> Usa el botón verde <i class="bx bx-send"></i> para entregar una cuenta; esto la enviará automáticamente al formulario de clientes para que solo pongas el nombre del comprador.`,
+        
+        'store': `<b>📍 Estás en: Mi Tiendita Web</b><br><br>Este es tu catálogo público para vender en automático.<br><br>💡 <b>Tip de uso:</b> Si marcas <b>"Conectar al Inventario"</b> al crear un producto, este se agotará en la tienda cuando te quedes sin stock en tu bodega.`,
+        
+        'pedidos': `<b>📍 Estás en: Ventas Pendientes</b><br><br>Aquí llegan los pagos que tus clientes hacen en la tiendita.<br><br>💡 <b>Tip de uso:</b> Revisa la captura de pago y presiona <b>"Aprobar"</b>. El sistema sacará una cuenta de tu inventario y se la mandará al WhatsApp del cliente por ti.`,
+        
+        'profile': `<b>📍 Estás en: Mi Perfil & Bot</b><br><br>Aquí configuras tu identidad visual.<br><br>💡 <b>Tip de uso:</b> Enlaza tu WhatsApp haciendo clic en <b>"Activar Mensajes Automáticos"</b> y escaneando el QR. Esto permitirá que tu teléfono cobre las renovaciones mientras duermes.`,
+        
+        'admin': `<b>📍 Estás en: Panel Global (Admin)</b><br><br>Control total de tu negocio SaaS.<br><br>💡 <b>Tip de uso:</b> Usa los filtros de arriba para encontrar clientes. Al editar la licencia de alguien, puedes darle una Demo de 3 horas o un plan Mensual. Si su tiempo se acaba, el sistema lo bloqueará automáticamente.`
+    };
+
+    // 3. Inyectar el mensaje y abrir el panel
+    msgEl.innerHTML = baseConocimientos[activeSection];
+    panel.classList.add('active');
+};
+
+window.closeAssistant = () => {
+    document.getElementById('aiAssistantPanel').classList.remove('active');
+};
