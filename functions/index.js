@@ -220,9 +220,9 @@ exports.portalAccess = onRequest(async (req, res) => {
 });
 
 // Los clientes antiguos conservan su código actual para no romper accesos ya enviados.
-// En clientes NUEVOS se reemplaza el código provisional del frontend por uno
-// criptográficamente aleatorio de 4 caracteres. Si ese mismo teléfono ya tenía
-// otro servicio, se reutiliza su código para que el cliente siga teniendo uno solo.
+// Los clientes creados desde el formulario normal ya llegan con 4 caracteres generados
+// con Web Crypto por portal-security.js. Si otro flujo (ej. checkout automático) crea
+// un cliente SIN código, este trigger le asigna uno seguro en el servidor.
 exports.securePortalCodeOnCreate = onDocumentCreated("clients/{clientId}", async (event) => {
   const snap = event.data;
   if (!snap) return;
@@ -231,8 +231,19 @@ exports.securePortalCodeOnCreate = onDocumentCreated("clients/{clientId}", async
   const data = snap.data() || {};
   const userId = data.userId;
   const phone = cleanPhone(data.phone);
+  const incomingCode = cleanCode(data.portalCode);
 
   if (!userId || !phone) return;
+
+  // Si ya llegó un código corto desde el formulario seguro, NO lo cambiamos.
+  // Así lo que aparece en pantalla y lo que se envía por WhatsApp siempre coincide.
+  if (incomingCode.length === 4) {
+    await snap.ref.update({
+      portalCodeVersion: 2,
+      portalCodeSecuredAt: FieldValue.serverTimestamp()
+    });
+    return;
+  }
 
   const userClients = await db.collection("clients")
     .where("userId", "==", userId)
