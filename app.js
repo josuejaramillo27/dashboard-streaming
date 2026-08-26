@@ -1633,7 +1633,8 @@ window.renderTable = () => {
         const stText = c.diffDays > 0 ? `Faltan ${c.diffDays} d` : (c.diffDays === 0 ? 'Hoy' : 'Vencido');
         const uCount = c.accountUnits || 1; const prof = ((c.price || 0) - (c.cost || 0)) * uCount; const dispUnits = uCount > 1 ? `<span style="font-size:11px;color:var(--mac-text-secondary);display:block;">(${uCount} unidades)</span>` : ''; // UI de Etiquetas, Notas y Lealtad
         let tagHtml = c.tag ? `<span style="background: ${c.tagColor}15; color: ${c.tagColor}; font-size: 10px; padding: 2px 6px; border-radius: 6px; border: 1px solid ${c.tagColor}50; display:inline-block; margin-top:4px; font-weight:bold;">${c.tag}</span>` : '';
-        let notesIcon = c.notes ? `<i class='bx bx-note' title="Nota: ${c.notes}" style="color:var(--mac-orange); cursor:help; margin-left:5px;"></i>` : '';
+        // 1. Creamos la "N" estilo Notion
+        let notionNoteHtml = c.notes ? `<div title="${c.notes.replace(/"/g, '&quot;')}" style="display:flex; align-items:center; justify-content:center; width:24px; height:24px; background:#000; color:#fff; border-radius:6px; font-weight:900; font-family:sans-serif; font-size:12px; cursor:help; flex-shrink:0; box-shadow:0 2px 5px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2);">N</div>` : '';
         let loyatyHtml = (c.renovations > 0) ? `<span title="${c.renovations} renovaciones continuas" style="font-size: 12px; color: #FFD700; margin-left: 5px;"><i class='bx bxs-star'></i>${c.renovations}</span>` : '';
 // LOGICA DE DISPOSITIVOS CON BOXICONS
         let deviceIndicator = '';
@@ -1656,11 +1657,17 @@ window.renderTable = () => {
                     <span style="color:${c.color || 'var(--mac-text-main)'}; font-weight: 800; font-size: 15px; letter-spacing: 0.5px;">${c.name}</span>
                     <span class="status ${c.statusCat} mobile-inline-badge" style="font-size: 10px; padding: 2px 6px; border-radius: 6px; line-height: 1;">${stText}</span>
                 </span>
-                ${loyatyHtml}${notesIcon}<br>${tagHtml}
+                ${loyatyHtml}<br>${tagHtml} <!-- 👈 ELIMINAMOS EL VIEJO ÍCONO DE AQUÍ -->
             </div>
         </td>
         <td data-label="Plataformas" style="font-weight: 500;">${c.platform}${deviceIndicator}</td>
         <td data-label="Cuenta">
+            <!-- 👈 AGREGAMOS LA "N" JUNTO A VER DATOS -->
+            <div style="display:flex; align-items:center; gap:8px;">
+                ${notionNoteHtml}
+                <button class="action-btn" style="color:var(--mac-text-main); font-weight:bold; border: 1px solid var(--mac-border);" onclick="window.viewAccountData('${c.id}')"><i class='bx bx-key'></i> Ver Datos</button>
+            </div>
+        </td>
             <div style="display:flex; align-items:center; gap:8px;">
                 ${c.notes ? `<div title="${c.notes.replace(/"/g, '&quot;')}" style="display:flex; align-items:center; justify-content:center; width:24px; height:24px; background:#000; color:#fff; border-radius:6px; font-weight:900; font-family:sans-serif; font-size:12px; cursor:help; flex-shrink:0; box-shadow:0 2px 5px rgba(0,0,0,0.3);">N</div>` : ''}
                 <button class="action-btn" style="color:var(--mac-text-main); font-weight:bold; border: 1px solid var(--mac-border);" onclick="window.viewAccountData('${c.id}')"><i class='bx bx-key'></i> Ver Datos</button>
