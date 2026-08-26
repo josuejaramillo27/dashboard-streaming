@@ -1536,7 +1536,7 @@ window.renewClient = async (id) => {
     }
 };
 
-// Función auxiliar para guardar la fecha que el cliente seleccionó
+// Función auxiliar para guardar la fecha que el cliente seleccionó y avisar al BOT
 const aplicarRenovacionFirebase = async (id, strFirebase, nuevaFechaBonita, c) => {
     try {
         const nuevasRenovaciones = (c.renovations || 0) + 1;
@@ -1549,7 +1549,29 @@ const aplicarRenovacionFirebase = async (id, strFirebase, nuevaFechaBonita, c) =
 
         const plan = currentUserData.plan_actual || 'demo';
         if (plan === 'pro' || plan === 'elite') {
-            const datosRenovacion = { distribuidorId: currentUser.uid, numeroCliente: c.phone, plataforma: c.platform, nuevaFecha: nuevaFechaBonita };
+            
+            // 👈 AHORA SÍ CONSTRUIMOS TU MENSAJE PERSONALIZADO DE RENOVACIÓN
+            let baseMsg = currentUserData.waTemplate || "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*.\nPagos: {pago}";
+            let paymentInfo = currentUserData.waPaymentInfo || "(Pregúntame por mis métodos de pago)";
+            let uCount = c.accountUnits || 1;
+            let precioCalculado = (c.price || 0) * uCount;
+            let moneda = currentUserData.currency || "S/";
+
+            let finalMsg = baseMsg
+                .replace(/{nombre}/g, c.name)
+                .replace(/{plataforma}/g, c.platform)
+                .replace(/{fecha}/g, nuevaFechaBonita)
+                .replace(/{pago}/g, paymentInfo)
+                .replace(/{precio}/g, precioCalculado.toFixed(2))
+                .replace(/{moneda}/g, moneda);
+
+            const datosRenovacion = { 
+                distribuidorId: currentUser.uid, 
+                numeroCliente: c.phone, 
+                plataforma: c.platform, 
+                nuevaFecha: nuevaFechaBonita,
+                mensajeRenovacion: finalMsg // 👈 SE LO PASAMOS AL BOT
+            };
             fetch('https://bot.panelagc.com/api/confirmar-renovacion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datosRenovacion) });
         }
     } catch (error) { 
@@ -3132,6 +3154,7 @@ window.openCheckoutFromCart = () => {
     }
 
     document.getElementById('checkoutPhone').value = '';
+    document.getElementById('checkoutClientName').value = '';
     document.getElementById('checkoutReceipt').value = '';
     document.getElementById('checkoutModal').style.display = 'flex';
 };
@@ -3457,10 +3480,12 @@ window.descargarQR = async (url, banco) => {
 };
 
 window.submitCheckout = async () => {
+    const name = document.getElementById('checkoutClientName').value.trim();
     const phone = document.getElementById('checkoutPhone').value.trim();
     const fileInput = document.getElementById('checkoutReceipt');
     const file = fileInput.files.length > 0 ? fileInput.files[0] : null;
 
+    if (!name) return window.showNotification("⚠️ Por favor, ingresa tu nombre.");
     if (!phone || !phone.startsWith('+')) return window.showNotification("⚠️ Ingresa tu WhatsApp incluyendo el código de país (Ej: +51...)");
     if (!file) return window.showNotification("⚠️ Sube la foto de tu comprobante de pago.");
 
@@ -3485,6 +3510,7 @@ window.submitCheckout = async () => {
 
         await addDoc(collection(db, "pedidos"), {
             vendedorId: vendedorId,
+            clienteNombre: name,
             clienteNumero: phone,
             tipo: currentCheckoutItem.type || 'Servicio',
             plataforma: currentCheckoutItem.platform,
@@ -3849,6 +3875,7 @@ window.openPedidosModal = async () => {
         snapshot.forEach(docSnap => {
             const pedido = docSnap.data();
             const pId = docSnap.id;
+            const nombreCli = pedido.clienteNombre || "Cliente Nuevo";
 
             // HTML Dinámico (Invitación vs Normal)
             let dynamicControls = '';
@@ -3883,7 +3910,7 @@ window.openPedidosModal = async () => {
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px;">
                     <div>
                         <strong style="color:var(--mac-blue); font-size:16px;"><i class='bx bx-cart-add'></i> ${pedido.plataforma}</strong><br>
-                        <span style="color:var(--mac-text-main); font-size:13px; font-weight: 600;">📞 WA: ${pedido.clienteNumero}</span>
+                        <span style="color:var(--mac-text-main); font-size:13px; font-weight: 600;">👤 ${nombreCli} | 📞 WA: ${pedido.clienteNumero}</span>
                         <span style="display:block; font-size:12px; color:var(--mac-text-secondary); margin-top:2px;">Tipo: ${pedido.tipo.toUpperCase()} | Monto: <b style="color:var(--mac-green);">${globalCurrency}${pedido.precio.toFixed(2)}</b></span>
                     </div>
                     <button class="action-btn btn-del" onclick="window.rechazarPedido('${pId}')"><i class='bx bx-x'></i></button>
@@ -3901,7 +3928,7 @@ window.openPedidosModal = async () => {
                     <input type="number" id="precio_venta_${pId}" placeholder="Confirma Precio Total Cobrado" value="${pedido.precio}" style="width:100%; padding:10px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border); font-weight:bold;">
                 </div>
 
-                <button class="btn-primary" style="width:100%; background:var(--mac-green); border:none; padding:14px; font-size:14px; font-weight:bold;" onclick="window.aprobarVenta('${pId}', '${pedido.clienteNumero}', ${pedido.requiereInvitacion ? 'true' : 'false'}, '${pedido.clienteCorreo || ''}', '${pedido.plataforma}')">
+                <button class="btn-primary" style="width:100%; background:var(--mac-green); border:none; padding:14px; font-size:14px; font-weight:bold;" onclick="window.aprobarVenta('${pId}', '${pedido.clienteNumero}', ${pedido.requiereInvitacion ? 'true' : 'false'}, '${pedido.clienteCorreo || ''}', '${pedido.plataforma}', '${nombreCli.replace(/'/g, "\\'")}')">
                     <i class='bx bx-check-shield'></i> Aprobar y Entregar Automático
                 </button>
             `;
@@ -3934,7 +3961,7 @@ window.rechazarPedido = async (pedidoId) => {
 };
 
 // 3. Aprobar y Liberar Cuenta(s) (SISTEMA DE COMBOS)
-window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, clienteCorreo, plataforma) => {
+window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, clienteCorreo, plataforma, nombreCliente = "Cliente Nuevo") => {
     let cuentasIds = [];
     let matrizId = null;
     let perfilMatriz = '';
@@ -4056,7 +4083,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
             
             const docRef = await addDoc(collection(db, "clients"), {
                 userId: currentUser.uid,
-                name: "Cliente Nuevo", 
+                name: nombreCliente, 
                 phone: numeroBonito, 
                 platform: plataforma,
                 accountEmail: clienteCorreo,      
@@ -4126,7 +4153,10 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
                 templateMsg = `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tus cuentas:\n{bloqueCuentas}\n📅 *Vence el:* {fecha}\n\n¡Que disfrutes el contenido! 🍿`;
             }
 
-            textoFinal = templateMsg.replace(/{bloqueCuentas}/g, bloqueCuentas).replace(/{fecha}/g, dateWhatsApp || '');
+            textoFinal = templateMsg
+                .replace(/{nombre}/g, nombreCliente)
+                .replace(/{bloqueCuentas}/g, bloqueCuentas)
+                .replace(/{fecha}/g, dateWhatsApp || '');
         }
 
         await updateDoc(doc(db, "pedidos", pedidoId), { estado: "aprobado" });
