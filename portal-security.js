@@ -50,6 +50,39 @@ const applyStoreBranding = (store) => {
     }
 };
 
+// ---------------------------------------------------------------------------
+// GENERACIÓN SEGURA SIN CAMBIAR LA EXPERIENCIA
+// ---------------------------------------------------------------------------
+// app-original.js genera el código corto durante saveClientData() usando
+// Math.random(). Para no reescribir miles de líneas del archivo original,
+// durante ESA operación reemplazamos temporalmente Math.random por una fuente
+// basada en Web Crypto. El resultado visible sigue siendo el mismo formato de
+// 4 caracteres (ej. A7K2), pero la aleatoriedad ya no depende de Math.random.
+const secureRandomFloat = () => {
+    if (!window.crypto || !window.crypto.getRandomValues) return null;
+    const value = new Uint32Array(1);
+    window.crypto.getRandomValues(value);
+    return value[0] / 4294967296;
+};
+
+const originalSaveClientData = window.saveClientData;
+if (typeof originalSaveClientData === "function") {
+    window.saveClientData = async (...args) => {
+        const normalRandom = Math.random;
+        const cryptoRandomAvailable = secureRandomFloat() !== null;
+
+        if (cryptoRandomAvailable) {
+            Math.random = () => secureRandomFloat();
+        }
+
+        try {
+            return await originalSaveClientData(...args);
+        } finally {
+            Math.random = normalRandom;
+        }
+    };
+}
+
 // Reemplaza la versión original. Ya no consulta la colección clients desde
 // el navegador, ni permite entrar directamente mediante ?client=<id>.
 window.checkClientPortal = async () => {
