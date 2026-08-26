@@ -1662,14 +1662,8 @@ window.renderTable = () => {
         </td>
         <td data-label="Plataformas" style="font-weight: 500;">${c.platform}${deviceIndicator}</td>
         <td data-label="Cuenta">
-            <!-- 👈 AGREGAMOS LA "N" JUNTO A VER DATOS -->
             <div style="display:flex; align-items:center; gap:8px;">
                 ${notionNoteHtml}
-                <button class="action-btn" style="color:var(--mac-text-main); font-weight:bold; border: 1px solid var(--mac-border);" onclick="window.viewAccountData('${c.id}')"><i class='bx bx-key'></i> Ver Datos</button>
-            </div>
-        </td>
-            <div style="display:flex; align-items:center; gap:8px;">
-                ${c.notes ? `<div title="${c.notes.replace(/"/g, '&quot;')}" style="display:flex; align-items:center; justify-content:center; width:24px; height:24px; background:#000; color:#fff; border-radius:6px; font-weight:900; font-family:sans-serif; font-size:12px; cursor:help; flex-shrink:0; box-shadow:0 2px 5px rgba(0,0,0,0.3);">N</div>` : ''}
                 <button class="action-btn" style="color:var(--mac-text-main); font-weight:bold; border: 1px solid var(--mac-border);" onclick="window.viewAccountData('${c.id}')"><i class='bx bx-key'></i> Ver Datos</button>
             </div>
         </td>
