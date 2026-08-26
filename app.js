@@ -5717,6 +5717,12 @@ window.openAssistant = () => {
     const panel = document.getElementById('aiAssistantPanel');
     const msgEl = document.getElementById('aiContextMessage');
     
+    // 🔥 NUEVO: Si el panel ya está abierto, lo cerramos y detenemos la función
+    if (panel.classList.contains('active')) {
+        window.closeAssistant();
+        return;
+    }
+    
     // 1. Detectar en qué sección está el usuario
     let activeSection = 'home'; // Por defecto
     
