@@ -5557,15 +5557,36 @@ window.openNotesModal = async () => {
 
 window.toggleClientMenu = (e, menuId) => {
     e.stopPropagation();
-    // Cierra cualquier otro menú abierto
+    
+    // 1. Cerramos otros menús y reseteamos la profundidad de TODAS las filas
     document.querySelectorAll('.client-action-menu').forEach(menu => {
         if(menu.id !== menuId) menu.classList.remove('show');
     });
-    // Abre el menú seleccionado
-    document.getElementById(menuId).classList.toggle('show');
+    
+    document.querySelectorAll('#tableBody tr').forEach(tr => {
+        tr.style.zIndex = '1';
+        tr.style.position = 'relative'; // Fundamental para que el z-index haga efecto
+    });
+
+    // 2. Abrimos o cerramos el menú que el usuario clickeó
+    const menuSeleccionado = document.getElementById(menuId);
+    menuSeleccionado.classList.toggle('show');
+
+    // 3. 🪄 LA MAGIA: Si el menú se abrió, traemos TODA su fila al frente
+    if (menuSeleccionado.classList.contains('show')) {
+        const filaActual = menuSeleccionado.closest('tr');
+        if (filaActual) {
+            filaActual.style.zIndex = '9999';
+        }
+    }
 };
 
 // Cierra el menú de opciones si el usuario hace clic fuera de la tabla
 document.addEventListener('click', () => {
     document.querySelectorAll('.client-action-menu').forEach(menu => menu.classList.remove('show'));
+    
+    // También devolvemos todas las filas a su lugar normal al hacer clic fuera
+    document.querySelectorAll('#tableBody tr').forEach(tr => {
+        tr.style.zIndex = '1';
+    });
 });
