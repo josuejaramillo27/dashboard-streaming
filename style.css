@@ -1613,3 +1613,113 @@ body.dark-mode .settings-dropdown {
     background: rgba(20, 20, 25, 0.98) !important; /* Casi negro sólido en Modo Oscuro */
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
 }
+
+/* =========================================================
+   🤖 ASISTENTE INTELIGENTE CONTEXTUAL
+========================================================= */
+.ai-floating-btn {
+    position: fixed;
+    bottom: 25px;
+    right: 25px; /* Lo ponemos a la derecha */
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%); /* Verde Esmeralda */
+    color: white;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    z-index: 999995; /* Justo debajo de alertas */
+    transition: transform 0.3s;
+}
+.ai-floating-btn:hover {
+    transform: scale(1.1) translateY(-5px);
+}
+
+/* Panel Deslizable del Asistente */
+.ai-assistant-panel {
+    position: fixed;
+    bottom: 90px;
+    right: 25px;
+    width: 320px;
+    max-width: calc(100vw - 40px);
+    background: var(--mac-surface);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--mac-border);
+    border-radius: 20px;
+    box-shadow: var(--glass-shadow);
+    z-index: 999996;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.ai-assistant-panel.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.ai-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--mac-border);
+}
+.ai-header h3 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--mac-text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.ai-header button {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    color: var(--mac-text-secondary);
+    cursor: pointer;
+    padding: 0;
+}
+
+.ai-body {
+    padding: 20px;
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+}
+.ai-avatar {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+.ai-message {
+    background: var(--mac-gray);
+    padding: 15px;
+    border-radius: 0 16px 16px 16px;
+    border: 1px solid var(--mac-border);
+}
+.ai-message p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--mac-text-main);
+    line-height: 1.5;
+}
+
+/* Si está el carrito, movemos un poco el botón AI para que no choquen */
+body.logged-in .floating-cart { bottom: 95px !important; }
