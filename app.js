@@ -1633,8 +1633,8 @@ window.renderTable = () => {
         const stText = c.diffDays > 0 ? `Faltan ${c.diffDays} d` : (c.diffDays === 0 ? 'Hoy' : 'Vencido');
         const uCount = c.accountUnits || 1; const prof = ((c.price || 0) - (c.cost || 0)) * uCount; const dispUnits = uCount > 1 ? `<span style="font-size:11px;color:var(--mac-text-secondary);display:block;">(${uCount} unidades)</span>` : ''; // UI de Etiquetas, Notas y Lealtad
         let tagHtml = c.tag ? `<span style="background: ${c.tagColor}15; color: ${c.tagColor}; font-size: 10px; padding: 2px 6px; border-radius: 6px; border: 1px solid ${c.tagColor}50; display:inline-block; margin-top:4px; font-weight:bold;">${c.tag}</span>` : '';
-        // 1. Creamos la "N" estilo Notion
-        let notionNoteHtml = c.notes ? `<div title="${c.notes.replace(/"/g, '&quot;')}" style="display:flex; align-items:center; justify-content:center; width:24px; height:24px; background:#000; color:#fff; border-radius:6px; font-weight:900; font-family:sans-serif; font-size:12px; cursor:help; flex-shrink:0; box-shadow:0 2px 5px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2);">N</div>` : '';
+        // 1. Creamos la "N" estilo Notion (Clickeable)
+        let notionNoteHtml = c.notes ? `<div onclick="window.viewClientNote('${c.id}')" title="Ver Nota" style="display:flex; align-items:center; justify-content:center; width:24px; height:24px; background:#000; color:#fff; border-radius:6px; font-weight:900; font-family:sans-serif; font-size:12px; cursor:pointer; flex-shrink:0; box-shadow:0 2px 5px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2);">N</div>` : '';
         let loyatyHtml = (c.renovations > 0) ? `<span title="${c.renovations} renovaciones continuas" style="font-size: 12px; color: #FFD700; margin-left: 5px;"><i class='bx bxs-star'></i>${c.renovations}</span>` : '';
 // LOGICA DE DISPOSITIVOS CON BOXICONS
         let deviceIndicator = '';
@@ -5535,7 +5535,24 @@ window.updateStoreToggleUI = (labelEl, inputId) => {
 };
 
 window.currentClientNote = '';
-
+// --- VER NOTA DEL CLIENTE (TIPO PAPELITO) ---
+window.viewClientNote = (id) => {
+    const c = clients.find(x => x.id === id);
+    if(c && c.notes) {
+        Swal.fire({
+            title: '📝 Nota del Cliente',
+            html: `
+                <div style="text-align: left; white-space: pre-wrap; font-size: 14px; line-height: 1.6; background: var(--mac-bg); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border); color: var(--mac-text-main); font-style: italic;">
+                    ${c.notes}
+                </div>
+            `,
+            confirmButtonText: 'Cerrar',
+            confirmButtonColor: 'var(--mac-blue)',
+            background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+            color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+        });
+    }
+};
 window.openNotesModal = async () => {
     const { value: text } = await Swal.fire({
         title: 'Notas del Cliente',
