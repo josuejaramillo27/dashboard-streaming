@@ -1383,7 +1383,8 @@ window.saveClientData = async () => {
             linkedMasterId: finalLinkedMasterId, 
             accountDeviceName: primaryData.deviceName, 
             accountDeviceType: primaryData.deviceType,
-            portalCode: generatedPortalCode
+            portalCode: generatedPortalCode,
+            notes: window.currentClientNote
         };
 
         if (editingClientId) { 
@@ -1425,7 +1426,7 @@ window.saveClientData = async () => {
         if(typeof variablesEnlaceMatriz !== 'undefined') {
             variablesEnlaceMatriz = { masterId: null, profileNum: null };
         }
-
+        window.currentClientNote = '';
         editingClientId = null; 
         document.getElementById('clientForm').reset(); 
         resetAccountButton(); 
@@ -1495,65 +1496,44 @@ window.renewClient = async (id) => {
     const c = clients.find(x => x.id === id);
     if (!c) return;
 
-    // Detectar cuántos meses tiene contratado este cliente
-    let mesesARenovar = 1;
-    if (c.multiAccounts) {
-        const firstPlatform = Object.keys(c.multiAccounts)[0];
-        if (c.multiAccounts[firstPlatform].months) mesesARenovar = parseInt(c.multiAccounts[firstPlatform].months);
-    } else if (c.accountMonths) {
-        mesesARenovar = parseInt(c.accountMonths);
-    }
-
     let [year, month, day] = c.date.split('-');
     let fechaAntigua = new Date(year, month - 1, day);
-    
-    // Opción 1: Mes a Mes (Día a Día)
-    let fechaMesAMes = new Date(fechaAntigua);
-    fechaMesAMes.setMonth(fechaMesAMes.getMonth() + mesesARenovar);
-    const strMesAMes = `${fechaMesAMes.getFullYear()}-${String(fechaMesAMes.getMonth()+1).padStart(2,'0')}-${String(fechaMesAMes.getDate()).padStart(2,'0')}`; 
-    const bonitaMesAMes = fechaMesAMes.toLocaleDateString('es-ES'); 
-
-    // Opción 2: 30 Días Exactos
-    let fecha30Dias = new Date(fechaAntigua);
-    fecha30Dias.setDate(fecha30Dias.getDate() + (30 * mesesARenovar));
-    const str30Dias = `${fecha30Dias.getFullYear()}-${String(fecha30Dias.getMonth()+1).padStart(2,'0')}-${String(fecha30Dias.getDate()).padStart(2,'0')}`;
-    const bonita30Dias = fecha30Dias.toLocaleDateString('es-ES');
-
     const antiguaFechaBonita = fechaAntigua.toLocaleDateString('es-ES');
 
-    Swal.fire({
-        title: '🔄 Opciones de Renovación',
+    const { value: meses } = await Swal.fire({
+        title: '🔄 Renovar Servicio',
         html: `
             <p style="color: var(--mac-text-secondary); font-size: 14px; margin-bottom: 15px;">
                 Vencimiento actual: <strong>${antiguaFechaBonita}</strong><br>
-                Selecciona la modalidad para sumar <b>${mesesARenovar} mes(es)</b>:
+                ¿Por cuántos meses deseas renovar? <br><small>(1 mes = 30 días)</small>
             </p>
-            <div style="display:flex; flex-direction:column; gap:10px;">
-                <button id="btnRenovarMes" style="background:var(--mac-blue); border:none; color:white; padding:14px; font-size:14px; border-radius:8px; cursor:pointer; font-weight:bold;">
-                    📆 De Día a Día (Vence: ${bonitaMesAMes})
-                </button>
-                <button id="btnRenovar30" style="background:var(--mac-orange); border:none; color:white; padding:14px; font-size:14px; border-radius:8px; cursor:pointer; font-weight:bold;">
-                    🔢 30 Días Exactos (Vence: ${bonita30Dias})
-                </button>
+            <div style="display:flex; justify-content:center; align-items:center; gap: 10px;">
+                <input type="number" id="swal-renew-months" value="1" min="1" style="width: 80px; text-align: center; font-size: 18px; font-weight: bold; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); outline: none;">
+                <span style="font-size: 16px; font-weight: bold; color: var(--mac-text-main);">Mes(es)</span>
             </div>
         `,
-        showConfirmButton: false,
         showCancelButton: true,
-        cancelButtonText: 'Cancelar',
+        confirmButtonColor: 'var(--mac-blue)',
+        cancelButtonColor: 'var(--mac-gray)',
+        confirmButtonText: 'Confirmar Renovación',
+        cancelButtonText: '<span style="color:var(--mac-text-main)">Cancelar</span>',
         background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
         color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
-        didOpen: () => {
-            // Asignar funciones a los botones personalizados
-            document.getElementById('btnRenovarMes').addEventListener('click', () => {
-                Swal.close();
-                aplicarRenovacionFirebase(id, strMesAMes, bonitaMesAMes, c);
-            });
-            document.getElementById('btnRenovar30').addEventListener('click', () => {
-                Swal.close();
-                aplicarRenovacionFirebase(id, str30Dias, bonita30Dias, c);
-            });
+        preConfirm: () => {
+            return parseInt(document.getElementById('swal-renew-months').value) || 1;
         }
     });
+
+    if (meses) {
+        const dias = meses * 30;
+        let fechaNueva = new Date(fechaAntigua);
+        fechaNueva.setDate(fechaNueva.getDate() + dias);
+        
+        const strFirebase = `${fechaNueva.getFullYear()}-${String(fechaNueva.getMonth()+1).padStart(2,'0')}-${String(fechaNueva.getDate()).padStart(2,'0')}`;
+        const bonitaNueva = fechaNueva.toLocaleDateString('es-ES');
+
+        aplicarRenovacionFirebase(id, strFirebase, bonitaNueva, c);
+    }
 };
 
 // Función auxiliar para guardar la fecha que el cliente seleccionó
@@ -1580,6 +1560,7 @@ const aplicarRenovacionFirebase = async (id, strFirebase, nuevaFechaBonita, c) =
 window.startEdit = (id) => {
     editingClientId = id; 
     const c = clients.find(x => x.id === id);
+    window.currentClientNote = c.notes || '';
     document.getElementById('clientName').value = c.name; 
     document.getElementById('phone').value = c.phone; 
     document.getElementById('expirationDate').value = c.date;
@@ -1630,7 +1611,8 @@ window.startEdit = (id) => {
     document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
 };
 
-window.cancelEdit = () => { 
+window.cancelEdit = () => {
+    window.currentClientNote = '';
     editingClientId = null; 
     document.getElementById('clientForm').reset(); 
     resetAccountButton(); 
@@ -1678,18 +1660,30 @@ window.renderTable = () => {
             </div>
         </td>
         <td data-label="Plataformas" style="font-weight: 500;">${c.platform}${deviceIndicator}</td>
-        <td data-label="Cuenta"><button class="action-btn" style="color:var(--mac-text-main); font-weight:bold; border: 1px solid var(--mac-border);" onclick="window.viewAccountData('${c.id}')"><i class='bx bx-key'></i> Ver Datos</button></td>
+        <td data-label="Cuenta">
+            <div style="display:flex; align-items:center; gap:8px;">
+                ${c.notes ? `<div title="${c.notes.replace(/"/g, '&quot;')}" style="display:flex; align-items:center; justify-content:center; width:24px; height:24px; background:#000; color:#fff; border-radius:6px; font-weight:900; font-family:sans-serif; font-size:12px; cursor:help; flex-shrink:0; box-shadow:0 2px 5px rgba(0,0,0,0.3);">N</div>` : ''}
+                <button class="action-btn" style="color:var(--mac-text-main); font-weight:bold; border: 1px solid var(--mac-border);" onclick="window.viewAccountData('${c.id}')"><i class='bx bx-key'></i> Ver Datos</button>
+            </div>
+        </td>
         <td data-label="WhatsApp">${c.phone}</td>
         <td data-label="Utilidad (${globalCurrency})"><span style="color:var(--mac-green); font-weight:bold;">+${globalCurrency}${prof.toFixed(2)}</span>${dispUnits}</td>
         <td data-label="Vencimiento">${c.expDate.toLocaleDateString('es-ES')}</td>
         <td data-label="Estado"><span class="status ${c.statusCat}">${stText}</span></td>
-        <td data-label="Acciones" class="actions-cell">
-            <button class="action-btn btn-wa" onclick="window.openWaSendModal('${c.id}')"><i class='bx bxl-whatsapp'></i> WA</button>
-            <button class="action-btn" style="background: rgba(175, 82, 222, 0.15); color: #AF52DE; font-weight: bold;" onclick="window.downloadTicket('${c.id}', event)"><i class='bx bx-receipt'></i> Recibo</button>
-            <button class="action-btn" style="background: rgba(0, 122, 255, 0.15); color: #007AFF; font-weight: bold;" onclick="window.openLinkModal('${c.id}', '${c.platform}')" title="Vincular a Matriz"><i class='bx bx-link'></i></button>
-            ${c.statusCat !== 'active' ? `<button class="action-btn btn-renew" onclick="window.renewClient('${c.id}')"><i class='bx bx-refresh'></i></button>` : ''}
-            <button class="action-btn" style="color: var(--mac-text-main);" onclick="window.startEdit('${c.id}')"><i class='bx bx-edit-alt'></i></button>
-            <button class="action-btn btn-del" onclick="window.deleteClient('${c.id}')"><i class='bx bx-trash'></i></button>
+        <td data-label="Acciones" class="actions-cell" style="overflow: visible;">
+            <div style="position: relative; display: inline-block;">
+                <button class="action-btn" onclick="window.toggleClientMenu(event, 'menu-${c.id}')" style="background: var(--mac-blue); color: white; border:none; padding: 8px 12px;">
+                    ⚙️ Opciones <i class='bx bx-chevron-down'></i>
+                </button>
+                <div id="menu-${c.id}" class="settings-dropdown client-action-menu" style="top: 110%; right: 0; min-width: 150px; z-index: 999;">
+                    <button class="dropdown-item" onclick="window.openWaSendModal('${c.id}')" style="color: var(--mac-green);"><i class='bx bxl-whatsapp'></i> WhatsApp</button>
+                    <button class="dropdown-item" onclick="window.downloadTicket('${c.id}', event)" style="color: #AF52DE;"><i class='bx bx-receipt'></i> Recibo</button>
+                    <button class="dropdown-item" onclick="window.openLinkModal('${c.id}', '${c.platform}')" style="color: #007AFF;"><i class='bx bx-link'></i> Vincular a Matriz</button>
+                    ${c.statusCat !== 'active' ? `<button class="dropdown-item" onclick="window.renewClient('${c.id}')"><i class='bx bx-refresh'></i> Renovar</button>` : ''}
+                    <button class="dropdown-item" onclick="window.startEdit('${c.id}')"><i class='bx bx-edit-alt'></i> Editar</button>
+                    <button class="dropdown-item text-danger" onclick="window.deleteClient('${c.id}')"><i class='bx bx-trash'></i> Borrar</button>
+                </div>
+            </div>
         </td>`;
         tbody.appendChild(tr);
     });
@@ -5538,3 +5532,40 @@ window.updateStoreToggleUI = (labelEl, inputId) => {
         }
     }, 10);
 };
+
+window.currentClientNote = '';
+
+window.openNotesModal = async () => {
+    const { value: text } = await Swal.fire({
+        title: 'Notas del Cliente',
+        input: 'textarea',
+        inputValue: window.currentClientNote,
+        inputPlaceholder: 'Escribe aquí los detalles (Soporta saltos de línea)...',
+        showCancelButton: true,
+        confirmButtonText: 'Guardar Nota',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#000',
+        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+    });
+    
+    if (text !== undefined) {
+        window.currentClientNote = text;
+        window.showNotification("Nota temporal guardada.");
+    }
+};
+
+window.toggleClientMenu = (e, menuId) => {
+    e.stopPropagation();
+    // Cierra cualquier otro menú abierto
+    document.querySelectorAll('.client-action-menu').forEach(menu => {
+        if(menu.id !== menuId) menu.classList.remove('show');
+    });
+    // Abre el menú seleccionado
+    document.getElementById(menuId).classList.toggle('show');
+};
+
+// Cierra el menú de opciones si el usuario hace clic fuera de la tabla
+document.addEventListener('click', () => {
+    document.querySelectorAll('.client-action-menu').forEach(menu => menu.classList.remove('show'));
+});
