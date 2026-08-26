@@ -1684,10 +1684,13 @@ body.dark-mode .settings-dropdown {
 .ai-header button {
     background: transparent;
     border: none;
-    font-size: 24px;
+    font-size: 28px; 
     color: var(--mac-text-secondary);
     cursor: pointer;
     padding: 0;
+    width: auto !important;
+    margin: 0 !important;
+    line-height: 1;
 }
 
 .ai-body {
