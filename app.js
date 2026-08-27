@@ -3296,14 +3296,14 @@ window.searchPublicStore = () => {
 
 window.filterStoreType = (type, event) => {
     window.currentStoreTypeFilter = type;
-    document.querySelectorAll('#publicStoreFilters .segmented-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('#publicStoreFilters .spotify-type-btn').forEach(btn => btn.classList.remove('active'));
     if(event) event.currentTarget.classList.add('active');
     window.renderPublicCatalog();
 };
 
 window.filterStoreCategory = (cat, event) => {
     window.currentStoreCatFilter = cat;
-    document.querySelectorAll('#publicStoreCategoryFilters .chip-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('#publicStoreCategoryFilters .spotify-chip-btn').forEach(btn => btn.classList.remove('active'));
     if(event) event.currentTarget.classList.add('active');
     window.renderPublicCatalog();
 };
@@ -3328,9 +3328,9 @@ window.renderPublicCatalog = () => {
         catContainer.style.display = 'flex';
         // Solo repintamos los botones si cambió la lista de categorías
         if (catContainer.children.length !== activeCategories.length + 1) {
-            catContainer.innerHTML = `<button class="chip-btn ${window.currentStoreCatFilter === 'Todas' ? 'active' : ''}" onclick="window.filterStoreCategory('Todas', event)">Todo el Catálogo</button>`;
+            catContainer.innerHTML = `<button class="spotify-chip-btn ${window.currentStoreCatFilter === 'Todas' ? 'active' : ''}" onclick="window.filterStoreCategory('Todas', event)">Todo el Catálogo</button>`;
             activeCategories.forEach(cat => {
-                catContainer.innerHTML += `<button class="chip-btn ${window.currentStoreCatFilter === cat ? 'active' : ''}" onclick="window.filterStoreCategory('${cat}', event)">${cat}</button>`;
+                catContainer.innerHTML += `<button class="spotify-chip-btn ${window.currentStoreCatFilter === cat ? 'active' : ''}" onclick="window.filterStoreCategory('${cat}', event)">${cat}</button>`;
             });
         }
     } else {
@@ -3529,10 +3529,12 @@ const checkPublicStore = async () => {
             window.publicCatalogCache = data.storeCatalog || [];
             window.publicStoreDataCache = data;
 
-            // Activamos la Toolbar de Filtros y Buscador
-            const toolbarEl = document.getElementById('storeAppToolbar');
-            if (toolbarEl && window.publicCatalogCache.length > 0) {
-                toolbarEl.style.display = 'flex';
+            // Activamos Filtros y Buscador estilo Spotify
+            const searchContainer = document.getElementById('publicStoreSearchContainer');
+            const filtersWrapper = document.getElementById('storeAppFiltersWrapper');
+            if (window.publicCatalogCache.length > 0) {
+                if (searchContainer) searchContainer.style.display = 'block';
+                if (filtersWrapper) filtersWrapper.style.display = 'flex';
             }
 
             const supportBtn = document.getElementById('publicStoreSupportBtn');
