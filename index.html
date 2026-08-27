@@ -1399,30 +1399,26 @@
         <p style="color: var(--mac-text-secondary); margin-top: 5px; font-weight: 500;">Catálogo Oficial de Servicios</p>
     </div>
     
-    <!-- 🔥 NUEVO: BUSCADOR SPOTLIGHT CENTRADO -->
-    <div id="publicStoreSearchContainer" style="display: none; width: 100%; margin: 0 auto 20px auto;">
-        <div style="display: flex; justify-content: center; width: 100%;">
-            <div class="expandable-search">
-                <input type="text" id="publicStoreSearchInput" placeholder="Buscar..." oninput="window.searchPublicStore()">
-                <i class='bx bx-search'></i>
-            </div>
-        </div>
-    </div>
-
-    <!-- Filtro de Tipo (Selector iOS Minimalista) -->
-    <div style="text-align: center; margin-bottom: 15px;">
-        <div class="ios-segmented-control" id="publicStoreFilters" style="display: none;">
+    <!-- 🔥 TOOLBAR UNIFICADA: Filtros y Buscador en una sola línea -->
+    <div id="storeAppToolbar" class="store-app-toolbar" style="display: none;">
+        
+        <!-- Izquierda: Filtro de Tipo (Selector iOS) -->
+        <div class="ios-segmented-control" id="publicStoreFilters">
             <button class="segmented-btn active" onclick="window.filterStoreType('Todos', event)">Todos</button>
             <button class="segmented-btn" onclick="window.filterStoreType('Combo', event)">Combos</button>
             <button class="segmented-btn" onclick="window.filterStoreType('Servicio', event)">Servicios</button>
         </div>
+
+        <!-- Derecha: Buscador Spotlight -->
+        <div class="expandable-search">
+            <input type="text" id="publicStoreSearchInput" placeholder="Buscar..." oninput="window.searchPublicStore()">
+            <i class='bx bx-search'></i>
+        </div>
+        
     </div>
 
     <!-- Filtro de Categorías del Vendedor (Chips) -->
     <div class="store-chips-container" id="publicStoreCategoryFilters" style="display: none; margin-top: 0; margin-bottom: 25px;"></div>
-
-    <!-- Título Dinámico Elegante (Píldora Flotante) -->
-    <div id="dynamicCategoryTitle" style="text-align: center; margin: 10px 0 35px 0; transition: all 0.3s ease;"></div>
 
     <div id="publicStoreCatalog"></div>
 
