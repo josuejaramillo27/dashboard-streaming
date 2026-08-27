@@ -3296,7 +3296,7 @@ window.searchPublicStore = () => {
 
 window.filterStoreType = (type, event) => {
     window.currentStoreTypeFilter = type;
-    document.querySelectorAll('#publicStoreFilters .chip-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('#publicStoreFilters .segmented-btn').forEach(btn => btn.classList.remove('active'));
     if(event) event.currentTarget.classList.add('active');
     window.renderPublicCatalog();
 };
@@ -3367,14 +3367,11 @@ window.renderPublicCatalog = () => {
             let iconStyle = emojiMatch ? "filter: contrast(0) sepia(100%) hue-rotate(200deg) brightness(1.2) saturate(3);" : "";
 
             titleContainer.innerHTML = `
-                <div style="display: flex; align-items: center; justify-content: center; gap: 14px;">
-                    <div style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 14px; background: rgba(94, 92, 230, 0.1); border: 1px solid rgba(94, 92, 230, 0.3); font-size: 26px; ${iconStyle} box-shadow: 0 4px 15px rgba(94, 92, 230, 0.15);">
-                        ${emoji}
-                    </div>
-                    <div style="text-align: left;">
-                        <span style="display:block; font-size: 10px; color: var(--mac-text-secondary); font-weight: 800; letter-spacing: 1.5px; margin-bottom: 2px;">${titlePrefix}</span>
-                        <h2 style="margin: 0; font-size: 22px; color: var(--mac-text-main); font-weight: 900; letter-spacing: -0.5px;">${cleanText}</h2>
-                    </div>
+                <div style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); padding: 8px 24px; border-radius: 30px; box-shadow: var(--glass-shadow);">
+                    <span style="font-size: 20px; ${iconStyle} transform: translateY(-1px);">${emoji}</span>
+                    <h2 style="margin: 0; font-size: 14px; color: var(--mac-text-main); font-weight: 800; letter-spacing: 0.5px;">
+                        <span style="color: var(--mac-text-secondary); font-weight: 600;">${titlePrefix}</span> ${cleanText}
+                    </h2>
                 </div>
             `;
         }
