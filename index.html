@@ -1400,15 +1400,15 @@
     </div>
     
     <!-- 🔥 BUSCADOR ESTILO SPOTIFY (ARRIBA) -->
-    <div id="publicStoreSearchContainer" style="display: none; width: 100%; max-width: 800px; margin: 0 auto 25px auto;">
+    <div id="publicStoreSearchContainer" style="display: none; width: 100%; max-width: 800px; margin: 0 auto 25px auto; padding: 0 20px; box-sizing: border-box;">
         <div class="spotify-search-bar">
             <i class='bx bx-search'></i>
             <input type="text" id="publicStoreSearchInput" placeholder="¿Qué se te antoja ver hoy?" oninput="window.searchPublicStore()">
         </div>
     </div>
 
-    <!-- 🔥 FILTROS ESTILO SPOTIFY (SIN CAJA DE FONDO) -->
-    <div id="storeAppFiltersWrapper" style="display: none; flex-direction: column; gap: 15px; margin-bottom: 30px; max-width: 1000px; margin-left: auto; margin-right: auto;">
+    <!-- 🔥 FILTROS ESTILO SPOTIFY -->
+    <div id="storeAppFiltersWrapper" style="display: none; flex-direction: column; gap: 15px; margin-bottom: 15px; max-width: 1000px; margin-left: auto; margin-right: auto; padding: 0 20px; box-sizing: border-box;">
         
         <!-- TIPO (A la Izquierda, sueltos y minimalistas) -->
         <div id="publicStoreFilters" class="spotify-type-filters">
@@ -1420,6 +1420,9 @@
         <!-- CATEGORÍAS (Desplazamiento horizontal como los géneros musicales) -->
         <div class="spotify-category-scroll" id="publicStoreCategoryFilters" style="display: none;"></div>
     </div>
+
+    <!-- 🪄 EL TÍTULO ELEGANTE QUE FALTABA (AQUÍ APARECERÁ EL EMOJI VECTORIAL) -->
+    <div id="dynamicCategoryTitle" style="text-align: center; margin: 5px 0 35px 0; transition: all 0.3s ease; padding: 0 20px; box-sizing: border-box;"></div>
 
     <div id="publicStoreCatalog"></div>
 
