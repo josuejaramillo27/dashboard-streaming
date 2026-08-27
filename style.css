@@ -1806,3 +1806,144 @@ body.dark-mode .segmented-btn.active {
         display: none;
     }
 }
+
+/* =========================================================
+   REDISEÑO TIENDITA ESTILO SPOTIFY PERFECTO (PC Y MÓVIL)
+========================================================= */
+
+/* FILA SUPERIOR: Tipo a la izquierda, Buscador a la derecha */
+.spotify-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+}
+
+/* BUSCADOR SPOTIFY (DERECHA) */
+.spotify-search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 280px; /* Ancho elegante en PC */
+    flex-shrink: 0;
+}
+.spotify-search-container input {
+    width: 100% !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid transparent !important;
+    color: var(--mac-text-main) !important;
+    padding: 10px 15px 10px 42px !important;
+    border-radius: 20px !important;
+    font-size: 14px !important;
+    transition: all 0.3s ease !important;
+}
+body:not(.dark-mode) .spotify-search-container input {
+    background: rgba(0, 0, 0, 0.05) !important; /* Para modo claro */
+}
+.spotify-search-container input:focus {
+    background: rgba(94, 92, 230, 0.1) !important;
+    border-color: var(--mac-blue) !important;
+    outline: none !important;
+}
+.spotify-search-container i {
+    position: absolute;
+    left: 16px;
+    font-size: 20px;
+    color: var(--mac-text-secondary);
+    pointer-events: none;
+}
+
+/* FILTROS DE TIPO (IZQUIERDA) */
+.spotify-type-filters {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+.spotify-type-btn {
+    width: auto !important; /* 🔥 FIX: Evita que se estiren al 100% como en tu foto */
+    flex: 0 0 auto !important; 
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid transparent !important;
+    color: var(--mac-text-main) !important;
+    padding: 8px 20px !important;
+    border-radius: 20px !important; 
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer;
+    transition: all 0.2s ease !important;
+    margin: 0 !important;
+}
+body:not(.dark-mode) .spotify-type-btn {
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+.spotify-type-btn:hover {
+    background: rgba(94, 92, 230, 0.15) !important;
+    color: var(--mac-blue) !important;
+}
+.spotify-type-btn.active {
+    background: var(--mac-text-main) !important;
+    color: var(--mac-bg) !important; /* Contraste inverso como Spotify */
+    border-color: var(--mac-text-main) !important;
+}
+
+/* FILTROS DE CATEGORÍA (CARRUSEL HORIZONTAL INFERIOR) */
+.spotify-category-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 5px; 
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; 
+}
+.spotify-category-scroll::-webkit-scrollbar {
+    display: none; 
+}
+.spotify-chip-btn {
+    width: auto !important; 
+    flex: 0 0 auto !important; 
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid transparent !important;
+    color: var(--mac-text-main) !important;
+    padding: 8px 18px !important;
+    border-radius: 20px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer;
+    white-space: nowrap; 
+    transition: all 0.3s ease !important;
+    margin: 0 !important;
+}
+body:not(.dark-mode) .spotify-chip-btn {
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+.spotify-chip-btn:hover {
+    background: rgba(94, 92, 230, 0.1) !important;
+}
+.spotify-chip-btn.active {
+    background: var(--mac-blue) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 15px rgba(94, 92, 230, 0.3) !important;
+}
+
+/* 📱 ADAPTACIÓN INTELIGENTE PARA CELULARES */
+@media (max-width: 768px) {
+    .spotify-top-row {
+        flex-direction: column-reverse; /* El Buscador pasa arriba, y los tipos abajo */
+        align-items: stretch;
+        gap: 15px;
+    }
+    .spotify-search-container {
+        width: 100%;
+    }
+    .spotify-type-filters {
+        overflow-x: auto;
+        scrollbar-width: none;
+        padding-bottom: 5px;
+    }
+    .spotify-type-filters::-webkit-scrollbar {
+        display: none;
+    }
+}
