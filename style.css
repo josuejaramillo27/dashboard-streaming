@@ -1726,3 +1726,42 @@ body.dark-mode .settings-dropdown {
 
 /* Si está el carrito, movemos un poco el botón AI para que no choquen */
 body.logged-in .floating-cart { bottom: 95px !important; }
+
+/* =========================================================
+   SELECTOR DE TIPO ESTILO iOS (JERARQUÍA VISUAL)
+========================================================= */
+.ios-segmented-control {
+    display: inline-flex;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 4px;
+    border: 1px solid var(--mac-border);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+body.dark-mode .ios-segmented-control {
+    background: rgba(255, 255, 255, 0.04);
+}
+.segmented-btn {
+    background: transparent !important;
+    border: none !important;
+    color: var(--mac-text-secondary) !important;
+    padding: 8px 20px !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    cursor: pointer;
+    transition: all 0.3s ease !important;
+    margin: 0 !important;
+    width: auto !important;
+    box-shadow: none !important;
+}
+.segmented-btn.active {
+    background: var(--mac-surface) !important;
+    color: var(--mac-text-main) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12) !important;
+    border: 1px solid var(--mac-border) !important;
+}
+body.dark-mode .segmented-btn.active {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4) !important;
+}
