@@ -506,6 +506,27 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
     scrollbar-width: thin;
     scrollbar-color: rgba(134, 134, 139, 0.25) transparent;
 }
+/* =========================================================
+   REGLA PARA CELULARES (La barra siempre debe estar expandida)
+========================================================= */
+@media (max-width: 768px) {
+    .expandable-search {
+        width: 100%;
+        flex: 1;
+    }
+    .expandable-search input {
+        width: 100% !important; /* Fuerza la barra a ocupar el máximo espacio */
+        height: auto;
+        border-radius: 10px; /* Borde cuadrado clásico de iOS */
+        padding: 12px 14px 12px 38px;
+        color: var(--mac-text-main);
+        cursor: text;
+    }
+    .expandable-search input::placeholder {
+        color: var(--mac-text-secondary);
+        opacity: 0.6;
+    }
+}
 
 /* =========================================================
    TIENDITA WEB: PANTALLA COMPLETA (SIN CAJA FLOTANTE)
