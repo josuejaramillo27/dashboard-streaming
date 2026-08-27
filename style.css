@@ -1809,15 +1809,18 @@ body.dark-mode .segmented-btn.active {
     flex-wrap: wrap;
 }
 .spotify-type-btn {
+    width: auto !important; /* 👈 EL FIX CLAVE: Evita que se estiren al 100% */
+    flex: 0 0 auto !important; /* 👈 Mantiene la forma perfecta de píldora */
     background: transparent !important;
     border: 1px solid var(--mac-border-solid) !important;
     color: var(--mac-text-secondary) !important;
     padding: 8px 20px !important;
-    border-radius: 30px !important; /* Estilo píldora */
+    border-radius: 30px !important; 
     font-size: 13px !important;
     font-weight: 700 !important;
     cursor: pointer;
     transition: all 0.2s ease !important;
+    margin: 0 !important;
 }
 .spotify-type-btn:hover {
     background: rgba(255, 255, 255, 0.05) !important;
@@ -1825,7 +1828,7 @@ body.dark-mode .segmented-btn.active {
 }
 .spotify-type-btn.active {
     background: var(--mac-text-main) !important;
-    color: var(--mac-bg) !important; /* Contraste brutal: Fondo claro, letra oscura (o viceversa) */
+    color: var(--mac-bg) !important; /* Contraste brutal tipo Spotify */
     border-color: var(--mac-text-main) !important;
 }
 
@@ -1836,12 +1839,14 @@ body.dark-mode .segmented-btn.active {
     overflow-x: auto;
     padding-bottom: 5px; 
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Oculta en Firefox */
+    scrollbar-width: none; /* Oculta barra en Firefox */
 }
 .spotify-category-scroll::-webkit-scrollbar {
-    display: none; /* Oculta en Chrome/Safari/Edge */
+    display: none; /* Oculta barra en Chrome/Safari */
 }
 .spotify-chip-btn {
+    width: auto !important; /* 👈 EL FIX CLAVE */
+    flex: 0 0 auto !important; /* 👈 EL FIX CLAVE */
     background: rgba(255, 255, 255, 0.05) !important;
     border: none !important;
     color: var(--mac-text-main) !important;
@@ -1850,11 +1855,12 @@ body.dark-mode .segmented-btn.active {
     font-size: 14px !important;
     font-weight: 600 !important;
     cursor: pointer;
-    white-space: nowrap; /* Evita que el texto de la categoría se rompa */
+    white-space: nowrap; 
     transition: all 0.3s ease !important;
+    margin: 0 !important;
 }
 body.dark-mode .spotify-chip-btn {
-    background: rgba(255, 255, 255, 0.08) !important; /* Gris oscuro para el modo oscuro */
+    background: rgba(255, 255, 255, 0.08) !important;
 }
 .spotify-chip-btn:hover {
     background: rgba(255, 255, 255, 0.12) !important;
