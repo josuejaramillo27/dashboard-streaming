@@ -1407,21 +1407,35 @@
         </div>
     </div>
 
-    <!-- 🔥 FILTROS ESTILO SPOTIFY -->
+    <!-- 🔥 FILTROS Y BUSCADOR (NUEVO ORDEN PERFECTO) -->
     <div id="storeAppFiltersWrapper" style="display: none; flex-direction: column; gap: 15px; margin-bottom: 15px; max-width: 1000px; margin-left: auto; margin-right: auto; padding: 0 20px; box-sizing: border-box;">
         
-        <!-- TIPO (A la Izquierda, sueltos y minimalistas) -->
-        <div id="publicStoreFilters" class="spotify-type-filters">
-            <button class="spotify-type-btn active" onclick="window.filterStoreType('Todos', event)">Todos</button>
-            <button class="spotify-type-btn" onclick="window.filterStoreType('Combo', event)">Combos</button>
-            <button class="spotify-type-btn" onclick="window.filterStoreType('Servicio', event)">Servicios</button>
+        <!-- FILA SUPERIOR: Tipo (Izq) y Buscador (Der) -->
+        <div class="store-top-controls">
+            
+            <!-- IZQUIERDA: Filtros de Tipo -->
+            <div id="publicStoreFilters" class="spotify-type-filters">
+                <button class="spotify-type-btn active" onclick="window.filterStoreType('Todos', event)">Todos</button>
+                <button class="spotify-type-btn" onclick="window.filterStoreType('Combo', event)">Combos</button>
+                <button class="spotify-type-btn" onclick="window.filterStoreType('Servicio', event)">Servicios</button>
+            </div>
+
+            <!-- DERECHA: Buscador Expandible Minimalista -->
+            <div class="store-search-right">
+                <div class="expandable-search">
+                    <input type="text" id="publicStoreSearchInput" placeholder="Buscar..." oninput="window.searchPublicStore()">
+                    <i class='bx bx-search'></i>
+                </div>
+            </div>
+
         </div>
 
-        <!-- CATEGORÍAS (Desplazamiento horizontal como los géneros musicales) -->
+        <!-- FILA INFERIOR: Categorías -->
         <div class="spotify-category-scroll" id="publicStoreCategoryFilters" style="display: none;"></div>
+        
     </div>
 
-    <!-- 🪄 EL TÍTULO ELEGANTE QUE FALTABA (AQUÍ APARECERÁ EL EMOJI VECTORIAL) -->
+    <!-- 🪄 TÍTULO DINÁMICO ELEGANTE -->
     <div id="dynamicCategoryTitle" style="text-align: center; margin: 5px 0 35px 0; transition: all 0.3s ease; padding: 0 20px; box-sizing: border-box;"></div>
 
     <div id="publicStoreCatalog"></div>
