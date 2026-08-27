@@ -3529,12 +3529,10 @@ const checkPublicStore = async () => {
             window.publicCatalogCache = data.storeCatalog || [];
             window.publicStoreDataCache = data;
 
-            // Activamos los filtros y el Buscador Spotlight
-            const filtersEl = document.getElementById('publicStoreFilters');
-            const searchEl = document.getElementById('publicStoreSearchContainer');
-            if (filtersEl && window.publicCatalogCache.length > 0) {
-                filtersEl.style.display = 'flex';
-                if(searchEl) searchEl.style.display = 'block';
+            // Activamos la Toolbar de Filtros y Buscador
+            const toolbarEl = document.getElementById('storeAppToolbar');
+            if (toolbarEl && window.publicCatalogCache.length > 0) {
+                toolbarEl.style.display = 'flex';
             }
 
             const supportBtn = document.getElementById('publicStoreSupportBtn');
