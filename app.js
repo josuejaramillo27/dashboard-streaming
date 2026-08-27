@@ -3539,10 +3539,8 @@ const checkPublicStore = async () => {
             window.publicStoreDataCache = data;
 
             // Activamos Filtros y Buscador estilo Spotify
-            const searchContainer = document.getElementById('publicStoreSearchContainer');
             const filtersWrapper = document.getElementById('storeAppFiltersWrapper');
             if (window.publicCatalogCache.length > 0) {
-                if (searchContainer) searchContainer.style.display = 'block';
                 if (filtersWrapper) filtersWrapper.style.display = 'flex';
             }
 
