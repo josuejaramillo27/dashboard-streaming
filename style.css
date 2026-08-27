@@ -1767,107 +1767,42 @@ body.dark-mode .segmented-btn.active {
 }
 
 /* =========================================================
-   REDISEÑO TIENDITA ESTILO SPOTIFY
+   ORDEN PERFECTO: TIPO (IZQ) Y BUSCADOR (DER)
 ========================================================= */
-
-/* 1. Buscador Superior Gigante y Elegante */
-.spotify-search-bar {
-    position: relative;
+.store-top-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
     width: 100%;
 }
-.spotify-search-bar input {
-    width: 100% !important;
-    background: rgba(255, 255, 255, 0.04) !important;
-    border: 1px solid var(--mac-border-solid) !important;
-    color: var(--mac-text-main) !important;
-    padding: 16px 20px 16px 50px !important;
-    border-radius: 14px !important;
-    font-size: 16px !important;
-    transition: all 0.3s ease !important;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
-}
-.spotify-search-bar input:focus {
-    background: rgba(94, 92, 230, 0.08) !important;
-    border-color: var(--mac-blue) !important;
-    box-shadow: 0 4px 20px rgba(94, 92, 230, 0.2) !important;
-}
-.spotify-search-bar i {
-    position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 22px;
-    color: var(--mac-text-secondary);
-    pointer-events: none;
+
+.store-search-right {
+    display: flex;
+    justify-content: flex-end;
 }
 
-/* 2. Filtros de Tipo (Alineados a la Izquierda, sin caja de fondo) */
-.spotify-type-filters {
-    display: flex;
-    gap: 12px;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-}
-.spotify-type-btn {
-    width: auto !important; /* 👈 EL FIX CLAVE: Evita que se estiren al 100% */
-    flex: 0 0 auto !important; /* 👈 Mantiene la forma perfecta de píldora */
-    background: transparent !important;
-    border: 1px solid var(--mac-border-solid) !important;
-    color: var(--mac-text-secondary) !important;
-    padding: 8px 20px !important;
-    border-radius: 30px !important; 
-    font-size: 13px !important;
-    font-weight: 700 !important;
-    cursor: pointer;
-    transition: all 0.2s ease !important;
-    margin: 0 !important;
-}
-.spotify-type-btn:hover {
-    background: rgba(255, 255, 255, 0.05) !important;
-    color: var(--mac-text-main) !important;
-}
-.spotify-type-btn.active {
-    background: var(--mac-text-main) !important;
-    color: var(--mac-bg) !important; /* Contraste brutal tipo Spotify */
-    border-color: var(--mac-text-main) !important;
-}
-
-/* 3. Filtros de Categoría (Carrusel Horizontal como Spotify) */
-.spotify-category-scroll {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    padding-bottom: 5px; 
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Oculta barra en Firefox */
-}
-.spotify-category-scroll::-webkit-scrollbar {
-    display: none; /* Oculta barra en Chrome/Safari */
-}
-.spotify-chip-btn {
-    width: auto !important; /* 👈 EL FIX CLAVE */
-    flex: 0 0 auto !important; /* 👈 EL FIX CLAVE */
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: none !important;
-    color: var(--mac-text-main) !important;
-    padding: 10px 22px !important;
-    border-radius: 30px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    cursor: pointer;
-    white-space: nowrap; 
-    transition: all 0.3s ease !important;
-    margin: 0 !important;
-}
-body.dark-mode .spotify-chip-btn {
-    background: rgba(255, 255, 255, 0.08) !important;
-}
-.spotify-chip-btn:hover {
-    background: rgba(255, 255, 255, 0.12) !important;
-    transform: scale(1.02);
-}
-.spotify-chip-btn.active {
-    background: var(--mac-blue) !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 15px rgba(94, 92, 230, 0.3) !important;
+/* 📱 ADAPTACIÓN PARA CELULARES */
+@media (max-width: 768px) {
+    .store-top-controls {
+        flex-direction: column-reverse; /* El buscador pasa arriba, botones abajo */
+        align-items: stretch;
+        gap: 15px;
+    }
+    .store-search-right {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Efecto carrusel para los botones de tipo en celular (Evita amontonamiento) */
+    .spotify-type-filters {
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 5px;
+    }
+    .spotify-type-filters::-webkit-scrollbar {
+        display: none;
+    }
 }
