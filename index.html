@@ -1399,26 +1399,27 @@
         <p style="color: var(--mac-text-secondary); margin-top: 5px; font-weight: 500;">Catálogo Oficial de Servicios</p>
     </div>
     
-    <!-- 🔥 TOOLBAR UNIFICADA: Filtros y Buscador en una sola línea -->
-    <div id="storeAppToolbar" class="store-app-toolbar" style="display: none;">
-        
-        <!-- Izquierda: Filtro de Tipo (Selector iOS) -->
-        <div class="ios-segmented-control" id="publicStoreFilters">
-            <button class="segmented-btn active" onclick="window.filterStoreType('Todos', event)">Todos</button>
-            <button class="segmented-btn" onclick="window.filterStoreType('Combo', event)">Combos</button>
-            <button class="segmented-btn" onclick="window.filterStoreType('Servicio', event)">Servicios</button>
-        </div>
-
-        <!-- Derecha: Buscador Spotlight -->
-        <div class="expandable-search">
-            <input type="text" id="publicStoreSearchInput" placeholder="Buscar..." oninput="window.searchPublicStore()">
+    <!-- 🔥 BUSCADOR ESTILO SPOTIFY (ARRIBA) -->
+    <div id="publicStoreSearchContainer" style="display: none; width: 100%; max-width: 800px; margin: 0 auto 25px auto;">
+        <div class="spotify-search-bar">
             <i class='bx bx-search'></i>
+            <input type="text" id="publicStoreSearchInput" placeholder="¿Qué se te antoja ver hoy?" oninput="window.searchPublicStore()">
         </div>
-        
     </div>
 
-    <!-- Filtro de Categorías del Vendedor (Chips) -->
-    <div class="store-chips-container" id="publicStoreCategoryFilters" style="display: none; margin-top: 0; margin-bottom: 25px;"></div>
+    <!-- 🔥 FILTROS ESTILO SPOTIFY (SIN CAJA DE FONDO) -->
+    <div id="storeAppFiltersWrapper" style="display: none; flex-direction: column; gap: 15px; margin-bottom: 30px; max-width: 1000px; margin-left: auto; margin-right: auto;">
+        
+        <!-- TIPO (A la Izquierda, sueltos y minimalistas) -->
+        <div id="publicStoreFilters" class="spotify-type-filters">
+            <button class="spotify-type-btn active" onclick="window.filterStoreType('Todos', event)">Todos</button>
+            <button class="spotify-type-btn" onclick="window.filterStoreType('Combo', event)">Combos</button>
+            <button class="spotify-type-btn" onclick="window.filterStoreType('Servicio', event)">Servicios</button>
+        </div>
+
+        <!-- CATEGORÍAS (Desplazamiento horizontal como los géneros musicales) -->
+        <div class="spotify-category-scroll" id="publicStoreCategoryFilters" style="display: none;"></div>
+    </div>
 
     <div id="publicStoreCatalog"></div>
 
