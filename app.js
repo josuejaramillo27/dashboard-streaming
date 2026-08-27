@@ -257,6 +257,7 @@ window.forceAppUpdate = async () => {
     }
 };
 window.doLogout = async () => {
+    if(document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'none';
     clients = []; currentUser = null; currentUserData = null; document.getElementById('tableBody').innerHTML = ''; showView('authView'); window.showLogin();
     try { await signOut(auth); window.showNotification("Sesión cerrada"); } catch (e) { console.error(e); }
 };
@@ -386,6 +387,7 @@ onAuthStateChanged(auth, async (user) => {
                     showView('adminView'); 
                     loadAdminData(); 
                     window.requestNotificationPermission(); 
+                    if(document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'flex'; // 👈 MOSTRAR ASISTENTE
                 } else { 
                     if (currentUserData.active === true) { 
                         showView('appView'); 
@@ -395,6 +397,7 @@ onAuthStateChanged(auth, async (user) => {
                         window.requestNotificationPermission(); 
                         window.renderInventory();
                         window.syncUserServices();
+                        if(document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'flex'; // 👈 MOSTRAR ASISTENTE
                         
                         // --- LANZADOR DEL TUTORIAL ---
                         if (!currentUserData.tutorialVisto && window.innerWidth > 768) {
@@ -472,6 +475,11 @@ window.switchDashboardSection = (sectionId, menuElement) => {
 const originalCloseModals = window.closeModals;
 window.closeModals = (resetTab = true) => {
     originalCloseModals(resetTab);
+    
+    // 👈 RESTAURAR ASISTENTE AL CERRAR MODALES (Solo si tiene sesión activa)
+    if (currentUser && document.getElementById('aiFloatingBtn')) {
+        document.getElementById('aiFloatingBtn').style.display = 'flex';
+    }
     
     // Le quitamos la validación de PC para que en celular también restaure el inicio
     if (resetTab === true) {
@@ -2271,6 +2279,7 @@ window.viewNewsDetail = (noticia, element) => {
    A.G.C. WRAPPED - ALGORITMO DE MÉTRICAS PREMIUM SIN LOGO
 ========================================================= */
 window.showWrapped = () => {
+    if(document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'none';
     window.closeModals(false);
     let totalUnits = 0;
     let platformCounts = {};
