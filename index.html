@@ -1407,11 +1407,11 @@
         </div>
     </div>
 
-    <!-- 🔥 FILTROS Y BUSCADOR (NUEVO ORDEN PERFECTO) -->
-    <div id="storeAppFiltersWrapper" style="display: none; flex-direction: column; gap: 15px; margin-bottom: 15px; max-width: 1000px; margin-left: auto; margin-right: auto; padding: 0 20px; box-sizing: border-box;">
+   <!-- 🔥 FILTROS Y BUSCADOR (ORDEN SPOTIFY PERFECTO) -->
+    <div id="storeAppFiltersWrapper" style="display: none; flex-direction: column; gap: 15px; margin-bottom: 25px; max-width: 1000px; margin-left: auto; margin-right: auto; padding: 0 20px; box-sizing: border-box;">
         
         <!-- FILA SUPERIOR: Tipo (Izq) y Buscador (Der) -->
-        <div class="store-top-controls">
+        <div class="spotify-top-row">
             
             <!-- IZQUIERDA: Filtros de Tipo -->
             <div id="publicStoreFilters" class="spotify-type-filters">
@@ -1420,12 +1420,10 @@
                 <button class="spotify-type-btn" onclick="window.filterStoreType('Servicio', event)">Servicios</button>
             </div>
 
-            <!-- DERECHA: Buscador Expandible Minimalista -->
-            <div class="store-search-right">
-                <div class="expandable-search">
-                    <input type="text" id="publicStoreSearchInput" placeholder="Buscar..." oninput="window.searchPublicStore()">
-                    <i class='bx bx-search'></i>
-                </div>
+            <!-- DERECHA: Buscador Minimalista -->
+            <div class="spotify-search-container">
+                <i class='bx bx-search'></i>
+                <input type="text" id="publicStoreSearchInput" placeholder="Buscar en tienda..." oninput="window.searchPublicStore()">
             </div>
 
         </div>
@@ -1436,7 +1434,7 @@
     </div>
 
     <!-- 🪄 TÍTULO DINÁMICO ELEGANTE -->
-    <div id="dynamicCategoryTitle" style="text-align: center; margin: 5px 0 35px 0; transition: all 0.3s ease; padding: 0 20px; box-sizing: border-box;"></div>
+    <div id="dynamicCategoryTitle" style="text-align: center; margin: 10px 0 35px 0; transition: all 0.3s ease; padding: 0 20px; box-sizing: border-box;"></div>
 
     <div id="publicStoreCatalog"></div>
 
