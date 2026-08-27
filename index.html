@@ -1409,19 +1409,20 @@
         </div>
     </div>
 
-    <!-- Filtro de Tipo (Combos / Servicios) -->
-    <div class="store-chips-container" id="publicStoreFilters" style="display: none; margin-bottom: 10px;">
-        <button class="chip-btn active" onclick="window.filterStoreType('Todos', event)">Todos</button>
-        <button class="chip-btn" onclick="window.filterStoreType('Combo', event)">Combos</button>
-        <button class="chip-btn" onclick="window.filterStoreType('Servicio', event)">Servicios</button>
+    <!-- Filtro de Tipo (Selector iOS Minimalista) -->
+    <div style="text-align: center; margin-bottom: 15px;">
+        <div class="ios-segmented-control" id="publicStoreFilters" style="display: none;">
+            <button class="segmented-btn active" onclick="window.filterStoreType('Todos', event)">Todos</button>
+            <button class="segmented-btn" onclick="window.filterStoreType('Combo', event)">Combos</button>
+            <button class="segmented-btn" onclick="window.filterStoreType('Servicio', event)">Servicios</button>
+        </div>
     </div>
 
-    <!-- Filtro de Categorías del Vendedor -->
-    <div class="store-chips-container" id="publicStoreCategoryFilters" style="display: none; margin-top: 0; padding-top: 0;">
-    </div>
+    <!-- Filtro de Categorías del Vendedor (Chips) -->
+    <div class="store-chips-container" id="publicStoreCategoryFilters" style="display: none; margin-top: 0; margin-bottom: 25px;"></div>
 
-    <!-- Título Dinámico Elegante -->
-    <div id="dynamicCategoryTitle" style="text-align: center; margin: 15px 0 30px 0; transition: all 0.3s ease;"></div>
+    <!-- Título Dinámico Elegante (Píldora Flotante) -->
+    <div id="dynamicCategoryTitle" style="text-align: center; margin: 10px 0 35px 0; transition: all 0.3s ease;"></div>
 
     <div id="publicStoreCatalog"></div>
 
