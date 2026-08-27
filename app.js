@@ -2748,6 +2748,7 @@ window.openStoreModal = () => {
         document.getElementById('btnCopyInternalLink').style.display = 'block';
         document.getElementById('externalCatalogActive').style.display = 'none';
         window.renderStoreItems();
+        window.syncStoreCategories();
     }
     document.getElementById('storeModal').style.display = 'flex';
 };
@@ -2866,11 +2867,59 @@ window.updateStoreStockCount = () => {
         countText.innerText = `${count} disp.`; countText.style.color = count > 0 ? 'var(--mac-green)' : 'var(--mac-red)';
     }
 };
+/* --- GESTIÓN DE CATEGORÍAS DE LA TIENDA --- */
+window.syncStoreCategories = () => {
+    let cats = currentUserData.storeCategories || [];
+    const select = document.getElementById('storeCategorySelect');
+    if (select) {
+        select.innerHTML = '<option value="">Sin Categoría</option>';
+        cats.forEach(c => select.innerHTML += `<option value="${c}">${c}</option>`);
+    }
+    window.renderStoreCategoryChips();
+};
 
+window.renderStoreCategoryChips = () => {
+    const container = document.getElementById('storeCategoryChips');
+    if (!container) return;
+    container.innerHTML = '';
+    const cats = currentUserData.storeCategories || [];
+
+    cats.forEach((c, index) => {
+        const chip = document.createElement('div');
+        chip.style.cssText = "background: rgba(94, 92, 230, 0.1); border: 1px solid var(--mac-blue); color: var(--mac-blue); font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 20px; display: flex; align-items: center; gap: 8px;";
+        chip.innerHTML = `<span>${c}</span> <i class='bx bx-x' style='cursor:pointer; color:var(--mac-red); font-size:16px;' onclick="window.removeStoreCategory(${index})"></i>`;
+        container.appendChild(chip);
+    });
+};
+
+window.addStoreCategory = async () => {
+    const input = document.getElementById('newStoreCategoryInput');
+    const name = input.value.trim();
+    if (!name) return window.showNotification("Escribe una categoría");
+
+    let cats = currentUserData.storeCategories || [];
+    if (cats.includes(name)) return window.showNotification("La categoría ya existe");
+
+    cats.push(name);
+    currentUserData.storeCategories = cats;
+    input.value = '';
+
+    await updateDoc(doc(db, "users", currentUser.uid), { storeCategories: cats });
+    window.syncStoreCategories();
+};
+
+window.removeStoreCategory = async (index) => {
+    let cats = currentUserData.storeCategories || [];
+    cats.splice(index, 1);
+    currentUserData.storeCategories = cats;
+    await updateDoc(doc(db, "users", currentUser.uid), { storeCategories: cats });
+    window.syncStoreCategories();
+};
 window.addStoreItem = async () => {
     const type = document.getElementById('storeType') ? document.getElementById('storeType').value : 'Servicio';
     const plat = document.getElementById('storePlatform').value.trim();
     const price = document.getElementById('storePrice').value;
+    const cat = document.getElementById('storeCategorySelect').value;
     const desc = document.getElementById('storeDesc') ? document.getElementById('storeDesc').value.trim() : '';
     const autoStock = document.getElementById('storeAutoStock').checked;
     const requiresInvite = document.getElementById('storeRequiresInvite') ? document.getElementById('storeRequiresInvite').checked : false;
@@ -2902,7 +2951,8 @@ window.addStoreItem = async () => {
         catalog.push({ 
             id: 'item_' + Date.now(), 
             platform: plat, 
-            price: parseFloat(price), 
+            price: parseFloat(price),
+            category: cat,
             desc: desc, imgUrl: imgUrl, type: type, 
             autoStock: autoStock, stockPlatforms: stockPlatforms,
             requiresInvite: requiresInvite,
@@ -2916,6 +2966,7 @@ window.addStoreItem = async () => {
         document.getElementById('storePrice').value = '';
         if (document.getElementById('storeDesc')) document.getElementById('storeDesc').value = '';
         if (fileInput) fileInput.value = '';
+        document.getElementById('storeCategorySelect').value = '';
         
         // Reset de checkboxes
         document.getElementById('storeAutoStock').checked = false;
@@ -2990,14 +3041,31 @@ window.editStoreItem = async (index) => {
     let item = catalog[index];
     if (!item) return;
 
+    let catOptions = '<option value="">Sin Categoría</option>';
+    const userCats = currentUserData.storeCategories || [];
+    userCats.forEach(c => {
+        const sel = item.category === c ? 'selected' : '';
+        catOptions += `<option value="${c}" ${sel}>${c}</option>`;
+    });
+
     const { value: formValues } = await Swal.fire({
         title: 'Editar Producto',
         html: `
             <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Nombre del Servicio/Combo:</label>
                 <input id="swal-plat" class="swal2-input" style="margin:0; width: 100%; box-sizing:border-box;" value="${item.platform}">
-                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Precio:</label>
-                <input id="swal-price" type="number" step="0.1" class="swal2-input" style="margin:0; width: 100%; box-sizing:border-box;" value="${item.price}">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                    <div>
+                        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Precio:</label>
+                        <input id="swal-price" type="number" step="0.1" class="swal2-input" style="margin:0; width: 100%; box-sizing:border-box;" value="${item.price}">
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Categoría:</label>
+                        <select id="swal-cat" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-top: 5px;">
+                            ${catOptions}
+                        </select>
+                    </div>
+                </div>
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-orange); margin-top: 10px;">
                     <input type="checkbox" id="swal-invite" ${item.requiresInvite ? 'checked' : ''}> Venta por Invitación
                 </label>
@@ -3012,12 +3080,13 @@ window.editStoreItem = async (index) => {
         preConfirm: () => {
             const plat = document.getElementById('swal-plat').value.trim();
             const price = parseFloat(document.getElementById('swal-price').value);
+            const cat = document.getElementById('swal-cat').value;
             const invite = document.getElementById('swal-invite').checked;
             const desc = document.getElementById('swal-desc').value.trim();
             const fileInput = document.getElementById('swal-img');
             const file = fileInput && fileInput.files.length > 0 ? fileInput.files[0] : null;
             if (!plat || isNaN(price)) { Swal.showValidationMessage('El nombre y el precio son obligatorios'); return false; }
-            return { platform: plat, price: price, desc: desc, requiresInvite: invite, file: file };
+            return { platform: plat, price: price, category: cat, desc: desc, requiresInvite: invite, file: file };
         }
     });
 
@@ -3025,13 +3094,13 @@ window.editStoreItem = async (index) => {
         let newImgUrl = item.imgUrl || ""; 
         try {
             if (formValues.file) {
-                window.showNotification("⏳ Subiendo nueva imagen...");
                 const storageRef = ref(storage, `store_images/${currentUser.uid}_${Date.now()}_${formValues.file.name}`);
                 const snapshot = await uploadBytes(storageRef, formValues.file);
                 newImgUrl = await getDownloadURL(snapshot.ref);
             }
             catalog[index].platform = formValues.platform;
             catalog[index].price = formValues.price;
+            catalog[index].category = formValues.category; // 👈 Guarda categoría
             catalog[index].desc = formValues.desc;
             catalog[index].requiresInvite = formValues.requiresInvite;
             catalog[index].imgUrl = newImgUrl; 
@@ -3073,25 +3142,11 @@ window.openProductDesc = (title, desc) => {
     document.getElementById('productDescModal').style.display = 'flex';
 };
 
-window.filterStore = (type) => {
-    document.querySelectorAll('.chip-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.textContent.includes('Combos') && type === 'Combo') btn.classList.add('active');
-        else if (btn.textContent.includes('Servicios') && type === 'Servicio') btn.classList.add('active');
-        else if (btn.textContent === 'Todos' && type === 'Todos') btn.classList.add('active');
-    });
-    window.renderPublicCatalog(type);
-};
 /* =========================================================
    MOTOR DE CARRITO, BUSCADOR SPOTLIGHT Y COMPARTIR
 ========================================================= */
 window.storeCart = [];
 window.currentStoreFilter = 'Todos';
-
-// BUSCADOR SPOTLIGHT
-window.searchPublicStore = () => {
-    window.renderPublicCatalog(window.currentStoreFilter);
-};
 
 // COMPARTIR NATIVO (WEB SHARE API)
 window.shareProduct = async (itemId) => {
@@ -3229,7 +3284,31 @@ window.openCheckoutFromCart = () => {
     document.getElementById('checkoutReceipt').value = '';
     document.getElementById('checkoutModal').style.display = 'flex';
 };
-window.renderPublicCatalog = (filterType) => {
+/* =========================================================
+   SISTEMA DE FILTROS, BUSCADOR Y RENDERIZADO (TIENDITA)
+========================================================= */
+window.currentStoreTypeFilter = 'Todos';
+window.currentStoreCatFilter = 'Todas';
+
+window.searchPublicStore = () => {
+    window.renderPublicCatalog();
+};
+
+window.filterStoreType = (type, event) => {
+    window.currentStoreTypeFilter = type;
+    document.querySelectorAll('#publicStoreFilters .chip-btn').forEach(btn => btn.classList.remove('active'));
+    if(event) event.currentTarget.classList.add('active');
+    window.renderPublicCatalog();
+};
+
+window.filterStoreCategory = (cat, event) => {
+    window.currentStoreCatFilter = cat;
+    document.querySelectorAll('#publicStoreCategoryFilters .chip-btn').forEach(btn => btn.classList.remove('active'));
+    if(event) event.currentTarget.classList.add('active');
+    window.renderPublicCatalog();
+};
+
+window.renderPublicCatalog = () => {
     const catalogBox = document.getElementById('publicStoreCatalog');
     if (!catalogBox) return;
     catalogBox.innerHTML = '';
@@ -3238,31 +3317,82 @@ window.renderPublicCatalog = (filterType) => {
     const data = window.publicStoreDataCache;
     if (!data) return;
 
-    window.currentStoreFilter = filterType || window.currentStoreFilter || 'Todos';
     const isStoreOpen = data.storeActive !== false; 
-
-    // 🔥 FILTRO COMBINADO (Pestañas + Buscador Spotlight)
     const searchTerm = document.getElementById('publicStoreSearchInput') ? document.getElementById('publicStoreSearchInput').value.toLowerCase() : '';
     
+    // 1. Extraemos las categorías ÚNICAS
+    const activeCategories = [...new Set(catalog.map(i => i.category).filter(c => c && c !== ''))];
+    const catContainer = document.getElementById('publicStoreCategoryFilters');
+    
+    if (activeCategories.length > 0) {
+        catContainer.style.display = 'flex';
+        // Solo repintamos los botones si cambió la lista de categorías
+        if (catContainer.children.length !== activeCategories.length + 1) {
+            catContainer.innerHTML = `<button class="chip-btn ${window.currentStoreCatFilter === 'Todas' ? 'active' : ''}" onclick="window.filterStoreCategory('Todas', event)">Todo el Catálogo</button>`;
+            activeCategories.forEach(cat => {
+                catContainer.innerHTML += `<button class="chip-btn ${window.currentStoreCatFilter === cat ? 'active' : ''}" onclick="window.filterStoreCategory('${cat}', event)">${cat}</button>`;
+            });
+        }
+    } else {
+        catContainer.style.display = 'none';
+    }
+
+    // 2. Filtramos el catálogo
+    const typeF = window.currentStoreTypeFilter;
+    const catF = window.currentStoreCatFilter;
+
     const itemsFiltrados = catalog.filter(item => {
-        const matchCategory = window.currentStoreFilter === 'Todos' || item.type === window.currentStoreFilter;
+        const matchType = typeF === 'Todos' || item.type === typeF;
+        const matchCat = catF === 'Todas' || item.category === catF;
         const matchSearch = item.platform.toLowerCase().includes(searchTerm) || (item.desc && item.desc.toLowerCase().includes(searchTerm));
-        return matchCategory && matchSearch;
+        return matchType && matchCat && matchSearch;
     });
 
+    // 3. Generamos el Título Dinámico con Emoji Minimalista
+    const titleContainer = document.getElementById('dynamicCategoryTitle');
+    if (titleContainer) {
+        if (searchTerm) {
+            titleContainer.innerHTML = `<span style="font-size: 13px; color: var(--mac-text-secondary); font-weight:bold;">Resultados para: "${searchTerm}"</span>`;
+        } else {
+            let titlePrefix = typeF === 'Combo' ? 'COMBOS DE' : (typeF === 'Servicio' ? 'SERVICIOS DE' : 'EXPLORAR');
+            let rawCat = catF === 'Todas' ? 'TODO EL CATÁLOGO' : catF;
+            
+            // Atrapamos el Emoji para volverlo un ícono vectorial
+            const emojiRegex = /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g;
+            let emojiMatch = rawCat.match(emojiRegex);
+            let emoji = emojiMatch ? emojiMatch[0] : "<i class='bx bx-category'></i>";
+            let cleanText = rawCat.replace(emojiRegex, '').trim().toUpperCase();
+
+            // Magia CSS para monocromatizar el Emoji original
+            let iconStyle = emojiMatch ? "filter: contrast(0) sepia(100%) hue-rotate(200deg) brightness(1.2) saturate(3);" : "";
+
+            titleContainer.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; gap: 14px;">
+                    <div style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 14px; background: rgba(94, 92, 230, 0.1); border: 1px solid rgba(94, 92, 230, 0.3); font-size: 26px; ${iconStyle} box-shadow: 0 4px 15px rgba(94, 92, 230, 0.15);">
+                        ${emoji}
+                    </div>
+                    <div style="text-align: left;">
+                        <span style="display:block; font-size: 10px; color: var(--mac-text-secondary); font-weight: 800; letter-spacing: 1.5px; margin-bottom: 2px;">${titlePrefix}</span>
+                        <h2 style="margin: 0; font-size: 22px; color: var(--mac-text-main); font-weight: 900; letter-spacing: -0.5px;">${cleanText}</h2>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
     if (itemsFiltrados.length === 0) {
-        catalogBox.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); width: 100%; grid-column: 1/-1; padding: 40px 0; font-weight: 500;">No hay productos que coincidan con la búsqueda.</p>';
+        catalogBox.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); width: 100%; grid-column: 1/-1; padding: 40px 0; font-weight: 500;">No hay productos que coincidan con la búsqueda o filtro.</p>';
         return;
     }
 
+    // 4. Dibujar las tarjetas (El código de diseño queda idéntico al que ya tenías)
     itemsFiltrados.forEach(item => {
         const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
         let isAgotado = item.status === 'agotado';
         let stockHtml = '';
         
-        // 🔥 LÓGICA DE STOCK Y ETIQUETA "A PEDIDO"
         if (item.badgeOption === 'a_pedido') {
-            isAgotado = false; // A Pedido no se agota
+            isAgotado = false;
             stockHtml = `<span style="font-size:10px; color:var(--mac-blue); display:block; margin-top:6px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><i class='bx bx-package'></i> Disponible a pedido</span>`;
         } else if (item.autoStock && item.stockPlatforms && item.stockPlatforms.length > 0 && data.inventory) {
             const stock = data.inventory || [];
@@ -3280,31 +3410,18 @@ window.renderPublicCatalog = (filterType) => {
             }
         }
 
-        // 2. ETIQUETAS Y EMOJIS DE TIENDA
         let typeBadgeHtml = item.type === 'Combo' ? `<div class="store-vibrant-badge badge-combo"><i class='bx bx-gift'></i> Combo</div>` : '';
-
-        // 🔥 NUEVA ETIQUETA: VENTA POR INVITACIÓN
-        if (item.requiresInvite) {
-            typeBadgeHtml += `<div class="store-vibrant-badge" style="background:var(--mac-orange); color:white; margin-left: 5px;"><i class='bx bx-envelope'></i> Invitación</div>`;
-        }
-
+        if (item.requiresInvite) typeBadgeHtml += `<div class="store-vibrant-badge" style="background:var(--mac-orange); color:white; margin-left: 5px;"><i class='bx bx-envelope'></i> Invitación</div>`;
         if (item.badgeOption) {
-            if (item.badgeOption === 'oferta') {
-                typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="margin-left: 5px;"><i class='bx bxs-flame'></i> Oferta Especial</div>`;
-            } else if (item.badgeOption === 'poco_stock') {
-                typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #FF9500 0%, #FF5E00 100%); margin-left: 5px;"><i class='bx bx-error-alt'></i> Poco Stock</div>`;
-            } else if (item.badgeOption === 'tiempo_limitado') {
-                typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #AF52DE 0%, #5856D6 100%); margin-left: 5px;"><i class='bx bxs-time-five'></i> Tiempo Limitado</div>`;
-            } else if (item.badgeOption === 'nuevo') {
-                typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #34C759 0%, #28CD41 100%); margin-left: 5px;"><i class='bx bxs-star'></i> Nuevo Ingreso</div>`;
-            } else if (item.badgeOption === 'a_pedido' && !item.requiresInvite) {
-                typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #007AFF 0%, #0056b3 100%); margin-left: 5px;"><i class='bx bx-package'></i> A Pedido</div>`;
-            }
+            if (item.badgeOption === 'oferta') typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="margin-left: 5px;"><i class='bx bxs-flame'></i> Oferta Especial</div>`;
+            else if (item.badgeOption === 'poco_stock') typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #FF9500 0%, #FF5E00 100%); margin-left: 5px;"><i class='bx bx-error-alt'></i> Poco Stock</div>`;
+            else if (item.badgeOption === 'tiempo_limitado') typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #AF52DE 0%, #5856D6 100%); margin-left: 5px;"><i class='bx bxs-time-five'></i> Tiempo Limitado</div>`;
+            else if (item.badgeOption === 'nuevo') typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #34C759 0%, #28CD41 100%); margin-left: 5px;"><i class='bx bxs-star'></i> Nuevo Ingreso</div>`;
+            else if (item.badgeOption === 'a_pedido' && !item.requiresInvite) typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #007AFF 0%, #0056b3 100%); margin-left: 5px;"><i class='bx bx-package'></i> A Pedido</div>`;
         }
 
         const titleSafe = item.platform.replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n').replace(/\r/g, '') : 'Sin detalles adicionales.';
-        
         const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}" alt="${item.platform}">` : `<div style="width:100%; height:100%; background:var(--mac-gray); display:flex; align-items:center; justify-content:center;"><i class='bx bx-play-circle' style='font-size:48px; color:var(--mac-text-secondary); opacity:0.3;'></i></div>`;
 
         let btnHTML = '';
@@ -3313,7 +3430,6 @@ window.renderPublicCatalog = (filterType) => {
         } else if (isAgotado) {
             btnHTML = `<span class="status expired" style="padding:10px; border-radius:12px; font-weight:800; font-size:12px;">Agotado</span>`;
         } else {
-            // 🔥 AHORA AGREGA AL CARRITO EN LUGAR DE IR DIRECTO AL CHECKOUT (Botón circular elegante)
             btnHTML = `<button onclick="window.addToCart('${item.id}')" class="btn-wa" style="border:none; cursor:pointer; padding:0; border-radius:14px; display:inline-flex; align-items:center; justify-content:center; margin:0; width: 48px; height: 48px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important; color: white !important;"><i class='bx bx-cart-add' style='margin:0; font-size: 24px;'></i></button>`;
         }
 
@@ -3321,15 +3437,11 @@ window.renderPublicCatalog = (filterType) => {
         card.className = `store-product-card ${isAgotado || !isStoreOpen ? 'is-agotado' : ''}`;
         card.innerHTML = `
             ${typeBadgeHtml}
-            <!-- 🔥 BOTÓN DE COMPARTIR -->
             <button class="store-share-btn" onclick="event.stopPropagation(); window.shareProduct('${item.id}')" title="Compartir Oferta"><i class='bx bx-share-alt'></i></button>
-            
             <div class="store-product-visual" onclick="window.openProductDesc('${titleSafe}', '${descSafe}')">
                 ${imgHTML}
                 <div class="store-product-visual-overlay"><span class="view-desc-hint"><i class='bx bx-zoom-in'></i> Detalles</span></div>
             </div>
-            
-            <!-- 🔥 DISEÑO EN 2 LÍNEAS (TÍTULO ARRIBA, PRECIO Y BOTÓN ABAJO) -->
             <div class="store-product-glass-footer">
                 <div style="width: 100%; margin-bottom: 12px;">
                     <strong class="store-product-title" style="display:block; font-size:18px; line-height:1.3; color: var(--mac-text-main); word-break: break-word;">${item.platform}</strong>
