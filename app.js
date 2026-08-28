@@ -3015,7 +3015,6 @@ window.renderStoreItems = () => {
 
     catalog.forEach((item, index) => {
         let isAgotado = item.status === 'agotado';
-        if (item.badgeOption === 'a_pedido') isAgotado = false; // A Pedido ignora el botón de agotado
         
         const statusBadge = isAgotado ? `<span style="background:var(--mac-red); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold;">AGOTADO</span>` : `<span style="background:var(--mac-green); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold;">DISPONIBLE</span>`;
         const typeBadge = item.type === 'Combo' ? `<span style="background:var(--mac-orange); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold; margin-right:5px;"><i class='bx bx-gift'></i> COMBO</span>` : '';
@@ -3398,7 +3397,6 @@ window.renderPublicCatalog = () => {
         let stockHtml = '';
         
         if (item.badgeOption === 'a_pedido') {
-            isAgotado = false;
             stockHtml = `<span style="font-size:10px; color:var(--mac-blue); display:block; margin-top:6px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><i class='bx bx-package'></i> Disponible a pedido</span>`;
         } else if (item.autoStock && item.stockPlatforms && item.stockPlatforms.length > 0 && data.inventory) {
             const stock = data.inventory || [];
