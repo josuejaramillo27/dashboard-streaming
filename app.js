@@ -6082,29 +6082,77 @@ window.renderPublicCatalog = () => {
 
     const isStoreOpen = data.storeActive !== false; 
     const searchTerm = document.getElementById('publicStoreSearchInput') ? document.getElementById('publicStoreSearchInput').value.toLowerCase() : '';
-    const catF = window.currentStoreCatFilter;
+    
+    // Valores por defecto seguros para evitar que se quede en blanco
+    const typeF = window.currentStoreTypeFilter || 'Todos';
+    const catF = window.currentStoreCatFilter || 'Todas';
 
-    // Obtener lista de categorías a renderizar
-    let activeCategories = [...new Set(catalog.map(i => i.category || 'Otros'))];
-    if (catF !== 'Todas') activeCategories = [catF]; // Si hay filtro, solo mostramos esa ventana
+    // 1. Extraemos las categorías ÚNICAS de todo el catálogo para dibujar los botones
+    const allCategories = [...new Set(catalog.map(i => i.category).filter(c => c && c !== ''))];
+    const catContainer = document.getElementById('publicStoreCategoryFilters');
+    
+    if (allCategories.length > 0) {
+        catContainer.style.display = 'flex';
+        // Solo repintamos los botones si cambió la lista de categorías
+        if (catContainer.children.length !== allCategories.length + 1) {
+            catContainer.innerHTML = `<button class="spotify-chip-btn ${catF === 'Todas' ? 'active' : ''}" onclick="window.filterStoreCategory('Todas', event)">Todo el Catálogo</button>`;
+            allCategories.forEach(cat => {
+                catContainer.innerHTML += `<button class="spotify-chip-btn ${catF === cat ? 'active' : ''}" onclick="window.filterStoreCategory('${cat}', event)">${cat}</button>`;
+            });
+        } else {
+            // Actualizar clases activas visualmente
+            catContainer.querySelectorAll('.spotify-chip-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.innerText === catF || (btn.innerText === 'Todo el Catálogo' && catF === 'Todas'));
+            });
+        }
+    } else {
+        if(catContainer) catContainer.style.display = 'none';
+    }
 
+    // 2. Generamos el Título Dinámico
+    const titleContainer = document.getElementById('dynamicCategoryTitle');
+    if (titleContainer) {
+        if (searchTerm) {
+            titleContainer.innerHTML = `<span style="font-size: 13px; color: var(--mac-text-secondary); font-weight:bold;">Resultados para: "${searchTerm}"</span>`;
+        } else {
+            let titlePrefix = typeF === 'Combo' ? 'COMBOS DE' : (typeF === 'Servicio' ? 'SERVICIOS DE' : 'EXPLORAR');
+            let rawCat = catF === 'Todas' ? 'TODO EL CATÁLOGO' : catF;
+            
+            const emojiRegex = /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g;
+            let emojiMatch = rawCat.match(emojiRegex);
+            let emoji = emojiMatch ? emojiMatch[0] : "<i class='bx bx-category'></i>";
+            let cleanText = rawCat.replace(emojiRegex, '').trim().toUpperCase();
+
+            let iconStyle = emojiMatch ? "filter: contrast(0) sepia(100%) hue-rotate(200deg) brightness(1.2) saturate(3);" : "";
+
+            titleContainer.innerHTML = `
+                <div style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); padding: 8px 24px; border-radius: 30px; box-shadow: var(--glass-shadow);">
+                    <span style="font-size: 20px; ${iconStyle} transform: translateY(-1px);">${emoji}</span>
+                    <h2 style="margin: 0; font-size: 14px; color: var(--mac-text-main); font-weight: 800; letter-spacing: 0.5px;">
+                        <span style="color: var(--mac-text-secondary); font-weight: 600;">${titlePrefix}</span> ${cleanText}
+                    </h2>
+                </div>
+            `;
+        }
+    }
+
+    // 3. Renderizar las "Ventanas" por Categoría
+    let activeCategoriesToRender = catF === 'Todas' ? [...new Set(catalog.map(i => i.category || 'Otros'))] : [catF];
     let itemsMostrados = 0;
 
-    // Bucle para crear una "Ventana" por cada categoría
-    activeCategories.forEach(categoriaActual => {
-        
-        // Filtramos los items que pertenecen a esta categoría y coinciden con la búsqueda
+    activeCategoriesToRender.forEach(categoriaActual => {
+        // Filtramos los items de esta categoría que también cumplan con Type y Búsqueda
         const itemsEnCategoria = catalog.filter(item => {
             const itemCat = item.category || 'Otros';
             const matchCat = itemCat === categoriaActual;
+            const matchType = typeF === 'Todos' || item.type === typeF;
             const matchSearch = item.platform.toLowerCase().includes(searchTerm) || (item.desc && item.desc.toLowerCase().includes(searchTerm));
-            return matchCat && matchSearch;
+            return matchCat && matchType && matchSearch;
         });
 
-        if (itemsEnCategoria.length === 0) return; // Si la categoría está vacía tras buscar, la omitimos
+        if (itemsEnCategoria.length === 0) return; 
         itemsMostrados += itemsEnCategoria.length;
 
-        // Crear el bloque de la "Ventana/Sección"
         const sectionDiv = document.createElement('div');
         sectionDiv.style.cssText = "margin-bottom: 40px; background: rgba(255, 255, 255, 0.02); padding: 20px; border-radius: 24px; border: 1px solid var(--mac-border); box-shadow: 0 10px 30px rgba(0,0,0,0.1);";
         
@@ -6113,29 +6161,80 @@ window.renderPublicCatalog = () => {
                 <div style="background: var(--mac-blue); padding: 8px; border-radius: 10px; color: white;"><i class='bx bx-category' style="font-size: 20px; margin: 0;"></i></div>
                 <h2 style="margin: 0; font-size: 20px; color: var(--mac-text-main); font-weight: 800;">${categoriaActual.toUpperCase()}</h2>
             </div>
-            <div class="category-items-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px;">
-            </div>
+            <div class="category-items-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px;"></div>
         `;
         
         const gridDiv = sectionDiv.querySelector('.category-items-grid');
 
-        // Renderizar las tarjetas dentro de la cuadrícula de su categoría (Este es tu mismo código de tarjetas)
+        // Renderizar las tarjetas
         itemsEnCategoria.forEach(item => {
             const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
             let isAgotado = item.status === 'agotado';
-            // ... (Tu código de insignias y stockHtml va aquí igual que siempre) ...
+            let stockHtml = '';
             
+            // Lógica de Etiquetas de Stock
+            if (item.badgeOption === 'a_pedido') {
+                stockHtml = `<span style="font-size:10px; color:var(--mac-blue); display:block; margin-top:6px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><i class='bx bx-package'></i> Disponible a pedido</span>`;
+            } else if (item.autoStock && item.stockPlatforms && item.stockPlatforms.length > 0 && data.inventory) {
+                const stock = data.inventory || [];
+                if (item.type === 'Combo') {
+                    const counts = item.stockPlatforms.map(p => stock.filter(i => i.status === 'libre' && i.platform === p).length);
+                    const comboDisponible = Math.min(...counts); 
+                    if (comboDisponible === 0) isAgotado = true; 
+                    const colorStock = comboDisponible > 2 ? 'var(--mac-green)' : (comboDisponible > 0 ? 'var(--mac-orange)' : 'var(--mac-red)');
+                    stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><i class='bx bx-box'></i> Stock Combo: <span style="color:${colorStock};">${comboDisponible} disp.</span></span>`;
+                } else {
+                    const cantidadLibre = stock.filter(i => i.status === 'libre' && i.platform === item.stockPlatforms[0]).length;
+                    if (cantidadLibre === 0) isAgotado = true;
+                    const colorStock = cantidadLibre > 2 ? 'var(--mac-green)' : (cantidadLibre > 0 ? 'var(--mac-orange)' : 'var(--mac-red)');
+                    stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><i class='bx bx-box'></i> Stock en vivo: <span style="color:${colorStock};">${cantidadLibre} disp.</span></span>`;
+                }
+            }
+
+            let typeBadgeHtml = item.type === 'Combo' ? `<div class="store-vibrant-badge badge-combo"><i class='bx bx-gift'></i> Combo</div>` : '';
+            if (item.requiresInvite) typeBadgeHtml += `<div class="store-vibrant-badge" style="background:var(--mac-orange); color:white; margin-left: 5px;"><i class='bx bx-envelope'></i> Invitación</div>`;
+            if (item.badgeOption) {
+                if (item.badgeOption === 'oferta') typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="margin-left: 5px;"><i class='bx bxs-flame'></i> Oferta Especial</div>`;
+                else if (item.badgeOption === 'poco_stock') typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #FF9500 0%, #FF5E00 100%); margin-left: 5px;"><i class='bx bx-error-alt'></i> Poco Stock</div>`;
+                else if (item.badgeOption === 'tiempo_limitado') typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #AF52DE 0%, #5856D6 100%); margin-left: 5px;"><i class='bx bxs-time-five'></i> Tiempo Limitado</div>`;
+                else if (item.badgeOption === 'nuevo') typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #34C759 0%, #28CD41 100%); margin-left: 5px;"><i class='bx bxs-star'></i> Nuevo Ingreso</div>`;
+                else if (item.badgeOption === 'a_pedido' && !item.requiresInvite) typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #007AFF 0%, #0056b3 100%); margin-left: 5px;"><i class='bx bx-package'></i> A Pedido</div>`;
+            }
+
+            const titleSafe = item.platform.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n').replace(/\r/g, '') : 'Sin detalles adicionales.';
+            const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}" alt="${item.platform}">` : `<div style="width:100%; height:100%; background:var(--mac-gray); display:flex; align-items:center; justify-content:center;"><i class='bx bx-play-circle' style='font-size:48px; color:var(--mac-text-secondary); opacity:0.3;'></i></div>`;
+
+            let btnHTML = '';
+            if (!isStoreOpen) {
+                btnHTML = `<span class="status expired" style="padding:10px; border-radius:12px; font-weight:800; font-size:12px; background: var(--mac-gray); color: var(--mac-text-secondary);"><i class='bx bx-store-alt'></i> Cerrada</span>`;
+            } else if (isAgotado) {
+                btnHTML = `<span class="status expired" style="padding:10px; border-radius:12px; font-weight:800; font-size:12px;">Agotado</span>`;
+            } else {
+                btnHTML = `<button onclick="window.addToCart('${item.id}')" class="btn-wa" style="border:none; cursor:pointer; padding:0; border-radius:14px; display:inline-flex; align-items:center; justify-content:center; margin:0; width: 48px; height: 48px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important; color: white !important;"><i class='bx bx-cart-add' style='margin:0; font-size: 24px;'></i></button>`;
+            }
+
             const card = document.createElement('div');
             card.className = `store-product-card ${isAgotado || !isStoreOpen ? 'is-agotado' : ''}`;
             card.innerHTML = `
-                <div class="store-product-visual" onclick="window.openProductDesc('${item.platform.replace(/'/g, "\\'")}', '${(item.desc || '').replace(/'/g, "\\'")}')">
-                    ${item.imgUrl ? `<img src="${item.imgUrl}" alt="${item.platform}">` : `<div style="width:100%; height:100%; background:var(--mac-gray); display:flex; align-items:center; justify-content:center;"><i class='bx bx-play-circle' style='font-size:48px; color:var(--mac-text-secondary); opacity:0.3;'></i></div>`}
+                ${typeBadgeHtml}
+                <button class="store-share-btn" onclick="event.stopPropagation(); window.shareProduct('${item.id}')" title="Compartir Oferta"><i class='bx bx-share-alt'></i></button>
+                <div class="store-product-visual" onclick="window.openProductDesc('${titleSafe}', '${descSafe}')">
+                    ${imgHTML}
+                    <div class="store-product-visual-overlay"><span class="view-desc-hint"><i class='bx bx-zoom-in'></i> Detalles</span></div>
                 </div>
                 <div class="store-product-glass-footer">
-                    <strong class="store-product-title" style="display:block; font-size:16px; margin-bottom: 5px;">${item.platform}</strong>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span class="store-product-price" style="font-size: 18px; font-weight: 900; color: var(--mac-green);">${priceStr}</span>
-                        ${(!isStoreOpen || isAgotado) ? `<span class="status expired" style="padding:6px 10px; border-radius:8px; font-size:11px;">Agotado</span>` : `<button onclick="window.addToCart('${item.id}')" class="btn-primary" style="padding:8px 12px; border-radius:10px;"><i class='bx bx-cart-add' style="margin:0;"></i></button>`}
+                    <div style="width: 100%; margin-bottom: 12px;">
+                        <strong class="store-product-title" style="display:block; font-size:18px; line-height:1.3; color: var(--mac-text-main); word-break: break-word;">${item.platform}</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; width:100%; margin-top: auto;">
+                        <div class="store-product-info" style="display:flex; flex-direction:column; gap:4px;">
+                            <span class="store-product-price" style="font-size: 22px; font-weight: 900; color: var(--mac-green);">${priceStr}</span>
+                            ${stockHtml} 
+                        </div>
+                        <div class="store-product-action" style="flex-shrink:0;">
+                            ${btnHTML}
+                        </div>
                     </div>
                 </div>
             `;
@@ -6146,7 +6245,7 @@ window.renderPublicCatalog = () => {
     });
 
     if (itemsMostrados === 0) {
-        catalogBox.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); padding: 40px 0; font-weight: 500;">No hay productos que coincidan con la búsqueda.</p>';
+        catalogBox.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); width: 100%; grid-column: 1/-1; padding: 40px 0; font-weight: 500;">No hay productos que coincidan con la búsqueda o filtro.</p>';
     }
 };
 
