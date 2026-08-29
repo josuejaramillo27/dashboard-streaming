@@ -1510,11 +1510,13 @@
     </div>
     <div class="cart-footer" style="padding: 20px;">
         <!-- Cupones -->
-<div style="display: flex; gap: 8px; margin-bottom: 15px;">
-    <input type="text" id="cartCouponInput" placeholder="¿Tienes un cupón?" style="flex: 1; min-width: 0; padding: 10px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); text-transform: uppercase;">
-    <!-- 🔥 FIX: Ancho automático y evitar que se encoja/estire mal -->
-    <button class="btn-secondary" style="width: auto !important; flex-shrink: 0; padding: 0 20px; border: 1px solid var(--mac-blue); color: var(--mac-blue); background: transparent;" onclick="window.applyCoupon()"><i class='bx bx-check'></i></button>
-</div>
+        <div style="display: flex; gap: 8px; margin-bottom: 5px;">
+            <input type="text" id="cartCouponInput" placeholder="¿Tienes un cupón?" style="flex: 1; min-width: 0; padding: 10px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); text-transform: uppercase;">
+            <!-- 🔥 FIX: Ancho automático y evitar que se encoja/estire mal -->
+            <button class="btn-secondary" style="width: auto !important; flex-shrink: 0; padding: 0 20px; border: 1px solid var(--mac-blue); color: var(--mac-blue); background: transparent;" onclick="window.applyCoupon()"><i class='bx bx-check'></i></button>
+        </div>
+        <!-- MENSAJE DE RETROALIMENTACIÓN DEL CUPÓN -->
+        <p id="couponFeedbackMessage" style="font-size: 11px; margin: 0 0 15px 5px; font-weight: bold; display: none;"></p>
 
         <!-- Resumen de Costos -->
         <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 8px;">
