@@ -2747,20 +2747,9 @@ window.openStoreModal = () => {
     const storeToggle = document.getElementById('storeActiveToggle');
     if (storeToggle) storeToggle.checked = currentUserData.storeActive !== false; // true por defecto
 
-    // 🔥 FIX: Lógica de Catálogo Externo sin buscar el "internalCatalogSection" que ya borramos
-    const externalUrl = currentUserData.externalStoreUrl;
-    if (externalUrl && externalUrl.trim() !== '') {
-        document.getElementById('externalCatalogSetup').style.display = 'none';
-        document.getElementById('externalCatalogActive').style.display = 'block';
-        document.getElementById('activeExternalLinkText').innerText = externalUrl;
-        if(document.getElementById('btnCopyInternalLink')) document.getElementById('btnCopyInternalLink').style.display = 'none';
-    } else {
-        document.getElementById('externalCatalogSetup').style.display = 'block';
-        document.getElementById('externalCatalogActive').style.display = 'none';
-        if(document.getElementById('btnCopyInternalLink')) document.getElementById('btnCopyInternalLink').style.display = 'block';
-        window.renderStoreItems();
-        window.syncStoreCategories();
-    }
+    // 🔥 Renderizamos los productos y categorías directamente
+    window.renderStoreItems();
+    window.syncStoreCategories();
 
     // 🪄 MAGIA EXTRA: Resetea el modal a la primera pestaña (Catálogo) siempre que se abra
     const tabBtn = document.querySelector('#storeModal .chrome-tab');
