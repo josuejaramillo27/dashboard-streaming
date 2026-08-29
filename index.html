@@ -768,144 +768,185 @@
 
         <!-- SECCIÓN 4: MI TIENDITA -->
         <div id="storeModal" class="dashboard-section modal-overlay" style="display: none;">
-             <div class="modal-card" style="max-width: 800px; margin: 0 auto; height: 100%; display: flex; flex-direction: column;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--mac-border); padding-bottom: 15px; margin-bottom: 20px;">
-                    <div>
-                        <h2 style="margin: 0; font-size: 24px; color: var(--mac-text-main);"><i class='bx bx-store-alt'></i> Mi Tiendita Web</h2>
-                        <p style="color:var(--mac-text-secondary); font-size:14px; margin:5px 0 0 0;">Tu catálogo público y automatizado.</p>
-                    </div>
-                    <!-- 🔥 NUEVO: SWITCH DE TIENDA ESTILO APP -->
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <input type="checkbox" id="storeActiveToggle" class="store-toggle-checkbox" onchange="window.toggleStoreActive(this)">
-                        <label for="storeActiveToggle" class="store-toggle-label"></label>
-                    </div>
+             <div id="storeModal" class="dashboard-section modal-overlay" style="display: none;">
+    <div class="modal-card" style="max-width: 850px; margin: 0 auto; height: 100%; display: flex; flex-direction: column;">
+        
+        <!-- CABECERA Y TABS -->
+        <div style="border-bottom: 1px solid var(--mac-border); padding-bottom: 15px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div>
+                    <h2 style="margin: 0; font-size: 24px; color: var(--mac-text-main);"><i class='bx bx-store-alt'></i> Mi Tiendita Web</h2>
+                    <p style="color:var(--mac-text-secondary); font-size:13px; margin:5px 0 0 0;">Gestiona tu catálogo, cupones y descuentos dinámicos.</p>
                 </div>
-                
-                <div style="flex-grow: 1; overflow-y: auto; padding-right: 10px;">
-                    <div id="externalCatalogSetup" style="background: rgba(0, 122, 255, 0.1); border: 1px dashed var(--mac-blue); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-                        <label style="font-size: 12px; font-weight: bold; color: var(--mac-blue);">¿Ya tienes un catálogo propio? Ingrésalo aquí:</label>
-                        <div style="display: flex; gap: 10px; margin-top: 8px;">
-                            <input type="url" id="storeExternalInput" placeholder="Ej: https://misitio.com/catalogo" style="flex: 1; background: var(--mac-surface);">
-                            <button class="btn-primary" style="width: auto; padding: 0 15px;" onclick="window.saveExternalStore()"><i class='bx bx-save'></i></button>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="storeActiveToggle" class="store-toggle-checkbox" onchange="window.toggleStoreActive(this)">
+                    <label for="storeActiveToggle" class="store-toggle-label"></label>
+                </div>
+            </div>
+            <!-- PESTAÑAS (VENTANAS) -->
+            <div class="chrome-tabs-container" style="margin: 0; border: none; background: transparent; padding: 0;">
+                <div class="chrome-tab active" onclick="window.switchStoreAdminTab('tabCatalogo', this)"><i class='bx bx-grid-alt'></i> Catálogo</div>
+                <div class="chrome-tab" onclick="window.switchStoreAdminTab('tabDescuentos', this)"><i class='bx bxs-discount'></i> Descuentos y Cupones</div>
+                <div class="chrome-tab" onclick="window.switchStoreAdminTab('tabAjustes', this)"><i class='bx bx-cog'></i> Ajustes de Tienda</div>
+            </div>
+        </div>
+        
+        <div style="flex-grow: 1; overflow-y: auto; padding-right: 10px;">
+            
+            <!-- VENTANA 1: CATÁLOGO (Lo que ya tenías) -->
+            <div id="tabCatalogo" class="store-admin-tab" style="display: block;">
+                <!-- Gestión de Categorías -->
+                <div style="background: var(--mac-bg); padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid var(--mac-border);">
+                    <label style="font-size: 12px; font-weight: bold; color: var(--mac-blue);"><i class='bx bx-category'></i> Categorías (Secciones de tu tienda):</label>
+                    <div style="display: flex; gap: 8px; margin-top: 8px; margin-bottom: 10px;">
+                        <input type="text" id="newStoreCategoryInput" placeholder="Ej: 📺 Streaming, 🎵 Música..." style="flex: 1; padding: 10px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 13px;">
+                        <button type="button" class="btn-primary" style="width: auto; padding: 0 15px;" onclick="window.addStoreCategory()"><i class='bx bx-plus'></i></button>
+                    </div>
+                    <div id="storeCategoryChips" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                </div>
+
+                <!-- Formulario de Producto (Igual al tuyo) -->
+                <div style="background: var(--mac-bg); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                    <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Añadir un producto al catálogo:</label>
+                    
+                    <div style="background: rgba(0, 122, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed var(--mac-blue); display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                            <label class="store-toggle-card" onclick="window.updateStoreToggleUI(this, 'storeAutoStock')" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; flex: 1; min-width: 200px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-blue); font-weight: bold; font-size: 12px; transition: all 0.2s;">
+                                <span><i class='bx bx-box'></i> Conectar al Inventario</span>
+                                <input type="checkbox" id="storeAutoStock" onchange="window.toggleStoreStockFields()" style="display:none;">
+                                <i class='bx bx-circle store-toggle-icon' style="color: var(--mac-text-secondary); font-size: 18px;"></i>
+                            </label>
+                            <label class="store-toggle-card" onclick="window.updateStoreToggleUI(this, 'storeRequiresInvite')" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; flex: 1; min-width: 200px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-orange); font-weight: bold; font-size: 12px; transition: all 0.2s;">
+                                <span><i class='bx bx-envelope'></i> Venta por Invitación</span>
+                                <input type="checkbox" id="storeRequiresInvite" style="display:none;">
+                                <i class='bx bx-circle store-toggle-icon' style="color: var(--mac-text-secondary); font-size: 18px;"></i>
+                            </label>
+                            <div style="flex: 1; min-width: 150px;">
+                                <label style="font-size: 10px; color: var(--mac-text-secondary); display: block;">Etiqueta de Tienda:</label>
+                                <select id="storeBadgeOption" style="padding: 6px; font-size: 11px; width: 100%; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border);">
+                                    <option value="">Ninguna</option>
+                                    <option value="oferta">🔥 Oferta Especial</option>
+                                    <option value="poco_stock">⚠️ Poco Stock</option>
+                                    <option value="tiempo_limitado">⏳ Por Tiempo Limitado</option>
+                                    <option value="nuevo">✨ Nuevo Ingreso</option>
+                                    <option value="a_pedido">📦 A Pedido</option>
+                                </select>
+                            </div>
                         </div>
-                        <p style="font-size: 11px; color: var(--mac-text-secondary); margin-top: 5px; margin-bottom: 0;">Al guardar, la tiendita interna se desactivará.</p>
+                        <div id="storeStockConfig" style="display: none; flex-direction: column; gap: 8px; border-top: 1px dashed rgba(0, 122, 255, 0.3); padding-top: 10px;">
+                            <label id="storeStockLabel" style="font-size: 11px; color: var(--mac-text-secondary);">Selecciona la plataforma del inventario:</label>
+                            <div id="storeStockPlatformsList" style="display: flex; flex-direction: column; gap: 6px;"></div>
+                            <div style="text-align: right; background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 6px; padding: 6px 12px; margin-left: auto;">
+                                <span id="storeStockCountText" style="font-size: 12px; font-weight: bold; color: var(--mac-blue);">0 disp.</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <div id="externalCatalogActive" style="display: none; background: rgba(52, 199, 89, 0.1); border: 1px solid var(--mac-green); padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: center;">
-                        <h4 style="color: var(--mac-green); margin: 0 0 10px 0;"><i class='bx bx-check-circle'></i> Catálogo Externo Activado</h4>
-                        <p style="font-size: 13px; color: var(--mac-text-main); margin-bottom: 15px; word-break: break-all;" id="activeExternalLinkText"></p>
-                        <button class="btn-secondary" style="width: 100%; border: 1px solid var(--mac-red); color: var(--mac-red); background: transparent;" onclick="window.removeExternalStore()">
-                            <i class='bx bx-trash'></i> Eliminar y usar Tiendita Interna
+                    <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 15px;">
+                        <input type="text" id="storePlatform" placeholder="Nombre del Producto" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 14px; box-sizing: border-box;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <select id="storeCategorySelect" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 13px; outline: none;">
+                                <option value="">Sin Categoría</option>
+                            </select>
+                            <input type="number" id="storePrice" placeholder="Precio final" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 13px; box-sizing: border-box;">
+                        </div>
+                        <input type="file" id="storeImg" accept="image/*" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 13px; box-sizing: border-box;">
+                        <textarea id="storeDesc" placeholder="Descripción del producto..." style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 14px; resize: vertical; min-height: 80px; box-sizing: border-box;"></textarea>
+                        
+                        <button class="btn-primary" style="padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 800; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); border: none;" onclick="window.addStoreItem()">
+                            <i class='bx bx-plus-circle'></i> Añadir al Catálogo
                         </button>
                     </div>
+                </div>
 
-                    <div id="internalCatalogSection">
-                        <!-- NUEVO: GESTIÓN DE CATEGORÍAS -->
-                        <div style="background: var(--mac-bg); padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid var(--mac-border);">
-                            <label style="font-size: 12px; font-weight: bold; color: var(--mac-blue);"><i class='bx bx-category'></i> Categorías de tu Tienda:</label>
-                            <div style="display: flex; gap: 8px; margin-top: 8px; margin-bottom: 10px;">
-                                <input type="text" id="newStoreCategoryInput" placeholder="Ej: 📺 Streaming, 🎵 Música..." style="flex: 1; padding: 10px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 13px;">
-                                <button type="button" class="btn-primary" style="width: auto; padding: 0 15px;" onclick="window.addStoreCategory()"><i class='bx bx-plus'></i></button>
+                <div id="storeItemsList" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; margin-bottom: 15px;"></div>
+            </div>
+
+            <!-- VENTANA 2: DESCUENTOS Y CUPONES (¡NUEVO!) -->
+            <div id="tabDescuentos" class="store-admin-tab" style="display: none;">
+                <div style="background: rgba(94, 92, 230, 0.05); padding: 20px; border-radius: 12px; border: 1px solid var(--mac-blue); margin-bottom: 20px;">
+                    <h4 style="margin: 0 0 10px 0; color: var(--mac-blue);"><i class='bx bx-layer'></i> Descuentos Dinámicos por Combos (Arma tu combo)</h4>
+                    <p style="font-size: 12px; color: var(--mac-text-secondary); margin-bottom: 15px;">Si el cliente agrega 2 o más servicios al carrito, se aplicará este descuento automáticamente.</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-main);">Por llevar 2 servicios:</label>
+                            <div style="display: flex; align-items: center; gap: 5px; margin-top: 5px;">
+                                <input type="number" id="descCombo2" placeholder="Ej: 5" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main);">
+                                <span style="color: var(--mac-text-secondary); font-weight: bold;">%</span>
                             </div>
-                            <div id="storeCategoryChips" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
                         </div>
-
-                        <div style="background: var(--mac-bg); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-                            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Añadir un producto o combo:</label>
-<div style="background: rgba(0, 122, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed var(--mac-blue); display: flex; flex-direction: column; gap: 10px;">
-    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-        <label class="store-toggle-card" onclick="window.updateStoreToggleUI(this, 'storeAutoStock')" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; flex: 1; min-width: 200px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-blue); font-weight: bold; font-size: 12px; transition: all 0.2s;">
-        <span><i class='bx bx-box'></i> Conectar al Inventario</span>
-        <input type="checkbox" id="storeAutoStock" onchange="window.toggleStoreStockFields()" style="display:none;">
-        <i class='bx bx-circle store-toggle-icon' style="color: var(--mac-text-secondary); font-size: 18px;"></i>
-    </label>
-        <label class="store-toggle-card" onclick="window.updateStoreToggleUI(this, 'storeRequiresInvite')" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; flex: 1; min-width: 200px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-orange); font-weight: bold; font-size: 12px; transition: all 0.2s;">
-        <span><i class='bx bx-envelope'></i> Venta por Invitación</span>
-        <input type="checkbox" id="storeRequiresInvite" style="display:none;">
-        <i class='bx bx-circle store-toggle-icon' style="color: var(--mac-text-secondary); font-size: 18px;"></i>
-    </label>
-        <div style="flex: 1; min-width: 150px;">
-        <label style="font-size: 10px; color: var(--mac-text-secondary); display: block;">Etiqueta de Tienda (Opcional):</label>
-        <select id="storeBadgeOption" style="padding: 6px; font-size: 11px; width: 100%; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border);">
-            <option value="">Ninguna</option>
-            <option value="oferta">🔥 Oferta Especial</option>
-            <option value="poco_stock">⚠️ Poco Stock</option>
-            <option value="tiempo_limitado">⏳ Por Tiempo Limitado</option>
-            <option value="nuevo">✨ Nuevo Ingreso</option>
-            <option value="a_pedido">📦 A Pedido (Sin stock previo)</option>
-        </select>
-    </div>
-</div>
-    
-    <div id="storeStockConfig" style="display: none; flex-direction: column; gap: 8px; border-top: 1px dashed rgba(0, 122, 255, 0.3); padding-top: 10px;">
-        <label id="storeStockLabel" style="font-size: 11px; color: var(--mac-text-secondary);">¿Qué plataforma(s) del inventario componen este producto?</label>
-        
-        <div id="storeStockPlatformsList" style="display: flex; flex-direction: column; gap: 6px;">
-            </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
-            <button type="button" id="btnAddComboPlatformBtn" class="action-btn" style="display: none; font-size: 11px; padding: 4px 10px; background: rgba(0, 122, 255, 0.1); color: var(--mac-blue); border: 1px solid var(--mac-blue);" onclick="window.addStoreStockSelectRow()">
-                <i class='bx bx-plus'></i> Añadir otra plataforma al Combo
-            </button>
-            <div style="text-align: right; background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 6px; padding: 6px 12px; margin-left: auto;">
-                <span id="storeStockCountText" style="font-size: 12px; font-weight: bold; color: var(--mac-blue);">0 disp.</span>
-            </div>
-        </div>
-        <p style="font-size: 10px; color: var(--mac-text-secondary); margin: 0;">* El stock disponible del combo se calcula automáticamente según la plataforma con menor cantidad libre.</p>
-    </div>
-</div>
-                            <!-- 📱 FORMULARIO REORGANIZADO PARA MÓVILES Y PC -->
-<div style="display: flex; flex-direction: column; gap: 14px; margin-top: 15px;">
-    
-    <!-- Fila 1: Nombre del Producto (Ocupa todo el ancho) -->
-    <div>
-        <input type="text" id="storePlatform" placeholder="Nombre del Servicio o Combo" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 14px; box-sizing: border-box;">
-    </div>
-
-    <!-- Fila 2: Tipo, Precio y Categoría -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-        <select id="storeType" onchange="window.handleStoreTypeChange()" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 13px; outline: none;">
-            <option value="Servicio">Servicio Único</option>
-            <option value="Combo">🎁 Combo</option>
-        </select>
-        <select id="storeCategorySelect" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 13px; outline: none;">
-            <option value="">Sin Categoría</option>
-        </select>
-        <input type="number" id="storePrice" placeholder="Precio final" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 13px; box-sizing: border-box;">
-    </div>
-
-    <!-- Fila 3: Imagen -->
-    <div>
-        <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary); display: block; margin-bottom: 6px;">Imagen de portada (Opcional):</label>
-        <input type="file" id="storeImg" accept="image/*" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 13px; box-sizing: border-box;">
-    </div>
-
-    <!-- Fila 4: Descripción y Botón (Apilados para celular) -->
-    <div style="display: flex; flex-direction: column; gap: 12px;">
-        <textarea id="storeDesc" placeholder="Descripción del producto...&#10;(Usa la tecla 'Enter' para saltos de línea)" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 14px; font-family: inherit; resize: vertical; min-height: 80px; box-sizing: border-box; outline: none;"></textarea>
-        
-        <button class="btn-primary" style="width: 100%; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); border: none; box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);" onclick="window.addStoreItem()">
-            <i class='bx bx-plus-circle' style="font-size: 22px;"></i> Añadir al Catálogo
-        </button>
-    </div>
-</div>
+                        <div>
+                            <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-main);">Por llevar 3 servicios:</label>
+                            <div style="display: flex; align-items: center; gap: 5px; margin-top: 5px;">
+                                <input type="number" id="descCombo3" placeholder="Ej: 10" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main);">
+                                <span style="color: var(--mac-text-secondary); font-weight: bold;">%</span>
+                            </div>
                         </div>
-
-                        <div id="storeItemsList" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; margin-bottom: 15px;"></div>
-
-                        <div style="border-top: 1px dashed var(--mac-border); padding-top: 15px;">
-                            <label style="font-size: 12px; font-weight: bold; color: var(--mac-blue);">Tu Link Público:</label>
-                            <input type="text" id="storeLinkInput" readonly style="color: var(--mac-text-secondary); background: var(--mac-surface);">
+                        <div>
+                            <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-main);">Por llevar 4 o más:</label>
+                            <div style="display: flex; align-items: center; gap: 5px; margin-top: 5px;">
+                                <input type="number" id="descCombo4" placeholder="Ej: 15" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main);">
+                                <span style="color: var(--mac-text-secondary); font-weight: bold;">%</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button class="btn-primary" id="btnCopyInternalLink" style="padding: 12px; font-size: 14px;" onclick="window.copyStoreLink()"><i class='bx bx-copy'></i> Copiar Link de Tienda</button>
-                    <button class="btn-secondary mobile-only-btn" style="padding: 12px; font-size: 14px;" onclick="window.closeModals()">Cerrar</button>
+
+                <div style="background: var(--mac-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--mac-border);">
+                    <h4 style="margin: 0 0 10px 0; color: var(--mac-green);"><i class='bx bxs-coupon'></i> Creador de Cupones Promocionales</h4>
+                    <p style="font-size: 12px; color: var(--mac-text-secondary); margin-bottom: 15px;">Dales un código a tus clientes para que tengan un descuento exclusivo en el carrito.</p>
+                    
+                    <div style="display: flex; gap: 10px; align-items: flex-end; margin-bottom: 15px;">
+                        <div style="flex: 2;">
+                            <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Código del Cupón (Sin espacios):</label>
+                            <input type="text" id="newCouponCode" placeholder="Ej: VERANO20" style="width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); text-transform: uppercase;">
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Descuento (%):</label>
+                            <input type="number" id="newCouponPercent" placeholder="20" style="width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main);">
+                        </div>
+                        <button class="btn-primary" style="padding: 10px 15px; background: var(--mac-green); border: none;" onclick="window.addStoreCoupon()">Crear Cupón</button>
+                    </div>
+
+                    <div id="storeCouponsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                </div>
+
+                <button class="btn-primary" style="width: 100%; margin-top: 20px; padding: 14px;" onclick="window.saveStoreSettings()"><i class='bx bx-save'></i> Guardar Descuentos y Cupones</button>
+            </div>
+
+            <!-- VENTANA 3: AJUSTES GENERALES (Link y Catálogo externo) -->
+            <div id="tabAjustes" class="store-admin-tab" style="display: none;">
+                <div style="background: var(--mac-bg); border: 1px solid var(--mac-border); padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+                    <label style="font-size: 14px; font-weight: bold; color: var(--mac-blue); display: block; margin-bottom: 10px;">Tu Enlace de Tienda Oficial:</label>
+                    <input type="text" id="storeLinkInput" readonly style="width: 100%; padding: 14px; border-radius: 8px; color: var(--mac-blue); background: rgba(0, 122, 255, 0.1); border: 1px solid var(--mac-blue); font-weight: bold; text-align: center; font-size: 14px; margin-bottom: 15px;">
+                    <button class="btn-primary" id="btnCopyInternalLink" style="padding: 12px 20px; font-size: 14px; width: 100%;" onclick="window.copyStoreLink()"><i class='bx bx-copy'></i> Copiar Link para compartir</button>
+                </div>
+
+                <div id="externalCatalogSetup" style="background: rgba(255, 149, 0, 0.1); border: 1px dashed var(--mac-orange); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                    <label style="font-size: 12px; font-weight: bold; color: var(--mac-orange);">¿Ya tienes un catálogo en otra web? Ingrésalo aquí:</label>
+                    <div style="display: flex; gap: 10px; margin-top: 8px;">
+                        <input type="url" id="storeExternalInput" placeholder="Ej: https://misitio.com/catalogo" style="flex: 1; background: var(--mac-surface);">
+                        <button class="btn-primary" style="width: auto; padding: 0 15px; background: var(--mac-orange); border: none;" onclick="window.saveExternalStore()"><i class='bx bx-save'></i></button>
+                    </div>
+                </div>
+
+                <div id="externalCatalogActive" style="display: none; background: rgba(52, 199, 89, 0.1); border: 1px solid var(--mac-green); padding: 15px; border-radius: 10px; text-align: center;">
+                    <h4 style="color: var(--mac-green); margin: 0 0 10px 0;"><i class='bx bx-check-circle'></i> Catálogo Externo Activado</h4>
+                    <p style="font-size: 13px; color: var(--mac-text-main); margin-bottom: 15px; word-break: break-all;" id="activeExternalLinkText"></p>
+                    <button class="btn-secondary" style="width: 100%; border: 1px solid var(--mac-red); color: var(--mac-red); background: transparent;" onclick="window.removeExternalStore()">
+                        <i class='bx bx-trash'></i> Eliminar y usar Tiendita Interna
+                    </button>
                 </div>
             </div>
+
         </div>
+        
+        <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+            <button class="btn-secondary mobile-only-btn" style="padding: 12px; font-size: 14px; width: 100%;" onclick="window.closeModals()">Cerrar Tiendita</button>
+        </div>
+    </div>
+</div>
 
         <!-- SECCIÓN 5: WRAPPED -->
         <div id="wrappedModal" class="dashboard-section modal-overlay" style="display: none;">
@@ -1474,11 +1515,30 @@
     <div id="cartItemsContainer" class="cart-items">
         <!-- Los productos aparecerán aquí -->
     </div>
-    <div class="cart-footer">
-        <div class="cart-total">
-            <span>Total a pagar:</span>
-            <span id="cartTotalPrice">S/ 0.00</span>
+    <div class="cart-footer" style="padding: 20px;">
+        <!-- Cupones -->
+        <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+            <input type="text" id="cartCouponInput" placeholder="¿Tienes un cupón?" style="flex: 1; padding: 10px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); text-transform: uppercase;">
+            <button class="btn-secondary" style="padding: 0 15px; border: 1px solid var(--mac-blue); color: var(--mac-blue); background: transparent;" onclick="window.applyCoupon()"><i class='bx bx-check'></i></button>
         </div>
+
+        <!-- Resumen de Costos -->
+        <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 8px;">
+            <span>Subtotal:</span> <span id="cartSubtotalPrice">S/ 0.00</span>
+        </div>
+        <div id="cartComboDiscountRow" style="display: none; justify-content: space-between; font-size: 13px; color: var(--mac-blue); margin-bottom: 8px; font-weight: bold;">
+            <span id="cartComboDiscountLabel">Descuento Combo:</span> <span id="cartComboDiscountAmount">- S/ 0.00</span>
+        </div>
+        <div id="cartCouponRow" style="display: none; justify-content: space-between; font-size: 13px; color: var(--mac-green); margin-bottom: 12px; font-weight: bold;">
+            <span>Cupón Aplicado:</span> <span id="cartCouponAmount">- S/ 0.00</span>
+        </div>
+
+        <!-- Total -->
+        <div class="cart-total" style="border-top: 1px dashed var(--mac-border); padding-top: 15px; margin-bottom: 15px;">
+            <span>Total a pagar:</span>
+            <span id="cartTotalPrice" style="color: var(--mac-green); font-size: 24px;">S/ 0.00</span>
+        </div>
+        
         <button class="btn-primary" style="width: 100%; padding: 16px; border-radius: 16px; font-size: 16px; font-weight: 800; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); border: none; box-shadow: 0 8px 20px rgba(0, 122, 255, 0.3);" onclick="window.openCheckoutFromCart()">
             Proceder al Pago <i class='bx bx-right-arrow-alt'></i>
         </button>
