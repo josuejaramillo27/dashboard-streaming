@@ -5881,3 +5881,274 @@ window.openAssistant = () => {
 window.closeAssistant = () => {
     document.getElementById('aiAssistantPanel').classList.remove('active');
 };
+
+/* =========================================================
+   MÓDULO: PESTAÑAS Y CONFIGURACIÓN DE TIENDA (ADMIN)
+========================================================= */
+window.switchStoreAdminTab = (tabId, element) => {
+    // Cambiar vista
+    document.querySelectorAll('.store-admin-tab').forEach(tab => tab.style.display = 'none');
+    document.getElementById(tabId).style.display = 'block';
+    // Cambiar color de pestaña
+    document.querySelectorAll('#storeModal .chrome-tab').forEach(tab => tab.classList.remove('active'));
+    element.classList.add('active');
+    
+    // Si entra a ajustes, cargar datos
+    if(tabId === 'tabDescuentos') {
+        const d = currentUserData.storeDiscounts || { qty2: 0, qty3: 0, qty4: 0 };
+        document.getElementById('descCombo2').value = d.qty2 || '';
+        document.getElementById('descCombo3').value = d.qty3 || '';
+        document.getElementById('descCombo4').value = d.qty4 || '';
+        window.renderStoreCoupons();
+    }
+};
+
+window.saveStoreSettings = async () => {
+    try {
+        const qty2 = parseFloat(document.getElementById('descCombo2').value) || 0;
+        const qty3 = parseFloat(document.getElementById('descCombo3').value) || 0;
+        const qty4 = parseFloat(document.getElementById('descCombo4').value) || 0;
+        
+        const storeDiscounts = { qty2, qty3, qty4 };
+        
+        await updateDoc(doc(db, "users", currentUser.uid), { storeDiscounts });
+        currentUserData.storeDiscounts = storeDiscounts;
+        window.showNotification("✅ Descuentos guardados correctamente");
+    } catch(e) { window.showNotification("Error: " + e.message); }
+};
+
+window.addStoreCoupon = async () => {
+    const code = document.getElementById('newCouponCode').value.trim().toUpperCase();
+    const percent = parseFloat(document.getElementById('newCouponPercent').value) || 0;
+    
+    if (!code || percent <= 0) return window.showNotification("⚠️ Ingresa un código y un descuento válido.");
+    
+    let coupons = currentUserData.storeCoupons || [];
+    if (coupons.some(c => c.code === code)) return window.showNotification("Ese código ya existe.");
+    
+    coupons.push({ code, percent });
+    try {
+        await updateDoc(doc(db, "users", currentUser.uid), { storeCoupons: coupons });
+        currentUserData.storeCoupons = coupons;
+        document.getElementById('newCouponCode').value = '';
+        document.getElementById('newCouponPercent').value = '';
+        window.renderStoreCoupons();
+        window.showNotification("🎟️ Cupón creado");
+    } catch(e) {}
+};
+
+window.renderStoreCoupons = () => {
+    const list = document.getElementById('storeCouponsList');
+    list.innerHTML = '';
+    const coupons = currentUserData.storeCoupons || [];
+    
+    coupons.forEach((c, index) => {
+        list.innerHTML += `
+            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mac-surface); border: 1px dashed var(--mac-green); padding: 10px 15px; border-radius: 8px;">
+                <span style="font-weight: 900; color: var(--mac-green); letter-spacing: 1px;">${c.code} <span style="font-size: 11px; color: var(--mac-text-secondary);">(-${c.percent}%)</span></span>
+                <button class="action-btn btn-del" style="padding: 4px; font-size: 14px;" onclick="window.deleteStoreCoupon(${index})"><i class='bx bx-trash'></i></button>
+            </div>
+        `;
+    });
+};
+
+window.deleteStoreCoupon = async (index) => {
+    let coupons = currentUserData.storeCoupons || [];
+    coupons.splice(index, 1);
+    await updateDoc(doc(db, "users", currentUser.uid), { storeCoupons: coupons });
+    currentUserData.storeCoupons = coupons;
+    window.renderStoreCoupons();
+};
+
+
+/* =========================================================
+   MÓDULO: CALCULADORA DE CARRITO (PÚBLICO)
+========================================================= */
+let activeCoupon = null;
+
+window.applyCoupon = () => {
+    const code = document.getElementById('cartCouponInput').value.trim().toUpperCase();
+    if(!code) return;
+    
+    const storeCoupons = window.publicStoreDataCache.storeCoupons || [];
+    const validCoupon = storeCoupons.find(c => c.code === code);
+    
+    if (validCoupon) {
+        activeCoupon = validCoupon;
+        window.showNotification("✅ ¡Cupón aplicado!");
+        window.renderCartItems(); // Recalcular todo
+    } else {
+        window.showNotification("❌ Cupón inválido o expirado.");
+        activeCoupon = null;
+        window.renderCartItems();
+    }
+};
+
+window.renderCartItems = () => {
+    const container = document.getElementById('cartItemsContainer');
+    const data = window.publicStoreDataCache;
+    container.innerHTML = '';
+    
+    if (window.storeCart.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: var(--mac-text-secondary); margin-top: 50px;"><i class="bx bx-shopping-bag" style="font-size: 64px; opacity: 0.3; margin-bottom: 15px;"></i><p style="font-weight: bold; font-size: 16px;">Tu carrito está vacío</p></div>';
+        document.getElementById('cartTotalPrice').innerText = `${data.currency || 'S/'}0.00`;
+        document.getElementById('floatingCartBtn').style.display = 'none';
+        document.getElementById('cartComboDiscountRow').style.display = 'none';
+        document.getElementById('cartCouponRow').style.display = 'none';
+        return;
+    }
+    
+    let subtotal = 0;
+    window.storeCart.forEach((item, index) => {
+        subtotal += item.price;
+        const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}">` : `<div style="width:65px; height:65px; border-radius:12px; background:var(--mac-gray); display:flex; align-items:center; justify-content:center; border: 1px solid var(--mac-border);"><i class="bx bx-play-circle" style="color:var(--mac-text-secondary); font-size:24px;"></i></div>`;
+        container.innerHTML += `
+            <div class="cart-item">
+                ${imgHTML}
+                <div class="cart-item-info">
+                    <div class="cart-item-title">${item.platform}</div>
+                    <div class="cart-item-price">${data.currency || 'S/'}${item.price.toFixed(2)}</div>
+                </div>
+                <button class="cart-item-remove" onclick="window.removeFromCart(${index})" title="Quitar"><i class='bx bx-trash'></i></button>
+            </div>
+        `;
+    });
+
+    // CÁLCULO DE DESCUENTOS DINÁMICOS POR COMBO
+    let qty = window.storeCart.length;
+    let comboDiscountPercent = 0;
+    const dynamicDisc = data.storeDiscounts || { qty2: 0, qty3: 0, qty4: 0 };
+    
+    if (qty >= 4 && dynamicDisc.qty4) comboDiscountPercent = dynamicDisc.qty4;
+    else if (qty === 3 && dynamicDisc.qty3) comboDiscountPercent = dynamicDisc.qty3;
+    else if (qty === 2 && dynamicDisc.qty2) comboDiscountPercent = dynamicDisc.qty2;
+
+    let comboDiscountAmount = subtotal * (comboDiscountPercent / 100);
+    let afterComboPrice = subtotal - comboDiscountAmount;
+    
+    // CÁLCULO DE CUPÓN
+    let couponDiscountAmount = 0;
+    if (activeCoupon) {
+        couponDiscountAmount = afterComboPrice * (activeCoupon.percent / 100);
+    }
+    
+    let finalTotal = afterComboPrice - couponDiscountAmount;
+
+    // ACTUALIZAR INTERFAZ DEL CARRITO
+    document.getElementById('cartSubtotalPrice').innerText = `${data.currency || 'S/'}${subtotal.toFixed(2)}`;
+    
+    if (comboDiscountAmount > 0) {
+        document.getElementById('cartComboDiscountRow').style.display = 'flex';
+        document.getElementById('cartComboDiscountLabel').innerText = `Combo Armado (-${comboDiscountPercent}%):`;
+        document.getElementById('cartComboDiscountAmount').innerText = `- ${data.currency || 'S/'}${comboDiscountAmount.toFixed(2)}`;
+    } else {
+        document.getElementById('cartComboDiscountRow').style.display = 'none';
+    }
+
+    if (couponDiscountAmount > 0) {
+        document.getElementById('cartCouponRow').style.display = 'flex';
+        document.getElementById('cartCouponAmount').innerText = `- ${data.currency || 'S/'}${couponDiscountAmount.toFixed(2)} (-${activeCoupon.percent}%)`;
+    } else {
+        document.getElementById('cartCouponRow').style.display = 'none';
+    }
+
+    document.getElementById('cartTotalPrice').innerText = `${data.currency || 'S/'}${finalTotal.toFixed(2)}`;
+    
+    // Guardar el total en una variable global para el checkout
+    window.currentCartFinalTotal = finalTotal;
+};
+
+
+/* =========================================================
+   MÓDULO: RENDERIZADO DE TIENDA POR "VENTANAS" (SECCIONES)
+========================================================= */
+window.renderPublicCatalog = () => {
+    const catalogBox = document.getElementById('publicStoreCatalog');
+    if (!catalogBox) return;
+    catalogBox.innerHTML = '';
+    
+    const catalog = window.publicCatalogCache || [];
+    const data = window.publicStoreDataCache;
+    if (!data) return;
+
+    const isStoreOpen = data.storeActive !== false; 
+    const searchTerm = document.getElementById('publicStoreSearchInput') ? document.getElementById('publicStoreSearchInput').value.toLowerCase() : '';
+    const catF = window.currentStoreCatFilter;
+
+    // Obtener lista de categorías a renderizar
+    let activeCategories = [...new Set(catalog.map(i => i.category || 'Otros'))];
+    if (catF !== 'Todas') activeCategories = [catF]; // Si hay filtro, solo mostramos esa ventana
+
+    let itemsMostrados = 0;
+
+    // Bucle para crear una "Ventana" por cada categoría
+    activeCategories.forEach(categoriaActual => {
+        
+        // Filtramos los items que pertenecen a esta categoría y coinciden con la búsqueda
+        const itemsEnCategoria = catalog.filter(item => {
+            const itemCat = item.category || 'Otros';
+            const matchCat = itemCat === categoriaActual;
+            const matchSearch = item.platform.toLowerCase().includes(searchTerm) || (item.desc && item.desc.toLowerCase().includes(searchTerm));
+            return matchCat && matchSearch;
+        });
+
+        if (itemsEnCategoria.length === 0) return; // Si la categoría está vacía tras buscar, la omitimos
+        itemsMostrados += itemsEnCategoria.length;
+
+        // Crear el bloque de la "Ventana/Sección"
+        const sectionDiv = document.createElement('div');
+        sectionDiv.style.cssText = "margin-bottom: 40px; background: rgba(255, 255, 255, 0.02); padding: 20px; border-radius: 24px; border: 1px solid var(--mac-border); box-shadow: 0 10px 30px rgba(0,0,0,0.1);";
+        
+        sectionDiv.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px;">
+                <div style="background: var(--mac-blue); padding: 8px; border-radius: 10px; color: white;"><i class='bx bx-category' style="font-size: 20px; margin: 0;"></i></div>
+                <h2 style="margin: 0; font-size: 20px; color: var(--mac-text-main); font-weight: 800;">${categoriaActual.toUpperCase()}</h2>
+            </div>
+            <div class="category-items-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px;">
+            </div>
+        `;
+        
+        const gridDiv = sectionDiv.querySelector('.category-items-grid');
+
+        // Renderizar las tarjetas dentro de la cuadrícula de su categoría (Este es tu mismo código de tarjetas)
+        itemsEnCategoria.forEach(item => {
+            const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
+            let isAgotado = item.status === 'agotado';
+            // ... (Tu código de insignias y stockHtml va aquí igual que siempre) ...
+            
+            const card = document.createElement('div');
+            card.className = `store-product-card ${isAgotado || !isStoreOpen ? 'is-agotado' : ''}`;
+            card.innerHTML = `
+                <div class="store-product-visual" onclick="window.openProductDesc('${item.platform.replace(/'/g, "\\'")}', '${(item.desc || '').replace(/'/g, "\\'")}')">
+                    ${item.imgUrl ? `<img src="${item.imgUrl}" alt="${item.platform}">` : `<div style="width:100%; height:100%; background:var(--mac-gray); display:flex; align-items:center; justify-content:center;"><i class='bx bx-play-circle' style='font-size:48px; color:var(--mac-text-secondary); opacity:0.3;'></i></div>`}
+                </div>
+                <div class="store-product-glass-footer">
+                    <strong class="store-product-title" style="display:block; font-size:16px; margin-bottom: 5px;">${item.platform}</strong>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span class="store-product-price" style="font-size: 18px; font-weight: 900; color: var(--mac-green);">${priceStr}</span>
+                        ${(!isStoreOpen || isAgotado) ? `<span class="status expired" style="padding:6px 10px; border-radius:8px; font-size:11px;">Agotado</span>` : `<button onclick="window.addToCart('${item.id}')" class="btn-primary" style="padding:8px 12px; border-radius:10px;"><i class='bx bx-cart-add' style="margin:0;"></i></button>`}
+                    </div>
+                </div>
+            `;
+            gridDiv.appendChild(card);
+        });
+
+        catalogBox.appendChild(sectionDiv);
+    });
+
+    if (itemsMostrados === 0) {
+        catalogBox.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); padding: 40px 0; font-weight: 500;">No hay productos que coincidan con la búsqueda.</p>';
+    }
+};
+
+// Pequeño parche para el Checkout (Enviamos el total ya con descuento)
+const originalOpenCheckout = window.openCheckoutFromCart;
+window.openCheckoutFromCart = () => {
+    originalOpenCheckout();
+    const data = window.publicStoreDataCache;
+    // Sobrescribir el precio con el total calculado
+    if(document.getElementById('checkoutItemPrice')) {
+        document.getElementById('checkoutItemPrice').innerText = `${data.currency || 'S/'}${window.currentCartFinalTotal.toFixed(2)}`;
+    }
+    if(currentCheckoutItem) currentCheckoutItem.price = window.currentCartFinalTotal; // Para que pase a la BD
+};
