@@ -5966,18 +5966,31 @@ let activeCoupon = null;
 
 window.applyCoupon = () => {
     const code = document.getElementById('cartCouponInput').value.trim().toUpperCase();
-    if(!code) return;
+    const feedback = document.getElementById('couponFeedbackMessage');
+
+    if(!code) {
+        if (feedback) feedback.style.display = 'none';
+        return;
+    }
     
     const storeCoupons = window.publicStoreDataCache.storeCoupons || [];
     const validCoupon = storeCoupons.find(c => c.code === code);
     
     if (validCoupon) {
         activeCoupon = validCoupon;
-        window.showNotification("✅ ¡Cupón aplicado!");
+        if (feedback) {
+            feedback.innerHTML = "✅ Cupón aplicado";
+            feedback.style.color = "var(--mac-green)";
+            feedback.style.display = "block";
+        }
         window.renderCartItems(); // Recalcular todo
     } else {
-        window.showNotification("❌ Cupón inválido o expirado.");
         activeCoupon = null;
+        if (feedback) {
+            feedback.innerHTML = "❌ Cupón inválido";
+            feedback.style.color = "var(--mac-red)";
+            feedback.style.display = "block";
+        }
         window.renderCartItems();
     }
 };
