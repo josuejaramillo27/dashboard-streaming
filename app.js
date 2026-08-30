@@ -4936,28 +4936,29 @@ window.openLinkModal = async (clientId, clientPlatform) => {
                     const matSelect = document.getElementById(`swal-matriz-${i}`);
                     const perfInput = document.getElementById(`swal-perfil-${i}`);
                     
-                    if (matSelect && matSelect.value) {
-                        const perfil = perfInput.value.trim();
-                        if (!perfil || !/\d/.test(perfil)) {
+                    if (matSelect) {
+                        const matrizId = matSelect.value;
+                        const perfil = perfInput ? perfInput.value.trim() : '';
+
+                        if (matrizId !== "" && (!perfil || !/\d/.test(perfil))) {
                             Swal.showValidationMessage(`El perfil para ${plataformas[i]} debe contener al menos un NÚMERO (Ej: 3, J3).`);
                             return false;
                         }
+                        
                         resultados.push({
                             plataforma: matSelect.getAttribute('data-plat'),
-                            matrizId: matSelect.value,
+                            matrizId: matrizId, // 🔥 Ahora reconoce cuando eliges "No vincular" ("")
                             perfil: perfil
                         });
                     }
                 }
-                return resultados; // Retorna un array con todas las asignaciones
+                return resultados;
             }
         });
 
         if (formValues && formValues.length > 0) { 
-            // Reconstruir o usar multiAccounts existente
             let multiAccounts = c.multiAccounts || {};
             
-            // Si estaba usando estructura antigua (1 sola plataforma genérica), la pasamos al nuevo formato multi-pestaña
             if (!c.multiAccounts) {
                 plataformas.forEach(p => {
                     multiAccounts[p] = {
@@ -4970,25 +4971,31 @@ window.openLinkModal = async (clientId, clientPlatform) => {
 
             let rootUpdates = {};
 
-            // Aplicar los nuevos vínculos seleccionados
             formValues.forEach(vinculo => {
-                const matrizSeleccionada = masterDataMap[vinculo.matrizId];
                 if (!multiAccounts[vinculo.plataforma]) multiAccounts[vinculo.plataforma] = window.getDefaultAccData();
                 
-                multiAccounts[vinculo.plataforma].masterAccountId = vinculo.matrizId;
-                multiAccounts[vinculo.plataforma].profile = vinculo.perfil;
-                multiAccounts[vinculo.plataforma].email = matrizSeleccionada.email;
-                multiAccounts[vinculo.plataforma].password = matrizSeleccionada.pass;
+                if (vinculo.matrizId === "") {
+                    // 🔥 LÓGICA DE DESVINCULACIÓN (Mata al fantasma)
+                    multiAccounts[vinculo.plataforma].masterAccountId = null;
+                    if (vinculo.plataforma === formValues[0].plataforma) {
+                        rootUpdates.linkedMasterId = null;
+                    }
+                } else {
+                    // LÓGICA DE VINCULACIÓN
+                    const matrizSeleccionada = masterDataMap[vinculo.matrizId];
+                    multiAccounts[vinculo.plataforma].masterAccountId = vinculo.matrizId;
+                    multiAccounts[vinculo.plataforma].profile = vinculo.perfil;
+                    multiAccounts[vinculo.plataforma].email = matrizSeleccionada.email;
+                    multiAccounts[vinculo.plataforma].password = matrizSeleccionada.pass;
 
-                // Actualizamos las variables raíz base al primer vínculo para compatibilidad con paneles legados
-                if (vinculo.plataforma === formValues[0].plataforma) {
-                    rootUpdates.linkedMasterId = vinculo.matrizId;
-                    rootUpdates.accountProfile = vinculo.perfil;
-                    rootUpdates.accountEmail = matrizSeleccionada.email;
-                    rootUpdates.accountPassword = matrizSeleccionada.pass;
+                    if (vinculo.plataforma === formValues[0].plataforma) {
+                        rootUpdates.linkedMasterId = vinculo.matrizId;
+                        rootUpdates.accountProfile = vinculo.perfil;
+                        rootUpdates.accountEmail = matrizSeleccionada.email;
+                        rootUpdates.accountPassword = matrizSeleccionada.pass;
+                    }
                 }
             });
-
             // Guardar todo de golpe en Firebase
             await updateDoc(doc(db, "clients", clientId), {
                 multiAccounts: multiAccounts,
