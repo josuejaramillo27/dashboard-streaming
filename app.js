@@ -6262,3 +6262,85 @@ window.openCheckoutFromCart = () => {
     }
     if(currentCheckoutItem) currentCheckoutItem.price = window.currentCartFinalTotal; // Para que pase a la BD
 };
+
+/* =========================================================
+   🤖 TUTORIAL CONTEXTUAL DINÁMICO (DRIVER.JS)
+========================================================= */
+window.startContextTutorial = () => {
+    // 1. Detectamos la sección exacta usando la misma lógica del Asistente
+    let activeSection = 'clientes'; 
+    
+    if (document.getElementById('adminView').style.display === 'block') {
+        activeSection = 'admin';
+    } else if (document.getElementById('inventoryModal').classList.contains('active-section') || document.getElementById('inventoryModal').style.display === 'flex') {
+        activeSection = 'inventory';
+    } else if (document.getElementById('storeModal').classList.contains('active-section') || document.getElementById('storeModal').style.display === 'flex') {
+        activeSection = 'store';
+    } else if (document.getElementById('pedidosModal').classList.contains('active-section') || document.getElementById('pedidosModal').style.display === 'flex') {
+        activeSection = 'pedidos';
+    } else if (document.getElementById('profileSection').classList.contains('active-section')) {
+        activeSection = 'profile';
+    } else if (document.getElementById('accountsTableContainer').style.display === 'block') {
+        activeSection = 'matrices';
+    }
+
+    // 2. Cerramos el panel del asistente para que no estorbe visualmente
+    window.closeAssistant();
+
+    // 3. Diccionario maestro de recorridos por sección
+    const tutorialSteps = {
+        'clientes': [
+            { popover: { title: 'Gestión de Clientes', description: 'Aquí puedes registrar, editar y administrar todos tus clientes.' } },
+            { element: '#homeSection .header-top', popover: { title: 'Acciones Rápidas', description: 'Accede al Portal de Clientes, Finanzas o Auto-WA desde aquí.' } },
+            { element: '#clientForm', popover: { title: 'Registrar Cliente', description: 'Llena este formulario para registrar una nueva venta o renovación.' } },
+            { element: '#topControlsBar', popover: { title: 'Buscador y Filtros', description: 'Busca clientes por nombre, teléfono o fíltralos por su estado.' } },
+            { element: '#mainTable', popover: { title: 'Lista de Clientes', description: 'Tus clientes aparecerán aquí. Haz clic en "⚙️ Opciones" para WhatsApp, Portal o Renovar.' } }
+        ],
+        'matrices': [
+            { popover: { title: 'Cuentas Matrices', description: 'Aquí gestionas tus cuentas completas y controlas la disponibilidad de sus perfiles.' } },
+            { element: '#accountsTableContainer button', popover: { title: 'Nueva Matriz', description: 'Haz clic aquí para agregar una cuenta proveedora o propia al sistema.' } },
+            { element: '#masterAccountsList', popover: { title: 'Lista de Matrices', description: 'Visualiza el estado de cada cuenta, sus ganancias y asigna perfiles libres a tus clientes.' } }
+        ],
+        'inventory': [
+            { popover: { title: 'Inventario de Cuentas', description: 'Tu bodega privada de cuentas libres, listas para ser vendidas.' } },
+            { element: '#invPlatform', popover: { title: 'Añadir al Stock', description: 'Ingresa los datos de una nueva cuenta aquí para tenerla lista cuando alguien te compre.' } },
+            { element: '#inventoryList', popover: { title: 'Cuentas Disponibles', description: 'Usa el botón verde de "Entregar" para enviar rápidamente una cuenta a un cliente nuevo.' } }
+        ],
+        'store': [
+            { popover: { title: 'Mi Tiendita Web', description: 'Configura tu catálogo público para vender en automático 24/7.' } },
+            { element: '.chrome-tabs-container', popover: { title: 'Pestañas de Configuración', description: 'Navega fácilmente entre tu Catálogo, Cupones de descuento y Ajustes Generales.' } },
+            { element: '#storePlatform', popover: { title: 'Agregar Producto', description: 'Añade nuevos servicios o combos a tu tienda desde este formulario.' } },
+            { element: '#storeActiveToggle', popover: { title: 'Interruptor de Tienda', description: 'Controla si tu tienda está ABIERTA o CERRADA para el público.' } }
+        ],
+        'pedidos': [
+            { popover: { title: 'Ventas Pendientes', description: 'Aquí llegarán todas las compras y comprobantes de pago de tu Tiendita Web.' } },
+            { element: '#pedidosList', popover: { title: 'Revisar y Aprobar', description: 'Verifica la captura de pago y aprueba la entrega para que el sistema le asigne la cuenta al cliente.' } }
+        ],
+        'profile': [
+            { popover: { title: 'Mi Perfil & Bot', description: 'Configura la identidad visual de tu negocio y la automatización de WhatsApp.' } },
+            { element: '#editLogoUpload', popover: { title: 'Marca Blanca', description: 'Sube tu logo y banner para personalizar tu Tiendita y tus recibos.' } },
+            { element: '#newCustomServiceInput', popover: { title: 'Servicios Personalizados', description: 'Agrega las plataformas exactas que tú vendes para que aparezcan en todo tu panel.' } },
+            { element: '#paymentMethodsContainer', popover: { title: 'Métodos de Pago', description: 'Configura Yape, Plin o Binance para que tus clientes te paguen en la tienda.' } },
+            { element: '#qrContainer', popover: { title: 'Bot de WhatsApp', description: 'Escanea el QR para que tu número envíe los mensajes automáticos de cobro y entregas.' } }
+        ],
+        'admin': [
+            { popover: { title: 'Panel Global A.G.C.', description: 'Control total de todos los distribuidores del sistema.' } },
+            { element: '#adminFilterPlan', popover: { title: 'Filtros y Búsqueda', description: 'Busca distribuidores rápidamente por su estado o nivel de plan.' } },
+            { element: '#btnSubmitNews', popover: { title: 'Novedades', description: 'Publica noticias, actualizaciones o avisos importantes para todos los paneles.' } }
+        ]
+    };
+
+    // 4. Lanzamos Driver.js
+    const driver = window.driver.js.driver;
+    const driverObj = driver({
+        showProgress: true,
+        nextBtnText: 'Siguiente &rarr;',
+        prevBtnText: '&larr; Atrás',
+        doneBtnText: '¡Entendido! 🚀',
+        popoverClass: 'driverjs-theme-dark',
+        // Seleccionamos los pasos de la sección activa (o por defecto, la de clientes)
+        steps: tutorialSteps[activeSection] || tutorialSteps['clientes']
+    });
+    
+    driverObj.drive();
+};
