@@ -809,20 +809,26 @@
                     <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Añadir un producto al catálogo:</label>
                     
                     <div style="background: rgba(0, 122, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed var(--mac-blue); display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
-                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                            <label class="store-toggle-card" onclick="window.updateStoreToggleUI(this, 'storeAutoStock')" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; flex: 1; min-width: 200px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-blue); font-weight: bold; font-size: 12px; transition: all 0.2s;">
-                                <span><i class='bx bx-box'></i> Conectar al Inventario</span>
-                                <input type="checkbox" id="storeAutoStock" onchange="window.toggleStoreStockFields()" style="display:none;">
-                                <i class='bx bx-circle store-toggle-icon' style="color: var(--mac-text-secondary); font-size: 18px;"></i>
-                            </label>
-                            <label class="store-toggle-card" onclick="window.updateStoreToggleUI(this, 'storeRequiresInvite')" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; flex: 1; min-width: 200px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-orange); font-weight: bold; font-size: 12px; transition: all 0.2s;">
-                                <span><i class='bx bx-envelope'></i> Venta por Invitación</span>
-                                <input type="checkbox" id="storeRequiresInvite" style="display:none;">
-                                <i class='bx bx-circle store-toggle-icon' style="color: var(--mac-text-secondary); font-size: 18px;"></i>
-                            </label>
+                        <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 200px;">
+                                <label style="font-size: 10px; color: var(--mac-text-secondary); display: block; margin-bottom: 6px;">Control de Stock:</label>
+                                <label class="store-toggle-card" onclick="window.updateStoreToggleUI(this, 'storeAutoStock')" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-blue); font-weight: bold; font-size: 12px; transition: all 0.2s; box-sizing: border-box;">
+                                    <span><i class='bx bx-box'></i> Conectar al Inventario</span>
+                                    <input type="checkbox" id="storeAutoStock" onchange="window.toggleStoreStockFields()" style="display:none;">
+                                    <i class='bx bx-circle store-toggle-icon' style="color: var(--mac-text-secondary); font-size: 18px;"></i>
+                                </label>
+                            </div>
+                            <div style="flex: 1; min-width: 200px;">
+                                <label style="font-size: 10px; color: var(--mac-text-secondary); display: block; margin-bottom: 6px;">Modo de Venta:</label>
+                                <label class="store-toggle-card" onclick="window.updateStoreToggleUI(this, 'storeRequiresInvite')" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-orange); font-weight: bold; font-size: 12px; transition: all 0.2s; box-sizing: border-box;">
+                                    <span><i class='bx bx-envelope'></i> Venta por Invitación</span>
+                                    <input type="checkbox" id="storeRequiresInvite" style="display:none;">
+                                    <i class='bx bx-circle store-toggle-icon' style="color: var(--mac-text-secondary); font-size: 18px;"></i>
+                                </label>
+                            </div>
                             <div style="flex: 1; min-width: 150px;">
-                                <label style="font-size: 10px; color: var(--mac-text-secondary); display: block;">Etiqueta de Tienda:</label>
-                                <select id="storeBadgeOption" style="padding: 6px; font-size: 11px; width: 100%; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border);">
+                                <label style="font-size: 10px; color: var(--mac-text-secondary); display: block; margin-bottom: 6px;">Etiqueta de Tienda:</label>
+                                <select id="storeBadgeOption" style="padding: 10px 12px; font-size: 12px; width: 100%; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); box-sizing: border-box; height: 41px;">
                                     <option value="">Ninguna</option>
                                     <option value="oferta">🔥 Oferta Especial</option>
                                     <option value="poco_stock">⚠️ Poco Stock</option>
