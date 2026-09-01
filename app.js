@@ -6286,7 +6286,7 @@ window.renderPublicCatalog = () => {
             const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n').replace(/\r/g, '') : 'Sin detalles adicionales.';
             const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}" alt="${item.platform}">` : `<div style="width:100%; height:100%; background:var(--mac-gray); display:flex; align-items:center; justify-content:center;"><i class='bx bx-play-circle' style='font-size:48px; color:var(--mac-text-secondary); opacity:0.3;'></i></div>`;
 
-            // Generador de la lista de opciones estilo Canva (FUERA de las comillas HTML)
+            // Generador de la lista de opciones estilo Canva
             const opcionesGuardadas = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{ label: '1 Mes', price: item.price }];
             
             let pricingHtml = `<div style="display:flex; flex-direction:column; gap:8px; width:100%; margin-top:15px; margin-bottom:15px;">`;
