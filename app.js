@@ -3070,46 +3070,88 @@ window.editStoreItem = async (index) => {
         catOptions += `<option value="${c}" ${sel}>${c}</option>`;
     });
 
+    // Extraemos las opciones de precio guardadas (o creamos vacías si no existen)
+    const opt1 = item.pricingOptions && item.pricingOptions[0] ? item.pricingOptions[0] : { label: '1 Mes', price: item.price || '' };
+    const opt2 = item.pricingOptions && item.pricingOptions[1] ? item.pricingOptions[1] : { label: '', price: '' };
+    const opt3 = item.pricingOptions && item.pricingOptions[2] ? item.pricingOptions[2] : { label: '', price: '' };
+
     const { value: formValues } = await Swal.fire({
         title: 'Editar Producto',
         html: `
             <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Nombre del Servicio/Combo:</label>
                 <input id="swal-plat" class="swal2-input" style="margin:0; width: 100%; box-sizing:border-box;" value="${item.platform}">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-                    <div>
-                        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Precio:</label>
-                        <input id="swal-price" type="number" step="0.1" class="swal2-input" style="margin:0; width: 100%; box-sizing:border-box;" value="${item.price}">
+                
+                <div style="margin-top: 5px;">
+                    <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Categoría:</label>
+                    <select id="swal-cat" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-top: 5px; outline: none;">
+                        ${catOptions}
+                    </select>
+                </div>
+
+                <div style="background: rgba(94, 92, 230, 0.05); padding: 15px; border-radius: 10px; border: 1px dashed var(--mac-blue); display: flex; flex-direction: column; gap: 10px; margin-top: 5px;">
+                    <label style="font-size: 12px; font-weight: bold; color: var(--mac-blue);"><i class='bx bx-time'></i> Opciones de Tiempo y Precio:</label>
+                    
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="swal-label1" placeholder="Ej: 1 Mes" value="${opt1.label}" style="flex:1; padding: 10px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px;">
+                        <input type="number" step="0.1" id="swal-price1" placeholder="Precio Base *" value="${opt1.price}" style="flex:1; padding: 10px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px;">
                     </div>
-                    <div>
-                        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Categoría:</label>
-                        <select id="swal-cat" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-top: 5px;">
-                            ${catOptions}
-                        </select>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="swal-label2" placeholder="Ej: 1 Año (Opcional)" value="${opt2.label}" style="flex:1; padding: 10px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px;">
+                        <input type="number" step="0.1" id="swal-price2" placeholder="Precio" value="${opt2.price}" style="flex:1; padding: 10px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px;">
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="swal-label3" placeholder="Ej: 2 Años (Opcional)" value="${opt3.label}" style="flex:1; padding: 10px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px;">
+                        <input type="number" step="0.1" id="swal-price3" placeholder="Precio" value="${opt3.price}" style="flex:1; padding: 10px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px;">
                     </div>
                 </div>
-                <label id="swal-invite-label" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 12px 15px; border-radius: 8px; border: 1px solid ${item.requiresInvite ? 'var(--mac-orange)' : 'var(--mac-border)'}; background: ${item.requiresInvite ? 'rgba(255, 149, 0, 0.1)' : 'var(--mac-bg)'}; transition: all 0.2s; margin-top: 15px;">
+
+                <label id="swal-invite-label" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 12px 15px; border-radius: 8px; border: 1px solid ${item.requiresInvite ? 'var(--mac-orange)' : 'var(--mac-border)'}; background: ${item.requiresInvite ? 'rgba(255, 149, 0, 0.1)' : 'var(--mac-bg)'}; transition: all 0.2s; margin-top: 5px;">
                     <span style="font-size: 13px; color: var(--mac-text-main); font-weight: bold;"><i class='bx bx-envelope' style="color: var(--mac-orange); font-size: 16px; vertical-align: middle; margin-right: 5px;"></i> Venta por Invitación</span>
-                    <input type="checkbox" id="swal-invite" ${item.requiresInvite ? 'checked' : ''} onchange="this.parentElement.style.borderColor = this.checked ? 'var(--mac-orange)' : 'var(--mac-border)'; this.parentElement.style.background = this.checked ? 'rgba(255, 149, 0, 0.1)' : 'var(--mac-bg)';" style="width: 18px !important; height: 18px !important; cursor: pointer; margin: 0;">
+                    <input type="checkbox" id="swal-invite" ${item.requiresInvite ? 'checked' : ''} onchange="this.parentElement.style.borderColor = this.checked ? 'var(--mac-orange)' : 'var(--mac-border)'; this.parentElement.style.background = this.checked ? 'rgba(255, 149, 0, 0.1)' : 'var(--mac-bg)';" style="width: 18px !important; height: 18px !important; cursor: pointer; margin: 0; appearance: auto !important; -webkit-appearance: auto !important;">
                 </label>
-                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Descripción:</label>
-                <textarea id="swal-desc" class="swal2-textarea" style="margin: 5px 0 0 0; width: 100%; box-sizing:border-box; padding: 10px; border-radius: 8px; font-size: 14px; min-height: 80px;">${item.desc || ''}</textarea>
-                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Cambiar Imagen (Opcional):</label>
+                
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 5px;">Descripción:</label>
+                <textarea id="swal-desc" class="swal2-textarea" style="margin: 0; width: 100%; box-sizing:border-box; padding: 10px; border-radius: 8px; font-size: 14px; min-height: 80px;">${item.desc || ''}</textarea>
+                
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 5px;">Cambiar Imagen (Opcional):</label>
                 <input type="file" id="swal-img" accept="image/*" style="margin:0; width: 100%; padding: 10px; font-size: 12px; border: 1px solid var(--mac-border); border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
             </div>
         `,
-        focusConfirm: false, showCancelButton: true, confirmButtonText: 'Guardar Cambios', cancelButtonText: 'Cancelar', confirmButtonColor: '#007AFF',
-        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff', color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
+        focusConfirm: false, 
+        showCancelButton: true, 
+        confirmButtonText: 'Guardar Cambios', 
+        cancelButtonText: 'Cancelar', 
+        confirmButtonColor: '#007AFF',
+        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff', 
+        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
         preConfirm: () => {
             const plat = document.getElementById('swal-plat').value.trim();
-            const price = parseFloat(document.getElementById('swal-price').value);
             const cat = document.getElementById('swal-cat').value;
             const invite = document.getElementById('swal-invite').checked;
             const desc = document.getElementById('swal-desc').value.trim();
             const fileInput = document.getElementById('swal-img');
             const file = fileInput && fileInput.files.length > 0 ? fileInput.files[0] : null;
-            if (!plat || isNaN(price)) { Swal.showValidationMessage('El nombre y el precio son obligatorios'); return false; }
-            return { platform: plat, price: price, category: cat, desc: desc, requiresInvite: invite, file: file };
+
+            // Extraemos los valores de las opciones
+            const l1 = document.getElementById('swal-label1').value.trim() || '1 Mes';
+            const p1 = parseFloat(document.getElementById('swal-price1').value);
+            const l2 = document.getElementById('swal-label2').value.trim();
+            const p2 = parseFloat(document.getElementById('swal-price2').value);
+            const l3 = document.getElementById('swal-label3').value.trim();
+            const p3 = parseFloat(document.getElementById('swal-price3').value);
+
+            if (!plat || isNaN(p1)) { 
+                Swal.showValidationMessage('El nombre y el Precio Base (primera opción) son obligatorios'); 
+                return false; 
+            }
+
+            let opcionesPrecio = [];
+            opcionesPrecio.push({ label: l1, price: p1 });
+            if (l2 && !isNaN(p2)) opcionesPrecio.push({ label: l2, price: p2 });
+            if (l3 && !isNaN(p3)) opcionesPrecio.push({ label: l3, price: p3 });
+
+            return { platform: plat, price: p1, pricingOptions: opcionesPrecio, category: cat, desc: desc, requiresInvite: invite, file: file };
         }
     });
 
@@ -3123,10 +3165,12 @@ window.editStoreItem = async (index) => {
             }
             catalog[index].platform = formValues.platform;
             catalog[index].price = formValues.price;
-            catalog[index].category = formValues.category; // 👈 Guarda categoría
+            catalog[index].pricingOptions = formValues.pricingOptions; // <-- Guardamos la nueva lista de precios en Firebase
+            catalog[index].category = formValues.category; 
             catalog[index].desc = formValues.desc;
             catalog[index].requiresInvite = formValues.requiresInvite;
             catalog[index].imgUrl = newImgUrl; 
+            
             await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
             currentUserData.storeCatalog = catalog;
             window.renderStoreItems();
