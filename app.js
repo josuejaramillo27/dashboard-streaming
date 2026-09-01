@@ -2925,10 +2925,19 @@ window.removeStoreCategory = async (index) => {
 window.addStoreItem = async () => {
     const type = document.getElementById('storeType') ? document.getElementById('storeType').value : 'Servicio';
     const plat = document.getElementById('storePlatform').value.trim();
-    const price = document.getElementById('storePrice').value;
-    const p3 = parseFloat(document.getElementById('storePrice3m').value) || null;
-    const p6 = parseFloat(document.getElementById('storePrice6m').value) || null;
-    const p12 = parseFloat(document.getElementById('storePrice12m').value) || null;
+    const p1L = document.getElementById('storeLabel1').value || '1 Mes';
+    const p1P = parseFloat(document.getElementById('storePrice').value);
+    const p2L = document.getElementById('storeLabel2').value;
+    const p2P = parseFloat(document.getElementById('storePrice2').value);
+    const p3L = document.getElementById('storeLabel3').value;
+    const p3P = parseFloat(document.getElementById('storePrice3').value);
+
+    let opcionesPrecio = [];
+    if (!isNaN(p1P)) opcionesPrecio.push({ label: p1L, price: p1P });
+    if (p2L && !isNaN(p2P)) opcionesPrecio.push({ label: p2L, price: p2P });
+    if (p3L && !isNaN(p3P)) opcionesPrecio.push({ label: p3L, price: p3P });
+
+    if (!plat || isNaN(p1P)) return window.showNotification("Completa plataforma y precio base");
     const cat = document.getElementById('storeCategorySelect').value;
     const desc = document.getElementById('storeDesc') ? document.getElementById('storeDesc').value.trim() : '';
     const autoStock = document.getElementById('storeAutoStock').checked;
@@ -2961,8 +2970,8 @@ window.addStoreItem = async () => {
         catalog.push({ 
             id: 'item_' + Date.now(), 
             platform: plat, 
-            price: parseFloat(price),
-            pricing: { m3: p3, m6: p6, m12: p12 },
+            price: p1P,
+            pricingOptions: opcionesPrecio,
             category: cat,
             desc: desc, imgUrl: imgUrl, type: type, 
             autoStock: autoStock, stockPlatforms: stockPlatforms,
@@ -2975,9 +2984,10 @@ window.addStoreItem = async () => {
 
         document.getElementById('storePlatform').value = '';
         document.getElementById('storePrice').value = '';
-        document.getElementById('storePrice3m').value = '';
-        document.getElementById('storePrice6m').value = '';
-        document.getElementById('storePrice12m').value = '';
+        document.getElementById('storeLabel2').value = '';
+        document.getElementById('storePrice2').value = '';
+        document.getElementById('storeLabel3').value = '';
+        document.getElementById('storePrice3').value = '';
         if (document.getElementById('storeDesc')) document.getElementById('storeDesc').value = '';
         if (fileInput) fileInput.value = '';
         document.getElementById('storeCategorySelect').value = '';
@@ -3477,21 +3487,51 @@ window.renderPublicCatalog = () => {
                 ${imgHTML}
                 <div class="store-product-visual-overlay"><span class="view-desc-hint"><i class='bx bx-zoom-in'></i> Detalles</span></div>
             </div>
-            <div class="store-product-glass-footer">
-                <div style="width: 100%; margin-bottom: 12px;">
-                    <strong class="store-product-title" style="display:block; font-size:18px; line-height:1.3; color: var(--mac-text-main); word-break: break-word;">${item.platform}</strong>
+            // Generador de la lista de opciones estilo Canva
+            const opcionesGuardadas = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{ label: '1 Mes', price: item.price }];
+            
+            let pricingHtml = `<div style="display:flex; flex-direction:column; gap:8px; width:100%; margin-top:15px; margin-bottom:15px;">`;
+            opcionesGuardadas.forEach((opt, i) => {
+                const isSelected = i === 0;
+                const borderColor = isSelected ? 'var(--mac-blue)' : 'var(--mac-border)';
+                const bg = isSelected ? 'rgba(0, 122, 255, 0.1)' : 'var(--mac-surface)';
+                
+                pricingHtml += `
+                    <label id="opt_label_${item.id}_${i}" onclick="window.selectPricingOption('${item.id}', ${i})" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-radius:12px; border:1px solid ${borderColor}; background:${bg}; cursor:pointer; transition:all 0.2s;">
+                        <span style="font-size:14px; font-weight:600; color:var(--mac-text-main);">${opt.label}</span>
+                        <span style="font-size:15px; font-weight:800; color:var(--mac-text-main);">${data.currency || 'S/'}${opt.price.toFixed(2)}</span>
+                        <input type="radio" name="opt_${item.id}" value="${i}" data-price="${opt.price}" data-label="${opt.label}" ${isSelected ? 'checked' : ''} style="display:none;">
+                    </label>
+                `;
+            });
+            pricingHtml += `</div>`;
+
+            let btnHTML = '';
+            if (!isStoreOpen) {
+                btnHTML = `<button disabled style="width:100%; padding:14px; border-radius:14px; font-weight:800; font-size:15px; background: var(--mac-gray); color: var(--mac-text-secondary); border:none;"><i class='bx bx-store-alt'></i> Tienda Cerrada</button>`;
+            } else if (isAgotado) {
+                btnHTML = `<button disabled style="width:100%; padding:14px; border-radius:14px; font-weight:800; font-size:15px; background: var(--mac-red); color: white; border:none;">Agotado</button>`;
+            } else {
+                btnHTML = `<button onclick="window.addToCartWithOptions('${item.id}')" style="width:100%; padding:14px; border-radius:14px; font-weight:800; font-size:15px; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); color: white; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                    Añadir al carrito <i class='bx bx-cart-add' style="font-size:20px;"></i>
+                </button>`;
+            }
+
+            card.innerHTML = `
+                ${typeBadgeHtml}
+                <button class="store-share-btn" onclick="event.stopPropagation(); window.shareProduct('${item.id}')" title="Compartir Oferta"><i class='bx bx-share-alt'></i></button>
+                <div class="store-product-visual" onclick="window.openProductDesc('${titleSafe}', '${descSafe}')">
+                    ${imgHTML}
+                    <div class="store-product-visual-overlay"><span class="view-desc-hint"><i class='bx bx-zoom-in'></i> Detalles</span></div>
                 </div>
-                <div style="display:flex; justify-content:space-between; align-items:flex-end; width:100%; margin-top: auto;">
-                    <div class="store-product-info" style="display:flex; flex-direction:column; gap:4px;">
-                        <span class="store-product-price" style="font-size: 22px; font-weight: 900; color: var(--mac-green);">${priceStr}</span>
-                        ${stockHtml} 
-                    </div>
-                    <div class="store-product-action" style="flex-shrink:0;">
-                        ${btnHTML}
-                    </div>
+                <div class="store-product-glass-footer" style="padding: 15px; display: flex; flex-direction: column;">
+                    <strong class="store-product-title" style="display:block; font-size:18px; line-height:1.3; color: var(--mac-text-main); word-break: break-word; text-align: center;">${item.platform}</strong>
+                    ${stockHtml ? `<div style="text-align:center; margin-top:5px;">${stockHtml}</div>` : ''}
+                    
+                    ${pricingHtml}
+                    ${btnHTML}
                 </div>
-            </div>
-        `;
+            `;
         catalogBox.appendChild(card);
     });
 };
@@ -6442,6 +6482,55 @@ window.addToCartConDuracion = (itemId) => {
     // Personalizamos el nombre en el carrito
     if (meses > 1) {
         cartItem.platform = `${originalItem.platform} (${meses} Meses)`;
+    }
+
+    window.storeCart.push(cartItem);
+    document.getElementById('cartBadge').innerText = window.storeCart.length;
+    document.getElementById('floatingCartBtn').style.display = 'flex';
+    
+    document.getElementById('cartPanelOverlay').classList.add('active');
+    document.getElementById('cartPanel').classList.add('active');
+    window.renderCartItems();
+};
+
+// Ilumina la opción seleccionada y apaga las demás
+window.selectPricingOption = (itemId, index) => {
+    const labels = document.querySelectorAll(`[id^="opt_label_${itemId}_"]`);
+    labels.forEach((lbl, i) => {
+        if (i === index) {
+            lbl.style.borderColor = 'var(--mac-blue)';
+            lbl.style.background = 'rgba(0, 122, 255, 0.1)';
+            lbl.querySelector('input').checked = true;
+        } else {
+            lbl.style.borderColor = 'var(--mac-border)';
+            lbl.style.background = 'var(--mac-surface)';
+            lbl.querySelector('input').checked = false;
+        }
+    });
+};
+
+// Manda al carrito leyendo el radio button invisible
+window.addToCartWithOptions = (itemId) => {
+    const catalog = window.publicCatalogCache || [];
+    const originalItem = catalog.find(i => i.id === itemId);
+    if (!originalItem) return;
+
+    // Buscamos qué opción está marcada
+    const selectedRadio = document.querySelector(`input[name="opt_${itemId}"]:checked`);
+    let finalPrice = originalItem.price;
+    let optionLabel = '';
+
+    if (selectedRadio) {
+        finalPrice = parseFloat(selectedRadio.getAttribute('data-price'));
+        optionLabel = selectedRadio.getAttribute('data-label');
+    }
+
+    const cartItem = { ...originalItem }; 
+    cartItem.price = finalPrice;
+    
+    // Le agregamos la etiqueta al nombre (Ej: "Canva Pro (1 Año)")
+    if (optionLabel) {
+        cartItem.platform = `${originalItem.platform} (${optionLabel})`;
     }
 
     window.storeCart.push(cartItem);
