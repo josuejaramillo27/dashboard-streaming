@@ -3173,7 +3173,33 @@ window.shareProduct = async (itemId) => {
         window.copyToClipboard(text + " " + storeUrl, "Link de Oferta");
     }
 };
+window.addToCartConDuracion = (itemId) => {
+    const catalog = window.publicCatalogCache || [];
+    const originalItem = catalog.find(i => i.id === itemId);
+    if (!originalItem) return;
 
+    // Leemos cuántos meses seleccionó el cliente
+    const selectElement = document.getElementById('duracion_' + itemId);
+    const meses = parseInt(selectElement.value) || 1;
+    
+    // Clonamos el producto para no alterar el catálogo original
+    const cartItem = { ...originalItem }; 
+    
+    // Multiplicamos el precio y actualizamos el nombre
+    cartItem.price = originalItem.price * meses;
+    if (meses > 1) {
+        cartItem.platform = `${originalItem.platform} (${meses} Meses)`;
+    }
+
+    // Agregamos al carrito e invocamos la animación
+    window.storeCart.push(cartItem);
+    document.getElementById('cartBadge').innerText = window.storeCart.length;
+    document.getElementById('floatingCartBtn').style.display = 'flex';
+    
+    document.getElementById('cartPanelOverlay').classList.add('active');
+    document.getElementById('cartPanel').classList.add('active');
+    window.renderCartItems();
+};
 // CARRITO DE COMPRAS
 window.addToCart = (itemId) => {
     const item = window.publicCatalogCache.find(i => i.id === itemId);
