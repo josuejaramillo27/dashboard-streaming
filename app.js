@@ -2947,7 +2947,6 @@ window.addStoreItem = async () => {
     const selects = document.querySelectorAll('.store-stock-select');
     const stockPlatforms = Array.from(selects).map(s => s.value).filter(val => val !== '');
 
-    if (!plat || !price) return window.showNotification("Completa plataforma y precio");
     if (autoStock && stockPlatforms.length === 0 && badgeOption !== 'a_pedido') {
         return window.showNotification("⚠️ Selecciona una plataforma del inventario para conectar el stock.");
     }
@@ -6287,42 +6286,39 @@ window.renderPublicCatalog = () => {
             const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n').replace(/\r/g, '') : 'Sin detalles adicionales.';
             const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}" alt="${item.platform}">` : `<div style="width:100%; height:100%; background:var(--mac-gray); display:flex; align-items:center; justify-content:center;"><i class='bx bx-play-circle' style='font-size:48px; color:var(--mac-text-secondary); opacity:0.3;'></i></div>`;
 
-            const basePrice = item.price;
-            const p3 = item.pricing && item.pricing.m3 ? item.pricing.m3 : basePrice * 3;
-            const p6 = item.pricing && item.pricing.m6 ? item.pricing.m6 : basePrice * 6;
-            const p12 = item.pricing && item.pricing.m12 ? item.pricing.m12 : basePrice * 12;
-
-            const formatOpt = (months, specificPrice) => {
-                const normalPrice = basePrice * months;
-                const savings = normalPrice - specificPrice;
-                let text = `${months} Meses - ${data.currency || 'S/'}${specificPrice.toFixed(2)}`;
-                if (savings > 0) text += ` (Ahorras ${data.currency || 'S/'}${savings.toFixed(2)} 🔥)`;
-                return `<option value="${months}" data-price="${specificPrice}">${text}</option>`;
-            };
+            // Generador de la lista de opciones estilo Canva (FUERA de las comillas HTML)
+            const opcionesGuardadas = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{ label: '1 Mes', price: item.price }];
+            
+            let pricingHtml = `<div style="display:flex; flex-direction:column; gap:8px; width:100%; margin-top:15px; margin-bottom:15px;">`;
+            opcionesGuardadas.forEach((opt, i) => {
+                const isSelected = i === 0;
+                const borderColor = isSelected ? 'var(--mac-blue)' : 'var(--mac-border)';
+                const bg = isSelected ? 'rgba(0, 122, 255, 0.1)' : 'var(--mac-surface)';
+                
+                pricingHtml += `
+                    <label id="opt_label_${item.id}_${i}" onclick="window.selectPricingOption('${item.id}', ${i})" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-radius:12px; border:1px solid ${borderColor}; background:${bg}; cursor:pointer; transition:all 0.2s;">
+                        <span style="font-size:14px; font-weight:600; color:var(--mac-text-main);">${opt.label}</span>
+                        <span style="font-size:15px; font-weight:800; color:var(--mac-text-main);">${data.currency || 'S/'}${opt.price.toFixed(2)}</span>
+                        <input type="radio" name="opt_${item.id}" value="${i}" data-price="${opt.price}" data-label="${opt.label}" ${isSelected ? 'checked' : ''} style="display:none;">
+                    </label>
+                `;
+            });
+            pricingHtml += `</div>`;
 
             let btnHTML = '';
             if (!isStoreOpen) {
-                btnHTML = `<span class="status expired" style="padding:10px; border-radius:12px; font-weight:800; font-size:12px; background: var(--mac-gray); color: var(--mac-text-secondary);"><i class='bx bx-store-alt'></i> Cerrada</span>`;
+                btnHTML = `<button disabled style="width:100%; padding:14px; border-radius:14px; font-weight:800; font-size:15px; background: var(--mac-gray); color: var(--mac-text-secondary); border:none;"><i class='bx bx-store-alt'></i> Tienda Cerrada</button>`;
             } else if (isAgotado) {
-                btnHTML = `<span class="status expired" style="padding:10px; border-radius:12px; font-weight:800; font-size:12px;">Agotado</span>`;
+                btnHTML = `<button disabled style="width:100%; padding:14px; border-radius:14px; font-weight:800; font-size:15px; background: var(--mac-red); color: white; border:none;">Agotado</button>`;
             } else {
-                btnHTML = `
-                    <div style="display: flex; gap: 8px; align-items: center; width: 100%; justify-content: flex-end;">
-                        <select id="duracion_${item.id}" onchange="window.updateCardPrice('${item.id}', this)" style="padding: 8px; border-radius: 10px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 11px; outline: none; font-weight: bold; flex-grow: 1; max-width: 150px;">
-                            <option value="1" data-price="${basePrice}">1 Mes - ${data.currency || 'S/'}${basePrice.toFixed(2)}</option>
-                            ${formatOpt(3, p3)}
-                            ${formatOpt(6, p6)}
-                            ${formatOpt(12, p12)}
-                        </select>
-                        <button onclick="window.addToCartConDuracion('${item.id}')" class="btn-wa" style="border:none; cursor:pointer; padding:0; border-radius:14px; display:inline-flex; align-items:center; justify-content:center; margin:0; width: 42px; height: 42px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important; color: white !important;">
-                            <i class='bx bx-cart-add' style='margin:0; font-size: 22px;'></i>
-                        </button>
-                    </div>
-                `;
+                btnHTML = `<button onclick="window.addToCartWithOptions('${item.id}')" style="width:100%; padding:14px; border-radius:14px; font-weight:800; font-size:15px; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); color: white; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                    Añadir al carrito <i class='bx bx-cart-add' style="font-size:20px;"></i>
+                </button>`;
             }
 
             const card = document.createElement('div');
             card.className = `store-product-card ${isAgotado || !isStoreOpen ? 'is-agotado' : ''}`;
+            
             card.innerHTML = `
                 ${typeBadgeHtml}
                 <button class="store-share-btn" onclick="event.stopPropagation(); window.shareProduct('${item.id}')" title="Compartir Oferta"><i class='bx bx-share-alt'></i></button>
@@ -6330,19 +6326,12 @@ window.renderPublicCatalog = () => {
                     ${imgHTML}
                     <div class="store-product-visual-overlay"><span class="view-desc-hint"><i class='bx bx-zoom-in'></i> Detalles</span></div>
                 </div>
-                <div class="store-product-glass-footer">
-                    <div style="width: 100%; margin-bottom: 12px;">
-                        <strong class="store-product-title" style="display:block; font-size:18px; line-height:1.3; color: var(--mac-text-main); word-break: break-word;">${item.platform}</strong>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:flex-end; width:100%; margin-top: auto;">
-                        <div class="store-product-info" style="display:flex; flex-direction:column; gap:4px;">
-                            <span class="store-product-price" style="font-size: 22px; font-weight: 900; color: var(--mac-green);">${priceStr}</span>
-                            ${stockHtml} 
-                        </div>
-                        <div class="store-product-action" style="flex-shrink:0;">
-                            ${btnHTML}
-                        </div>
-                    </div>
+                <div class="store-product-glass-footer" style="padding: 15px; display: flex; flex-direction: column;">
+                    <strong class="store-product-title" style="display:block; font-size:18px; line-height:1.3; color: var(--mac-text-main); word-break: break-word; text-align: center;">${item.platform}</strong>
+                    ${stockHtml ? `<div style="text-align:center; margin-top:5px;">${stockHtml}</div>` : ''}
+                    
+                    ${pricingHtml}
+                    ${btnHTML}
                 </div>
             `;
             gridDiv.appendChild(card);
