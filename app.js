@@ -6220,8 +6220,20 @@ window.renderPublicCatalog = () => {
             } else if (isAgotado) {
                 btnHTML = `<span class="status expired" style="padding:10px; border-radius:12px; font-weight:800; font-size:12px;">Agotado</span>`;
             } else {
-                btnHTML = `<button onclick="window.addToCart('${item.id}')" class="btn-wa" style="border:none; cursor:pointer; padding:0; border-radius:14px; display:inline-flex; align-items:center; justify-content:center; margin:0; width: 48px; height: 48px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important; color: white !important;"><i class='bx bx-cart-add' style='margin:0; font-size: 24px;'></i></button>`;
-            }
+    btnHTML = `
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <select id="duracion_${item.id}" style="padding: 8px; border-radius: 10px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px; outline: none; font-weight: bold;">
+                <option value="1">1 Mes</option>
+                <option value="3">3 Meses</option>
+                <option value="6">6 Meses</option>
+                <option value="12">12 Meses</option>
+            </select>
+            <button onclick="window.addToCartConDuracion('${item.id}')" class="btn-wa" style="border:none; cursor:pointer; padding:0; border-radius:14px; display:inline-flex; align-items:center; justify-content:center; margin:0; width: 48px; height: 48px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important; color: white !important;">
+                <i class='bx bx-cart-add' style='margin:0; font-size: 24px;'></i>
+            </button>
+        </div>
+    `;
+}
 
             const card = document.createElement('div');
             card.className = `store-product-card ${isAgotado || !isStoreOpen ? 'is-agotado' : ''}`;
