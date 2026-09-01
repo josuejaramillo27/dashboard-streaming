@@ -3088,8 +3088,9 @@ window.editStoreItem = async (index) => {
                         </select>
                     </div>
                 </div>
-                <label style="font-size: 12px; font-weight: bold; color: var(--mac-orange); margin-top: 10px;">
-                    <input type="checkbox" id="swal-invite" ${item.requiresInvite ? 'checked' : ''}> Venta por Invitación
+                <label id="swal-invite-label" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 12px 15px; border-radius: 8px; border: 1px solid ${item.requiresInvite ? 'var(--mac-orange)' : 'var(--mac-border)'}; background: ${item.requiresInvite ? 'rgba(255, 149, 0, 0.1)' : 'var(--mac-bg)'}; transition: all 0.2s; margin-top: 15px;">
+                    <span style="font-size: 13px; color: var(--mac-text-main); font-weight: bold;"><i class='bx bx-envelope' style="color: var(--mac-orange); font-size: 16px; vertical-align: middle; margin-right: 5px;"></i> Venta por Invitación</span>
+                    <input type="checkbox" id="swal-invite" ${item.requiresInvite ? 'checked' : ''} onchange="this.parentElement.style.borderColor = this.checked ? 'var(--mac-orange)' : 'var(--mac-border)'; this.parentElement.style.background = this.checked ? 'rgba(255, 149, 0, 0.1)' : 'var(--mac-bg)';" style="width: 18px !important; height: 18px !important; cursor: pointer; margin: 0;">
                 </label>
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Descripción:</label>
                 <textarea id="swal-desc" class="swal2-textarea" style="margin: 5px 0 0 0; width: 100%; box-sizing:border-box; padding: 10px; border-radius: 8px; font-size: 14px; min-height: 80px;">${item.desc || ''}</textarea>
