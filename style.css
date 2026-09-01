@@ -144,7 +144,7 @@ h3 { text-align: center; color: var(--mac-text-secondary); font-size: 14px; marg
 /* =========================================================
    CAMPOS DE TEXTO, FORMULARIOS Y BUSCADOR (ESTILO APPLE)
 ========================================================= */
-input, select, .select-box, textarea { 
+input:not([type="checkbox"]):not([type="radio"]), select, .select-box, textarea { 
     padding: 12px 14px; 
     border: 1px solid var(--mac-border); 
     border-radius: 10px; /* Bordes un poco más suaves */
