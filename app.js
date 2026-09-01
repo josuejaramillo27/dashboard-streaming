@@ -3478,14 +3478,8 @@ window.renderPublicCatalog = () => {
         }
 
         const card = document.createElement('div');
-        card.className = `store-product-card ${isAgotado || !isStoreOpen ? 'is-agotado' : ''}`;
-        card.innerHTML = `
-            ${typeBadgeHtml}
-            <button class="store-share-btn" onclick="event.stopPropagation(); window.shareProduct('${item.id}')" title="Compartir Oferta"><i class='bx bx-share-alt'></i></button>
-            <div class="store-product-visual" onclick="window.openProductDesc('${titleSafe}', '${descSafe}')">
-                ${imgHTML}
-                <div class="store-product-visual-overlay"><span class="view-desc-hint"><i class='bx bx-zoom-in'></i> Detalles</span></div>
-            </div>
+            card.className = `store-product-card ${isAgotado || !isStoreOpen ? 'is-agotado' : ''}`;
+            
             // Generador de la lista de opciones estilo Canva
             const opcionesGuardadas = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{ label: '1 Mes', price: item.price }];
             
