@@ -849,6 +849,15 @@
                             </select>
                             <input type="number" id="storePrice" placeholder="Precio final" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 13px; box-sizing: border-box;">
                         </div>
+                        <div style="grid-column: 1 / -1; background: rgba(94, 92, 230, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed var(--mac-blue); margin-top: 10px;">
+    <label style="font-size: 11px; font-weight: bold; color: var(--mac-blue); margin-bottom: 8px; display: block;"><i class='bx bx-time'></i> Ofertas Especiales por Tiempo (Opcional):</label>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+        <input type="number" step="0.1" id="storePrice3m" placeholder="Precio 3 Meses" style="padding: 10px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px;">
+        <input type="number" step="0.1" id="storePrice6m" placeholder="Precio 6 Meses" style="padding: 10px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px;">
+        <input type="number" step="0.1" id="storePrice12m" placeholder="Precio 12 Meses" style="padding: 10px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px;">
+    </div>
+    <p style="margin: 5px 0 0 0; font-size: 10px; color: var(--mac-text-secondary);">Si dejas uno vacío, el sistema solo multiplicará el precio de 1 mes por la cantidad.</p>
+</div>
                         <input type="file" id="storeImg" accept="image/*" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 13px; box-sizing: border-box;">
                         <textarea id="storeDesc" placeholder="Descripción del producto..." style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 14px; resize: vertical; min-height: 80px; box-sizing: border-box;"></textarea>
                         
