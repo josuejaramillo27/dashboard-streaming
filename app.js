@@ -2926,6 +2926,9 @@ window.addStoreItem = async () => {
     const type = document.getElementById('storeType') ? document.getElementById('storeType').value : 'Servicio';
     const plat = document.getElementById('storePlatform').value.trim();
     const price = document.getElementById('storePrice').value;
+    const p3 = parseFloat(document.getElementById('storePrice3m').value) || null;
+    const p6 = parseFloat(document.getElementById('storePrice6m').value) || null;
+    const p12 = parseFloat(document.getElementById('storePrice12m').value) || null;
     const cat = document.getElementById('storeCategorySelect').value;
     const desc = document.getElementById('storeDesc') ? document.getElementById('storeDesc').value.trim() : '';
     const autoStock = document.getElementById('storeAutoStock').checked;
@@ -2959,6 +2962,7 @@ window.addStoreItem = async () => {
             id: 'item_' + Date.now(), 
             platform: plat, 
             price: parseFloat(price),
+            pricing: { m3: p3, m6: p6, m12: p12 },
             category: cat,
             desc: desc, imgUrl: imgUrl, type: type, 
             autoStock: autoStock, stockPlatforms: stockPlatforms,
@@ -2971,6 +2975,9 @@ window.addStoreItem = async () => {
 
         document.getElementById('storePlatform').value = '';
         document.getElementById('storePrice').value = '';
+        document.getElementById('storePrice3m').value = '';
+        document.getElementById('storePrice6m').value = '';
+        document.getElementById('storePrice12m').value = '';
         if (document.getElementById('storeDesc')) document.getElementById('storeDesc').value = '';
         if (fileInput) fileInput.value = '';
         document.getElementById('storeCategorySelect').value = '';
@@ -6240,26 +6247,39 @@ window.renderPublicCatalog = () => {
             const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n').replace(/\r/g, '') : 'Sin detalles adicionales.';
             const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}" alt="${item.platform}">` : `<div style="width:100%; height:100%; background:var(--mac-gray); display:flex; align-items:center; justify-content:center;"><i class='bx bx-play-circle' style='font-size:48px; color:var(--mac-text-secondary); opacity:0.3;'></i></div>`;
 
+            const basePrice = item.price;
+            const p3 = item.pricing && item.pricing.m3 ? item.pricing.m3 : basePrice * 3;
+            const p6 = item.pricing && item.pricing.m6 ? item.pricing.m6 : basePrice * 6;
+            const p12 = item.pricing && item.pricing.m12 ? item.pricing.m12 : basePrice * 12;
+
+            const formatOpt = (months, specificPrice) => {
+                const normalPrice = basePrice * months;
+                const savings = normalPrice - specificPrice;
+                let text = `${months} Meses - ${data.currency || 'S/'}${specificPrice.toFixed(2)}`;
+                if (savings > 0) text += ` (Ahorras ${data.currency || 'S/'}${savings.toFixed(2)} 🔥)`;
+                return `<option value="${months}" data-price="${specificPrice}">${text}</option>`;
+            };
+
             let btnHTML = '';
             if (!isStoreOpen) {
                 btnHTML = `<span class="status expired" style="padding:10px; border-radius:12px; font-weight:800; font-size:12px; background: var(--mac-gray); color: var(--mac-text-secondary);"><i class='bx bx-store-alt'></i> Cerrada</span>`;
             } else if (isAgotado) {
                 btnHTML = `<span class="status expired" style="padding:10px; border-radius:12px; font-weight:800; font-size:12px;">Agotado</span>`;
             } else {
-    btnHTML = `
-        <div style="display: flex; gap: 8px; align-items: center;">
-            <select id="duracion_${item.id}" style="padding: 8px; border-radius: 10px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px; outline: none; font-weight: bold;">
-                <option value="1">1 Mes</option>
-                <option value="3">3 Meses</option>
-                <option value="6">6 Meses</option>
-                <option value="12">12 Meses</option>
-            </select>
-            <button onclick="window.addToCartConDuracion('${item.id}')" class="btn-wa" style="border:none; cursor:pointer; padding:0; border-radius:14px; display:inline-flex; align-items:center; justify-content:center; margin:0; width: 48px; height: 48px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important; color: white !important;">
-                <i class='bx bx-cart-add' style='margin:0; font-size: 24px;'></i>
-            </button>
-        </div>
-    `;
-}
+                btnHTML = `
+                    <div style="display: flex; gap: 8px; align-items: center; width: 100%; justify-content: flex-end;">
+                        <select id="duracion_${item.id}" onchange="window.updateCardPrice('${item.id}', this)" style="padding: 8px; border-radius: 10px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 11px; outline: none; font-weight: bold; flex-grow: 1; max-width: 150px;">
+                            <option value="1" data-price="${basePrice}">1 Mes - ${data.currency || 'S/'}${basePrice.toFixed(2)}</option>
+                            ${formatOpt(3, p3)}
+                            ${formatOpt(6, p6)}
+                            ${formatOpt(12, p12)}
+                        </select>
+                        <button onclick="window.addToCartConDuracion('${item.id}')" class="btn-wa" style="border:none; cursor:pointer; padding:0; border-radius:14px; display:inline-flex; align-items:center; justify-content:center; margin:0; width: 42px; height: 42px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important; color: white !important;">
+                            <i class='bx bx-cart-add' style='margin:0; font-size: 22px;'></i>
+                        </button>
+                    </div>
+                `;
+            }
 
             const card = document.createElement('div');
             card.className = `store-product-card ${isAgotado || !isStoreOpen ? 'is-agotado' : ''}`;
@@ -6388,4 +6408,47 @@ window.startContextTutorial = () => {
     });
     
     driverObj.drive();
+};
+
+
+// Función para el efecto sorpresa visual (Cambia el precio verde grande en vivo)
+window.updateCardPrice = (itemId, selectEl) => {
+    const option = selectEl.options[selectEl.selectedIndex];
+    const price = parseFloat(option.getAttribute('data-price'));
+    const displayEl = document.getElementById('price_display_' + itemId);
+    if(displayEl) {
+        displayEl.innerText = `${window.publicStoreDataCache.currency || 'S/'}${price.toFixed(2)}`;
+        // Pequeño efecto de latido para que el cliente note el cambio
+        displayEl.style.transform = 'scale(1.1)';
+        setTimeout(() => displayEl.style.transform = 'scale(1)', 150);
+    }
+};
+
+// Función para atrapar el precio exacto y agregarlo al carrito
+window.addToCartConDuracion = (itemId) => {
+    const catalog = window.publicCatalogCache || [];
+    const originalItem = catalog.find(i => i.id === itemId);
+    if (!originalItem) return;
+
+    const selectElement = document.getElementById('duracion_' + itemId);
+    const meses = parseInt(selectElement.value) || 1;
+    const option = selectElement.options[selectElement.selectedIndex];
+    const finalPrice = parseFloat(option.getAttribute('data-price'));
+    
+    // Clonamos para no alterar la BD original
+    const cartItem = { ...originalItem }; 
+    cartItem.price = finalPrice;
+    
+    // Personalizamos el nombre en el carrito
+    if (meses > 1) {
+        cartItem.platform = `${originalItem.platform} (${meses} Meses)`;
+    }
+
+    window.storeCart.push(cartItem);
+    document.getElementById('cartBadge').innerText = window.storeCart.length;
+    document.getElementById('floatingCartBtn').style.display = 'flex';
+    
+    document.getElementById('cartPanelOverlay').classList.add('active');
+    document.getElementById('cartPanel').classList.add('active');
+    window.renderCartItems();
 };
