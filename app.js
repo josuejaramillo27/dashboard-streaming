@@ -6396,3 +6396,57 @@ window.addToCartWithOptions = (itemId) => {
     document.getElementById('cartPanel').classList.add('active');
     window.renderCartItems();
 };
+
+/* =========================================================
+   SOPORTE PREMIUM: SCROLL HORIZONTAL EN PC (ARRASTRAR Y RUEDA)
+========================================================= */
+document.addEventListener('DOMContentLoaded', () => {
+    // Atrapamos las dos barras horizontales de la tiendita
+    const scrollContainers = [
+        document.getElementById('publicStoreCategoryFilters'),
+        document.getElementById('publicStoreFilters') 
+    ];
+
+    scrollContainers.forEach(container => {
+        if (!container) return;
+
+        // 1. MODO RUEDA DEL RATÓN
+        container.addEventListener('wheel', (evt) => {
+            // Solo activamos la rueda horizontal si hay suficientes categorías para scrollear
+            if (container.scrollWidth > container.clientWidth) {
+                evt.preventDefault(); // Evita que la página baje
+                container.scrollLeft += evt.deltaY; // Mueve la barra de lado a lado
+            }
+        });
+
+        // 2. MODO "CLIC Y ARRASTRAR" (Como si fuera táctil en celular)
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        container.addEventListener('mousedown', (e) => {
+            isDown = true;
+            container.style.cursor = 'grabbing'; // Cambia el cursor a una manito cerrada
+            startX = e.pageX - container.offsetLeft;
+            scrollLeft = container.scrollLeft;
+        });
+
+        container.addEventListener('mouseleave', () => {
+            isDown = false;
+            container.style.cursor = 'pointer'; // Vuelve al cursor normal
+        });
+
+        container.addEventListener('mouseup', () => {
+            isDown = false;
+            container.style.cursor = 'pointer';
+        });
+
+        container.addEventListener('mousemove', (e) => {
+            if (!isDown) return; // Si no está haciendo clic, no hace nada
+            e.preventDefault();
+            const x = e.pageX - container.offsetLeft;
+            const walk = (x - startX) * 2; // El "2" es la velocidad de arrastre
+            container.scrollLeft = scrollLeft - walk;
+        });
+    });
+});
