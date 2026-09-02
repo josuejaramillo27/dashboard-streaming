@@ -3038,20 +3038,20 @@ window.renderStoreItems = () => {
 
         // 🔥 FIX: Un solo div con el diseño correcto
         const div = document.createElement('div');
-        div.style.cssText = `display:flex; justify-content:space-between; align-items:center; background:var(--mac-surface); padding:10px; border-radius:8px; border:1px solid var(--mac-border); opacity: ${isAgotado ? '0.7' : '1'}; gap: 10px;`;
+        div.style.cssText = `display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; background:var(--mac-surface); padding:15px; border-radius:12px; border:1px solid var(--mac-border); opacity: ${isAgotado ? '0.7' : '1'}; gap: 15px;`;
         
         div.innerHTML = `
-            <div style="flex:1; min-width:0; overflow:hidden;">
+            <div style="flex:1; min-width:200px; overflow:hidden;">
                 ${typeBadge}
-                <strong style="color:var(--mac-text-main); font-size:14px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.platform}</strong>
+                <strong style="color:var(--mac-text-main); font-size:15px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.platform}</strong>
                 <span style="color:var(--mac-text-secondary); font-size:12px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; white-space:pre-wrap; margin:4px 0;">${item.desc || ''}</span>
-                <span style="color:var(--mac-green); font-size:13px; font-weight:bold; display:block; margin-top:2px;">${globalCurrency}${item.price.toFixed(2)}</span>
-                <div style="margin-top: 5px;">${statusBadge}</div>
+                <span style="color:var(--mac-green); font-size:14px; font-weight:bold; display:block; margin-top:2px;">${globalCurrency}${item.price.toFixed(2)}</span>
+                <div style="margin-top: 8px;">${statusBadge}</div>
             </div>
-            <div style="display:flex; flex-direction:column; gap:5px; width: 100px; flex-shrink: 0;">
-                <button class="action-btn" style="border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 11px; padding: 4px; border-radius:6px; background:transparent;" onclick="window.toggleStoreItemStatus(${index})">🔄 Cambiar Estado</button>
-                <button class="action-btn" style="border: 1px solid var(--mac-blue); color: var(--mac-blue); font-size: 11px; padding: 4px; border-radius:6px; background:transparent;" onclick="window.editStoreItem(${index})"><i class='bx bx-edit'></i> Editar</button>
-                <button class="action-btn btn-del" style="padding: 4px; font-size: 11px; border-radius:6px;" onclick="window.deleteStoreItem(${index})"><i class='bx bx-trash'></i> Borrar</button>
+            <div style="display:flex; flex-direction:row; gap:8px; flex-shrink: 0; flex-wrap:wrap; justify-content:flex-end;">
+                <button class="action-btn" style="border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px; padding: 8px 12px; border-radius:8px; background:var(--mac-bg); font-weight: bold;" onclick="window.toggleStoreItemStatus(${index})">🔄 Cambiar Estado</button>
+                <button class="action-btn" style="border: 1px solid var(--mac-blue); color: var(--mac-blue); font-size: 12px; padding: 8px 12px; border-radius:8px; background:rgba(0, 122, 255, 0.05); font-weight: bold;" onclick="window.editStoreItem(${index})"><i class='bx bx-edit'></i> Editar</button>
+                <button class="action-btn btn-del" style="padding: 8px 12px; font-size: 12px; border-radius:8px; font-weight: bold;" onclick="window.deleteStoreItem(${index})"><i class='bx bx-trash'></i> Borrar</button>
             </div>
         `;
         list.appendChild(div);
