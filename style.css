@@ -1886,7 +1886,7 @@ body:not(.dark-mode) .spotify-search-container input {
     transition: all 0.2s ease !important;
     margin: 0 !important;
 }
-body:not(.dark-mode) .spotify-type-btn {
+body:not(.dark-mode) .spotify-type-btn:not(.active) {
     background: rgba(0, 0, 0, 0.05) !important;
 }
 .spotify-type-btn:hover {
@@ -1926,7 +1926,7 @@ body:not(.dark-mode) .spotify-type-btn {
     transition: all 0.3s ease !important;
     margin: 0 !important;
 }
-body:not(.dark-mode) .spotify-chip-btn {
+body:not(.dark-mode) .spotify-chip-btn:not(.active) {
     background: rgba(0, 0, 0, 0.05) !important;
 }
 .spotify-chip-btn:hover {
