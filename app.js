@@ -257,6 +257,7 @@ window.forceAppUpdate = async () => {
     }
 };
 window.doLogout = async () => {
+    localStorage.removeItem('agc_owner_uid');
     if(document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'none';
     clients = []; currentUser = null; currentUserData = null; document.getElementById('tableBody').innerHTML = ''; showView('authView'); window.showLogin();
     try { await signOut(auth); window.showNotification("Sesión cerrada"); } catch (e) { console.error(e); }
@@ -276,6 +277,7 @@ onAuthStateChanged(auth, async (user) => {
 
     if (user) {
         currentUser = user;
+        localStorage.setItem('agc_owner_uid', user.uid);
 
         // 🔥 MEJORA VISUAL: Ocultar login y dar feedback INMEDIATO
         document.getElementById('loginForm').style.display = 'none';
@@ -2756,7 +2758,33 @@ window.openStoreModal = () => {
     if (tabBtn) {
         window.switchStoreAdminTab('tabCatalogo', tabBtn);
     }
-
+    // --- NUEVO: MOSTRAR ESTADÍSTICAS AL DUEÑO ---
+    const ownerStatsContainer = document.getElementById('ownerStoreStats');
+    if (ownerStatsContainer) {
+        const vistas = currentUserData.storeViews || 0;
+        const ventas = currentUserData.storeSalesCount || 0;
+        const ingresos = currentUserData.storeRevenue || 0;
+        
+        ownerStatsContainer.innerHTML = `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 20px;">
+                <div style="background: var(--mac-surface); padding: 15px; border-radius: 12px; border: 1px solid var(--mac-border); text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                    <i class='bx bx-show' style="font-size: 24px; color: var(--mac-blue); margin-bottom: 5px;"></i>
+                    <h4 style="margin: 0 0 5px 0; color: var(--mac-text-main); font-size: 20px;">${vistas}</h4>
+                    <span style="font-size: 10px; color: var(--mac-text-secondary); text-transform: uppercase; font-weight: bold;">Visitas Únicas</span>
+                </div>
+                <div style="background: var(--mac-surface); padding: 15px; border-radius: 12px; border: 1px solid var(--mac-border); text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                    <i class='bx bx-shopping-bag' style="font-size: 24px; color: var(--mac-green); margin-bottom: 5px;"></i>
+                    <h4 style="margin: 0 0 5px 0; color: var(--mac-text-main); font-size: 20px;">${ventas}</h4>
+                    <span style="font-size: 10px; color: var(--mac-text-secondary); text-transform: uppercase; font-weight: bold;">Ventas Tiendita</span>
+                </div>
+                <div style="background: var(--mac-surface); padding: 15px; border-radius: 12px; border: 1px solid var(--mac-border); text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                    <i class='bx bx-money' style="font-size: 24px; color: var(--mac-orange); margin-bottom: 5px;"></i>
+                    <h4 style="margin: 0 0 5px 0; color: var(--mac-text-main); font-size: 20px;">${globalCurrency}${ingresos.toFixed(2)}</h4>
+                    <span style="font-size: 10px; color: var(--mac-text-secondary); text-transform: uppercase; font-weight: bold;">Ingresos Tiendita</span>
+                </div>
+            </div>
+        `;
+    }
     document.getElementById('storeModal').style.display = 'flex';
 };
 
@@ -3500,7 +3528,30 @@ const checkPublicStore = async () => {
                 storeViewEl.style.justifyContent = 'flex-start';
                 storeViewEl.style.paddingTop = '30px'; 
             }
+            // --- NUEVO: CONTADOR DE VISITAS ÚNICAS ---
+            const viewerUid = localStorage.getItem('agc_owner_uid');
+            if (viewerUid !== data.uid) { // No cuenta si el dueño está mirando
+                const visitKey = 'visited_store_' + data.uid;
+                if (!localStorage.getItem(visitKey)) {
+                    localStorage.setItem(visitKey, 'true'); // Evita contar al mismo cliente si recarga la página
+                    const currentViews = data.storeViews || 0;
+                    await updateDoc(doc(db, "users", data.uid), { storeViews: currentViews + 1 });
+                    data.storeViews = currentViews + 1;
+                }
+            }
 
+            // --- NUEVO: RENDERIZAR ESTADÍSTICAS PÚBLICAS ESTILO TELEGRAM ---
+            const statsContainer = document.getElementById('publicStoreCornerStats');
+            if (statsContainer) {
+                const vistas = data.storeViews || 0;
+                const compradores = data.storeSalesCount || 0;
+                statsContainer.innerHTML = `
+                    <div style="background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: white; font-size: 11px; padding: 6px 14px; border-radius: 20px; display: flex; gap: 12px; font-weight: bold; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                        <span style="display:flex; align-items:center; gap:5px;"><i class='bx bx-show' style="color: #007AFF; font-size: 14px;"></i> ${vistas} Visitas</span>
+                        <span style="display:flex; align-items:center; gap:5px;"><i class='bx bx-shopping-bag' style="color: #34C759; font-size: 14px;"></i> ${compradores} Compradores</span>
+                    </div>
+                `;
+            }
             // Primer renderizado general automático
             window.renderPublicCatalog('Todos');
             // Primer renderizado general automático
@@ -4281,6 +4332,19 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
         }
 
         await updateDoc(doc(db, "pedidos", pedidoId), { estado: "aprobado" });
+        // --- NUEVO: ACTUALIZAR ESTADÍSTICAS DE LA TIENDA TRAS LA VENTA ---
+        try {
+            const newSalesCount = (currentUserData.storeSalesCount || 0) + 1;
+            const newRevenue = (currentUserData.storeRevenue || 0) + precioTotal;
+            await updateDoc(doc(db, "users", currentUser.uid), { 
+                storeSalesCount: newSalesCount, 
+                storeRevenue: newRevenue 
+            });
+            currentUserData.storeSalesCount = newSalesCount;
+            currentUserData.storeRevenue = newRevenue;
+        } catch (errStoreStats) {
+            console.error("Error actualizando stats de la tienda:", errStoreStats);
+        }
         window.renderInventory(); 
         loadUserClients(); 
 
