@@ -3610,7 +3610,8 @@ window.showPaymentDetails = (idx) => {
         return;
     }
     
-    const data = window.publicStoreDataCache;
+    // 🔥 FIX: Leer datos tanto de la Tiendita como del Portal
+    const data = window.publicStoreDataCache || portalStoreData;
     const m = data.paymentMethods[idx];
     
     let qrBtn = '';
@@ -3707,7 +3708,8 @@ window.submitCheckout = async () => {
     btn.disabled = true;
 
     try {
-        const data = window.publicStoreDataCache;
+        // 🔥 FIX: Leer el ID del vendedor desde la Tiendita o desde el Portal
+        const data = window.publicStoreDataCache || portalStoreData;
         const vendedorId = data.uid; 
         
         const storageRef = ref(storage, `comprobantes/${vendedorId}_${Date.now()}_${file.name}`);
