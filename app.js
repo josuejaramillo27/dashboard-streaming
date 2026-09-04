@@ -3674,11 +3674,12 @@ window.openRenewFromPortal = (clientId, platform, price) => {
     }
 
     // Configurar estado global para que submitCheckout sepa qué hacer
-    window.currentCheckoutItem = {
+    currentCheckoutItem = {
         isRenewal: true,
         clientId: clientId,
         platform: platform,
-        price: parseFloat(price)
+        price: parseFloat(price),
+        requiresInvite: false
     };
 
     document.getElementById('checkoutPhone').value = '';
