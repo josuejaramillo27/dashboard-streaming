@@ -5504,6 +5504,7 @@ window.checkClientPortal = async () => {
                 let matchedClients = [];
                 snapAll.forEach(d => {
                     const c = d.data();
+                    c.id = d.id; // <-- FIX: Atrapa el ID secreto del cliente
                     const cleanDbPhone = c.phone ? c.phone.replace(/[^\d]/g, '') : '';
                     if ((cleanDbPhone === cleanInputPhone || cleanDbPhone.endsWith(cleanInputPhone)) && c.portalCode === codeInput) {
                         matchedClients.push(c); 
@@ -5540,6 +5541,7 @@ window.searchPortalByPhone = async () => {
         let matchedClients = [];
         snap.forEach(d => {
             const c = d.data();
+            c.id = d.id; // <-- FIX: Atrapa el ID secreto del cliente
             const cleanDbPhone = c.phone ? c.phone.replace(/[^\d]/g, '') : '';
             // Validar teléfono y código para apilar todas sus compras
             if ((cleanDbPhone === cleanInputPhone || cleanDbPhone.endsWith(cleanInputPhone)) && c.portalCode === codeInput) {
