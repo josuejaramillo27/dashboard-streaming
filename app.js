@@ -4453,7 +4453,21 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
 };
 
 window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVenta) => {
-    const c = clients.find(x => x.id === clientId);
+    // 1. Buscamos primero en la memoria rápida (los últimos 30 clientes cargados)
+    let c = clients.find(x => x.id === clientId);
+    
+    // 2. Si no está en la memoria rápida, lo buscamos directo en la Base de Datos
+    if (!c) {
+        try {
+            const docSnap = await getDoc(doc(db, "clients", clientId));
+            if (docSnap.exists()) {
+                c = { id: docSnap.id, ...docSnap.data() };
+            }
+        } catch (err) {
+            console.error("Error buscando cliente en BD:", err);
+        }
+    }
+
     if (!c) return window.showNotification("Error: El cliente ya no existe en tu base.");
 
     let [year, month, day] = c.date.split('-');
