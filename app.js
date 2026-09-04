@@ -4477,6 +4477,42 @@ window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVe
     window.currentRenewType = 'mes'; 
     window.currentRenewBaseDate = fechaAntigua;
 
+    // 🔥 FIX: 1. Función para actualizar los números en tiempo real al escribir
+    window.updateRenewDates = () => {
+        let meses = parseInt(document.getElementById('swal-renew-months').value) || 1;
+        
+        let dMes = new Date(window.currentRenewBaseDate);
+        dMes.setMonth(dMes.getMonth() + meses);
+        document.getElementById('date-mes').innerText = dMes.toLocaleDateString('es-ES');
+
+        let d30 = new Date(window.currentRenewBaseDate);
+        d30.setDate(d30.getDate() + (30 * meses));
+        document.getElementById('date-30d').innerText = d30.toLocaleDateString('es-ES');
+    };
+
+    // 🔥 FIX: 2. Función para iluminar la tarjeta que el usuario seleccione
+    window.selectRenewOpt = (type) => {
+        window.currentRenewType = type;
+        const cardMes = document.getElementById('optMesAMes');
+        const card30d = document.getElementById('opt30Dias');
+        
+        if(type === 'mes') {
+            cardMes.style.border = '2px solid var(--mac-blue)';
+            cardMes.style.background = 'rgba(0, 122, 255, 0.15)';
+            card30d.style.border = '1px solid var(--mac-border)';
+            card30d.style.background = 'var(--mac-bg)';
+        } else {
+            card30d.style.border = '2px solid var(--mac-blue)';
+            card30d.style.background = 'rgba(0, 122, 255, 0.15)';
+            cardMes.style.border = '1px solid var(--mac-border)';
+            cardMes.style.background = 'var(--mac-bg)';
+        }
+    };
+
+    // 🔥 FIX: 3. Calculamos los valores iniciales (1 mes por defecto)
+    let initMes = new Date(fechaAntigua); initMes.setMonth(initMes.getMonth() + 1);
+    let init30d = new Date(fechaAntigua); init30d.setDate(init30d.getDate() + 30);
+
     const { value: confirmacion } = await Swal.fire({
         title: '🔄 Configurar Renovación',
         html: `
@@ -4492,11 +4528,11 @@ window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVe
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div id="optMesAMes" onclick="window.selectRenewOpt('mes')" style="cursor: pointer; background: rgba(0, 122, 255, 0.15); padding: 15px 10px; border-radius: 12px; border: 2px solid var(--mac-blue); transition: 0.2s; display: flex; flex-direction: column; align-items: center;">
                     <span style="font-size: 12px; font-weight: bold; color: var(--mac-text-main); margin-bottom: 5px;">📆 Fecha a Fecha</span>
-                    <strong id="date-mes" style="font-size: 16px; color: var(--mac-blue); margin-top: 8px;">-</strong>
+                    <strong id="date-mes" style="font-size: 16px; color: var(--mac-blue); margin-top: 8px;">${initMes.toLocaleDateString('es-ES')}</strong>
                 </div>
                 <div id="opt30Dias" onclick="window.selectRenewOpt('30d')" style="cursor: pointer; background: var(--mac-bg); padding: 15px 10px; border-radius: 12px; border: 1px solid var(--mac-border); transition: 0.2s; display: flex; flex-direction: column; align-items: center;">
                     <span style="font-size: 12px; font-weight: bold; color: var(--mac-text-main); margin-bottom: 5px;">🔢 30 Días Exactos</span>
-                    <strong id="date-30d" style="font-size: 16px; color: var(--mac-blue); margin-top: 8px;">-</strong>
+                    <strong id="date-30d" style="font-size: 16px; color: var(--mac-blue); margin-top: 8px;">${init30d.toLocaleDateString('es-ES')}</strong>
                 </div>
             </div>
         `,
