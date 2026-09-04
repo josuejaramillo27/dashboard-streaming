@@ -6,8 +6,8 @@
     --mac-surface: rgba(255, 255, 255, 0.75); 
     
     /* Textos: Gris carbón profundo (más elegante que el negro puro) */
-    --mac-text-main: #1f2937;
-    --mac-text-secondary: #6b7280; 
+    --mac-text-main: #111827; /* Un negro casi puro */
+    --mac-text-secondary: #4b5563; /* Gris más oscuro y legible */
     
     /* Bordes: Sutiles líneas grises casi invisibles */
     --mac-border: rgba(0, 0, 0, 0.08); 
@@ -173,8 +173,8 @@ input:focus, select:focus, textarea:focus, .select-box:focus {
 /* Estilo elegante para el texto de relleno (placeholder) */
 input::placeholder, textarea::placeholder {
     color: var(--mac-text-secondary);
-    opacity: 0.6;
-    font-weight: 400;
+    opacity: 0.85; /* Más sólido y visible */
+    font-weight: 500;
 }
 .custom-select { position: relative; width: 100%; }
 .select-box { cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: var(--mac-text-secondary); }
