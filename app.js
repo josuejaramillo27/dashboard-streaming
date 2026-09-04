@@ -3650,7 +3650,41 @@ window.descargarQR = async (url, banco) => {
         window.open(url, '_blank');
     }
 };
+window.openRenewFromPortal = (clientId, platform, price) => {
+    const data = portalStoreData; // Usamos la data pública del portal
+    
+    document.getElementById('checkoutItemName').innerText = `Renovación: ${platform}`;
+    document.getElementById('checkoutItemPrice').innerText = `${data.currency || 'S/'}${parseFloat(price).toFixed(2)}`;
+    
+    const emailContainer = document.getElementById('checkoutEmailContainer');
+    if(emailContainer) emailContainer.style.display = 'none';
 
+    const pmContainer = document.getElementById('checkoutPaymentMethods');
+    pmContainer.innerHTML = '';
+    const methods = data.paymentMethods || [];
+    if (methods.length === 0) {
+        pmContainer.innerHTML = '<p style="font-size: 12px; color: var(--mac-red); text-align: center;">El administrador no ha configurado métodos de pago.</p>';
+    } else {
+        let selectHtml = `<select id="pmSelectDropdown" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 14px; font-weight: bold; outline: none; margin-bottom: 10px;" onchange="window.showPaymentDetails(this.value)">`;
+        selectHtml += `<option value="">-- Elige un método de pago --</option>`;
+        methods.forEach((m, idx) => { selectHtml += `<option value="${idx}">🏦 ${m.bank}</option>`; });
+        selectHtml += `</select><div id="pmDetailsContainer" style="display:none; background: var(--mac-bg); padding: 15px; border-radius: 10px; border: 1px dashed var(--mac-border);"></div>`;
+        pmContainer.innerHTML = selectHtml;
+    }
+
+    // Configurar estado global para que submitCheckout sepa qué hacer
+    window.currentCheckoutItem = {
+        isRenewal: true,
+        clientId: clientId,
+        platform: platform,
+        price: parseFloat(price)
+    };
+
+    document.getElementById('checkoutPhone').value = '';
+    document.getElementById('checkoutClientName').value = '';
+    document.getElementById('checkoutReceipt').value = '';
+    document.getElementById('checkoutModal').style.display = 'flex';
+};
 window.submitCheckout = async () => {
     const name = document.getElementById('checkoutClientName').value.trim();
     const phone = document.getElementById('checkoutPhone').value.trim();
@@ -3682,9 +3716,10 @@ window.submitCheckout = async () => {
 
         await addDoc(collection(db, "pedidos"), {
             vendedorId: vendedorId,
+            clienteId: currentCheckoutItem.isRenewal ? currentCheckoutItem.clientId : null,
             clienteNombre: name,
             clienteNumero: phone,
-            tipo: currentCheckoutItem.type || 'Servicio',
+            tipo: currentCheckoutItem.isRenewal ? 'renovacion' : (currentCheckoutItem.type || 'Servicio'),
             plataforma: currentCheckoutItem.platform,
             precio: currentCheckoutItem.price,
             comprobanteUrl: comprobanteUrl,
@@ -3694,7 +3729,7 @@ window.submitCheckout = async () => {
             fecha: new Date().toISOString()
         });
 
-        // 🔥 NUEVO: GATILLAR NOTIFICACIÓN AL VENDEDOR (DISPARA EL PUSH)
+        // Reemplaza el fetch de notificación por esto:
         fetch('https://bot.panelagc.com/api/notificar-venta', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -3702,7 +3737,8 @@ window.submitCheckout = async () => {
                 vendedorId: vendedorId,
                 plataforma: currentCheckoutItem.platform,
                 precio: currentCheckoutItem.price,
-                moneda: data.currency || 'S/'
+                moneda: data.currency || 'S/',
+                tipo: currentCheckoutItem.isRenewal ? 'renovacion' : 'venta'
             })
         }).catch(err => console.error("Error enviando alerta de venta:", err));
 
@@ -4051,29 +4087,49 @@ window.openPedidosModal = async () => {
 
             // HTML Dinámico (Invitación vs Normal)
             let dynamicControls = '';
-            if (pedido.requiereInvitacion) {
+            let btnAction = '';
+
+            if (pedido.tipo === 'renovacion') {
                 dynamicControls = `
-                    <p style="font-size: 13px; color: var(--mac-orange); font-weight: bold; margin-bottom:10px; background: rgba(255, 149, 0, 0.1); padding: 8px; border-radius: 6px;"><i class='bx bx-envelope'></i> Correo cliente: ${pedido.clienteCorreo}</p>
-                    <label style="font-size: 11px; font-weight:bold; color:var(--mac-text-secondary);">¿En qué Matriz vas a guardar este registro?</label>
-                    <div id="cuentas_container_${pId}">
-                        <select class="select_matriz_${pId}" style="width:100%; margin-bottom:5px; padding:8px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border);">
-                            ${opcionesMatricesGlobal}
-                        </select>
-                        <input type="text" id="input_perfil_${pId}" placeholder="N° Perfil / Espacio (Opcional)" style="width:100%; padding:8px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border); margin-bottom:10px;">
+                    <div style="background: rgba(0, 122, 255, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed var(--mac-blue); margin-bottom: 10px; text-align: center;">
+                        <span style="color: var(--mac-blue); font-weight: bold; font-size: 13px;"><i class='bx bx-refresh'></i> SOLICITUD DE RENOVACIÓN</span>
+                        <p style="font-size: 11px; color: var(--mac-text-main); margin: 5px 0 0 0;">El cliente ya tiene la cuenta, solo debes verificar el pago y extender sus días.</p>
                     </div>
                 `;
+                btnAction = `<button class="btn-primary" style="width:100%; background:var(--mac-blue); border:none; padding:14px; font-size:14px; font-weight:bold;" onclick="window.aprobarRenovacionPedido('${pId}', '${pedido.clienteId}', '${pedido.plataforma}', ${pedido.precio})">
+                    <i class='bx bx-check-shield'></i> Aprobar y Actualizar Fecha
+                </button>`;
             } else {
-                dynamicControls = `
-                    <label style="font-size: 11px; font-weight:bold; color:var(--mac-text-secondary);">Elige qué cuenta(s) despachar:</label>
-                    <div id="cuentas_container_${pId}">
-                        <select class="select_acc_${pId}" style="width:100%; margin-bottom:5px; padding:8px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border);">
-                            ${window.opcionesCuentasGlobal}
-                        </select>
-                    </div>
-                    <button class="action-btn" style="color:var(--mac-blue); font-size:12px; margin-bottom:12px; font-weight:bold; background:transparent; border:none; padding:0; cursor:pointer;" onclick="window.addSelectToPedido('${pId}')">
-                        + Añadir otra cuenta al despacho
-                    </button>
-                `;
+                if (pedido.requiereInvitacion) {
+                    dynamicControls = `
+                        <p style="font-size: 13px; color: var(--mac-orange); font-weight: bold; margin-bottom:10px; background: rgba(255, 149, 0, 0.1); padding: 8px; border-radius: 6px;"><i class='bx bx-envelope'></i> Correo cliente: ${pedido.clienteCorreo}</p>
+                        <label style="font-size: 11px; font-weight:bold; color:var(--mac-text-secondary);">¿En qué Matriz vas a guardar este registro?</label>
+                        <div id="cuentas_container_${pId}">
+                            <select class="select_matriz_${pId}" style="width:100%; margin-bottom:5px; padding:8px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border);">
+                                ${opcionesMatricesGlobal}
+                            </select>
+                            <input type="text" id="input_perfil_${pId}" placeholder="N° Perfil / Espacio (Opcional)" style="width:100%; padding:8px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border); margin-bottom:10px;">
+                        </div>
+                    `;
+                    btnAction = `<button class="btn-primary" style="width:100%; background:var(--mac-green); border:none; padding:14px; font-size:14px; font-weight:bold;" onclick="window.aprobarVenta('${pId}', '${pedido.clienteNumero}', true, '${pedido.clienteCorreo || ''}', '${pedido.plataforma}', '${nombreCli.replace(/'/g, "\\'")}')">
+                        <i class='bx bx-check-shield'></i> Aprobar y Entregar Automático
+                    </button>`;
+                } else {
+                    dynamicControls = `
+                        <label style="font-size: 11px; font-weight:bold; color:var(--mac-text-secondary);">Elige qué cuenta(s) despachar:</label>
+                        <div id="cuentas_container_${pId}">
+                            <select class="select_acc_${pId}" style="width:100%; margin-bottom:5px; padding:8px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border);">
+                                ${window.opcionesCuentasGlobal}
+                            </select>
+                        </div>
+                        <button class="action-btn" style="color:var(--mac-blue); font-size:12px; margin-bottom:12px; font-weight:bold; background:transparent; border:none; padding:0; cursor:pointer;" onclick="window.addSelectToPedido('${pId}')">
+                            + Añadir otra cuenta al despacho
+                        </button>
+                    `;
+                    btnAction = `<button class="btn-primary" style="width:100%; background:var(--mac-green); border:none; padding:14px; font-size:14px; font-weight:bold;" onclick="window.aprobarVenta('${pId}', '${pedido.clienteNumero}', false, '', '${pedido.plataforma}', '${nombreCli.replace(/'/g, "\\'")}')">
+                        <i class='bx bx-check-shield'></i> Aprobar y Entregar Automático
+                    </button>`;
+                }
             }
 
             const div = document.createElement('div');
@@ -4100,9 +4156,7 @@ window.openPedidosModal = async () => {
                     <input type="number" id="precio_venta_${pId}" placeholder="Confirma Precio Total Cobrado" value="${pedido.precio}" style="width:100%; padding:10px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border); font-weight:bold;">
                 </div>
 
-                <button class="btn-primary" style="width:100%; background:var(--mac-green); border:none; padding:14px; font-size:14px; font-weight:bold;" onclick="window.aprobarVenta('${pId}', '${pedido.clienteNumero}', ${pedido.requiereInvitacion ? 'true' : 'false'}, '${pedido.clienteCorreo || ''}', '${pedido.plataforma}', '${nombreCli.replace(/'/g, "\\'")}')">
-                    <i class='bx bx-check-shield'></i> Aprobar y Entregar Automático
-                </button>
+                ${btnAction}
             `;
             list.appendChild(div);
         });
@@ -4394,6 +4448,111 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
         console.error(e); window.showNotification("Error: " + e.message);
     }
 };
+
+window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVenta) => {
+    const c = clients.find(x => x.id === clientId);
+    if (!c) return window.showNotification("Error: El cliente ya no existe en tu base.");
+
+    let [year, month, day] = c.date.split('-');
+    let fechaAntigua = new Date(year, month - 1, day);
+    const antiguaFechaBonita = fechaAntigua.toLocaleDateString('es-ES');
+
+    window.currentRenewType = 'mes'; 
+    window.currentRenewBaseDate = fechaAntigua;
+
+    const { value: confirmacion } = await Swal.fire({
+        title: '🔄 Configurar Renovación',
+        html: `
+            <p style="color: var(--mac-text-secondary); font-size: 14px; margin-bottom: 15px;">
+                Vencimiento actual: <strong style="color: var(--mac-text-main);">${antiguaFechaBonita}</strong>
+            </p>
+            <div style="display:flex; align-items:center; justify-content:center; gap: 10px; margin-bottom: 20px;">
+                <label style="font-size: 14px; font-weight: bold; color: var(--mac-text-main);">Renovar por:</label>
+                <input type="number" id="swal-renew-months" value="1" min="1" max="99" oninput="window.updateRenewDates()" style="width: 60px; text-align: center; font-size: 18px; font-weight: bold; padding: 8px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-blue); outline: none;">
+                <label style="font-size: 14px; font-weight: bold; color: var(--mac-text-main);">mes(es)</label>
+            </div>
+            <p style="font-size: 11px; color: var(--mac-text-secondary); font-weight: bold; text-transform: uppercase; margin-bottom: 10px;">Selecciona la modalidad de cálculo:</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div id="optMesAMes" onclick="window.selectRenewOpt('mes')" style="cursor: pointer; background: rgba(0, 122, 255, 0.15); padding: 15px 10px; border-radius: 12px; border: 2px solid var(--mac-blue); transition: 0.2s; display: flex; flex-direction: column; align-items: center;">
+                    <span style="font-size: 12px; font-weight: bold; color: var(--mac-text-main); margin-bottom: 5px;">📆 Fecha a Fecha</span>
+                    <strong id="date-mes" style="font-size: 16px; color: var(--mac-blue); margin-top: 8px;">-</strong>
+                </div>
+                <div id="opt30Dias" onclick="window.selectRenewOpt('30d')" style="cursor: pointer; background: var(--mac-bg); padding: 15px 10px; border-radius: 12px; border: 1px solid var(--mac-border); transition: 0.2s; display: flex; flex-direction: column; align-items: center;">
+                    <span style="font-size: 12px; font-weight: bold; color: var(--mac-text-main); margin-bottom: 5px;">🔢 30 Días Exactos</span>
+                    <strong id="date-30d" style="font-size: 16px; color: var(--mac-blue); margin-top: 8px;">-</strong>
+                </div>
+            </div>
+        `,
+        didOpen: () => { window.updateRenewDates(); },
+        showCancelButton: true,
+        confirmButtonColor: 'var(--mac-blue)',
+        cancelButtonColor: 'var(--mac-gray)',
+        confirmButtonText: 'Aprobar Renovación',
+        cancelButtonText: '<span style="color:var(--mac-text-main)">Cancelar</span>',
+        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
+        preConfirm: () => {
+            const meses = parseInt(document.getElementById('swal-renew-months').value) || 1;
+            let finalDate = new Date(window.currentRenewBaseDate);
+            if (window.currentRenewType === 'mes') finalDate.setMonth(finalDate.getMonth() + meses);
+            else finalDate.setDate(finalDate.getDate() + (30 * meses));
+            return finalDate;
+        }
+    });
+
+    if (confirmacion) {
+        try {
+            window.showNotification("⏳ Actualizando fecha...");
+            let fechaNueva = confirmacion; 
+            const strFirebase = `${fechaNueva.getFullYear()}-${String(fechaNueva.getMonth()+1).padStart(2,'0')}-${String(fechaNueva.getDate()).padStart(2,'0')}`;
+            const nuevaFechaBonita = fechaNueva.toLocaleDateString('es-ES');
+
+            // 1. Desaparecemos el pedido
+            await updateDoc(doc(db, "pedidos", pedidoId), { estado: "aprobado" });
+
+            // 2. Aplicamos la renovación al cliente
+            const nuevasRenovaciones = (c.renovations || 0) + 1;
+            await updateDoc(doc(db, "clients", clientId), { date: strFirebase, renovations: nuevasRenovaciones });
+
+            // 3. Sumar ganancias a las estadísticas
+            const precioTotalValidado = parseFloat(document.getElementById(`precio_venta_${pedidoId}`).value) || precioVenta;
+            const newRevenue = (currentUserData.storeRevenue || 0) + precioTotalValidado;
+            await updateDoc(doc(db, "users", currentUser.uid), { storeRevenue: newRevenue });
+            currentUserData.storeRevenue = newRevenue;
+
+            // 4. Preparamos el Mensaje
+            const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
+            let baseMsg = currentUserData.waTemplate || "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*.\nPagos: {pago}";
+            let paymentInfo = currentUserData.waPaymentInfo || "(Pregúntame por mis métodos de pago)";
+            
+            let finalMsg = baseMsg
+                .replace(/{nombre}/g, c.name)
+                .replace(/{plataforma}/g, plataforma)
+                .replace(/{fecha}/g, nuevaFechaBonita)
+                .replace(/{pago}/g, paymentInfo)
+                .replace(/{precio}/g, precioTotalValidado.toFixed(2))
+                .replace(/{moneda}/g, currentUserData.currency || "S/");
+
+            // 5. Enviar mensaje por bot o WA
+            if (plan === 'pro' || plan === 'elite') {
+                fetch('https://bot.panelagc.com/api/confirmar-renovacion', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ distribuidorId: currentUser.uid, numeroCliente: c.phone, plataforma: plataforma, nuevaFecha: nuevaFechaBonita, mensajeRenovacion: finalMsg }) 
+                });
+                window.showNotification("✅ Renovación completada. El bot avisará al cliente.");
+            } else {
+                const numeroLimpio = c.phone.replace(/[^\d]/g, '');
+                window.open(`https://wa.me/${numeroLimpio}?text=${encodeURIComponent(finalMsg)}`, '_blank');
+                window.showNotification("✅ Renovación completada en la BD.");
+            }
+
+            window.openPedidosModal(); // Refrescar modal
+            loadUserClients(); // Refrescar tabla de fondo
+        } catch (error) { window.showNotification("Error: " + error.message); }
+    }
+};
+
 /* ========================================== MÓDULO DE CUENTAS MATRICES (ESTILO MATRIZ) ========================================== */
 let variablesEnlaceMatriz = { masterId: null, profileNum: null };
 let editingMasterId = null; 
@@ -5517,7 +5676,7 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
                 <h2 style="margin: 0 0 5px 0; font-size: 22px; color: var(--mac-text-main);">${clientObj.name}</h2>
                 <p style="font-size: 13px; color: var(--mac-text-secondary); margin-top: 0; margin-bottom: 20px;">Vencimiento: <b>${exp.toLocaleDateString('es-ES')}</b></p>
                 ${accountsHtml}
-                ${diffDays <= 3 ? `<a href="${renewUrl}" target="_blank" class="btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; text-decoration: none; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 14px;"><i class='bx bxl-whatsapp' style="font-size: 20px;"></i> Renovar Servicio</a>` : ''}
+                ${diffDays <= 3 ? `<button onclick="window.openRenewFromPortal('${clientObj.id}', '${platName}', ${clientObj.price})" class="btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); color: white; border: none; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 14px; cursor: pointer; width: 100%;"><i class='bx bx-refresh' style="font-size: 20px;"></i> Solicitar Renovación</button>` : ''}
             </div>
         `;
     });
