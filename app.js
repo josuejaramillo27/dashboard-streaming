@@ -1632,19 +1632,24 @@ const aplicarRenovacionFirebase = async (id, strFirebase, nuevaFechaBonita, c) =
         if (plan === 'pro' || plan === 'elite') {
             
             // 👈 AHORA SÍ CONSTRUIMOS TU MENSAJE PERSONALIZADO DE RENOVACIÓN
-            let baseMsg = currentUserData.waTemplate || "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*.\nPagos: {pago}";
-            let paymentInfo = currentUserData.waPaymentInfo || "(Pregúntame por mis métodos de pago)";
+            let baseMsg = currentUserData.waTemplate || "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*.";
             let uCount = c.accountUnits || 1;
             let precioCalculado = (c.price || 0) * uCount;
             let moneda = currentUserData.currency || "S/";
+            
+            const baseUrl = window.location.origin + window.location.pathname;
+            const portalAlias = currentUserData.storeAlias || currentUser.uid;
+            const portalUrl = `${baseUrl}?portal=${portalAlias}`;
 
             let finalMsg = baseMsg
                 .replace(/{nombre}/g, c.name)
                 .replace(/{plataforma}/g, c.platform)
                 .replace(/{fecha}/g, nuevaFechaBonita)
-                .replace(/{pago}/g, paymentInfo)
                 .replace(/{precio}/g, precioCalculado.toFixed(2))
-                .replace(/{moneda}/g, moneda);
+                .replace(/{moneda}/g, moneda)
+                .replace(/{link}/g, portalUrl)
+                .replace(/{numero}/g, c.phone)
+                .replace(/{codigo}/g, c.portalCode || 'N/A');
 
             const datosRenovacion = { 
                 distribuidorId: currentUser.uid, 
@@ -1972,13 +1977,19 @@ window.confirmSendWa = () => {
     const dateStr = exp.toLocaleDateString('es-ES');
 
     if (currentWaType === 'renovacion') {
-        let baseMsg = currentUserData.waTemplate || "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*.\nPagos: {pago}";
-        let paymentInfo = currentUserData.waPaymentInfo || "(Pregúntame por mis métodos de pago)";
+        let baseMsg = currentUserData.waTemplate || "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*.";
+        
+        const baseUrl = window.location.origin + window.location.pathname;
+        const portalAlias = currentUserData.storeAlias || currentUser.uid;
+        const portalUrl = `${baseUrl}?portal=${portalAlias}`;
+
         finalMsg = baseMsg
             .replace(/{nombre}/g, c.name)
             .replace(/{plataforma}/g, c.platform)
             .replace(/{fecha}/g, dateStr)
-            .replace(/{pago}/g, paymentInfo);
+            .replace(/{link}/g, portalUrl)
+            .replace(/{numero}/g, c.phone)
+            .replace(/{codigo}/g, c.portalCode || 'N/A');
 
     } else if (currentWaType === 'portal') {
         const baseUrl = window.location.origin + window.location.pathname;
@@ -4575,16 +4586,21 @@ window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVe
 
             // 4. Preparamos el Mensaje
             const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
-            let baseMsg = currentUserData.waTemplate || "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*.\nPagos: {pago}";
-            let paymentInfo = currentUserData.waPaymentInfo || "(Pregúntame por mis métodos de pago)";
+            let baseMsg = currentUserData.waTemplate || "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*.";
+            
+            const baseUrl = window.location.origin + window.location.pathname;
+            const portalAlias = currentUserData.storeAlias || currentUser.uid;
+            const portalUrl = `${baseUrl}?portal=${portalAlias}`;
             
             let finalMsg = baseMsg
                 .replace(/{nombre}/g, c.name)
                 .replace(/{plataforma}/g, plataforma)
                 .replace(/{fecha}/g, nuevaFechaBonita)
-                .replace(/{pago}/g, paymentInfo)
                 .replace(/{precio}/g, precioTotalValidado.toFixed(2))
-                .replace(/{moneda}/g, currentUserData.currency || "S/");
+                .replace(/{moneda}/g, currentUserData.currency || "S/")
+                .replace(/{link}/g, portalUrl)
+                .replace(/{numero}/g, c.phone)
+                .replace(/{codigo}/g, c.portalCode || 'N/A');
 
             // 5. Enviar mensaje por bot o WA
             if (plan === 'pro' || plan === 'elite') {
