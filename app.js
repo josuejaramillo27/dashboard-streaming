@@ -4719,78 +4719,181 @@ window.saveMasterAccount = async () => {
         }
 
         if (editingMasterId) {
-            // 1. Actualizamos la matriz en Firebase
-            await updateDoc(doc(db, "masterAccounts", editingMasterId), { platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName });
-            window.showNotification("✅ Cuenta Matriz actualizada");
-
-            // 2. Sincronizamos clientes vinculados y preparamos la lista para el Bot
+            // 1. Detectamos a los clientes afectados ANTES de guardar en la BD
             const qCli = query(collection(db, "clients"), where("userId", "==", currentUser.uid));
             const snapCli = await getDocs(qCli);
-            const updatePromises = [];
-            let clientesParaAvisar = []; // 🔥 LA LISTA NEGRA PARA EL BOT
+            let clientesAfectados = [];
             
             snapCli.forEach(d => {
                 const c = d.data();
-                let needsUpdate = false;
-                let mAccounts = c.multiAccounts || {};
-                let rootUpdates = {};
-                let datosAviso = null;
+                let isAffected = false;
+                let platName = "";
+                let profileStr = "";
+                let pinStr = "";
                 
-                // Actualizar si usaba el sistema antiguo de enlace
+                // Buscar en modelo antiguo
                 if (c.linkedMasterId === editingMasterId) {
-                    // 🔥 FIX: Solo actualizar y avisar si REALMENTE cambió el correo o la clave
                     if (c.accountEmail !== email || c.accountPassword !== pass) {
-                        rootUpdates.accountEmail = email;
-                        rootUpdates.accountPassword = pass;
-                        needsUpdate = true;
-                        datosAviso = { name: c.name, phone: c.phone, platform: c.platform, email: email, pass: pass, profile: c.accountProfile, pin: c.accountPin };
+                        isAffected = true; platName = c.platform; profileStr = c.accountProfile; pinStr = c.accountPin;
                     }
                 }
                 
-                // Actualizar si usa el sistema nuevo (multipestaña)
+                // Buscar en modelo nuevo (multipestaña)
                 if (c.multiAccounts) {
-                    for (let platKey in mAccounts) {
-                        if (mAccounts[platKey].masterAccountId === editingMasterId) {
-                            // 🔥 FIX: Solo actualizar y avisar si REALMENTE cambió el correo o la clave
-                            if (mAccounts[platKey].email !== email || mAccounts[platKey].password !== pass) {
-                                mAccounts[platKey].email = email;
-                                mAccounts[platKey].password = pass;
-                                needsUpdate = true;
-                                datosAviso = { name: c.name, phone: c.phone, platform: platKey, email: email, pass: pass, profile: mAccounts[platKey].profile, pin: mAccounts[platKey].pin };
+                    for (let platKey in c.multiAccounts) {
+                        if (c.multiAccounts[platKey].masterAccountId === editingMasterId) {
+                            if (c.multiAccounts[platKey].email !== email || c.multiAccounts[platKey].password !== pass) {
+                                isAffected = true; platName = platKey; profileStr = c.multiAccounts[platKey].profile; pinStr = c.multiAccounts[platKey].pin;
                             }
                         }
                     }
                 }
                 
-                // Si este cliente pertenece a la matriz y hubo cambios, guardamos en BD y lo metemos a la lista del Bot
-                if (needsUpdate) {
-                    let finalUpdate = { ...rootUpdates };
-                    if (c.multiAccounts) finalUpdate.multiAccounts = mAccounts;
-                    updatePromises.push(updateDoc(doc(db, "clients", d.id), finalUpdate));
-                    if (datosAviso) clientesParaAvisar.push(datosAviso);
+                if (isAffected) {
+                    clientesAfectados.push({ id: d.id, data: c, name: c.name, phone: c.phone, platform: platName, profile: profileStr, pin: pinStr });
                 }
             });
+
+            let clientesParaNotificar = [];
+            let opcionesEnvio = { correo: true, clave: true, perfil: true, pin: true };
             
-            // 3. Ejecutar actualizaciones en Firebase
-            if (updatePromises.length > 0) {
-                await Promise.all(updatePromises);
-                if (typeof loadUserClients === 'function') loadUserClients(); // Recarga la tabla de clientes
-                
-                // 🔥 4. EL GATILLO DEL BOT (Solo Plan PRO/Elite)
-                if ((plan === 'pro' || plan === 'elite') && clientesParaAvisar.length > 0) {
-                    fetch('https://bot.panelagc.com/api/actualizar-credenciales', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            distribuidorId: currentUser.uid,
-                            clientes: clientesParaAvisar
-                        })
-                    }).catch(e => console.error("Error al contactar al bot para actualizar:", e));
-                    
-                    setTimeout(() => {
-                        window.showNotification(`🤖 Bot avisando a ${clientesParaAvisar.length} cliente(s) sobre el cambio de clave.`);
-                    }, 1500); // Pequeño retraso para que no se superponga con el aviso de "Matriz actualizada"
+            const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
+            
+            // 2. Si hay clientes afectados y es PRO, lanzamos el Modal Interactivo
+            if (clientesAfectados.length > 0 && (plan === 'pro' || plan === 'elite')) {
+                // Dibujamos las tarjetas de los clientes con el check activo por defecto
+                let htmlClientes = clientesAfectados.map((c) => `
+                    <label onclick="window.toggleSwalChk(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); transition: all 0.2s; margin-bottom: 5px;">
+                        <span style="font-size: 13px; color: var(--mac-text-main); font-weight: bold;">👤 ${c.name} <span style="font-size:11px; color:var(--mac-text-secondary); font-weight:normal;">(${c.platform})</span></span>
+                        <input type="checkbox" class="swal-client-chk" value="${c.id}" checked style="display:none;">
+                        <i class='bx bx-check-circle' style="color: var(--mac-green); font-size: 18px;"></i>
+                    </label>
+                `).join('');
+
+                const { value: confirmData, isConfirmed } = await Swal.fire({
+                    title: '🔄 Notificar Actualización',
+                    html: `
+                        <p style="font-size:13px; color:var(--mac-text-secondary); text-align:left; margin-bottom:15px;">Has cambiado los datos de esta cuenta. Selecciona a qué clientes deseas notificarles por WhatsApp:</p>
+                        <div style="max-height: 180px; overflow-y: auto; text-align: left; margin-bottom: 15px; padding-right: 5px;">
+                            ${htmlClientes}
+                        </div>
+                        <p style="font-size:13px; color:var(--mac-text-main); text-align:left; font-weight:bold; margin-bottom:10px;">¿Qué datos enviarás en el aviso?</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align:left;">
+                            <label onclick="window.toggleSwalChk(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); transition: all 0.2s;">
+                                <span style="font-size: 13px; color: var(--mac-text-main); font-weight: bold;">📧 Correo</span>
+                                <input type="checkbox" id="chk-upd-correo" checked style="display:none;">
+                                <i class='bx bx-check-circle' style="color: var(--mac-green); font-size: 18px;"></i>
+                            </label>
+                            <label onclick="window.toggleSwalChk(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); transition: all 0.2s;">
+                                <span style="font-size: 13px; color: var(--mac-text-main); font-weight: bold;">🔑 Clave</span>
+                                <input type="checkbox" id="chk-upd-pass" checked style="display:none;">
+                                <i class='bx bx-check-circle' style="color: var(--mac-green); font-size: 18px;"></i>
+                            </label>
+                            <label onclick="window.toggleSwalChk(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); transition: all 0.2s;">
+                                <span style="font-size: 13px; color: var(--mac-text-main); font-weight: bold;">👤 N° Perfil</span>
+                                <input type="checkbox" id="chk-upd-perfil" checked style="display:none;">
+                                <i class='bx bx-check-circle' style="color: var(--mac-green); font-size: 18px;"></i>
+                            </label>
+                            <label onclick="window.toggleSwalChk(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); transition: all 0.2s;">
+                                <span style="font-size: 13px; color: var(--mac-text-main); font-weight: bold;">📌 PIN</span>
+                                <input type="checkbox" id="chk-upd-pin" checked style="display:none;">
+                                <i class='bx bx-check-circle' style="color: var(--mac-green); font-size: 18px;"></i>
+                            </label>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="bx bx-send"></i> Guardar y Notificar',
+                    cancelButtonText: 'Solo Guardar',
+                    confirmButtonColor: '#34C759',
+                    cancelButtonColor: '#8E8E93',
+                    background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+                    color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
+                    preConfirm: () => {
+                        const selectedClients = Array.from(document.querySelectorAll('.swal-client-chk:checked')).map(chk => chk.value);
+                        return {
+                            selectedClients,
+                            correo: document.getElementById('chk-upd-correo').checked,
+                            clave: document.getElementById('chk-upd-pass').checked,
+                            perfil: document.getElementById('chk-upd-perfil').checked,
+                            pin: document.getElementById('chk-upd-pin').checked
+                        };
+                    }
+                });
+
+                // Si presionó el botón Verde (Guardar y Notificar)
+                if (isConfirmed) {
+                    const idsNotificar = confirmData.selectedClients;
+                    clientesParaNotificar = clientesAfectados.filter(c => idsNotificar.includes(c.id));
+                    opcionesEnvio = confirmData;
                 }
+                // Si presionó Cancelar o la 'X', la longitud de clientesParaNotificar se queda en 0 y solo guarda silenciosamente.
+            }
+
+            // 3. AHORA PROCEDEMOS A GUARDAR EN LA BD (Haya notificación o no)
+            window.showNotification("⏳ Guardando datos...");
+
+            await updateDoc(doc(db, "masterAccounts", editingMasterId), { platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName });
+            
+            const updatePromises = [];
+            clientesAfectados.forEach(clientObj => {
+                const c = clientObj.data;
+                let rootUpdates = {};
+                let mAccounts = c.multiAccounts || {};
+
+                if (c.linkedMasterId === editingMasterId) {
+                    rootUpdates.accountEmail = email;
+                    rootUpdates.accountPassword = pass;
+                }
+                
+                if (c.multiAccounts) {
+                    for (let platKey in mAccounts) {
+                        if (mAccounts[platKey].masterAccountId === editingMasterId) {
+                            mAccounts[platKey].email = email;
+                            mAccounts[platKey].password = pass;
+                        }
+                    }
+                    rootUpdates.multiAccounts = mAccounts;
+                }
+                
+                updatePromises.push(updateDoc(doc(db, "clients", clientObj.id), rootUpdates));
+            });
+
+            await Promise.all(updatePromises);
+            window.showNotification("✅ Cuenta Matriz y clientes actualizados");
+            if (typeof loadUserClients === 'function') loadUserClients();
+
+            // 4. LÓGICA DE NOTIFICACIÓN AL BOT (Solo enviará a los marcados con ✅)
+            if (clientesParaNotificar.length > 0) {
+                let clientesFormateados = clientesParaNotificar.map(c => {
+                    // Armamos el mensaje dinámicamente según los checks de opciones
+                    let mensajePersonalizado = `🔄 *¡Actualización de Seguridad!*\n\nHola *${c.name}*, los datos de tu acceso a *${c.platform}* han sido actualizados para garantizar la estabilidad de tu servicio.\n\nAquí tienes tus nuevas credenciales activas:\n`;
+                    
+                    if (opcionesEnvio.correo) mensajePersonalizado += `\n📧 *Correo:* ${email}`;
+                    if (opcionesEnvio.clave) mensajePersonalizado += `\n🔑 *Clave:* ${pass}`;
+                    if (opcionesEnvio.perfil) mensajePersonalizado += `\n👤 *Perfil:* ${c.profile || '1'}`;
+                    if (opcionesEnvio.pin) mensajePersonalizado += `\n📌 *PIN:* ${c.pin || 'N/A'}`;
+                    
+                    mensajePersonalizado += `\n\n¡Sigue disfrutando del mejor entretenimiento! 🍿`;
+
+                    return {
+                        phone: c.phone,
+                        name: c.name,
+                        mensaje: mensajePersonalizado
+                    };
+                });
+
+                fetch('https://bot.panelagc.com/api/actualizar-credenciales', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        distribuidorId: currentUser.uid,
+                        clientes: clientesFormateados
+                    })
+                }).catch(e => console.error("Error al contactar al bot para actualizar:", e));
+                
+                setTimeout(() => {
+                    window.showNotification(`🤖 Bot avisando a ${clientesFormateados.length} cliente(s) seleccionados.`);
+                }, 1500);
             }
 
         } else {
