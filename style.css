@@ -1959,29 +1959,45 @@ body:not(.dark-mode) .spotify-chip-btn:not(.active) {
 }
 
 /* ==========================================================================
-   GRILLA PARA EL PORTAL WEB DE CLIENTES (SOLO EN PC)
+   GRILLA PARA EL PORTAL WEB DE CLIENTES (PC) - PANEL A.G.C.
    ========================================================================== */
 @media (min-width: 769px) {
-    /* Convierte el contenedor en una cuadrícula adaptable */
-    #portalClientResults {
-        display: grid !important;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
-        gap: 20px; /* Espaciado entre las tarjetas */
-        align-items: stretch; /* Estira las tarjetas para que tengan la misma altura */
+    /* Seleccionamos el contenedor exacto que envuelve las tarjetas */
+    #portalClientResults > .row {
+        display: flex;
+        flex-wrap: wrap;
+        /* Asegura un margen negativo para alinear con el padding de las columnas */
+        margin-right: -15px; 
+        margin-left: -15px;
     }
     
-    /* Ajusta la tarjeta interna para el nuevo formato */
-    #portalClientResults .portal-hero-card {
-        margin-bottom: 0 !important; /* Anulamos el margen original para usar el 'gap' */
-        height: auto; 
-        min-height: 100%;
+    /* Apuntamos a la columna que contiene la tarjeta */
+    #portalClientResults > .row > .col-md-6 {
+        /* Fuerza a que ocupen un 50% en monitores medianos (2 por fila) */
+        flex: 0 0 50%;
+        max-width: 50%;
+        display: flex; /* Permite estirar la tarjeta interna */
+    }
+    
+    /* Si el monitor es muy grande (Full HD), mostramos 3 por fila */
+    @media (min-width: 1200px) {
+        #portalClientResults > .row > .col-md-6 {
+            flex: 0 0 33.333333%;
+            max-width: 33.333333%;
+        }
+    }
+
+    /* Ajustamos la tarjeta en sí para que se estire y ocupe toda la altura */
+    #portalClientResults .card.portal-hero-card {
+        width: 100%; /* Ocupa todo el ancho de su columna */
+        height: 100%; /* Se estira a la altura de la columna */
         display: flex;
         flex-direction: column;
-        box-sizing: border-box;
+        margin-bottom: 0; /* Bootstrap ya pone margen abajo en la columna */
     }
     
-    /* Si el servicio está por vencer, empuja el botón de renovación al final de la tarjeta */
-    #portalClientResults .portal-hero-card > button.btn-primary {
+    /* Empuja el contenedor del botón siempre al final de la tarjeta */
+    #portalClientResults .card.portal-hero-card .mt-4.text-center {
         margin-top: auto !important;
     }
 }
