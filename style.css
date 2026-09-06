@@ -1959,19 +1959,25 @@ body:not(.dark-mode) .spotify-chip-btn:not(.active) {
 }
 
 /* ==========================================================================
-   GRILLA INTERNA PARA PLATAFORMAS EN EL PORTAL DE CLIENTES (PC)
+   GRILLA INTERNA PARA PLATAFORMAS EN EL PORTAL DE CLIENTES
    ========================================================================== */
 .portal-platforms-grid {
     display: grid;
-    grid-template-columns: 1fr; /* En celular se mantiene 1 debajo de otra */
+    grid-template-columns: 1fr; /* 📱 Por defecto en celular: 1 debajo de otra */
     gap: 15px; /* Separación perfecta entre las tarjetas */
     margin-bottom: 15px;
 }
 
-@media (min-width: 769px) {
+/* 💻 Para tablets y pantallas de PC estándar (Muestra 2 por fila) */
+@media (min-width: 768px) {
     .portal-platforms-grid {
-        /* En PC: Crea columnas automáticamente. Si entran 2, pone 2. Si hay pantalla para 3, pone 3. */
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        align-items: stretch; /* Asegura que todas las tarjetas de la misma fila midan lo mismo */
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* 🖥️ Para monitores amplios (Muestra 3 por fila) */
+@media (min-width: 1024px) {
+    .portal-platforms-grid {
+        grid-template-columns: repeat(3, 1fr);
     }
 }
