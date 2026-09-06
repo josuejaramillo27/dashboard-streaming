@@ -2042,3 +2042,27 @@ body.dark-mode .portal-platforms-grid > div {
 .portal-hero-card {
     border: none !important;
 }
+
+/* =========================================================
+   ELIMINAR RECTÁNGULOS DE FONDO EN EL PORTAL DE CLIENTES
+========================================================= */
+
+/* 1. Elimina el rectángulo gigante de más atrás (Contenedor principal) */
+#clientPortalView.container {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* 2. Elimina el rectángulo interno (El que envuelve el mensaje Vencido y las plataformas) */
+.portal-hero-card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    padding-left: 0 !important; /* Quitamos el relleno lateral para que aproveche todo el espacio */
+    padding-right: 0 !important;
+}
