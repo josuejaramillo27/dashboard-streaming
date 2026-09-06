@@ -1968,20 +1968,41 @@ body:not(.dark-mode) .spotify-chip-btn:not(.active) {
 }
 
 /* ==========================================================================
-   GRILLA INTERNA PARA PLATAFORMAS EN EL PORTAL DE CLIENTES
+   GRILLA INTERNA PARA PLATAFORMAS EN EL PORTAL DE CLIENTES (EFECTO 3D)
    ========================================================================== */
 .portal-platforms-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 15px;
+    gap: 22px; /* Un poco más de espacio para que las sombras respiren */
     margin-bottom: 15px;
 }
 
-/* 🔥 TRUCO MÁGICO 1: Obliga a las columnas a respetar su espacio y NO desbordarse */
+/* 🔥 1. ADIÓS MARCOS, HOLA 3D: Cajas de plataformas flotantes */
 .portal-platforms-grid > div {
     min-width: 0 !important; 
+    border: none !important; /* Eliminamos el borde de línea */
+    background: var(--mac-surface) !important; /* Fondo cristalino */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important; /* Sombra base suave */
+    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
 }
 
+/* Sombra más profunda e intensa para el Modo Oscuro */
+body.dark-mode .portal-platforms-grid > div {
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 🪄 2. EFECTO LEVITACIÓN AL PASAR EL MOUSE (Solo en PC) */
+@media (hover: hover) and (pointer: fine) {
+    .portal-platforms-grid > div:hover {
+        transform: translateY(-6px); /* La tarjeta "sube" hacia ti */
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+    }
+    body.dark-mode .portal-platforms-grid > div:hover {
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.8) !important;
+    }
+}
+
+/* 3. COLUMNAS ADAPTATIVAS PARA PC */
 @media (min-width: 768px) {
     .portal-platforms-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -1994,19 +2015,18 @@ body:not(.dark-mode) .spotify-chip-btn:not(.active) {
     }
 }
 
-/* 🔥 TRUCO MÁGICO 2: Permite que las tarjetas de datos se puedan encoger */
+/* 🔥 4. RECULAR INTERNO LIMPIO: Sin marcos en Correo/Clave */
 .credential-card {
     background: var(--mac-gray);
-    border: 1px solid var(--mac-border);
-    border-radius: 16px;
+    border: none !important; /* También quitamos estos marcos para más limpieza */
+    border-radius: 14px; /* Curvas más suaves */
     padding: 12px 16px;
     margin-bottom: 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     text-align: left;
-    transition: border-color 0.2s;
-    min-width: 0 !important; /* Da permiso de encogerse */
+    min-width: 0 !important;
 }
 
 .credential-info {
@@ -2015,5 +2035,10 @@ body:not(.dark-mode) .spotify-chip-btn:not(.active) {
     overflow: hidden;
     padding-right: 10px;
     flex: 1; 
-    min-width: 0 !important; /* Obliga al texto largo a usar puntos suspensivos (...) */
+    min-width: 0 !important;
+}
+
+/* 🪄 5. OPCIONAL: Quitar el marco de la tarjeta gigante que envuelve todo */
+.portal-hero-card {
+    border: none !important;
 }
