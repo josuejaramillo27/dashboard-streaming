@@ -5813,7 +5813,7 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
                 };
 
             accountsHtml += `
-                <div style="background: var(--mac-bg); padding: 15px; border-radius: 16px; border: 1px solid var(--mac-border); margin-bottom: 15px; text-align: left;">
+                <div style="background: var(--mac-bg); padding: 15px; border-radius: 16px; border: 1px solid var(--mac-border); text-align: left; display: flex; flex-direction: column; height: 100%; box-sizing: border-box;">
                     <div style="font-size: 14px; font-weight: 800; color: var(--mac-text-main); margin-bottom: 12px;">🎬 ${platName.toUpperCase()}</div>
                     
                     <div class="credential-card">
@@ -5844,13 +5844,17 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
         const renewMsg = encodeURIComponent(`¡Hola! Quisiera renovar mi servicio de ${clientObj.platform}. Nombre: ${clientObj.name}`);
         const renewUrl = `https://wa.me/${vendorPhone}?text=${renewMsg}`;
 
-        fullHtml += `
+       fullHtml += `
             <div class="portal-hero-card" style="margin-bottom: 20px;">
                 <span class="portal-badge ${badgeClass}"><i class='bx ${badgeIcon}'></i> ${badgeText}</span>
                 <h2 style="margin: 0 0 5px 0; font-size: 22px; color: var(--mac-text-main);">${clientObj.name}</h2>
                 <p style="font-size: 13px; color: var(--mac-text-secondary); margin-top: 0; margin-bottom: 20px;">Vencimiento: <b>${exp.toLocaleDateString('es-ES')}</b></p>
-                ${accountsHtml}
-                ${diffDays <= 3 ? `<button onclick="window.openRenewFromPortal('${clientObj.id}', '${clientObj.platform}', ${clientObj.price})" class="btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); color: white; border: none; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 14px; cursor: pointer; width: 100%;"><i class='bx bx-refresh' style="font-size: 20px;"></i> Solicitar Renovación</button>` : ''}
+                
+                <div class="portal-platforms-grid">
+                    ${accountsHtml}
+                </div>
+
+                ${diffDays <= 3 ? `<button onclick="window.openRenewFromPortal...
             </div>
         `;
     });
