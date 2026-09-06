@@ -1972,21 +1972,48 @@ body:not(.dark-mode) .spotify-chip-btn:not(.active) {
    ========================================================================== */
 .portal-platforms-grid {
     display: grid;
-    grid-template-columns: 1fr; /* 📱 Por defecto en celular: 1 debajo de otra */
-    gap: 15px; /* Separación perfecta entre las tarjetas */
+    grid-template-columns: 1fr;
+    gap: 15px;
     margin-bottom: 15px;
 }
 
-/* 💻 Para tablets y pantallas de PC estándar (Muestra 2 por fila) */
+/* 🔥 TRUCO MÁGICO 1: Obliga a las columnas a respetar su espacio y NO desbordarse */
+.portal-platforms-grid > div {
+    min-width: 0 !important; 
+}
+
 @media (min-width: 768px) {
     .portal-platforms-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
-/* 🖥️ Para monitores amplios (Muestra 3 por fila) */
 @media (min-width: 1024px) {
     .portal-platforms-grid {
         grid-template-columns: repeat(3, 1fr);
     }
+}
+
+/* 🔥 TRUCO MÁGICO 2: Permite que las tarjetas de datos se puedan encoger */
+.credential-card {
+    background: var(--mac-gray);
+    border: 1px solid var(--mac-border);
+    border-radius: 16px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    transition: border-color 0.2s;
+    min-width: 0 !important; /* Da permiso de encogerse */
+}
+
+.credential-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-right: 10px;
+    flex: 1; 
+    min-width: 0 !important; /* Obliga al texto largo a usar puntos suspensivos (...) */
 }
