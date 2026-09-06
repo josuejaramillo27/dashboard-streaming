@@ -1114,10 +1114,16 @@ body.dark-mode .bottom-nav { background: linear-gradient(to top, rgba(0, 0, 0, 1
    DISEÑO PREMIUM PARA "MI PORTAL" (VISTA CLIENTE)
 ========================================================= */
 .portal-container {
-    max-width: 500px;
+    max-width: 1000px; /* 🔥 Ampliado de 500px a 1000px para que entren las columnas en PC */
     margin: 20px auto;
     padding: 20px;
     box-sizing: border-box;
+}
+
+/* 🔥 Evita que el formulario inicial de búsqueda se estire y se vea gigante en monitores */
+#portalSearchCard {
+    max-width: 500px;
+    margin: 0 auto 20px auto;
 }
 
 .portal-hero-card {
