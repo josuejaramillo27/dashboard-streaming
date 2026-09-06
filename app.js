@@ -5854,7 +5854,7 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
                     ${accountsHtml}
                 </div>
 
-                ${diffDays <= 3 ? `<button onclick="window.openRenewFromPortal...
+                ${diffDays <= 3 ? `<button onclick="window.openRenewFromPortal('${clientObj.id}', '${clientObj.platform}', ${clientObj.price})" class="btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); color: white; border: none; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 14px; cursor: pointer; width: 100%;"><i class='bx bx-refresh' style="font-size: 20px;"></i> Solicitar Renovación</button>` : ''}
             </div>
         `;
     });
