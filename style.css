@@ -1136,7 +1136,8 @@ body.dark-mode .bottom-nav { background: linear-gradient(to top, rgba(0, 0, 0, 1
     box-shadow: var(--glass-shadow) !important;
     text-align: center;
     position: relative;
-    overflow: hidden;
+    overflow: visible !important; /* 🔥 Quitamos el 'hidden' para que no ampute las tarjetas */
+    box-sizing: border-box !important; /* 🔥 Evita que el relleno interior expanda la caja hacia los lados */
 }
 
 /* Insignia de Estado con Brillo de Neón */
@@ -1200,6 +1201,8 @@ body.dark-mode .bottom-nav { background: linear-gradient(to top, rgba(0, 0, 0, 1
     flex-direction: column;
     overflow: hidden;
     padding-right: 10px;
+    flex: 1; /* 🔥 Obliga a esta sección a respetar el espacio de su botón "Copiar" */
+    min-width: 0; /* 🔥 ESTA ES LA CLAVE: Le dice a la caja que puede encogerse y usar '...' si el texto es muy largo */
 }
 .credential-label {
     font-size: 11px;
