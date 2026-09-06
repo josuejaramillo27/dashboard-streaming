@@ -1957,3 +1957,31 @@ body:not(.dark-mode) .spotify-chip-btn:not(.active) {
         display: none;
     }
 }
+
+/* ==========================================================================
+   GRILLA PARA EL PORTAL WEB DE CLIENTES (SOLO EN PC)
+   ========================================================================== */
+@media (min-width: 769px) {
+    /* Convierte el contenedor en una cuadrícula adaptable */
+    #portalClientResults {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+        gap: 20px; /* Espaciado entre las tarjetas */
+        align-items: stretch; /* Estira las tarjetas para que tengan la misma altura */
+    }
+    
+    /* Ajusta la tarjeta interna para el nuevo formato */
+    #portalClientResults .portal-hero-card {
+        margin-bottom: 0 !important; /* Anulamos el margen original para usar el 'gap' */
+        height: auto; 
+        min-height: 100%;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+    }
+    
+    /* Si el servicio está por vencer, empuja el botón de renovación al final de la tarjeta */
+    #portalClientResults .portal-hero-card > button.btn-primary {
+        margin-top: auto !important;
+    }
+}
