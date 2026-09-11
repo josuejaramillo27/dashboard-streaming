@@ -175,16 +175,15 @@ window.doRegister = async () => {
         if (!response.ok) throw new Error("Error del servidor al asignar perfil.");
         // --- NUEVO: ACTIVACIÓN DE DEMO POR 3 HORAS ---
         const planElegido = document.getElementById('regPlanDemo').value;
+body: JSON.stringify({
+    idToken: idToken,
+    name: name,
+    phone: phone,
+    country: country,
+    planDemo: planElegido // Se envía al servidor
+})
         const targetDate = new Date();
         targetDate.setHours(targetDate.getHours() + 3);
-
-        await updateDoc(doc(db, "users", user.uid), {
-            active: true,
-            activeUntil: targetDate.toISOString(),
-            plan_actual: planElegido,
-            limite_clientes: planElegido === 'pro' ? 9999 : 100,
-            tutorialVisto: false // Activa el disparador del tutorial
-        });
         window.showNotification("¡Cuenta creada con éxito! Disfruta tu prueba gratuita.");
         
     } catch (e) { 
