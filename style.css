@@ -2066,3 +2066,5 @@ body.dark-mode .portal-platforms-grid > div {
     padding-left: 0 !important; /* Quitamos el relleno lateral para que aproveche todo el espacio */
     padding-right: 0 !important;
 }
+
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
