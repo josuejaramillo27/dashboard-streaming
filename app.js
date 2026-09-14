@@ -5461,9 +5461,9 @@ let platformChartInst = null;
 let funnelChartInst = null;
 
 window.renderCharts = (totalIncome, totalCost, totalProfit) => {
-    const isDark = document.body.classList.contains('dark-mode');
-    const textColor = isDark ? '#ebebf5' : '#1d1d1f';
-    const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+    // Forzamos los colores a modo oscuro para mantener el diseño tipo Shopify
+    const textColor = '#888888';
+    const gridColor = '#222222';
 
     // --- 1. DATOS: Curva de Proyección de Renovaciones ---
     const today = new Date(); today.setHours(0,0,0,0);
@@ -5485,6 +5485,11 @@ window.renderCharts = (totalIncome, totalCost, totalProfit) => {
         renewalsData.push(sum);
     }
 
+    // Actualizar las métricas dinámicas de la nueva cabecera HTML
+    let totalRevenue14d = renewalsData.reduce((a,b) => a+b, 0);
+    if(document.getElementById('chartHeaderTotal')) document.getElementById('chartHeaderTotal').innerText = `${globalCurrency}${totalRevenue14d.toFixed(2)}`;
+    if(document.getElementById('chartHeaderCuentas')) document.getElementById('chartHeaderCuentas').innerText = document.getElementById('statActive').innerText;
+
     // --- 2. DATOS: Top Plataformas ---
     let platCounts = {};
     clients.forEach(c => {
@@ -5497,23 +5502,41 @@ window.renderCharts = (totalIncome, totalCost, totalProfit) => {
 
     const commonOptions = {
         chart: { background: 'transparent', toolbar: { show: false }, animations: { enabled: true, easing: 'easeinout', speed: 800 } },
-        theme: { mode: isDark ? 'dark' : 'light' },
-        tooltip: { theme: isDark ? 'dark' : 'light' }
+        theme: { mode: 'dark' }, // Forzamos dark para que combine con el nuevo fondo
+        tooltip: { theme: 'dark' }
     };
 
-    // --- RENDER 1: Gráfico de Curva Suave (Área) ---
+    // --- RENDER 1: Gráfico de Línea Neón (Estilo Shopify) ---
     if(revenueChartInst) revenueChartInst.destroy();
     revenueChartInst = new ApexCharts(document.querySelector("#revenueChart"), {
         ...commonOptions,
         series: [{ name: `Por Cobrar (${globalCurrency})`, data: renewalsData }],
-        chart: { type: 'area', height: 250, toolbar: { show: false } },
+        chart: { 
+            type: 'line', // Cambiamos 'area' por 'line' para imitar la referencia
+            height: 250, 
+            toolbar: { show: false },
+            dropShadow: { enabled: true, top: 6, left: 0, blur: 6, color: '#0a84ff', opacity: 0.4 } // El resplandor Neón de la línea
+        },
         colors: ['#0a84ff'],
-        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.45, opacityTo: 0.05, stops: [0, 90, 100] } },
         dataLabels: { enabled: false },
-        stroke: { curve: 'smooth', width: 3 },
-        xaxis: { categories: daysLabels, labels: { style: { colors: textColor } }, axisBorder: { show: false }, axisTicks: { show: false } },
-        yaxis: { labels: { style: { colors: textColor }, formatter: (val) => globalCurrency + val.toFixed(0) } },
-        grid: { borderColor: gridColor, strokeDashArray: 4 }
+        stroke: { curve: 'smooth', width: 4 }, // Línea gruesa y suave
+        xaxis: { 
+            categories: daysLabels, 
+            labels: { style: { colors: textColor } }, 
+            axisBorder: { show: false }, 
+            axisTicks: { show: false },
+            tooltip: { enabled: false }
+        },
+        yaxis: { 
+            labels: { style: { colors: textColor }, formatter: (val) => globalCurrency + val.toFixed(0) } 
+        },
+        grid: { 
+            show: true,
+            borderColor: gridColor, 
+            strokeDashArray: 0,
+            xaxis: { lines: { show: false } }, // Quitamos líneas verticales para más limpieza
+            yaxis: { lines: { show: true } }
+        }
     });
     revenueChartInst.render();
 
@@ -5526,15 +5549,15 @@ window.renderCharts = (totalIncome, totalCost, totalProfit) => {
         chart: { type: 'donut', height: 260 },
         colors: ['#0a84ff', '#30d158', '#ff9f0a', '#bf5af2', '#ff453a'],
         plotOptions: { 
-            pie: { donut: { size: '72%', labels: { show: true, name: { color: textColor }, value: { color: textColor, fontSize: '20px', fontWeight: 'bold', formatter: (val) => val + " ud" }, total: { show: true, showAlways: true, label: 'Cuentas', color: textColor } } } } 
+            pie: { donut: { size: '72%', labels: { show: true, name: { color: textColor }, value: { color: '#ffffff', fontSize: '20px', fontWeight: 'bold', formatter: (val) => val + " ud" }, total: { show: true, showAlways: true, label: 'Cuentas', color: textColor } } } } 
         },
         dataLabels: { enabled: false },
-        stroke: { show: true, colors: [isDark ? '#1c1c1e' : '#ffffff'], width: 2 },
-        legend: { position: 'right', labels: { colors: textColor } }
+        stroke: { show: true, colors: ['#0a0a0c'], width: 3 }, // Borde negro profundo
+        legend: { position: 'right', labels: { colors: '#ffffff' } }
     });
     platformChartInst.render();
 
-    // --- RENDER 3: Embudo Financiero (Barras Horizontales Premium) ---
+    // --- RENDER 3: Embudo Financiero ---
     if(funnelChartInst) funnelChartInst.destroy();
     funnelChartInst = new ApexCharts(document.querySelector("#funnelChart"), {
         ...commonOptions,
