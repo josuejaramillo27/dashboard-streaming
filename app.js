@@ -5501,25 +5501,26 @@ window.renderCharts = (totalIncome, totalCost, totalProfit) => {
     const platData = sortedPlats.length ? sortedPlats.map(x => x[1]) : [1];
 
     const commonOptions = {
-        chart: { background: 'transparent', toolbar: { show: false }, animations: { enabled: true, easing: 'easeinout', speed: 800 } },
-        theme: { mode: 'dark' }, // Forzamos dark para que combine con el nuevo fondo
+        theme: { mode: 'dark' }, 
         tooltip: { theme: 'dark' }
     };
 
-    // --- RENDER 1: Gráfico de Línea Neón (Estilo Shopify) ---
+    // --- RENDER 1: Gráfico de Línea Neón ---
     if(revenueChartInst) revenueChartInst.destroy();
     revenueChartInst = new ApexCharts(document.querySelector("#revenueChart"), {
         ...commonOptions,
         series: [{ name: `Por Cobrar (${globalCurrency})`, data: renewalsData }],
         chart: { 
-            type: 'line', // Cambiamos 'area' por 'line' para imitar la referencia
+            type: 'line', 
             height: 250, 
+            background: 'transparent', // ¡ESTO ELIMINA EL FONDO GRIS!
             toolbar: { show: false },
-            dropShadow: { enabled: true, top: 6, left: 0, blur: 6, color: '#0a84ff', opacity: 0.4 } // El resplandor Neón de la línea
+            animations: { enabled: true, easing: 'easeinout', speed: 800 },
+            dropShadow: { enabled: true, top: 6, left: 0, blur: 6, color: '#0a84ff', opacity: 0.4 } 
         },
         colors: ['#0a84ff'],
         dataLabels: { enabled: false },
-        stroke: { curve: 'smooth', width: 4 }, // Línea gruesa y suave
+        stroke: { curve: 'smooth', width: 4 }, 
         xaxis: { 
             categories: daysLabels, 
             labels: { style: { colors: textColor } }, 
@@ -5534,7 +5535,7 @@ window.renderCharts = (totalIncome, totalCost, totalProfit) => {
             show: true,
             borderColor: gridColor, 
             strokeDashArray: 0,
-            xaxis: { lines: { show: false } }, // Quitamos líneas verticales para más limpieza
+            xaxis: { lines: { show: false } }, 
             yaxis: { lines: { show: true } }
         }
     });
@@ -5546,13 +5547,18 @@ window.renderCharts = (totalIncome, totalCost, totalProfit) => {
         ...commonOptions,
         series: platData,
         labels: platLabels,
-        chart: { type: 'donut', height: 260 },
+        chart: { 
+            type: 'donut', 
+            height: 260,
+            background: 'transparent', // ¡ESTO ELIMINA EL FONDO GRIS!
+            animations: { enabled: true, easing: 'easeinout', speed: 800 }
+        },
         colors: ['#0a84ff', '#30d158', '#ff9f0a', '#bf5af2', '#ff453a'],
         plotOptions: { 
             pie: { donut: { size: '72%', labels: { show: true, name: { color: textColor }, value: { color: '#ffffff', fontSize: '20px', fontWeight: 'bold', formatter: (val) => val + " ud" }, total: { show: true, showAlways: true, label: 'Cuentas', color: textColor } } } } 
         },
         dataLabels: { enabled: false },
-        stroke: { show: true, colors: ['#0a0a0c'], width: 3 }, // Borde negro profundo
+        stroke: { show: true, colors: ['#0a0a0c'], width: 3 }, 
         legend: { position: 'right', labels: { colors: '#ffffff' } }
     });
     platformChartInst.render();
@@ -5562,7 +5568,13 @@ window.renderCharts = (totalIncome, totalCost, totalProfit) => {
     funnelChartInst = new ApexCharts(document.querySelector("#funnelChart"), {
         ...commonOptions,
         series: [{ name: 'Monto', data: [totalIncome, totalCost, totalProfit] }],
-        chart: { type: 'bar', height: 180, toolbar: { show: false } },
+        chart: { 
+            type: 'bar', 
+            height: 180, 
+            background: 'transparent', // ¡ESTO ELIMINA EL FONDO GRIS!
+            toolbar: { show: false },
+            animations: { enabled: true, easing: 'easeinout', speed: 800 }
+        },
         plotOptions: { bar: { borderRadius: 6, horizontal: true, distributed: true, dataLabels: { position: 'bottom' } } },
         colors: ['#0a84ff', '#ff453a', '#30d158'],
         dataLabels: { 
