@@ -439,6 +439,7 @@ window.closeModals = (resetTab = true) => {
 };
 /* --- CONTROLADOR DE SECCIONES DASHBOARD (PC Y MÓVIL) --- */
 window.switchDashboardSection = (sectionId, menuElement) => {
+    document.body.style.overflow = 'auto';
     setTimeout(() => {
         // 1. Apagamos TODAS las secciones
         document.querySelectorAll('.dashboard-section').forEach(sec => {
