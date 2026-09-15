@@ -6951,3 +6951,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+// --- CONTROLADOR DE PESTAÑAS DE FINANZAS ---
+window.switchFinanceTab = (tabId, element) => {
+    // 1. Ocultar todos los contenidos de las pestañas
+    document.querySelectorAll('.finance-tab').forEach(tab => {
+        tab.style.display = 'none';
+    });
+    
+    // 2. Mostrar el contenido seleccionado
+    document.getElementById(tabId).style.display = 'block';
+    
+    // 3. Quitar el color azul a todas las pestañas y ponérselo a la cliqueada
+    document.querySelectorAll('#financeSection .chrome-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    element.classList.add('active');
+    
+    // 4. Parche mágico para ApexCharts (Fuerza a redibujar los gráficos si estaban ocultos)
+    if(tabId === 'tabTendencias') {
+        window.dispatchEvent(new Event('resize'));
+    }
+};
