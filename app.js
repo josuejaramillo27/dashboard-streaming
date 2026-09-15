@@ -5469,9 +5469,16 @@ window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion
     const textColor = '#888888';
     const gridColor = '#222222';
     
-    const revChartId = '#revenueChart';
-    const platChartId = '#platformChart';
-    const funChartId = '#funnelChart';
+    // --- 1. RADAR INTELIGENTE DE SECCIÓN ---
+    const isFinance = document.getElementById('financeSection') && document.getElementById('financeSection').classList.contains('active-section');
+    
+    const revChartId = isFinance ? '#revenueChartFin' : '#revenueChart';
+    const platChartId = isFinance ? '#platformChartFin' : '#platformChart';
+    const funChartId = isFinance ? '#funnelChartFin' : '#funnelChart';
+    
+    const lblTitleId = isFinance ? 'chartHeaderLabelFin' : 'chartHeaderLabel';
+    const lblTagId = isFinance ? 'chartHeaderTagFin' : 'chartHeaderTag';
+    const lblTotalId = isFinance ? 'chartHeaderTotalFin' : 'chartHeaderTotal';
 
     const today = new Date(); today.setHours(0,0,0,0);
     let catLabels = [];
@@ -5550,11 +5557,11 @@ window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion
         chartData = months;
     }
 
-    // Actualización de textos DOM (Usa estos con la palabra Fin)
-    if(document.getElementById('chartHeaderLabelFin')) document.getElementById('chartHeaderLabelFin').innerText = labelTitle;
-    if(document.getElementById('chartHeaderTagFin')) document.getElementById('chartHeaderTagFin').innerHTML = tagHtml;
+    // Actualización de textos DOM usando las variables detectadas
+    if(document.getElementById(lblTitleId)) document.getElementById(lblTitleId).innerText = labelTitle;
+    if(document.getElementById(lblTagId)) document.getElementById(lblTagId).innerHTML = tagHtml;
     let headerTotal = chartData.reduce((a,b) => a+b, 0);
-    if(document.getElementById('chartHeaderTotalFin')) document.getElementById('chartHeaderTotalFin').innerText = `${globalCurrency}${headerTotal.toFixed(2)}`;
+    if(document.getElementById(lblTotalId)) document.getElementById(lblTotalId).innerText = `${globalCurrency}${headerTotal.toFixed(2)}`;
 
     // DONUT PLATAFORMAS DINÁMICO
     let platCounts = {};
