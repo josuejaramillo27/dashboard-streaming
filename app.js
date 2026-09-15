@@ -5550,11 +5550,11 @@ window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion
         chartData = months;
     }
 
-    // Actualización de textos DOM
-    if(document.getElementById('chartHeaderLabel')) document.getElementById('chartHeaderLabel').innerText = labelTitle;
-    if(document.getElementById('chartHeaderTag')) document.getElementById('chartHeaderTag').innerHTML = tagHtml;
+    // Actualización de textos DOM (Usa estos con la palabra Fin)
+    if(document.getElementById('chartHeaderLabelFin')) document.getElementById('chartHeaderLabelFin').innerText = labelTitle;
+    if(document.getElementById('chartHeaderTagFin')) document.getElementById('chartHeaderTagFin').innerHTML = tagHtml;
     let headerTotal = chartData.reduce((a,b) => a+b, 0);
-    if(document.getElementById('chartHeaderTotal')) document.getElementById('chartHeaderTotal').innerText = `${globalCurrency}${headerTotal.toFixed(2)}`;
+    if(document.getElementById('chartHeaderTotalFin')) document.getElementById('chartHeaderTotalFin').innerText = `${globalCurrency}${headerTotal.toFixed(2)}`;
 
     // DONUT PLATAFORMAS DINÁMICO
     let platCounts = {};
