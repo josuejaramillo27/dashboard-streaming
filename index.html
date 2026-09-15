@@ -954,14 +954,13 @@
             </div>
 
             <!-- VENTANA 3: AJUSTES GENERALES (Link y Catálogo externo) -->
-<div id="tabAjustes" class="store-admin-tab" style="display: none;">
-    <div id="ownerStoreStats"></div>
-    <div style="background: var(--mac-bg); border: 1px solid var(--mac-border); padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
-        <label style="font-size: 14px; font-weight: bold; color: var(--mac-blue); display: block; margin-bottom: 10px;">Tu Enlace de Tienda Oficial:</label>
-        <input type="text" id="storeLinkInput" readonly style="width: 100%; padding: 14px; border-radius: 8px; color: var(--mac-blue); background: rgba(0, 122, 255, 0.1); border: 1px solid var(--mac-blue); font-weight: bold; text-align: center; font-size: 14px; margin-bottom: 15px;">
-        <button class="btn-primary" id="btnCopyInternalLink" style="padding: 12px 20px; font-size: 14px; width: 100%;" onclick="window.copyStoreLink()"><i class='bx bx-copy'></i> Copiar Link para compartir</button>
-    </div>
-</div>
+            <div id="tabAjustes" class="store-admin-tab" style="display: none;">
+                <div id="ownerStoreStats"></div>
+                <div style="background: var(--mac-bg); border: 1px solid var(--mac-border); padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+                    <label style="font-size: 14px; font-weight: bold; color: var(--mac-blue); display: block; margin-bottom: 10px;">Tu Enlace de Tienda Oficial:</label>
+                    <input type="text" id="storeLinkInput" readonly style="width: 100%; padding: 14px; border-radius: 8px; color: var(--mac-blue); background: rgba(0, 122, 255, 0.1); border: 1px solid var(--mac-blue); font-weight: bold; text-align: center; font-size: 14px; margin-bottom: 15px;">
+                    <button class="btn-primary" id="btnCopyInternalLink" style="padding: 12px 20px; font-size: 14px; width: 100%;" onclick="window.copyStoreLink()"><i class='bx bx-copy'></i> Copiar Link para compartir</button>
+                </div>
 
                 <div id="externalCatalogActive" style="display: none; background: rgba(52, 199, 89, 0.1); border: 1px solid var(--mac-green); padding: 15px; border-radius: 10px; text-align: center;">
                     <h4 style="color: var(--mac-green); margin: 0 0 10px 0;"><i class='bx bx-check-circle'></i> Catálogo Externo Activado</h4>
@@ -970,15 +969,14 @@
                         <i class='bx bx-trash'></i> Eliminar y usar Tiendita Interna
                     </button>
                 </div>
-            </div>
-
-        </div>
+            </div> <!-- Fin VENTANA 3 -->
+        </div> <!-- Fin flex-grow -->
         
         <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
             <button class="btn-secondary mobile-only-btn" style="padding: 12px; font-size: 14px; width: 100%;" onclick="window.closeModals()">Cerrar Tiendita</button>
         </div>
-    </div>
-</div>
+    </div> <!-- Fin modal-card -->
+</div> <!-- Fin storeModal -->
 
         <!-- SECCIÓN 5: FINANZAS Y METAS (Ex Wrapped) -->
         <div id="financeSection" class="dashboard-section" style="display: none;">
