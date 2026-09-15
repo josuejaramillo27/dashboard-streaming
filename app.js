@@ -2290,134 +2290,112 @@ window.viewNewsDetail = (noticia, element) => {
 /* =========================================================
    A.G.C. WRAPPED - ALGORITMO DE MÉTRICAS PREMIUM SIN LOGO
 ========================================================= */
-window.showWrapped = () => {
-    if(document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'none';
-    window.closeModals(false);
-    let totalUnits = 0;
-    let platformCounts = {};
-    let dayCounts = {};
-    let clientLoyalty = {}; 
+// 1. Guardar la meta mensual en Firebase
+window.setFinancialGoal = async () => {
+    const { value: goal } = await Swal.fire({
+        title: '🎯 Define tu Meta',
+        input: 'number',
+        inputLabel: '¿Cuánto de GANANCIA NETA quieres lograr este mes?',
+        inputPlaceholder: 'Ej: 1500',
+        inputValue: currentUserData.financialGoal || '',
+        showCancelButton: true,
+        confirmButtonColor: 'var(--mac-blue)',
+        confirmButtonText: 'Guardar Meta',
+        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+    });
 
-    const today = new Date();
+    if (goal) {
+        try {
+            await updateDoc(doc(db, "users", currentUser.uid), { financialGoal: parseFloat(goal) });
+            currentUserData.financialGoal = parseFloat(goal);
+            window.showNotification("✅ Proyección financiera actualizada");
+            window.loadFinanceData();
+        } catch(e) { window.showNotification("Error: " + e.message); }
+    }
+};
 
-    // Recorrido analítico de toda la base de clientes local
+// 2. Procesar todos los datos y dar consejos inteligentes
+window.loadFinanceData = () => {
+    let act=0, profit=0, income=0, cost=0; 
+    const t = new Date(); t.setHours(0,0,0,0);
+    let validAccountsCount = 0;
+
+    // Calcular las sumas globales
     clients.forEach(c => {
-        const u = c.accountUnits || 1;
-        totalUnits += u;
-
-        // 1. Mapeo de plataformas más vendidas
-        if (c.platform) {
-            c.platform.split(', ').forEach(p => {
-                platformCounts[p] = (platformCounts[p] || 0) + u;
-            });
-        }
-
-        // 2. Mapeo de días con mayor índice de registros
-        if (c.date) {
-            let cleanDate = String(c.date);
-            if (cleanDate.includes('-')) {
-                const parts = cleanDate.split('-');
-                if (parts.length === 3) cleanDate = `${parts[2]}/${parts[1]}`;
-            }
-            dayCounts[cleanDate] = (dayCounts[cleanDate] || 0) + u;
-        }
-
-        // 3. Mapeo de Cliente Fiel (Nombre idéntico + Mismo WhatsApp)
-        if (c.name && c.phone) {
-            const clientKey = `${c.name.trim().toLowerCase()}_${c.phone.trim()}`;
-            if (!clientLoyalty[clientKey]) {
-                clientLoyalty[clientKey] = {
-                    originalName: c.name.trim(),
-                    registeredUnits: 0,
-                    appearances: 0
-                };
-            }
-            clientLoyalty[clientKey].registeredUnits += u;
-            clientLoyalty[clientKey].appearances += 1;
+        const x = new Date(c.date); x.setMinutes(x.getMinutes() + x.getTimezoneOffset()); x.setHours(0,0,0,0);
+        const d = Math.ceil((x-t)/86400000);
+        
+        if(d>=0) { 
+            act++;
+            const uCount = c.accountUnits || 1; 
+            profit += ((c.price || 0) - (c.cost || 0)) * uCount;
+            income += (c.price || 0) * uCount;
+            cost += (c.cost || 0) * uCount;
+            validAccountsCount += uCount;
         }
     });
 
-    // Encontrar Plataforma Líder
-    let topPlatform = "Ninguna"; let maxPlatformU = 0;
-    for (let p in platformCounts) {
-        if (platformCounts[p] > maxPlatformU) { maxPlatformU = platformCounts[p]; topPlatform = p; }
-    }
-
-    // Encontrar Día Pico de Ventas
-    let topDay = "Sin registros"; let maxDayU = 0;
-    for (let d in dayCounts) {
-        if (dayCounts[d] > maxDayU) { maxDayU = dayCounts[d]; topDay = d; }
-    }
-
-    // Encontrar Cliente Más Fiel
-    let topClientName = "No detectado"; let topClientUnits = 0; let maxAppearances = 0;
-    for (let k in clientLoyalty) {
-        if (clientLoyalty[k].appearances > maxAppearances) {
-            maxAppearances = clientLoyalty[k].appearances;
-            topClientName = clientLoyalty[k].originalName;
-            topClientUnits = clientLoyalty[k].registeredUnits;
-        } else if (clientLoyalty[k].appearances === maxAppearances && clientLoyalty[k].registeredUnits > topClientUnits) {
-            topClientName = clientLoyalty[k].originalName;
-            topClientUnits = clientLoyalty[k].registeredUnits;
-        }
-    }
+    // Llenar las tarjetas de resumen
+    if(document.getElementById('bdIncome')) document.getElementById('bdIncome').innerText = `${globalCurrency}${income.toFixed(2)}`;
+    if(document.getElementById('bdCost')) document.getElementById('bdCost').innerText = `${globalCurrency}${cost.toFixed(2)}`;
+    if(document.getElementById('bdProfit')) document.getElementById('bdProfit').innerText = `${globalCurrency}${profit.toFixed(2)}`;
+    if(document.getElementById('statActive')) document.getElementById('statActive').innerText = act; // Solo para pasar el dato al gráfico
     
-    // Fallback por si todos tienen 1 sola aparición pero hay clientes
-    if (maxAppearances === 1 && Object.keys(clientLoyalty).length > 0) {
-        let maxU = 0;
-        for (let k in clientLoyalty) {
-            if (clientLoyalty[k].registeredUnits > maxU) {
-                maxU = clientLoyalty[k].registeredUnits;
-                topClientName = clientLoyalty[k].originalName;
-                topClientUnits = clientLoyalty[k].registeredUnits;
+    // --- LÓGICA DE METAS Y ASESOR FINANCIERO ---
+    const goal = currentUserData.financialGoal || 0;
+    const displayGoal = document.getElementById('displayFinancialGoal');
+    const progressBar = document.getElementById('goalProgressBar');
+    const progressText = document.getElementById('goalProgressText');
+    const advisorBox = document.getElementById('financeAdvisorBox');
+
+    if(displayGoal) displayGoal.innerText = `${globalCurrency}${goal.toFixed(2)}`;
+    
+    if (goal > 0) {
+        let pct = (profit / goal) * 100;
+        if (pct < 0) pct = 0; 
+        
+        progressBar.style.width = `${Math.min(pct, 100)}%`;
+        progressText.innerText = `${pct.toFixed(1)}%`;
+
+        if (profit >= goal) {
+            advisorBox.innerHTML = `<strong>¡Felicidades! 🏆</strong> Has superado tu meta mensual de ganancia. Estás obteniendo una rentabilidad del <strong>${((profit/cost)*100).toFixed(0)}%</strong> sobre tu inversión total.`;
+            advisorBox.style.borderLeftColor = 'var(--mac-green)';
+        } else {
+            const faltante = goal - profit;
+            const avgCost = validAccountsCount > 0 ? (cost / validAccountsCount) : 0;
+            const avgProfitPerAccount = validAccountsCount > 0 ? (profit / validAccountsCount) : 0;
+            
+            let adviceHTML = `Te faltan <strong>${globalCurrency}${faltante.toFixed(2)}</strong> de ganancia para lograr tu meta mensual.<br><br>`;
+            
+            if (avgProfitPerAccount > 0) {
+                // Opción 1: Mantener los precios actuales
+                const accountsNeeded = Math.ceil(faltante / avgProfitPerAccount);
+                // Opción 2: Acelerar vendiendo solo 10 cuentas
+                const requiredProfitFor10 = faltante / 10;
+                const suggestedPriceFor10 = avgCost + requiredProfitFor10;
+
+                adviceHTML += `💡 <strong>¿Cómo lograrlo?</strong><br>
+                • Puedes vender <strong>${accountsNeeded} cuentas más</strong> manteniendo tu precio de venta promedio actual.<br>
+                • ⚡ <strong>Vía rápida:</strong> Si prefieres llegar a la meta vendiendo <strong>solo 10 cuentas nuevas</strong> (asumiendo que tu costo promedio es de ${globalCurrency}${avgCost.toFixed(2)}), deberías venderlas a <strong>${globalCurrency}${suggestedPriceFor10.toFixed(2)}</strong> cada una.`;
+            } else if (validAccountsCount > 0) {
+                 adviceHTML += `⚠️ <strong>Atención:</strong> Actualmente estás vendiendo a un precio menor o igual a tu inversión. Para tener proyecciones, debes ajustar tus precios de venta por encima del costo.`;
+            } else {
+                 adviceHTML += `💡 Registra tus primeras ventas (con Costo y Precio) para que la IA calcule las estrategias necesarias.`;
             }
+
+            advisorBox.innerHTML = adviceHTML;
+            advisorBox.style.borderLeftColor = 'var(--mac-orange)';
         }
+    } else {
+        progressBar.style.width = '0%';
+        progressText.innerText = '0%';
+        advisorBox.innerHTML = `💡 Aún no has definido una meta. Haz clic en <strong>Fijar Meta</strong> para proyectar tus ganancias y recibir recomendaciones de precios de venta.`;
+        advisorBox.style.borderLeftColor = 'var(--mac-blue)';
     }
 
-    const mesActual = today.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }).toUpperCase();
-    
-    let frase = "";
-    if (totalUnits >= 100) frase = "¡Nivel Dios! Tu imperio sigue expandiéndose sin límites. 👑";
-    else if (totalUnits >= 50) frase = "¡Imparable! Estás dominando el mercado con fuerza absoluta. 🔥";
-    else if (totalUnits >= 20) frase = "¡Excelente ritmo! Tienes una base poderosa para escalar. 🚀";
-    else if (totalUnits > 0) frase = "¡Gran trabajo! Cada cuenta suma para alcanzar la cima. 🌱";
-    else frase = "Aún no hay ventas registradas. ¡Es hora de despertar tu poder! 💥";
-
-    // 🛑 CAMBIO AQUÍ: Ahora llama al nuevo modal exclusivo y elimina el sidebar
-    document.getElementById('wrappedModal').style.display = 'flex';
-    
-    const content = document.getElementById('wrappedContentArea');
-    content.innerHTML = `
-        <div style="text-align: center; padding: 10px 0;">
-            <span style="display:inline-block; background:rgba(255,45,85,0.2); color:#FF2D55; padding:5px 15px; border-radius:20px; font-weight:bold; font-size:12px; margin-bottom:10px;">A.G.C. WRAPPED</span>
-            <h2 style="margin-top: 0; margin-bottom: 5px; font-size: 24px;">Resumen de ${mesActual}</h2>
-            <p style="font-size: 14px; color: var(--mac-text-secondary); margin-bottom: 20px;">${frase}</p>
-            
-            <div style="display: flex; gap: 10px; flex-direction: column; max-width: 360px; margin: 0 auto 25px auto; text-align: left;">
-                <div style="background: var(--mac-gray); padding: 12px 15px; border-radius: 12px; border: 1px solid var(--mac-border);">
-                    <span style="font-size:11px; color: var(--mac-text-secondary); font-weight:bold; text-transform:uppercase;">Cuentas Totales</span>
-                    <p style="margin:2px 0 0 0; font-size:18px; font-weight:900; color:var(--mac-green);">${totalUnits}</p>
-                </div>
-                <div style="background: var(--mac-gray); padding: 12px 15px; border-radius: 12px; border: 1px solid var(--mac-border);">
-                    <span style="font-size:11px; color: var(--mac-text-secondary); font-weight:bold; text-transform:uppercase;">Plataforma Líder</span>
-                    <p style="margin:2px 0 0 0; font-size:18px; font-weight:900; color:var(--mac-blue);">${topPlatform}</p>
-                </div>
-                <div style="background: var(--mac-gray); padding: 12px 15px; border-radius: 12px; border: 1px solid var(--mac-border);">
-                    <span style="font-size:11px; color: var(--mac-text-secondary); font-weight:bold; text-transform:uppercase;">Día de Mayor Flujo</span>
-                    <p style="margin:2px 0 0 0; font-size:18px; font-weight:900; color:var(--mac-orange);">${topDay}</p>
-                </div>
-                <div style="background: var(--mac-gray); padding: 12px 15px; border-radius: 12px; border: 1px solid var(--mac-border);">
-                    <span style="font-size:11px; color: var(--mac-text-secondary); font-weight:bold; text-transform:uppercase;">Cliente Más Fiel</span>
-                    <p style="margin:2px 0 0 0; font-size:18px; font-weight:900; color:#AF52DE;">${topClientName}</p>
-                    <span style="font-size:12px; color:var(--mac-text-secondary); font-weight:500;">Registró: ${topClientUnits} cuentas</span>
-                </div>
-            </div>
-            
-            <button class="btn-primary" style="padding:16px; font-size:15px; width:100%; max-width:320px; background: linear-gradient(45deg, #FF2D55, #5856D6); border:none; box-shadow: 0 10px 20px rgba(88, 86, 214, 0.3);" onclick="window.downloadWrapup('${totalUnits}', '${topPlatform}', '${topDay}', '${topClientName}', '${topClientUnits}', '${frase}', '${mesActual}', event)">
-                <i class='bx bxs-camera'></i> Descargar Historia (IG/WA)
-            </button>
-        </div>
-    `;
+    // Dibujar Gráficos (usando tu función anterior)
+    if(typeof ApexCharts !== 'undefined') window.renderCharts(income, cost, profit);
 };
 
 window.downloadWrapup = async (acc, platform, day, clientName, clientUnits, frase, mes, event) => {
