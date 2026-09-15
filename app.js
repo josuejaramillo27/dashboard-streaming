@@ -2100,7 +2100,9 @@ window.toggleStats = (forceUpdate = false) => {
         
         // ¡Magia! Renderizamos los gráficos si la librería ya cargó
         if(typeof ApexCharts !== 'undefined') {
-            window.renderCharts(income, cost, profit);
+            setTimeout(() => {
+                window.renderCharts(income, cost, profit);
+            }, 100);
         }
     }
 };
@@ -2407,8 +2409,10 @@ if(document.getElementById('chartHeaderCuentasFin')) document.getElementById('ch
         }
     }
 
-    // Dibujar Gráficos
-    if(typeof ApexCharts !== 'undefined') window.renderCharts(income, cost, profit);
+    // Dibujar Gráficos (Con retraso para esperar la animación de la pantalla)
+    setTimeout(() => {
+        if(typeof ApexCharts !== 'undefined') window.renderCharts(income, cost, profit);
+    }, 100);
 };
 
 window.downloadWrapup = async (acc, platform, day, clientName, clientUnits, frase, mes, event) => {
