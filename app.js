@@ -2325,35 +2325,62 @@ window.setFinancialGoal = async () => {
 };
 
 // 2. Procesar todos los datos y dar consejos inteligentes
+// --- NUEVO SISTEMA DE FILTROS FINANCIEROS ---
+window.currentDashboardFilter = 'proyeccion';
+
+window.changeDashboardFilter = (val) => {
+    window.currentDashboardFilter = val;
+    window.loadFinanceData();
+};
+
 window.loadFinanceData = () => {
     let act=0, profit=0, income=0, cost=0; 
     const t = new Date(); t.setHours(0,0,0,0);
     let validAccountsCount = 0;
+    const filter = window.currentDashboardFilter;
 
-    // Calcular las sumas globales
+    // Fechas límite para filtros históricos
+    const semanaInicio = new Date(t); semanaInicio.setDate(semanaInicio.getDate() - 6);
+    const mesInicio = new Date(t.getFullYear(), t.getMonth(), 1);
+    const anioInicio = new Date(t.getFullYear(), 0, 1);
+
     clients.forEach(c => {
-        const x = new Date(c.date); x.setMinutes(x.getMinutes() + x.getTimezoneOffset()); x.setHours(0,0,0,0);
-        const d = Math.ceil((x-t)/86400000);
+        const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
         
-        if(d>=0) { 
-            act++;
+        // Magia: Extraer fecha de pago aproximada restando los meses contratados
+        const mesesContratados = c.accountMonths || 1;
+        const fechaPago = new Date(exp);
+        fechaPago.setMonth(fechaPago.getMonth() - mesesContratados);
+
+        const d = Math.ceil((exp-t)/86400000); // Días para vencer
+        let entraEnFiltro = false;
+
+        // Evaluador de filtros
+        if (filter === 'proyeccion') { if(d >= 0 && d <= 14) entraEnFiltro = true; } 
+        else if (filter === 'hoy') { if(fechaPago.getTime() === t.getTime()) entraEnFiltro = true; } 
+        else if (filter === 'semana') { if(fechaPago >= semanaInicio && fechaPago <= t) entraEnFiltro = true; } 
+        else if (filter === 'mes') { if(fechaPago >= mesInicio && fechaPago <= t) entraEnFiltro = true; } 
+        else if (filter === 'anio') { if(fechaPago >= anioInicio && fechaPago <= t) entraEnFiltro = true; }
+
+        // Sumar a tarjetas principales SOLO si pasa el filtro
+        if(entraEnFiltro) {
             const uCount = c.accountUnits || 1; 
             profit += ((c.price || 0) - (c.cost || 0)) * uCount;
             income += (c.price || 0) * uCount;
             cost += (c.cost || 0) * uCount;
             validAccountsCount += uCount;
         }
+        
+        // Las cuentas activas siempre se muestran en global para no asustar al usuario
+        if (d >= 0) act++; 
     });
 
-    // Llenar las tarjetas de resumen (Coincidiendo con el HTML)
-if(document.getElementById('bdIncomeFin')) document.getElementById('bdIncomeFin').innerText = `${globalCurrency}${income.toFixed(2)}`;
-if(document.getElementById('bdCostFin')) document.getElementById('bdCostFin').innerText = `${globalCurrency}${cost.toFixed(2)}`;
-if(document.getElementById('bdProfitFin')) document.getElementById('bdProfitFin').innerText = `${globalCurrency}${profit.toFixed(2)}`;
+    if(document.getElementById('bdIncomeFin')) document.getElementById('bdIncomeFin').innerText = `${globalCurrency}${income.toFixed(2)}`;
+    if(document.getElementById('bdCostFin')) document.getElementById('bdCostFin').innerText = `${globalCurrency}${cost.toFixed(2)}`;
+    if(document.getElementById('bdProfitFin')) document.getElementById('bdProfitFin').innerText = `${globalCurrency}${profit.toFixed(2)}`;
+    if(document.getElementById('chartHeaderCuentas')) document.getElementById('chartHeaderCuentas').innerText = act; 
 
-// Cabecera de gráficos
-if(document.getElementById('chartHeaderCuentasFin')) document.getElementById('chartHeaderCuentasFin').innerText = act; 
-    
-    // --- LÓGICA DE METAS Y ASESOR FINANCIERO ---
+    // --- LÓGICA DE METAS Y ASESOR FINANCIERO (Se mantiene igual) ---
     const goal = currentUserData.financialGoal || 0;
     const displayGoal = document.getElementById('displayFinancialGoal');
     const progressBar = document.getElementById('goalProgressBar');
@@ -2370,48 +2397,31 @@ if(document.getElementById('chartHeaderCuentasFin')) document.getElementById('ch
         if(progressText) progressText.innerText = `${pct.toFixed(1)}%`;
 
         if (profit >= goal) {
-            if(advisorBox) {
-                advisorBox.innerHTML = `<strong>¡Felicidades! 🏆</strong> Has superado tu meta mensual de ganancia. Estás obteniendo una rentabilidad del <strong>${((profit/cost)*100).toFixed(0)}%</strong> sobre tu inversión total.`;
-                advisorBox.style.borderLeftColor = 'var(--mac-green)';
-            }
+            if(advisorBox) { advisorBox.innerHTML = `<strong>¡Felicidades! 🏆</strong> Has superado tu meta mensual de ganancia. Estás obteniendo una rentabilidad del <strong>${((profit/cost)*100).toFixed(0)}%</strong> sobre tu inversión total.`; advisorBox.style.borderLeftColor = 'var(--mac-green)'; }
         } else {
             const faltante = goal - profit;
             const avgCost = validAccountsCount > 0 ? (cost / validAccountsCount) : 0;
             const avgProfitPerAccount = validAccountsCount > 0 ? (profit / validAccountsCount) : 0;
             
             let adviceHTML = `Te faltan <strong>${globalCurrency}${faltante.toFixed(2)}</strong> de ganancia para lograr tu meta mensual.<br><br>`;
-            
             if (avgProfitPerAccount > 0) {
                 const accountsNeeded = Math.ceil(faltante / avgProfitPerAccount);
-                const requiredProfitFor10 = faltante / 10;
-                const suggestedPriceFor10 = avgCost + requiredProfitFor10;
+                const suggestedPriceFor10 = avgCost + (faltante / 10);
+                adviceHTML += `💡 <strong>¿Cómo lograrlo?</strong><br>• Puedes vender <strong>${accountsNeeded} cuentas más</strong> manteniendo tu precio actual.<br>• ⚡ <strong>Vía rápida:</strong> Si prefieres llegar a la meta vendiendo <strong>solo 10 cuentas nuevas</strong>, deberías venderlas a <strong>${globalCurrency}${suggestedPriceFor10.toFixed(2)}</strong> cada una.`;
+            } else if (validAccountsCount > 0) { adviceHTML += `⚠️ Actualmente estás vendiendo a un precio menor o igual a tu inversión.`; } 
+            else { adviceHTML += `💡 Registra tus primeras ventas (con Costo y Precio) para que la IA calcule las estrategias necesarias.`; }
 
-                adviceHTML += `💡 <strong>¿Cómo lograrlo?</strong><br>
-                • Puedes vender <strong>${accountsNeeded} cuentas más</strong> manteniendo tu precio de venta promedio actual.<br>
-                • ⚡ <strong>Vía rápida:</strong> Si prefieres llegar a la meta vendiendo <strong>solo 10 cuentas nuevas</strong> (asumiendo que tu costo promedio es de ${globalCurrency}${avgCost.toFixed(2)}), deberías venderlas a <strong>${globalCurrency}${suggestedPriceFor10.toFixed(2)}</strong> cada una.`;
-            } else if (validAccountsCount > 0) {
-                adviceHTML += `⚠️ <strong>Atención:</strong> Actualmente estás vendiendo a un precio menor o igual a tu inversión. Para tener proyecciones, debes ajustar tus precios de venta por encima del costo.`;
-            } else {
-                adviceHTML += `💡 Registra tus primeras ventas (con Costo y Precio) para que la IA calcule las estrategias necesarias.`;
-            }
-
-            if(advisorBox) {
-                advisorBox.innerHTML = adviceHTML;
-                advisorBox.style.borderLeftColor = 'var(--mac-orange)';
-            }
+            if(advisorBox) { advisorBox.innerHTML = adviceHTML; advisorBox.style.borderLeftColor = 'var(--mac-orange)'; }
         }
     } else {
         if(progressBar) progressBar.style.width = '0%';
         if(progressText) progressText.innerText = '0%';
-        if(advisorBox) {
-            advisorBox.innerHTML = `💡 Aún no has definido una meta. Haz clic en <strong>Fijar Meta</strong> para proyectar tus ganancias y recibir recomendaciones de precios de venta.`;
-            advisorBox.style.borderLeftColor = 'var(--mac-blue)';
-        }
+        if(advisorBox) { advisorBox.innerHTML = `💡 Aún no has definido una meta. Haz clic en <strong>Fijar Meta</strong> para proyectar tus ganancias.`; advisorBox.style.borderLeftColor = 'var(--mac-blue)'; }
     }
 
-    // Dibujar Gráficos (Con retraso para esperar la animación de la pantalla)
+    // Dibujar Gráficos enviando el filtro
     setTimeout(() => {
-        if(typeof ApexCharts !== 'undefined') window.renderCharts(income, cost, profit);
+        if(typeof ApexCharts !== 'undefined') window.renderCharts(income, cost, profit, filter);
     }, 100);
 };
 
@@ -5455,45 +5465,115 @@ let revenueChartInst = null;
 let platformChartInst = null;
 let funnelChartInst = null;
 
-window.renderCharts = (totalIncome, totalCost, totalProfit) => {
+window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion') => {
     const textColor = '#888888';
     const gridColor = '#222222';
     
-    // Lógica para detectar qué sección está activa
-    const isFinance = document.getElementById('financeSection').classList.contains('active-section');
-    
-    // 🔥 AQUÍ ESTÁ LA CORRECCIÓN: Usamos 'Fin' para que haga match con tu HTML
-    const headerTotalId = isFinance ? 'chartHeaderTotalFin' : 'chartHeaderTotal';
-    const revChartId = isFinance ? '#revenueChartFin' : '#revenueChart';
-    const platChartId = isFinance ? '#platformChartFin' : '#platformChart';
-    const funChartId = isFinance ? '#funnelChartFin' : '#funnelChart';
+    const revChartId = '#revenueChart';
+    const platChartId = '#platformChart';
+    const funChartId = '#funnelChart';
 
     const today = new Date(); today.setHours(0,0,0,0);
-    let daysLabels = [];
-    let renewalsData = [];
-    
-    for(let i=0; i<14; i++) {
-        let d = new Date(today);
-        d.setDate(today.getDate() + i);
-        daysLabels.push(d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }));
-        
-        let sum = 0;
+    let catLabels = [];
+    let chartData = [];
+    let labelTitle = '';
+    let tagHtml = '';
+
+    // CONSTRUCTOR DE EJES Y DATOS SEGÚN EL FILTRO
+    if (filter === 'proyeccion') {
+        labelTitle = 'Dinero por cobrar (Próx. 14 Días)';
+        tagHtml = `+ Proyección <i class='bx bx-trending-up'></i>`;
+        for(let i=0; i<14; i++) {
+            let d = new Date(today); d.setDate(today.getDate() + i);
+            catLabels.push(d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }));
+            let sum = 0;
+            clients.forEach(c => {
+                const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+                if (exp.getTime() === d.getTime()) sum += (c.price || 0) * (c.accountUnits || 1);
+            });
+            chartData.push(sum);
+        }
+    } else if (filter === 'hoy') {
+        labelTitle = 'Ingresos de Hoy';
+        tagHtml = `Solo Hoy <i class='bx bx-check'></i>`;
+        catLabels = ['Ayer', 'Hoy'];
+        let sumAyer = 0, sumHoy = 0;
+        let ayer = new Date(today); ayer.setDate(today.getDate() - 1);
         clients.forEach(c => {
-            const exp = new Date(c.date);
-            exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
-            exp.setHours(0,0,0,0);
-            if (exp.getTime() === d.getTime()) sum += (c.price || 0) * (c.accountUnits || 1);
+            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+            const fechaPago = new Date(exp); fechaPago.setMonth(fechaPago.getMonth() - (c.accountMonths || 1));
+            if (fechaPago.getTime() === today.getTime()) sumHoy += (c.price || 0) * (c.accountUnits || 1);
+            if (fechaPago.getTime() === ayer.getTime()) sumAyer += (c.price || 0) * (c.accountUnits || 1);
         });
-        renewalsData.push(sum);
+        chartData = [sumAyer, sumHoy];
+    } else if (filter === 'semana') {
+        labelTitle = 'Ingresos (Últimos 7 días)';
+        tagHtml = `Esta Semana <i class='bx bx-calendar'></i>`;
+        for(let i=6; i>=0; i--) {
+            let d = new Date(today); d.setDate(today.getDate() - i);
+            catLabels.push(d.toLocaleDateString('es-ES', { weekday: 'short' })); 
+            let sum = 0;
+            clients.forEach(c => {
+                const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+                const fechaPago = new Date(exp); fechaPago.setMonth(fechaPago.getMonth() - (c.accountMonths || 1));
+                if (fechaPago.getTime() === d.getTime()) sum += (c.price || 0) * (c.accountUnits || 1);
+            });
+            chartData.push(sum);
+        }
+    } else if (filter === 'mes') {
+        labelTitle = 'Ingresos del Mes (Por Semanas)';
+        tagHtml = `Este Mes <i class='bx bx-bar-chart'></i>`;
+        catLabels = ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'];
+        let weeks = [0, 0, 0, 0];
+        clients.forEach(c => {
+            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+            const fechaPago = new Date(exp); fechaPago.setMonth(fechaPago.getMonth() - (c.accountMonths || 1));
+            if (fechaPago.getMonth() === today.getMonth() && fechaPago.getFullYear() === today.getFullYear()) {
+                let w = Math.floor((fechaPago.getDate() - 1) / 7);
+                if (w > 3) w = 3;
+                weeks[w] += (c.price || 0) * (c.accountUnits || 1);
+            }
+        });
+        chartData = weeks;
+    } else if (filter === 'anio') {
+        labelTitle = 'Ingresos del Año (Por Meses)';
+        tagHtml = `Este Año <i class='bx bx-line-chart'></i>`;
+        catLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        let months = new Array(12).fill(0);
+        clients.forEach(c => {
+            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+            const fechaPago = new Date(exp); fechaPago.setMonth(fechaPago.getMonth() - (c.accountMonths || 1));
+            if (fechaPago.getFullYear() === today.getFullYear()) {
+                months[fechaPago.getMonth()] += (c.price || 0) * (c.accountUnits || 1);
+            }
+        });
+        chartData = months;
     }
 
-    let totalRevenue14d = renewalsData.reduce((a,b) => a+b, 0);
-    if(document.getElementById(headerTotalId)) document.getElementById(headerTotalId).innerText = `${globalCurrency}${totalRevenue14d.toFixed(2)}`;
+    // Actualización de textos DOM
+    if(document.getElementById('chartHeaderLabel')) document.getElementById('chartHeaderLabel').innerText = labelTitle;
+    if(document.getElementById('chartHeaderTag')) document.getElementById('chartHeaderTag').innerHTML = tagHtml;
+    let headerTotal = chartData.reduce((a,b) => a+b, 0);
+    if(document.getElementById('chartHeaderTotal')) document.getElementById('chartHeaderTotal').innerText = `${globalCurrency}${headerTotal.toFixed(2)}`;
 
+    // DONUT PLATAFORMAS DINÁMICO
     let platCounts = {};
     clients.forEach(c => {
-        const u = c.accountUnits || 1;
-        c.platform.split(', ').forEach(p => { platCounts[p] = (platCounts[p] || 0) + u; });
+        const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+        const fechaPago = new Date(exp); fechaPago.setMonth(fechaPago.getMonth() - (c.accountMonths || 1));
+        const dVenc = Math.ceil((exp-today)/86400000);
+        
+        let entra = false;
+        if (filter === 'proyeccion') { if(dVenc >= 0 && dVenc <= 14) entra = true; }
+        else if (filter === 'hoy') { if(fechaPago.getTime() === today.getTime()) entra = true; }
+        else if (filter === 'semana') { let w = new Date(today); w.setDate(w.getDate()-6); if(fechaPago>=w && fechaPago<=today) entra=true; }
+        else if (filter === 'mes') { if(fechaPago.getMonth()===today.getMonth() && fechaPago.getFullYear()===today.getFullYear()) entra=true; }
+        else if (filter === 'anio') { if(fechaPago.getFullYear()===today.getFullYear()) entra=true; }
+
+        if (entra) {
+            const u = c.accountUnits || 1;
+            c.platform.split(', ').forEach(p => { platCounts[p] = (platCounts[p] || 0) + u; });
+        }
     });
     const sortedPlats = Object.entries(platCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
     const platLabels = sortedPlats.length ? sortedPlats.map(x => x[0]) : ['Sin Datos'];
@@ -5501,18 +5581,20 @@ window.renderCharts = (totalIncome, totalCost, totalProfit) => {
 
     const commonOptions = { theme: { mode: 'dark' }, tooltip: { theme: 'dark' } };
 
+    // DIBUJAR CURVA
     if(revenueChartInst) revenueChartInst.destroy();
     revenueChartInst = new ApexCharts(document.querySelector(revChartId), {
         ...commonOptions,
-        series: [{ name: `Por Cobrar (${globalCurrency})`, data: renewalsData }],
-        chart: { type: 'line', height: 250, background: 'transparent', toolbar: { show: false }, animations: { enabled: true, easing: 'easeinout', speed: 800 }, dropShadow: { enabled: true, top: 6, left: 0, blur: 6, color: '#0a84ff', opacity: 0.4 } },
-        colors: ['#0a84ff'], dataLabels: { enabled: false }, stroke: { curve: 'smooth', width: 4 }, 
-        xaxis: { categories: daysLabels, labels: { style: { colors: textColor } }, axisBorder: { show: false }, axisTicks: { show: false }, tooltip: { enabled: false } },
+        series: [{ name: `Monto (${globalCurrency})`, data: chartData }],
+        chart: { type: 'area', height: 250, background: 'transparent', toolbar: { show: false }, animations: { enabled: true, easing: 'easeinout', speed: 800 } },
+        colors: ['#0a84ff'], dataLabels: { enabled: false }, stroke: { curve: 'smooth', width: 4 }, fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05, stops: [0, 100] } },
+        xaxis: { categories: catLabels, labels: { style: { colors: textColor } }, axisBorder: { show: false }, axisTicks: { show: false } },
         yaxis: { labels: { style: { colors: textColor }, formatter: (val) => globalCurrency + val.toFixed(0) } },
         grid: { show: true, borderColor: gridColor, strokeDashArray: 0, xaxis: { lines: { show: false } }, yaxis: { lines: { show: true } } }
     });
     revenueChartInst.render();
 
+    // DIBUJAR DONUT
     if(platformChartInst) platformChartInst.destroy();
     platformChartInst = new ApexCharts(document.querySelector(platChartId), {
         ...commonOptions, series: platData, labels: platLabels,
@@ -5523,6 +5605,7 @@ window.renderCharts = (totalIncome, totalCost, totalProfit) => {
     });
     platformChartInst.render();
 
+    // DIBUJAR EMBUDO
     if(funnelChartInst) funnelChartInst.destroy();
     funnelChartInst = new ApexCharts(document.querySelector(funChartId), {
         ...commonOptions, series: [{ name: 'Monto', data: [totalIncome, totalCost, totalProfit] }],
