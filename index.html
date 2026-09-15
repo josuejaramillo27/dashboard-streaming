@@ -353,6 +353,41 @@
             .mobile-date-label { display: none !important; }
             .date-wrapper { display: contents; } /* Hace que el contenedor sea fantasma en PC */
         }
+        /* ==========================================================================
+           SELECTOR DE TIEMPO PERSONALIZADO (PREMIUM)
+           ========================================================================== */
+        .custom-time-filter { position: relative; width: max-content; user-select: none; z-index: 100; }
+        .time-filter-selected { 
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 20px; border-radius: 30px; 
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)); 
+            color: #fff; border: 1px solid rgba(255, 255, 255, 0.15); 
+            font-size: 13px; font-weight: 700; cursor: pointer; 
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); 
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3); transition: all 0.3s ease;
+        }
+        .time-filter-selected:hover { background: rgba(255, 255, 255, 0.12); }
+        .time-filter-selected i:first-child { font-size: 18px; color: var(--mac-blue); }
+        .time-filter-selected i.chevron { font-size: 18px; margin-left: 5px; transition: 0.3s; color: #aaa; }
+        .custom-time-filter.open .time-filter-selected i.chevron { transform: rotate(180deg); color: #fff; }
+        
+        .time-filter-dropdown {
+            position: absolute; top: calc(100% + 10px); right: 0; width: max-content; min-width: 200px;
+            background: rgba(28, 28, 30, 0.95); border: 1px solid #333; border-radius: 16px;
+            padding: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .custom-time-filter.open .time-filter-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
+        
+        .time-option {
+            display: flex; align-items: center; gap: 10px; padding: 10px 15px;
+            border-radius: 10px; color: #aaa; font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: 0.2s;
+        }
+        .time-option:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
+        .time-option.active { background: rgba(0, 122, 255, 0.1); color: #fff; font-weight: bold; }
+        .time-option.active i { color: var(--mac-blue); }
+        .time-option i { font-size: 16px; transition: 0.2s; }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
     <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
@@ -1032,38 +1067,32 @@
             <!-- GRÁFICOS ANALÍTICOS -->
         <div id="analyticsSection" style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 25px;">
             <div style="background: #0a0a0c; border: 1px solid #222; border-radius: 16px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                
-                <!-- NUEVO SELECTOR DE VIAJE EN EL TIEMPO -->
+                    <!-- NUEVO SELECTOR DE VIAJE EN EL TIEMPO (CUSTOM) -->
                 <div style="width: 100%; display: flex; justify-content: flex-end; margin-bottom: 15px;">
-                    <select id="dashboardTimeFilter" onchange="window.changeDashboardFilter(this.value)" 
-    style="
-        width: max-content; 
-        padding: 10px 40px 10px 20px; 
-        border-radius: 30px; 
-        background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)); 
-        color: #fff; 
-        border: 1px solid rgba(255, 255, 255, 0.15); 
-        font-size: 13px; 
-        font-weight: 700; 
-        outline: none; 
-        cursor: pointer; 
-        backdrop-filter: blur(10px); 
-        -webkit-backdrop-filter: blur(10px); 
-        box-shadow: 0 6px 20px rgba(0,0,0,0.3); 
-        appearance: none; 
-        -webkit-appearance: none; 
-        background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23aaaaaa%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); 
-        background-repeat: no-repeat; 
-        background-position: right 14px center; 
-        background-size: 16px; 
-        transition: all 0.3s ease;">
-    
-    <option value="proyeccion" style="background: #1c1c1e; color: #fff;" selected>🔮 Proyección (14 días)</option>
-    <option value="hoy" style="background: #1c1c1e; color: #fff;">📅 Hoy</option>
-    <option value="semana" style="background: #1c1c1e; color: #fff;">📅 Esta Semana</option>
-    <option value="mes" style="background: #1c1c1e; color: #fff;">📅 Este Mes</option>
-    <option value="anio" style="background: #1c1c1e; color: #fff;">📅 Este Año</option>
-</select>
+                    <div class="custom-time-filter" id="customTimeFilter" onclick="window.toggleTimeFilter()">
+                        <div class="time-filter-selected">
+                            <i class='bx bx-trending-up'></i> <span id="timeFilterText">Proyección (14 días)</span>
+                            <i class='bx bx-chevron-down chevron'></i>
+                        </div>
+                        <div class="time-filter-dropdown" id="timeFilterDropdown">
+                            <div class="time-option active" onclick="window.selectTimeFilter('proyeccion', 'Proyección (14 días)', 'bx-trending-up', event)">
+                                <i class='bx bx-trending-up'></i> Proyección (14 días)
+                            </div>
+                            <div class="time-option" onclick="window.selectTimeFilter('hoy', 'Hoy', 'bx-calendar-star', event)">
+                                <i class='bx bx-calendar-star'></i> Hoy
+                            </div>
+                            <div class="time-option" onclick="window.selectTimeFilter('semana', 'Esta Semana', 'bx-calendar-week', event)">
+                                <i class='bx bx-calendar-week'></i> Esta Semana
+                            </div>
+                            <div class="time-option" onclick="window.selectTimeFilter('mes', 'Este Mes', 'bx-calendar', event)">
+                                <i class='bx bx-calendar'></i> Este Mes
+                            </div>
+                            <div class="time-option" onclick="window.selectTimeFilter('anio', 'Este Año', 'bx-bar-chart-alt-2', event)">
+                                <i class='bx bx-bar-chart-alt-2'></i> Este Año
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 </div>
 
                 <div style="display: flex; gap: 30px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;">
