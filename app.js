@@ -2343,13 +2343,13 @@ window.loadFinanceData = () => {
         }
     });
 
-    // Llenar las tarjetas de resumen
-    if(document.getElementById('bdIncome')) document.getElementById('bdIncome').innerText = `${globalCurrency}${income.toFixed(2)}`;
-    if(document.getElementById('bdCost')) document.getElementById('bdCost').innerText = `${globalCurrency}${cost.toFixed(2)}`;
-    if(document.getElementById('bdProfit')) document.getElementById('bdProfit').innerText = `${globalCurrency}${profit.toFixed(2)}`;
-    
-    // 🔥 FIX: Pasamos el dato de cuentas activas directamente a la cabecera nueva
-    if(document.getElementById('chartHeaderCuentas')) document.getElementById('chartHeaderCuentas').innerText = act; 
+    // Llenar las tarjetas de resumen (Nuevos IDs únicos)
+if(document.getElementById('finance_bdIncome')) document.getElementById('finance_bdIncome').innerText = `${globalCurrency}${income.toFixed(2)}`;
+if(document.getElementById('finance_bdCost')) document.getElementById('finance_bdCost').innerText = `${globalCurrency}${cost.toFixed(2)}`;
+if(document.getElementById('finance_bdProfit')) document.getElementById('finance_bdProfit').innerText = `${globalCurrency}${profit.toFixed(2)}`;
+
+// Cabecera de gráficos
+if(document.getElementById('finance_chartHeaderCuentas')) document.getElementById('finance_chartHeaderCuentas').innerText = act; 
     
     // --- LÓGICA DE METAS Y ASESOR FINANCIERO ---
     const goal = currentUserData.financialGoal || 0;
@@ -2436,8 +2436,8 @@ window.renderCharts = (totalIncome, totalCost, totalProfit) => {
     }
 
     let totalRevenue14d = renewalsData.reduce((a,b) => a+b, 0);
-    if(document.getElementById('chartHeaderTotal')) document.getElementById('chartHeaderTotal').innerText = `${globalCurrency}${totalRevenue14d.toFixed(2)}`;
-    // 🔥 ELIMINÉ LA LÍNEA QUE CHOCABA CON EL HTML VIEJO AQUÍ.
+    if(document.getElementById('chartHeaderTotalFin')) document.getElementById('chartHeaderTotalFin').innerText = `${globalCurrency}${totalRevenue14d.toFixed(2)}`;
+if(document.getElementById('chartHeaderCuentasFin')) document.getElementById('chartHeaderCuentasFin').innerText = document.getElementById('statActive').innerText;
 
     let platCounts = {};
     clients.forEach(c => {
@@ -5576,11 +5576,16 @@ let platformChartInst = null;
 let funnelChartInst = null;
 
 window.renderCharts = (totalIncome, totalCost, totalProfit) => {
-    // Forzamos los colores a modo oscuro para mantener el diseño tipo Shopify
     const textColor = '#888888';
     const gridColor = '#222222';
+    
+    // Lógica para detectar qué sección está activa
+    const isFinance = document.getElementById('financeSection').classList.contains('active-section');
+    const headerTotalId = isFinance ? 'finance_chartHeaderTotal' : 'chartHeaderTotal';
+    const revChartId = isFinance ? '#finance_revenueChart' : '#revenueChart';
+    const platChartId = isFinance ? '#finance_platformChart' : '#platformChart';
+    const funChartId = isFinance ? '#finance_funnelChart' : '#funnelChart';
 
-    // --- 1. DATOS: Curva de Proyección de Renovaciones ---
     const today = new Date(); today.setHours(0,0,0,0);
     let daysLabels = [];
     let renewalsData = [];
@@ -5600,12 +5605,9 @@ window.renderCharts = (totalIncome, totalCost, totalProfit) => {
         renewalsData.push(sum);
     }
 
-    // Actualizar las métricas dinámicas de la nueva cabecera HTML
     let totalRevenue14d = renewalsData.reduce((a,b) => a+b, 0);
-    if(document.getElementById('chartHeaderTotal')) document.getElementById('chartHeaderTotal').innerText = `${globalCurrency}${totalRevenue14d.toFixed(2)}`;
-    if(document.getElementById('chartHeaderCuentas')) document.getElementById('chartHeaderCuentas').innerText = document.getElementById('statActive').innerText;
+    if(document.getElementById(headerTotalId)) document.getElementById(headerTotalId).innerText = `${globalCurrency}${totalRevenue14d.toFixed(2)}`;
 
-    // --- 2. DATOS: Top Plataformas ---
     let platCounts = {};
     clients.forEach(c => {
         const u = c.accountUnits || 1;
@@ -5615,97 +5617,41 @@ window.renderCharts = (totalIncome, totalCost, totalProfit) => {
     const platLabels = sortedPlats.length ? sortedPlats.map(x => x[0]) : ['Sin Datos'];
     const platData = sortedPlats.length ? sortedPlats.map(x => x[1]) : [1];
 
-    const commonOptions = {
-        theme: { mode: 'dark' }, 
-        tooltip: { theme: 'dark' }
-    };
+    const commonOptions = { theme: { mode: 'dark' }, tooltip: { theme: 'dark' } };
 
-    // --- RENDER 1: Gráfico de Línea Neón ---
     if(revenueChartInst) revenueChartInst.destroy();
-    revenueChartInst = new ApexCharts(document.querySelector("#revenueChart"), {
+    revenueChartInst = new ApexCharts(document.querySelector(revChartId), {
         ...commonOptions,
         series: [{ name: `Por Cobrar (${globalCurrency})`, data: renewalsData }],
-        chart: { 
-            type: 'line', 
-            height: 250, 
-            background: 'transparent', // ¡ESTO ELIMINA EL FONDO GRIS!
-            toolbar: { show: false },
-            animations: { enabled: true, easing: 'easeinout', speed: 800 },
-            dropShadow: { enabled: true, top: 6, left: 0, blur: 6, color: '#0a84ff', opacity: 0.4 } 
-        },
-        colors: ['#0a84ff'],
-        dataLabels: { enabled: false },
-        stroke: { curve: 'smooth', width: 4 }, 
-        xaxis: { 
-            categories: daysLabels, 
-            labels: { style: { colors: textColor } }, 
-            axisBorder: { show: false }, 
-            axisTicks: { show: false },
-            tooltip: { enabled: false }
-        },
-        yaxis: { 
-            labels: { style: { colors: textColor }, formatter: (val) => globalCurrency + val.toFixed(0) } 
-        },
-        grid: { 
-            show: true,
-            borderColor: gridColor, 
-            strokeDashArray: 0,
-            xaxis: { lines: { show: false } }, 
-            yaxis: { lines: { show: true } }
-        }
+        chart: { type: 'line', height: 250, background: 'transparent', toolbar: { show: false }, animations: { enabled: true, easing: 'easeinout', speed: 800 }, dropShadow: { enabled: true, top: 6, left: 0, blur: 6, color: '#0a84ff', opacity: 0.4 } },
+        colors: ['#0a84ff'], dataLabels: { enabled: false }, stroke: { curve: 'smooth', width: 4 }, 
+        xaxis: { categories: daysLabels, labels: { style: { colors: textColor } }, axisBorder: { show: false }, axisTicks: { show: false }, tooltip: { enabled: false } },
+        yaxis: { labels: { style: { colors: textColor }, formatter: (val) => globalCurrency + val.toFixed(0) } },
+        grid: { show: true, borderColor: gridColor, strokeDashArray: 0, xaxis: { lines: { show: false } }, yaxis: { lines: { show: true } } }
     });
     revenueChartInst.render();
 
-    // --- RENDER 2: Gráfico de Anillo (Donut) ---
     if(platformChartInst) platformChartInst.destroy();
-    platformChartInst = new ApexCharts(document.querySelector("#platformChart"), {
-        ...commonOptions,
-        series: platData,
-        labels: platLabels,
-        chart: { 
-            type: 'donut', 
-            height: 260,
-            background: 'transparent', // ¡ESTO ELIMINA EL FONDO GRIS!
-            animations: { enabled: true, easing: 'easeinout', speed: 800 }
-        },
+    platformChartInst = new ApexCharts(document.querySelector(platChartId), {
+        ...commonOptions, series: platData, labels: platLabels,
+        chart: { type: 'donut', height: 260, background: 'transparent', animations: { enabled: true, easing: 'easeinout', speed: 800 } },
         colors: ['#0a84ff', '#30d158', '#ff9f0a', '#bf5af2', '#ff453a'],
-        plotOptions: { 
-            pie: { donut: { size: '72%', labels: { show: true, name: { color: textColor }, value: { color: '#ffffff', fontSize: '20px', fontWeight: 'bold', formatter: (val) => val + " ud" }, total: { show: true, showAlways: true, label: 'Cuentas', color: textColor } } } } 
-        },
-        dataLabels: { enabled: false },
-        stroke: { show: true, colors: ['#0a0a0c'], width: 3 }, 
-        legend: { position: 'right', labels: { colors: '#ffffff' } }
+        plotOptions: { pie: { donut: { size: '72%', labels: { show: true, name: { color: textColor }, value: { color: '#ffffff', fontSize: '20px', fontWeight: 'bold', formatter: (val) => val + " ud" }, total: { show: true, showAlways: true, label: 'Cuentas', color: textColor } } } } },
+        dataLabels: { enabled: false }, stroke: { show: true, colors: ['#0a0a0c'], width: 3 }, legend: { position: 'right', labels: { colors: '#ffffff' } }
     });
     platformChartInst.render();
 
-    // --- RENDER 3: Embudo Financiero ---
     if(funnelChartInst) funnelChartInst.destroy();
-    funnelChartInst = new ApexCharts(document.querySelector("#funnelChart"), {
-        ...commonOptions,
-        series: [{ name: 'Monto', data: [totalIncome, totalCost, totalProfit] }],
-        chart: { 
-            type: 'bar', 
-            height: 180, 
-            background: 'transparent', // ¡ESTO ELIMINA EL FONDO GRIS!
-            toolbar: { show: false },
-            animations: { enabled: true, easing: 'easeinout', speed: 800 }
-        },
+    funnelChartInst = new ApexCharts(document.querySelector(funChartId), {
+        ...commonOptions, series: [{ name: 'Monto', data: [totalIncome, totalCost, totalProfit] }],
+        chart: { type: 'bar', height: 180, background: 'transparent', toolbar: { show: false }, animations: { enabled: true, easing: 'easeinout', speed: 800 } },
         plotOptions: { bar: { borderRadius: 6, horizontal: true, distributed: true, dataLabels: { position: 'bottom' } } },
         colors: ['#0a84ff', '#ff453a', '#30d158'],
-        dataLabels: { 
-            enabled: true, textAnchor: 'start', 
-            style: { colors: ['#fff'], fontSize: '13px', fontWeight: 'bold' }, 
-            formatter: function (val, opt) { return opt.w.globals.labels[opt.dataPointIndex] + ": " + globalCurrency + val.toFixed(2); }, 
-            offsetX: 10, dropShadow: { enabled: true, top: 1, left: 1, blur: 1, opacity: 0.5 } 
-        },
-        stroke: { width: 0 },
-        xaxis: { categories: ['1. Ingresos Brutos', '2. Inversión Total', '3. Ganancia Neta'], labels: { show: false }, axisBorder: { show: false }, axisTicks: { show: false } },
-        yaxis: { labels: { show: false } },
-        grid: { show: false }
+        dataLabels: { enabled: true, textAnchor: 'start', style: { colors: ['#fff'], fontSize: '13px', fontWeight: 'bold' }, formatter: function (val, opt) { return opt.w.globals.labels[opt.dataPointIndex] + ": " + globalCurrency + val.toFixed(2); }, offsetX: 10, dropShadow: { enabled: true, top: 1, left: 1, blur: 1, opacity: 0.5 } },
+        stroke: { width: 0 }, xaxis: { categories: ['1. Ingresos Brutos', '2. Inversión Total', '3. Ganancia Neta'], labels: { show: false }, axisBorder: { show: false }, axisTicks: { show: false } }, yaxis: { labels: { show: false } }, grid: { show: false }
     });
     funnelChartInst.render();
 };
-
 /* ==========================================================================
    MÓDULO DE COMPRESIÓN DEL PANEL LATERAL
    ========================================================================== */
