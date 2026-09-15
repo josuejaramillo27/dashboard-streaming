@@ -2325,8 +2325,40 @@ window.setFinancialGoal = async () => {
 };
 
 // 2. Procesar todos los datos y dar consejos inteligentes
-// --- NUEVO SISTEMA DE FILTROS FINANCIEROS ---
+// --- NUEVO SISTEMA DE FILTROS FINANCIEROS (CON UI PERSONALIZADA) ---
 window.currentDashboardFilter = 'proyeccion';
+
+// 1. Abrir/Cerrar el menú
+window.toggleTimeFilter = () => {
+    document.getElementById('customTimeFilter').classList.toggle('open');
+};
+
+// 2. Al hacer clic en una opción
+window.selectTimeFilter = (value, text, iconClass, event) => {
+    event.stopPropagation(); // Evita que el clic lo cierre e inmediatamente lo abra
+    
+    // Cambiar el texto y el ícono principal
+    document.getElementById('timeFilterText').innerText = text;
+    document.querySelector('.time-filter-selected i:first-child').className = `bx ${iconClass}`;
+    
+    // Iluminar la opción seleccionada
+    document.querySelectorAll('.time-option').forEach(opt => opt.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    
+    // Cerrar el menú
+    document.getElementById('customTimeFilter').classList.remove('open');
+    
+    // Ejecutar tu lógica de gráficos existente
+    window.changeDashboardFilter(value);
+};
+
+// 3. Cerrar el menú si hacen clic en cualquier otra parte de la pantalla
+document.addEventListener('click', (e) => {
+    const filter = document.getElementById('customTimeFilter');
+    if (filter && !filter.contains(e.target)) {
+        filter.classList.remove('open');
+    }
+});
 
 window.changeDashboardFilter = (val) => {
     window.currentDashboardFilter = val;
