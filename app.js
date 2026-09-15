@@ -2343,13 +2343,13 @@ window.loadFinanceData = () => {
         }
     });
 
-    // Llenar las tarjetas de resumen (Nuevos IDs únicos)
-if(document.getElementById('finance_bdIncome')) document.getElementById('finance_bdIncome').innerText = `${globalCurrency}${income.toFixed(2)}`;
-if(document.getElementById('finance_bdCost')) document.getElementById('finance_bdCost').innerText = `${globalCurrency}${cost.toFixed(2)}`;
-if(document.getElementById('finance_bdProfit')) document.getElementById('finance_bdProfit').innerText = `${globalCurrency}${profit.toFixed(2)}`;
+    // Llenar las tarjetas de resumen (Coincidiendo con el HTML)
+if(document.getElementById('bdIncomeFin')) document.getElementById('bdIncomeFin').innerText = `${globalCurrency}${income.toFixed(2)}`;
+if(document.getElementById('bdCostFin')) document.getElementById('bdCostFin').innerText = `${globalCurrency}${cost.toFixed(2)}`;
+if(document.getElementById('bdProfitFin')) document.getElementById('bdProfitFin').innerText = `${globalCurrency}${profit.toFixed(2)}`;
 
 // Cabecera de gráficos
-if(document.getElementById('finance_chartHeaderCuentas')) document.getElementById('finance_chartHeaderCuentas').innerText = act; 
+if(document.getElementById('chartHeaderCuentasFin')) document.getElementById('chartHeaderCuentasFin').innerText = act; 
     
     // --- LÓGICA DE METAS Y ASESOR FINANCIERO ---
     const goal = currentUserData.financialGoal || 0;
@@ -2411,130 +2411,6 @@ if(document.getElementById('finance_chartHeaderCuentas')) document.getElementByI
     if(typeof ApexCharts !== 'undefined') window.renderCharts(income, cost, profit);
 };
 
-// 3. Renderizar los gráficos de la nueva UI
-window.renderCharts = (totalIncome, totalCost, totalProfit) => {
-    const textColor = '#888888';
-    const gridColor = '#222222';
-
-    const today = new Date(); today.setHours(0,0,0,0);
-    let daysLabels = [];
-    let renewalsData = [];
-    
-    for(let i=0; i<14; i++) {
-        let d = new Date(today);
-        d.setDate(today.getDate() + i);
-        daysLabels.push(d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }));
-        
-        let sum = 0;
-        clients.forEach(c => {
-            const exp = new Date(c.date);
-            exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
-            exp.setHours(0,0,0,0);
-            if (exp.getTime() === d.getTime()) sum += (c.price || 0) * (c.accountUnits || 1);
-        });
-        renewalsData.push(sum);
-    }
-
-    let totalRevenue14d = renewalsData.reduce((a,b) => a+b, 0);
-    if(document.getElementById('chartHeaderTotalFin')) document.getElementById('chartHeaderTotalFin').innerText = `${globalCurrency}${totalRevenue14d.toFixed(2)}`;
-if(document.getElementById('chartHeaderCuentasFin')) document.getElementById('chartHeaderCuentasFin').innerText = document.getElementById('statActive').innerText;
-
-    let platCounts = {};
-    clients.forEach(c => {
-        const u = c.accountUnits || 1;
-        c.platform.split(', ').forEach(p => { platCounts[p] = (platCounts[p] || 0) + u; });
-    });
-    const sortedPlats = Object.entries(platCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
-    const platLabels = sortedPlats.length ? sortedPlats.map(x => x[0]) : ['Sin Datos'];
-    const platData = sortedPlats.length ? sortedPlats.map(x => x[1]) : [1];
-
-    const commonOptions = {
-        theme: { mode: 'dark' }, 
-        tooltip: { theme: 'dark' }
-    };
-
-    if(revenueChartInst) revenueChartInst.destroy();
-    revenueChartInst = new ApexCharts(document.querySelector("#revenueChart"), {
-        ...commonOptions,
-        series: [{ name: `Por Cobrar (${globalCurrency})`, data: renewalsData }],
-        chart: { 
-            type: 'line', 
-            height: 250, 
-            background: 'transparent', 
-            toolbar: { show: false },
-            animations: { enabled: true, easing: 'easeinout', speed: 800 },
-            dropShadow: { enabled: true, top: 6, left: 0, blur: 6, color: '#0a84ff', opacity: 0.4 } 
-        },
-        colors: ['#0a84ff'],
-        dataLabels: { enabled: false },
-        stroke: { curve: 'smooth', width: 4 }, 
-        xaxis: { 
-            categories: daysLabels, 
-            labels: { style: { colors: textColor } }, 
-            axisBorder: { show: false }, 
-            axisTicks: { show: false },
-            tooltip: { enabled: false }
-        },
-        yaxis: { 
-            labels: { style: { colors: textColor }, formatter: (val) => globalCurrency + val.toFixed(0) } 
-        },
-        grid: { 
-            show: true,
-            borderColor: gridColor, 
-            strokeDashArray: 0,
-            xaxis: { lines: { show: false } }, 
-            yaxis: { lines: { show: true } }
-        }
-    });
-    revenueChartInst.render();
-
-    if(platformChartInst) platformChartInst.destroy();
-    platformChartInst = new ApexCharts(document.querySelector("#platformChart"), {
-        ...commonOptions,
-        series: platData,
-        labels: platLabels,
-        chart: { 
-            type: 'donut', 
-            height: 260,
-            background: 'transparent', 
-            animations: { enabled: true, easing: 'easeinout', speed: 800 }
-        },
-        colors: ['#0a84ff', '#30d158', '#ff9f0a', '#bf5af2', '#ff453a'],
-        plotOptions: { 
-            pie: { donut: { size: '72%', labels: { show: true, name: { color: textColor }, value: { color: '#ffffff', fontSize: '20px', fontWeight: 'bold', formatter: (val) => val + " ud" }, total: { show: true, showAlways: true, label: 'Cuentas', color: textColor } } } } 
-        },
-        dataLabels: { enabled: false },
-        stroke: { show: true, colors: ['#0a0a0c'], width: 3 }, 
-        legend: { position: 'right', labels: { colors: '#ffffff' } }
-    });
-    platformChartInst.render();
-
-    if(funnelChartInst) funnelChartInst.destroy();
-    funnelChartInst = new ApexCharts(document.querySelector("#funnelChart"), {
-        ...commonOptions,
-        series: [{ name: 'Monto', data: [totalIncome, totalCost, totalProfit] }],
-        chart: { 
-            type: 'bar', 
-            height: 180, 
-            background: 'transparent', 
-            toolbar: { show: false },
-            animations: { enabled: true, easing: 'easeinout', speed: 800 }
-        },
-        plotOptions: { bar: { borderRadius: 6, horizontal: true, distributed: true, dataLabels: { position: 'bottom' } } },
-        colors: ['#0a84ff', '#ff453a', '#30d158'],
-        dataLabels: { 
-            enabled: true, textAnchor: 'start', 
-            style: { colors: ['#fff'], fontSize: '13px', fontWeight: 'bold' }, 
-            formatter: function (val, opt) { return opt.w.globals.labels[opt.dataPointIndex] + ": " + globalCurrency + val.toFixed(2); }, 
-            offsetX: 10, dropShadow: { enabled: true, top: 1, left: 1, blur: 1, opacity: 0.5 } 
-        },
-        stroke: { width: 0 },
-        xaxis: { categories: ['1. Ingresos Brutos', '2. Inversión Total', '3. Ganancia Neta'], labels: { show: false }, axisBorder: { show: false }, axisTicks: { show: false } },
-        yaxis: { labels: { show: false } },
-        grid: { show: false }
-    });
-    funnelChartInst.render();
-};
 window.downloadWrapup = async (acc, platform, day, clientName, clientUnits, frase, mes, event) => {
     const btn = event.currentTarget;
     const originalText = btn.innerHTML;
@@ -5581,10 +5457,12 @@ window.renderCharts = (totalIncome, totalCost, totalProfit) => {
     
     // Lógica para detectar qué sección está activa
     const isFinance = document.getElementById('financeSection').classList.contains('active-section');
-    const headerTotalId = isFinance ? 'finance_chartHeaderTotal' : 'chartHeaderTotal';
-    const revChartId = isFinance ? '#finance_revenueChart' : '#revenueChart';
-    const platChartId = isFinance ? '#finance_platformChart' : '#platformChart';
-    const funChartId = isFinance ? '#finance_funnelChart' : '#funnelChart';
+    
+    // 🔥 AQUÍ ESTÁ LA CORRECCIÓN: Usamos 'Fin' para que haga match con tu HTML
+    const headerTotalId = isFinance ? 'chartHeaderTotalFin' : 'chartHeaderTotal';
+    const revChartId = isFinance ? '#revenueChartFin' : '#revenueChart';
+    const platChartId = isFinance ? '#platformChartFin' : '#platformChart';
+    const funChartId = isFinance ? '#funnelChartFin' : '#funnelChart';
 
     const today = new Date(); today.setHours(0,0,0,0);
     let daysLabels = [];
