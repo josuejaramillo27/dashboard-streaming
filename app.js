@@ -469,9 +469,14 @@ window.switchDashboardSection = (sectionId, menuElement) => {
                 setTimeout(() => overlay.style.display = 'none', 300);
             }
         }
+
+        // 🔥 5. FIX DEL SCROLL: Forzamos a la pantalla a volver arriba
+        const mainContainer = document.querySelector('.dashboard-main');
+        if (mainContainer) mainContainer.scrollTop = 0;
+        window.scrollTo(0, 0);
+
     }, 60); 
 };
-
 // Blindaje del botón "Cerrar" para que regrese correctamente al Home en PC y CELULAR
 const originalCloseModals = window.closeModals;
 window.closeModals = (resetTab = true) => {
@@ -2291,6 +2296,7 @@ window.viewNewsDetail = (noticia, element) => {
    A.G.C. WRAPPED - ALGORITMO DE MÉTRICAS PREMIUM SIN LOGO
 ========================================================= */
 // 1. Guardar la meta mensual en Firebase
+// 1. Guardar la meta mensual en Firebase
 window.setFinancialGoal = async () => {
     const { value: goal } = await Swal.fire({
         title: '🎯 Define tu Meta',
@@ -2340,7 +2346,9 @@ window.loadFinanceData = () => {
     if(document.getElementById('bdIncome')) document.getElementById('bdIncome').innerText = `${globalCurrency}${income.toFixed(2)}`;
     if(document.getElementById('bdCost')) document.getElementById('bdCost').innerText = `${globalCurrency}${cost.toFixed(2)}`;
     if(document.getElementById('bdProfit')) document.getElementById('bdProfit').innerText = `${globalCurrency}${profit.toFixed(2)}`;
-    if(document.getElementById('statActive')) document.getElementById('statActive').innerText = act; // Solo para pasar el dato al gráfico
+    
+    // 🔥 FIX: Pasamos el dato de cuentas activas directamente a la cabecera nueva
+    if(document.getElementById('chartHeaderCuentas')) document.getElementById('chartHeaderCuentas').innerText = act; 
     
     // --- LÓGICA DE METAS Y ASESOR FINANCIERO ---
     const goal = currentUserData.financialGoal || 0;
@@ -2355,12 +2363,14 @@ window.loadFinanceData = () => {
         let pct = (profit / goal) * 100;
         if (pct < 0) pct = 0; 
         
-        progressBar.style.width = `${Math.min(pct, 100)}%`;
-        progressText.innerText = `${pct.toFixed(1)}%`;
+        if(progressBar) progressBar.style.width = `${Math.min(pct, 100)}%`;
+        if(progressText) progressText.innerText = `${pct.toFixed(1)}%`;
 
         if (profit >= goal) {
-            advisorBox.innerHTML = `<strong>¡Felicidades! 🏆</strong> Has superado tu meta mensual de ganancia. Estás obteniendo una rentabilidad del <strong>${((profit/cost)*100).toFixed(0)}%</strong> sobre tu inversión total.`;
-            advisorBox.style.borderLeftColor = 'var(--mac-green)';
+            if(advisorBox) {
+                advisorBox.innerHTML = `<strong>¡Felicidades! 🏆</strong> Has superado tu meta mensual de ganancia. Estás obteniendo una rentabilidad del <strong>${((profit/cost)*100).toFixed(0)}%</strong> sobre tu inversión total.`;
+                advisorBox.style.borderLeftColor = 'var(--mac-green)';
+            }
         } else {
             const faltante = goal - profit;
             const avgCost = validAccountsCount > 0 ? (cost / validAccountsCount) : 0;
@@ -2369,9 +2379,7 @@ window.loadFinanceData = () => {
             let adviceHTML = `Te faltan <strong>${globalCurrency}${faltante.toFixed(2)}</strong> de ganancia para lograr tu meta mensual.<br><br>`;
             
             if (avgProfitPerAccount > 0) {
-                // Opción 1: Mantener los precios actuales
                 const accountsNeeded = Math.ceil(faltante / avgProfitPerAccount);
-                // Opción 2: Acelerar vendiendo solo 10 cuentas
                 const requiredProfitFor10 = faltante / 10;
                 const suggestedPriceFor10 = avgCost + requiredProfitFor10;
 
@@ -2379,25 +2387,153 @@ window.loadFinanceData = () => {
                 • Puedes vender <strong>${accountsNeeded} cuentas más</strong> manteniendo tu precio de venta promedio actual.<br>
                 • ⚡ <strong>Vía rápida:</strong> Si prefieres llegar a la meta vendiendo <strong>solo 10 cuentas nuevas</strong> (asumiendo que tu costo promedio es de ${globalCurrency}${avgCost.toFixed(2)}), deberías venderlas a <strong>${globalCurrency}${suggestedPriceFor10.toFixed(2)}</strong> cada una.`;
             } else if (validAccountsCount > 0) {
-                 adviceHTML += `⚠️ <strong>Atención:</strong> Actualmente estás vendiendo a un precio menor o igual a tu inversión. Para tener proyecciones, debes ajustar tus precios de venta por encima del costo.`;
+                adviceHTML += `⚠️ <strong>Atención:</strong> Actualmente estás vendiendo a un precio menor o igual a tu inversión. Para tener proyecciones, debes ajustar tus precios de venta por encima del costo.`;
             } else {
-                 adviceHTML += `💡 Registra tus primeras ventas (con Costo y Precio) para que la IA calcule las estrategias necesarias.`;
+                adviceHTML += `💡 Registra tus primeras ventas (con Costo y Precio) para que la IA calcule las estrategias necesarias.`;
             }
 
-            advisorBox.innerHTML = adviceHTML;
-            advisorBox.style.borderLeftColor = 'var(--mac-orange)';
+            if(advisorBox) {
+                advisorBox.innerHTML = adviceHTML;
+                advisorBox.style.borderLeftColor = 'var(--mac-orange)';
+            }
         }
     } else {
-        progressBar.style.width = '0%';
-        progressText.innerText = '0%';
-        advisorBox.innerHTML = `💡 Aún no has definido una meta. Haz clic en <strong>Fijar Meta</strong> para proyectar tus ganancias y recibir recomendaciones de precios de venta.`;
-        advisorBox.style.borderLeftColor = 'var(--mac-blue)';
+        if(progressBar) progressBar.style.width = '0%';
+        if(progressText) progressText.innerText = '0%';
+        if(advisorBox) {
+            advisorBox.innerHTML = `💡 Aún no has definido una meta. Haz clic en <strong>Fijar Meta</strong> para proyectar tus ganancias y recibir recomendaciones de precios de venta.`;
+            advisorBox.style.borderLeftColor = 'var(--mac-blue)';
+        }
     }
 
-    // Dibujar Gráficos (usando tu función anterior)
+    // Dibujar Gráficos
     if(typeof ApexCharts !== 'undefined') window.renderCharts(income, cost, profit);
 };
 
+// 3. Renderizar los gráficos de la nueva UI
+window.renderCharts = (totalIncome, totalCost, totalProfit) => {
+    const textColor = '#888888';
+    const gridColor = '#222222';
+
+    const today = new Date(); today.setHours(0,0,0,0);
+    let daysLabels = [];
+    let renewalsData = [];
+    
+    for(let i=0; i<14; i++) {
+        let d = new Date(today);
+        d.setDate(today.getDate() + i);
+        daysLabels.push(d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }));
+        
+        let sum = 0;
+        clients.forEach(c => {
+            const exp = new Date(c.date);
+            exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
+            exp.setHours(0,0,0,0);
+            if (exp.getTime() === d.getTime()) sum += (c.price || 0) * (c.accountUnits || 1);
+        });
+        renewalsData.push(sum);
+    }
+
+    let totalRevenue14d = renewalsData.reduce((a,b) => a+b, 0);
+    if(document.getElementById('chartHeaderTotal')) document.getElementById('chartHeaderTotal').innerText = `${globalCurrency}${totalRevenue14d.toFixed(2)}`;
+    // 🔥 ELIMINÉ LA LÍNEA QUE CHOCABA CON EL HTML VIEJO AQUÍ.
+
+    let platCounts = {};
+    clients.forEach(c => {
+        const u = c.accountUnits || 1;
+        c.platform.split(', ').forEach(p => { platCounts[p] = (platCounts[p] || 0) + u; });
+    });
+    const sortedPlats = Object.entries(platCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
+    const platLabels = sortedPlats.length ? sortedPlats.map(x => x[0]) : ['Sin Datos'];
+    const platData = sortedPlats.length ? sortedPlats.map(x => x[1]) : [1];
+
+    const commonOptions = {
+        theme: { mode: 'dark' }, 
+        tooltip: { theme: 'dark' }
+    };
+
+    if(revenueChartInst) revenueChartInst.destroy();
+    revenueChartInst = new ApexCharts(document.querySelector("#revenueChart"), {
+        ...commonOptions,
+        series: [{ name: `Por Cobrar (${globalCurrency})`, data: renewalsData }],
+        chart: { 
+            type: 'line', 
+            height: 250, 
+            background: 'transparent', 
+            toolbar: { show: false },
+            animations: { enabled: true, easing: 'easeinout', speed: 800 },
+            dropShadow: { enabled: true, top: 6, left: 0, blur: 6, color: '#0a84ff', opacity: 0.4 } 
+        },
+        colors: ['#0a84ff'],
+        dataLabels: { enabled: false },
+        stroke: { curve: 'smooth', width: 4 }, 
+        xaxis: { 
+            categories: daysLabels, 
+            labels: { style: { colors: textColor } }, 
+            axisBorder: { show: false }, 
+            axisTicks: { show: false },
+            tooltip: { enabled: false }
+        },
+        yaxis: { 
+            labels: { style: { colors: textColor }, formatter: (val) => globalCurrency + val.toFixed(0) } 
+        },
+        grid: { 
+            show: true,
+            borderColor: gridColor, 
+            strokeDashArray: 0,
+            xaxis: { lines: { show: false } }, 
+            yaxis: { lines: { show: true } }
+        }
+    });
+    revenueChartInst.render();
+
+    if(platformChartInst) platformChartInst.destroy();
+    platformChartInst = new ApexCharts(document.querySelector("#platformChart"), {
+        ...commonOptions,
+        series: platData,
+        labels: platLabels,
+        chart: { 
+            type: 'donut', 
+            height: 260,
+            background: 'transparent', 
+            animations: { enabled: true, easing: 'easeinout', speed: 800 }
+        },
+        colors: ['#0a84ff', '#30d158', '#ff9f0a', '#bf5af2', '#ff453a'],
+        plotOptions: { 
+            pie: { donut: { size: '72%', labels: { show: true, name: { color: textColor }, value: { color: '#ffffff', fontSize: '20px', fontWeight: 'bold', formatter: (val) => val + " ud" }, total: { show: true, showAlways: true, label: 'Cuentas', color: textColor } } } } 
+        },
+        dataLabels: { enabled: false },
+        stroke: { show: true, colors: ['#0a0a0c'], width: 3 }, 
+        legend: { position: 'right', labels: { colors: '#ffffff' } }
+    });
+    platformChartInst.render();
+
+    if(funnelChartInst) funnelChartInst.destroy();
+    funnelChartInst = new ApexCharts(document.querySelector("#funnelChart"), {
+        ...commonOptions,
+        series: [{ name: 'Monto', data: [totalIncome, totalCost, totalProfit] }],
+        chart: { 
+            type: 'bar', 
+            height: 180, 
+            background: 'transparent', 
+            toolbar: { show: false },
+            animations: { enabled: true, easing: 'easeinout', speed: 800 }
+        },
+        plotOptions: { bar: { borderRadius: 6, horizontal: true, distributed: true, dataLabels: { position: 'bottom' } } },
+        colors: ['#0a84ff', '#ff453a', '#30d158'],
+        dataLabels: { 
+            enabled: true, textAnchor: 'start', 
+            style: { colors: ['#fff'], fontSize: '13px', fontWeight: 'bold' }, 
+            formatter: function (val, opt) { return opt.w.globals.labels[opt.dataPointIndex] + ": " + globalCurrency + val.toFixed(2); }, 
+            offsetX: 10, dropShadow: { enabled: true, top: 1, left: 1, blur: 1, opacity: 0.5 } 
+        },
+        stroke: { width: 0 },
+        xaxis: { categories: ['1. Ingresos Brutos', '2. Inversión Total', '3. Ganancia Neta'], labels: { show: false }, axisBorder: { show: false }, axisTicks: { show: false } },
+        yaxis: { labels: { show: false } },
+        grid: { show: false }
+    });
+    funnelChartInst.render();
+};
 window.downloadWrapup = async (acc, platform, day, clientName, clientUnits, frase, mes, event) => {
     const btn = event.currentTarget;
     const originalText = btn.innerHTML;
