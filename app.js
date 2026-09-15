@@ -2378,7 +2378,8 @@ window.loadFinanceData = () => {
     if(document.getElementById('bdIncomeFin')) document.getElementById('bdIncomeFin').innerText = `${globalCurrency}${income.toFixed(2)}`;
     if(document.getElementById('bdCostFin')) document.getElementById('bdCostFin').innerText = `${globalCurrency}${cost.toFixed(2)}`;
     if(document.getElementById('bdProfitFin')) document.getElementById('bdProfitFin').innerText = `${globalCurrency}${profit.toFixed(2)}`;
-    if(document.getElementById('chartHeaderCuentas')) document.getElementById('chartHeaderCuentas').innerText = act; 
+    if(document.getElementById('chartHeaderCuentas')) document.getElementById('chartHeaderCuentas').innerText = act;
+    if(document.getElementById('chartHeaderCuentasFin')) document.getElementById('chartHeaderCuentasFin').innerText = act;
 
     // --- LÓGICA DE METAS Y ASESOR FINANCIERO (Se mantiene igual) ---
     const goal = currentUserData.financialGoal || 0;
