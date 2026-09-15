@@ -1013,96 +1013,66 @@
     </div> <!-- Fin modal-card -->
 </div> <!-- Fin storeModal -->
 
-        <!-- SECCIÓN 5: FINANZAS Y METAS (Ex Wrapped) -->
-        <div id="financeSection" class="dashboard-section" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--mac-border); padding-bottom: 15px;">
-                <div>
-                    <h2 style="margin: 0; font-size: 24px; color: var(--mac-text-main);"><i class='bx bx-line-chart'></i> Finanzas y Proyecciones</h2>
-                    <p style="color:var(--mac-text-secondary); font-size:14px; margin:5px 0 0 0;">Controla tu inversión y descubre cómo alcanzar tus metas.</p>
+        <!-- SECCIÓN 5: FINANZAS Y METAS -->
+<div id="financeSection" class="dashboard-section" style="display: none;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+            <h2 style="margin: 0; font-size: 24px; color: var(--mac-text-main);"><i class='bx bx-line-chart'></i> Finanzas y Proyecciones</h2>
+            <p style="color:var(--mac-text-secondary); font-size:14px; margin:5px 0 0 0;">Controla tu inversión, pagos y descubre cómo alcanzar tus metas.</p>
+        </div>
+    </div>
+
+    <!-- PESTAÑAS (TABS) DE FINANZAS -->
+    <div class="chrome-tabs-container" style="margin: 0; border: none; background: transparent; padding: 0; margin-bottom: 25px;">
+        <div class="chrome-tab active" onclick="window.switchFinanceTab('tabTendencias', this)"><i class='bx bx-bar-chart-alt-2'></i> Tendencias</div>
+        <div class="chrome-tab" onclick="window.switchFinanceTab('tabMetas', this)"><i class='bx bx-target-lock'></i> Metas</div>
+        <div class="chrome-tab" onclick="window.switchFinanceTab('tabPagos', this)"><i class='bx bx-wallet'></i> Pagos</div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- PESTAÑA 1: TENDENCIAS Y GRÁFICOS (Lo que ya tenías) -->
+    <!-- ============================================== -->
+    <div id="tabTendencias" class="finance-tab" style="display: block;">
+        
+        <div style="width: 100%; display: flex; justify-content: flex-end; margin-bottom: 15px;">
+            <div class="custom-time-filter" id="customTimeFilter" onclick="window.toggleTimeFilter()">
+                <div class="time-filter-selected">
+                    <i class='bx bx-trending-up'></i> <span id="timeFilterText">Proyección (14 días)</span>
+                    <i class='bx bx-chevron-down chevron'></i>
+                </div>
+                <div class="time-filter-dropdown" id="timeFilterDropdown">
+                    <div class="time-option active" onclick="window.selectTimeFilter('proyeccion', 'Proyección (14 días)', 'bx-trending-up', event)"><i class='bx bx-trending-up'></i> Proyección (14 días)</div>
+                    <div class="time-option" onclick="window.selectTimeFilter('hoy', 'Hoy', 'bx-calendar-star', event)"><i class='bx bx-calendar-star'></i> Hoy</div>
+                    <div class="time-option" onclick="window.selectTimeFilter('semana', 'Esta Semana', 'bx-calendar-week', event)"><i class='bx bx-calendar-week'></i> Esta Semana</div>
+                    <div class="time-option" onclick="window.selectTimeFilter('mes', 'Este Mes', 'bx-calendar', event)"><i class='bx bx-calendar'></i> Este Mes</div>
+                    <div class="time-option" onclick="window.selectTimeFilter('anio', 'Este Año', 'bx-bar-chart-alt-2', event)"><i class='bx bx-bar-chart-alt-2'></i> Este Año</div>
                 </div>
             </div>
+        </div>
 
-            <!-- PANEL INTELIGENTE DE METAS FINANCIERAS -->
-            <div style="background: #0a0a0c; border: 1px solid var(--mac-blue); padding: 25px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0, 122, 255, 0.15);">
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
-                    <div>
-                        <h4 style="margin: 0 0 5px 0; color: var(--mac-blue); font-size: 14px;"><i class='bx bx-target-lock'></i> Meta de Ganancia Neta Mensual</h4>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 28px; font-weight: 900; color: #fff;" id="displayFinancialGoal">S/ 0.00</span>
-                            <button class="action-btn" style="background: rgba(255,255,255,0.1); border:none; color: #fff; padding: 6px 12px; font-size: 12px;" onclick="window.setFinancialGoal()"><i class='bx bx-edit'></i> Fijar Meta</button>
-                        </div>
-                    </div>
-                    <div style="text-align: right;">
-                        <span style="font-size: 14px; color: #888; font-weight: bold;">Progreso</span>
-                        <h3 style="margin: 0; font-size: 32px; color: var(--mac-green);" id="goalProgressText">0%</h3>
-                    </div>
-                </div>
-                
-                <div style="width: 100%; background: #222; border-radius: 10px; height: 12px; overflow: hidden; margin-bottom: 15px;">
-                    <div id="goalProgressBar" style="height: 100%; background: linear-gradient(90deg, var(--mac-blue), var(--mac-green)); width: 0%; transition: width 1s cubic-bezier(0.25, 0.8, 0.25, 1);"></div>
-                </div>
-                
-                <!-- ASESOR FINANCIERO IA -->
-                <div id="financeAdvisorBox" style="background: rgba(255, 255, 255, 0.05); padding: 15px 20px; border-radius: 12px; border-left: 4px solid var(--mac-orange); font-size: 14px; color: #eee; line-height: 1.6;">
-                    Cargando análisis de rentabilidad...
-                </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px;">    
+            <div style="background: #0a0a0c; border: 1px solid #222; padding: 20px; border-radius: 16px;">
+                <h4 style="margin: 0 0 10px 0; font-size: 13px; color: #888;">Ingresos Brutos</h4>
+                <p id="bdIncomeFin" style="margin: 0; font-size: 26px; font-weight: 900; color: #fff;">0.00</p>
             </div>
+            <div style="background: #0a0a0c; border: 1px solid #222; padding: 20px; border-radius: 16px;">
+                <h4 style="margin: 0 0 10px 0; font-size: 13px; color: #888;">Inversión (Costo)</h4>
+                <p id="bdCostFin" style="margin: 0; font-size: 26px; font-weight: 900; color: var(--mac-red);">0.00</p>
+            </div>
+            <div style="background: #0a0a0c; border: 1px solid #222; padding: 20px; border-radius: 16px;">
+                <h4 style="margin: 0 0 10px 0; font-size: 13px; color: #888;">Ganancia Neta Actual</h4>
+                <p id="bdProfitFin" style="margin: 0; font-size: 26px; font-weight: 900; color: var(--mac-green);">0.00</p>
+            </div>
+        </div>
 
-            <!-- TARJETAS DE RESUMEN GLOBALES -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px;">    
-    <div style="background: #0a0a0c; border: 1px solid #222; padding: 20px; border-radius: 16px;">
-        <h4 style="margin: 0 0 10px 0; font-size: 13px; color: #888;">Ingresos Brutos</h4>
-        <p id="bdIncomeFin" style="margin: 0; font-size: 26px; font-weight: 900; color: #fff;">0.00</p>
-    </div>
-    <div style="background: #0a0a0c; border: 1px solid #222; padding: 20px; border-radius: 16px;">
-        <h4 style="margin: 0 0 10px 0; font-size: 13px; color: #888;">Inversión (Costo)</h4>
-        <p id="bdCostFin" style="margin: 0; font-size: 26px; font-weight: 900; color: var(--mac-red);">0.00</p>
-    </div>
-    <div style="background: #0a0a0c; border: 1px solid #222; padding: 20px; border-radius: 16px;">
-        <h4 style="margin: 0 0 10px 0; font-size: 13px; color: #888;">Ganancia Neta Actual</h4>
-        <p id="bdProfitFin" style="margin: 0; font-size: 26px; font-weight: 900; color: var(--mac-green);">0.00</p>
-    </div>
-</div>
-
-            <!-- GRÁFICOS ANALÍTICOS -->
         <div id="analyticsSection" style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 25px;">
-            
-            <!-- INICIO DE LA CAJA NEGRA -->
             <div style="background: #0a0a0c; border: 1px solid #222; border-radius: 16px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                
-                <!-- NUEVO SELECTOR DE VIAJE EN EL TIEMPO (CUSTOM) -->
-                <div style="width: 100%; display: flex; justify-content: flex-end; margin-bottom: 15px;">
-                    <div class="custom-time-filter" id="customTimeFilter" onclick="window.toggleTimeFilter()">
-                        <div class="time-filter-selected">
-                            <i class='bx bx-trending-up'></i> <span id="timeFilterText">Proyección (14 días)</span>
-                            <i class='bx bx-chevron-down chevron'></i>
-                        </div>
-                        <div class="time-filter-dropdown" id="timeFilterDropdown">
-                            <div class="time-option active" onclick="window.selectTimeFilter('proyeccion', 'Proyección (14 días)', 'bx-trending-up', event)">
-                                <i class='bx bx-trending-up'></i> Proyección (14 días)
-                            </div>
-                            <div class="time-option" onclick="window.selectTimeFilter('hoy', 'Hoy', 'bx-calendar-star', event)">
-                                <i class='bx bx-calendar-star'></i> Hoy
-                            </div>
-                            <div class="time-option" onclick="window.selectTimeFilter('semana', 'Esta Semana', 'bx-calendar-week', event)">
-                                <i class='bx bx-calendar-week'></i> Esta Semana
-                            </div>
-                            <div class="time-option" onclick="window.selectTimeFilter('mes', 'Este Mes', 'bx-calendar', event)">
-                                <i class='bx bx-calendar'></i> Este Mes
-                            </div>
-                            <div class="time-option" onclick="window.selectTimeFilter('anio', 'Este Año', 'bx-bar-chart-alt-2', event)">
-                                <i class='bx bx-bar-chart-alt-2'></i> Este Año
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CABECERA DE DATOS (MÉTRICAS) -->
                 <div style="display: flex; gap: 30px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;">
                     <div style="display: flex; flex-direction: column;">
                         <span style="color: #888; font-size: 13px; font-weight: 600; margin-bottom: 4px;">Cuentas Activas Total</span>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <div style="width: 10px; height: 10px; border-radius: 50%; background: #30d158; box-shadow: 0 0 10px #30d158; animation: pulse 2s infinite;"></div>
+                            <div style="width: 10px; height: 10px; border-radius: 50%; background: #30d158; box-shadow: 0 0 10px #30d158;"></div>
                             <span style="color: #fff; font-size: 22px; font-weight: 800;" id="chartHeaderCuentasFin">0</span>
                         </div>
                     </div>
@@ -1115,31 +1085,101 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- CONTENEDOR DEL GRÁFICO -->
                 <div id="revenueChartFin"></div>
-
             </div>
-            <!-- FIN DE LA CAJA NEGRA -->
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                    <div style="background: #0a0a0c; border: 1px solid #222; border-radius: 16px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                        <h3 style="margin-top:0; margin-bottom:15px; font-size:16px; color: #fff; display:flex; align-items:center; gap:8px;">
-                            <i class='bx bx-pie-chart-alt-2' style="color:var(--mac-orange);"></i> Top Plataformas
-                        </h3>
-                        <div id="platformChartFin"></div>
-                    </div>
-                    
-                    <div style="background: #0a0a0c; border: 1px solid #222; border-radius: 16px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                        <h3 style="margin-top:0; margin-bottom:5px; font-size:16px; color: #fff; display:flex; align-items:center; gap:8px;">
-                            <i class='bx bx-filter-alt' style="color:var(--mac-green);"></i> Embudo Financiero
-                        </h3>
-                        <p style="margin:0 0 15px 0; font-size:12px; color:#888;">Ingresos vs Inversión y Ganancia neta.</p>
-                        <div id="funnelChartFin"></div>
-                    </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div style="background: #0a0a0c; border: 1px solid #222; border-radius: 16px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                    <h3 style="margin-top:0; margin-bottom:15px; font-size:16px; color: #fff;"><i class='bx bx-pie-chart-alt-2' style="color:var(--mac-orange);"></i> Top Plataformas</h3>
+                    <div id="platformChartFin"></div>
+                </div>
+                
+                <div style="background: #0a0a0c; border: 1px solid #222; border-radius: 16px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                    <h3 style="margin-top:0; margin-bottom:5px; font-size:16px; color: #fff;"><i class='bx bx-filter-alt' style="color:var(--mac-green);"></i> Embudo Financiero</h3>
+                    <p style="margin:0 0 15px 0; font-size:12px; color:#888;">Ingresos vs Inversión y Ganancia neta.</p>
+                    <div id="funnelChartFin"></div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- PESTAÑA 2: METAS Y RENDIMIENTO -->
+    <!-- ============================================== -->
+    <div id="tabMetas" class="finance-tab" style="display: none;">
+        
+        <div style="background: #0a0a0c; border: 1px solid var(--mac-blue); padding: 25px; border-radius: 16px; margin-bottom: 25px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <h4 style="margin: 0 0 5px 0; color: var(--mac-blue); font-size: 14px;"><i class='bx bx-target-lock'></i> Meta de Ganancia Neta Mensual</h4>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 28px; font-weight: 900; color: #fff;" id="displayFinancialGoal">S/ 0.00</span>
+                        <button class="action-btn" style="background: rgba(255,255,255,0.1); border:none; color: #fff; padding: 6px 12px; font-size: 12px;" onclick="window.setFinancialGoal()"><i class='bx bx-edit'></i> Fijar Meta</button>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 14px; color: #888; font-weight: bold;">Progreso</span>
+                    <h3 style="margin: 0; font-size: 32px; color: var(--mac-green);" id="goalProgressText">0%</h3>
+                </div>
+            </div>
+            <div style="width: 100%; background: #222; border-radius: 10px; height: 12px; overflow: hidden; margin-bottom: 15px;">
+                <div id="goalProgressBar" style="height: 100%; background: linear-gradient(90deg, var(--mac-blue), var(--mac-green)); width: 0%; transition: width 1s;"></div>
+            </div>
+            <div id="financeAdvisorBox" style="background: rgba(255, 255, 255, 0.05); padding: 15px 20px; border-radius: 12px; border-left: 4px solid var(--mac-orange); font-size: 14px; color: #eee; line-height: 1.6;">
+                Cargando análisis de rentabilidad...
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <!-- Métrica: Retención -->
+            <div style="background: #0a0a0c; border: 1px solid #222; border-radius: 16px; padding: 25px;">
+                <h3 style="margin: 0 0 15px 0; color: #fff; font-size: 16px;"><i class='bx bx-refresh' style="color:var(--mac-green);"></i> Tasa de Retención</h3>
+                <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 15px;">
+                    <span style="font-size: 32px; font-weight: 900; color: #fff;" id="retentionRateText">0%</span>
+                    <span style="font-size: 13px; color: #888;">clientes renovaron</span>
+                </div>
+                <div style="width: 100%; background: #222; border-radius: 6px; height: 8px; overflow: hidden;">
+                    <div id="retentionBar" style="height: 100%; background: var(--mac-green); width: 0%;"></div>
+                </div>
+                <p style="margin: 10px 0 0 0; font-size: 12px; color: #888;" id="retentionDetailsText">Cargando datos...</p>
+            </div>
+
+            <!-- Métrica: Comparativa -->
+            <div style="background: #0a0a0c; border: 1px solid #222; border-radius: 16px; padding: 25px;">
+                <h3 style="margin: 0 0 15px 0; color: #fff; font-size: 16px;"><i class='bx bx-trending-up' style="color:var(--mac-blue);"></i> Crecimiento (Mes a Mes)</h3>
+                <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 5px;">
+                    <span style="font-size: 32px; font-weight: 900; color: #fff;" id="growthRateText">0%</span>
+                </div>
+                <p style="margin: 0 0 10px 0; font-size: 13px; color: #888;" id="growthDetailsText">Comparativa contra el mes pasado.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- PESTAÑA 3: PAGOS Y RENTABILIDAD -->
+    <!-- ============================================== -->
+    <div id="tabPagos" class="finance-tab" style="display: none;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            
+            <div style="background: #0a0a0c; border: 1px solid #222; border-radius: 16px; padding: 25px;">
+                <h3 style="margin: 0 0 15px 0; color: #fff; font-size: 16px;"><i class='bx bx-wallet' style="color:#bf5af2;"></i> Ingresos por Método de Pago</h3>
+                <div id="paymentMethodsStatsList" style="display: flex; flex-direction: column; gap: 12px;">
+                    <p style="color: #888; font-size: 13px;">(Próximamente: Las ventas de tu tiendita web se clasificarán aquí automáticamente)</p>
+                </div>
+            </div>
+
+            <div style="background: #0a0a0c; border: 1px solid #222; border-radius: 16px; padding: 25px;">
+                <h3 style="margin: 0 0 15px 0; color: #fff; font-size: 16px;"><i class='bx bx-diamond' style="color:#FFD700;"></i> Top Rentabilidad (Margen)</h3>
+                <p style="font-size: 12px; color: #888; margin-bottom: 15px;">Servicios que te dejan mayor ganancia neta por unidad.</p>
+                <div id="topMarginStatsList" style="display: flex; flex-direction: column; gap: 12px;">
+                    <!-- Se llenará con JS -->
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+</div>    
 <!-- SECCIÓN 6: MI PERFIL & BOT -->
         <div id="profileSection" class="dashboard-section" style="display: none;">
             <div style="margin-bottom: 20px; border-bottom: 1px solid var(--mac-border); padding-bottom: 15px;">
