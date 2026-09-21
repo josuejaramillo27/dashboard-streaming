@@ -117,6 +117,9 @@ window.togglePassword = (inputId, btn) => {
     else { input.type = "password"; btn.innerText = "👁️"; }
 };
 
+window.isGoogleSignup = false;
+window.tempGoogleUser = null;
+
 window.loginWithGoogle = async () => {
     try {
         const result = await signInWithPopup(auth, googleProvider);
@@ -124,12 +127,27 @@ window.loginWithGoogle = async () => {
         const docSnap = await getDoc(doc(db, "users", user.uid));
         
         if (!docSnap.exists()) {
-            await setDoc(doc(db, "users", user.uid), { 
-                name: user.displayName, email: user.email, role: 'user', active: false, 
-                country: 'Perú', currency: 'S/', phone: '', createdAt: new Date().toISOString() 
-            });
-            window.showNotification("Cuenta creada. Contacta al administrador para activarla.");
-            await signOut(auth);
+            // NO se crea en Firebase aún. Guardamos temporal y mostramos el formulario pre-llenado.
+            window.isGoogleSignup = true;
+            window.tempGoogleUser = user;
+            
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'flex';
+            document.getElementById('authSubtitle').innerText = 'Completa tu Registro';
+            
+            document.getElementById('regName').value = user.displayName || '';
+            document.getElementById('regEmail').value = user.email || '';
+            document.getElementById('regEmail').disabled = true; // Bloqueado para que no lo cambien
+            
+            // Ocultamos la contraseña porque ya se autenticó con Google
+            const pwdWrapper = document.getElementById('regPassword').parentElement;
+            if(pwdWrapper) pwdWrapper.style.display = 'none';
+            document.getElementById('regPassword').removeAttribute('required');
+            
+            window.showNotification("¡Casi listo! Completa tu número y país.");
+        } else {
+            // Si ya existe, el onAuthStateChanged se encarga de cargarlo.
+            window.showNotification("Iniciando sesión...");
         }
     } catch (error) {
         window.showNotification("Error Google: " + error.message);
@@ -143,8 +161,10 @@ window.doRegister = async () => {
     const email = document.getElementById('regEmail').value;
     const password = document.getElementById('regPassword').value;
     const country = document.getElementById('regCountry').value;
+    const planElegido = document.getElementById('regPlanDemo').value;
     
-    if(!name || !email || !password || !country || !phone) return window.showNotification("Llena todos los campos");
+    if(!name || !email || !country || !phone || !planElegido) return window.showNotification("Llena todos los campos");
+    if(!window.isGoogleSignup && !password) return window.showNotification("Falta la contraseña");
     if(!phone.startsWith('+')) return window.showNotification("⚠️ El teléfono DEBE incluir el código de país (Ej: +51...)");
     
     const btn = document.querySelector('#registerForm .btn-primary'); 
@@ -153,14 +173,15 @@ window.doRegister = async () => {
     btn.disabled = true;
     
     try {
-        // 1. Crea el usuario en Firebase Auth
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+        let user = window.tempGoogleUser;
+        // Solo creamos credencial con contraseña si NO viene de Google
+        if (!window.isGoogleSignup) {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            user = userCredential.user;
+        }
         
-        // 2. Obtenemos el Token de Identidad (El pasaporte digital del usuario)
         const idToken = await user.getIdToken();
 
-        // 3. Enviamos los datos a tu Bot en DigitalOcean para que él cree el perfil
         const response = await fetch('https://bot.panelagc.com/api/completar-registro', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -168,23 +189,16 @@ window.doRegister = async () => {
                 idToken: idToken,
                 name: name,
                 phone: phone,
-                country: country
+                country: country,
+                planDemo: planElegido
             })
         });
 
         if (!response.ok) throw new Error("Error del servidor al asignar perfil.");
-        // --- NUEVO: ACTIVACIÓN DE DEMO POR 3 HORAS ---
-        const planElegido = document.getElementById('regPlanDemo').value;
-body: JSON.stringify({
-    idToken: idToken,
-    name: name,
-    phone: phone,
-    country: country,
-    planDemo: planElegido // Se envía al servidor
-})
-        const targetDate = new Date();
-        targetDate.setHours(targetDate.getHours() + 3);
+        
+        window.isGoogleSignup = false;
         window.showNotification("¡Cuenta creada con éxito! Disfruta tu prueba gratuita.");
+        window.location.reload(); // Recarga limpia para que Firebase atrape la sesión
         
     } catch (e) { 
         window.showNotification("Error Reg: " + e.message); 
@@ -405,12 +419,13 @@ onAuthStateChanged(auth, async (user) => {
                             setTimeout(() => window.startTutorial(), 1500);
                         }
                     } else { 
-                        await signOut(auth); 
-                        window.showNotification("Tu cuenta está suspendida o pendiente."); 
-                        showView('authView'); 
-                        window.showLogin();
-                    } 
+                // NUEVO: Solo desloguea si no viene del botón de Google
+                if (!window.isGoogleSignup) {
+                    await signOut(auth); 
+                    showView('authView'); 
+                    window.showLogin(); 
                 }
+            }
             } else { await signOut(auth); showView('authView'); window.showLogin(); }
         } catch (e) { 
             console.error(e); 
@@ -2452,6 +2467,108 @@ window.loadFinanceData = () => {
         if(advisorBox) { advisorBox.innerHTML = `💡 Aún no has definido una meta. Haz clic en <strong>Fijar Meta</strong> para proyectar tus ganancias.`; advisorBox.style.borderLeftColor = 'var(--mac-blue)'; }
     }
 
+    // --- NUEVO: CÁLCULOS DE RETENCIÓN, CRECIMIENTO Y RENTABILIDAD ---
+    let totalActivos = 0;
+    let clientesRenovados = 0;
+    let ingresosMesActual = 0;
+    let ingresosMesAnterior = 0;
+    let margenesPlataforma = {};
+
+    const currentMonth = t.getMonth();
+    const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const lastMonthYear = currentMonth === 0 ? t.getFullYear() - 1 : t.getFullYear();
+
+    clients.forEach(c => {
+        // Tasa de Retención
+        if (c.statusCat !== 'expired') {
+            totalActivos++;
+            if (c.renovations > 0) clientesRenovados++;
+        }
+
+        const exp = new Date(c.date); 
+        exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
+        const fechaPago = new Date(exp); 
+        fechaPago.setMonth(fechaPago.getMonth() - (c.accountMonths || 1));
+        
+        const pIncome = (c.price || 0) * (c.accountUnits || 1);
+        const pCost = (c.cost || 0) * (c.accountUnits || 1);
+
+        // Crecimiento Mensual
+        if (fechaPago.getMonth() === currentMonth && fechaPago.getFullYear() === t.getFullYear()) {
+            ingresosMesActual += pIncome;
+        } else if (fechaPago.getMonth() === lastMonth && fechaPago.getFullYear() === lastMonthYear) {
+            ingresosMesAnterior += pIncome;
+        }
+
+        // Top Margen Rentabilidad
+        let platKey = c.platform || 'Otros';
+        if (!margenesPlataforma[platKey]) margenesPlataforma[platKey] = { income: 0, cost: 0, profit: 0 };
+        margenesPlataforma[platKey].income += pIncome;
+        margenesPlataforma[platKey].profit += (pIncome - pCost);
+    });
+
+    // Pintar Retención
+    const tasaRetencion = totalActivos > 0 ? (clientesRenovados / totalActivos) * 100 : 0;
+    if(document.getElementById('retentionRateText')) document.getElementById('retentionRateText').innerText = `${tasaRetencion.toFixed(1)}%`;
+    if(document.getElementById('retentionBar')) document.getElementById('retentionBar').style.width = `${tasaRetencion}%`;
+    if(document.getElementById('retentionDetailsText')) document.getElementById('retentionDetailsText').innerText = `${clientesRenovados} de ${totalActivos} clientes activos renovaron este mes.`;
+
+    // Pintar Crecimiento
+    let tasaCrecimiento = 0;
+    if (ingresosMesAnterior > 0) {
+        tasaCrecimiento = ((ingresosMesActual - ingresosMesAnterior) / ingresosMesAnterior) * 100;
+    } else if (ingresosMesActual > 0) {
+        tasaCrecimiento = 100;
+    }
+    if(document.getElementById('growthRateText')) document.getElementById('growthRateText').innerText = `${tasaCrecimiento >= 0 ? '+' : ''}${tasaCrecimiento.toFixed(1)}%`;
+    if(document.getElementById('growthDetailsText')) document.getElementById('growthDetailsText').innerText = `Mes actual: ${globalCurrency}${ingresosMesActual.toFixed(2)} | Mes anterior: ${globalCurrency}${ingresosMesAnterior.toFixed(2)}`;
+
+    // Pintar Top Rentabilidad (Margen)
+    let marginArray = Object.keys(margenesPlataforma).map(key => {
+        let m = margenesPlataforma[key];
+        let marginPct = m.income > 0 ? (m.profit / m.income) * 100 : 0;
+        return { platform: key, margin: marginPct, profit: m.profit };
+    }).sort((a,b) => b.margin - a.margin).slice(0, 5);
+
+    const topMarginList = document.getElementById('topMarginStatsList');
+    if (topMarginList) {
+        topMarginList.innerHTML = marginArray.length === 0 ? '<p style="font-size:12px; color:var(--mac-text-secondary);">No hay datos suficientes.</p>' : '';
+        marginArray.forEach(item => {
+            topMarginList.innerHTML += `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
+                    <strong style="color:var(--mac-text-main); font-size:13px;">${item.platform}</strong>
+                    <div style="text-align:right;">
+                        <span style="color:var(--mac-green); font-weight:bold; font-size:14px;">${item.margin.toFixed(1)}%</span><br>
+                        <span style="color:var(--mac-text-secondary); font-size:11px;">Neta: ${globalCurrency}${item.profit.toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // Pintar Ingresos por Método de Pago
+    const pmContainer = document.getElementById('paymentMethodsStatsList');
+    if(pmContainer && currentUserData.paymentMethods && currentUserData.paymentMethods.length > 0) {
+        pmContainer.innerHTML = '';
+        const methods = currentUserData.paymentMethods;
+        const avg = income / methods.length; // Estimado estadístico visual
+        methods.forEach(m => {
+            const pct = income > 0 ? ((avg / income) * 100).toFixed(1) : 0;
+            pmContainer.innerHTML += `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
+                    <strong style="color:var(--mac-text-main); font-size:13px;">🏦 ${m.bank}</strong>
+                    <div style="text-align:right;">
+                        <span style="color:#bf5af2; font-weight:bold; font-size:14px;">${globalCurrency}${avg.toFixed(2)}</span><br>
+                        <span style="color:var(--mac-text-secondary); font-size:11px;">${pct}% del ingreso total</span>
+                    </div>
+                </div>
+            `;
+        });
+    } else if (pmContainer) {
+        pmContainer.innerHTML = '<p style="color: #888; font-size: 13px;">Aún no tienes métodos de pago agregados.</p>';
+    }
+    // --- FIN NUEVOS CÁLCULOS ---
+
     // Dibujar Gráficos enviando el filtro
     setTimeout(() => {
         if(typeof ApexCharts !== 'undefined') window.renderCharts(income, cost, profit, filter);
@@ -3798,14 +3915,29 @@ window.submitCheckout = async () => {
         window.storeCart = [];
         document.getElementById('cartBadge').innerText = '0';
         document.getElementById('floatingCartBtn').style.display = 'none';
+        document.getElementById('checkoutModal').style.display = 'none';
+
+        // --- NUEVO: REDIRECCIÓN AL WHATSAPP DEL VENDEDOR ---
+        const dataTienda = window.publicStoreDataCache || portalStoreData;
+        const vendedorNum = dataTienda.phone ? dataTienda.phone.replace(/[^\d]/g, '') : '';
+        const wsText = `Hola, acabo de pagar mi pedido en tu tienda web.\n\n*🛒 Producto:* ${currentCheckoutItem.platform}\n*💰 Total Pagado:* ${dataTienda.currency || 'S/'}${currentCheckoutItem.price.toFixed(2)}\n*👤 A nombre de:* ${name}\n\nPor favor, verifica mi comprobante para entregarme el acceso.`;
+        const waUrl = `https://wa.me/${vendedorNum}?text=${encodeURIComponent(wsText)}`;
         
         Swal.fire({
             icon: 'success',
-            title: '¡Pago Enviado!',
-            html: '<p style="font-size:14px; color:var(--mac-text-secondary);">El vendedor verificará tu comprobante en breve.</p>',
-            confirmButtonColor: '#34C759',
+            title: '¡Pago Enviado con Éxito!',
+            html: '<p style="font-size:14px; color:var(--mac-text-secondary);">Tu comprobante está en revisión. <b>Por favor, avísale al vendedor por WhatsApp</b> haciendo clic en el botón de abajo para agilizar tu entrega.</p>',
+            confirmButtonText: '<i class="bx bxl-whatsapp" style="font-size:20px; vertical-align:middle;"></i> Avisar por WhatsApp',
+            confirmButtonColor: '#25D366',
+            showCancelButton: true,
+            cancelButtonText: 'Cerrar',
+            allowOutsideClick: false,
             background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
             color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.open(waUrl, '_blank');
+            }
         });
 
     } catch (error) { window.showNotification("Error: " + error.message); } 
@@ -6972,4 +7104,127 @@ window.switchFinanceTab = (tabId, element) => {
     if(tabId === 'tabTendencias') {
         window.dispatchEvent(new Event('resize'));
     }
+};
+
+/* =========================================================
+   MODO PREVISUALIZACIÓN DEMO (SIN REGISTRO)
+========================================================= */
+window.isDemoMode = false;
+
+window.checkDemo = () => {
+    if(window.isDemoMode) {
+        Swal.fire({
+            icon: 'info',
+            title: 'Modo Previsualización',
+            text: 'Estás viendo una demo interactiva. Para guardar cambios, vincular clientes y usar las herramientas, debes crear tu cuenta.',
+            confirmButtonText: 'Crear mi cuenta gratis',
+            showCancelButton: true,
+            cancelButtonText: 'Seguir mirando',
+            confirmButtonColor: '#007AFF',
+            background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+            color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+        }).then(r => {
+            if(r.isConfirmed) {
+                window.location.reload(); // Quita la demo y lo regresa al registro
+            }
+        });
+        return true;
+    }
+    return false;
+};
+
+window.chooseDemoMode = async () => {
+    const { value: planElegido } = await Swal.fire({
+        title: 'Selecciona la interfaz a probar',
+        input: 'select',
+        inputOptions: {
+            'basico': 'Plan Básico (Esencial)',
+            'pro': 'Plan PRO (Automatizado)'
+        },
+        inputPlaceholder: 'Elige un plan',
+        showCancelButton: true,
+        confirmButtonText: 'Entrar al Panel',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#007AFF',
+        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+    });
+    
+    if (planElegido) {
+        window.startVisualDemo(planElegido);
+    }
+};
+
+window.startVisualDemo = (plan) => {
+    window.isDemoMode = true;
+    
+    // Inyectar datos falsos en memoria local (no toca Firebase)
+    currentUser = { uid: 'demo_user' };
+    currentUserData = {
+        name: 'Usuario Demo',
+        role: 'user',
+        active: true,
+        plan_actual: plan,
+        currency: 'S/',
+        storeAlias: 'demo-store',
+        inventory: [
+            { id: 'inv1', platform: 'Netflix', type: 'Perfil', email: 'demo@netflix.com', pass: '123456', profile: '1', pin: '0000', status: 'libre' },
+            { id: 'inv2', platform: 'Disney+', type: 'Completa', email: 'disney@demo.com', pass: 'demo123', profile: '', pin: '', status: 'libre' }
+        ],
+        storeCatalog: [
+            { id: 'item1', platform: 'Netflix (1 Mes)', price: 15, pricingOptions: [{label:'1 Mes', price:15}], category: 'Streaming', desc: 'Pantalla 4K Demo', imgUrl: '', type: 'Servicio', status: 'disponible', autoStock: false },
+            { id: 'item2', platform: 'Combo Premium', price: 25, pricingOptions: [{label:'1 Mes', price:25}], category: 'Combos', desc: 'Netflix + Disney', imgUrl: '', type: 'Combo', status: 'disponible', autoStock: false }
+        ],
+        storeCategories: ['Streaming', 'Combos'],
+        customServices: ['Netflix', 'Disney+', 'HBO Max', 'Spotify Premium'],
+        financialGoal: 1500
+    };
+    
+    clients = [
+        { id: 'c1', name: 'Juan Pérez', platform: 'Netflix', phone: '+51999888777', date: new Date(Date.now() + 864000000).toISOString(), cost: 10, price: 15, accountUnits: 1, renovations: 2, statusCat: 'active' },
+        { id: 'c2', name: 'María Gómez', platform: 'Disney+', phone: '+51999888666', date: new Date(Date.now() - 86400000).toISOString(), cost: 8, price: 12, accountUnits: 1, renovations: 0, statusCat: 'expired' }
+    ];
+
+    // Interceptar silenciosamente las funciones de guardado para que no rompan
+    const funcToBlock = [
+        'saveClientData', 'deleteClient', 'renewClient', 'saveWaMessage', 
+        'saveProfile', 'addStoreItem', 'deleteStoreItem', 'addInventoryAccount', 
+        'deleteInventoryAccount', 'saveStoreSettings', 'saveMasterAccount', 
+        'deleteMasterAccount', 'submitCheckout', 'toggleStoreActive'
+    ];
+    
+    funcToBlock.forEach(fn => {
+        const originalFn = window[fn];
+        if (originalFn) {
+            window[fn] = (...args) => {
+                if(window.checkDemo()) return;
+                return originalFn(...args);
+            };
+        }
+    });
+
+    // Renderizar la Vista Principal
+    showView('appView');
+    
+    const brandName = document.getElementById('brandNameSidebar');
+    if (brandName) brandName.innerText = 'Usuario Demo';
+    
+    const mobileName = document.getElementById('mobileBrandName');
+    if (mobileName) mobileName.innerText = 'Usuario Demo';
+    
+    const planBadgeSide = document.getElementById('userPlanBadgeSidebar');
+    if (planBadgeSide) {
+        planBadgeSide.innerText = `Plan ${plan.toUpperCase()}`;
+        planBadgeSide.className = plan === 'pro' ? 'badge-pro-animated' : '';
+        planBadgeSide.style.display = 'inline-block';
+    }
+    
+    window.renderTable();
+    window.renderInventory();
+    window.syncStoreCategories();
+    window.renderStoreItems();
+    window.populateAllServiceSelects();
+    if (document.getElementById('statsPanel')) window.toggleStats(true);
+    
+    window.showNotification("¡Bienvenido al Modo Demo! Explora las herramientas.");
 };
