@@ -426,6 +426,7 @@ onAuthStateChanged(auth, async (user) => {
                     window.showLogin(); 
                 }
             }
+            } // <--- AÑADE ESTA LLAVE AQUÍ PARA CERRAR EL BLOQUE ANTERIOR
             } else { await signOut(auth); showView('authView'); window.showLogin(); }
         } catch (e) { 
             console.error(e); 
