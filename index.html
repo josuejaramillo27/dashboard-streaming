@@ -1362,6 +1362,67 @@
                     <i class='bx bx-upload'></i> Subir Estado
                 </button>
             </div>
+            <!-- NUEVO: ESTADOS AUTOMÁTICOS (HASTA 5) -->
+            <div style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border); margin-top: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px; margin-bottom: 15px;">
+                    <div>
+                        <h4 style="margin: 0 0 5px 0; color: #34C759; font-size: 15px;"><i class='bx bx-carousel'></i> Estados Automáticos</h4>
+                        <p style="font-size: 11px; color: var(--mac-text-secondary); margin: 0;">El bot rotará estos estados cada cierto tiempo en tu WhatsApp.</p>
+                    </div>
+                    <label class="store-toggle-label" style="transform: scale(0.8);">
+                        <input type="checkbox" id="autoStatusActive" class="store-toggle-checkbox">
+                        <span class="store-toggle-label"></span>
+                    </label>
+                </div>
+
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Frecuencia de publicación:</label>
+                <select id="autoStatusInterval" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 15px;">
+                    <option value="1">Cada 1 Hora</option>
+                    <option value="2">Cada 2 Horas</option>
+                    <option value="3">Cada 3 Horas</option>
+                    <option value="6">Cada 6 Horas</option>
+                </select>
+
+                <!-- Slots para los 5 Estados -->
+                <div id="statusSlotsContainer" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                    <!-- Se inyectan desde JS -->
+                </div>
+            </div>
+
+            <!-- NUEVO: SPAM EN GRUPOS -->
+            <div style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border); margin-top: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px; margin-bottom: 15px;">
+                    <div>
+                        <h4 style="margin: 0 0 5px 0; color: #FF9500; font-size: 15px;"><i class='bx bxs-group'></i> Difusión en Grupos</h4>
+                        <p style="font-size: 11px; color: var(--mac-text-secondary); margin: 0;">Programa un mensaje recurrente a tus grupos seleccionados.</p>
+                    </div>
+                    <label class="store-toggle-label" style="transform: scale(0.8);">
+                        <input type="checkbox" id="autoGroupActive" class="store-toggle-checkbox">
+                        <span class="store-toggle-label"></span>
+                    </label>
+                </div>
+
+                <button class="btn-secondary" style="width: 100%; margin-bottom: 15px; padding: 10px;" onclick="window.fetchWhatsAppGroups()">
+                    <i class='bx bx-refresh'></i> 1. Cargar Mis Grupos de WhatsApp
+                </button>
+
+                <div id="waGroupsList" style="max-height: 150px; overflow-y: auto; background: var(--mac-bg); border: 1px solid var(--mac-border); border-radius: 8px; padding: 10px; margin-bottom: 15px;">
+                    <p style="font-size: 12px; color: var(--mac-text-secondary); text-align: center; margin: 10px 0;">Presiona el botón para listar tus grupos aquí.</p>
+                </div>
+
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Mensaje publicitario (Spintax permitido):</label>
+                <textarea id="autoGroupText" rows="3" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none; margin-bottom: 10px;"></textarea>
+
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Imagen URL (Opcional):</label>
+                <input type="url" id="autoGroupImg" placeholder="https://i.postimg.cc/..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 10px;">
+
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Frecuencia del Spam:</label>
+                <select id="autoGroupInterval" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 15px;">
+                    <option value="1">Cada 1 Hora</option>
+                    <option value="2">Cada 2 Horas</option>
+                    <option value="4">Cada 4 Horas</option>
+                </select>
+            </div>
             
             <!-- Botón de Cerrar (Móvil) -->
             <button class="btn-secondary mobile-only-btn" style="width: 100%; padding: 14px; font-size: 15px; margin-top: 15px;" onclick="window.closeModals()">Cerrar Perfil</button>
