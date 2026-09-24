@@ -692,38 +692,6 @@ window.sendMassCampaign = async () => {
         }
     }
 };
-
-// --- SUBIR ESTADO DE WHATSAPP ---
-window.uploadWhatsAppStatus = async () => {
-    const msg = document.getElementById('statusDesc').value.trim();
-    const imgUrl = document.getElementById('statusImage').value.trim();
-
-    if (!msg && !imgUrl) return window.showNotification("⚠️ Escribe una descripción o pon una imagen.");
-
-    try {
-        window.showNotification("⏳ Subiendo estado a tu celular...");
-        const response = await fetch('https://bot.panelagc.com/api/subir-estado', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                distribuidorId: currentUser.uid,
-                textContent: msg,
-                imageUrl: imgUrl
-            })
-        });
-
-        const data = await response.json();
-        if(data.status === 'ok') {
-            window.showNotification("✅ Estado subido con éxito a WhatsApp");
-            document.getElementById('statusDesc').value = '';
-            document.getElementById('statusImage').value = '';
-        } else {
-            window.showNotification("❌ Error: " + data.message);
-        }
-    } catch(e) {
-        window.showNotification("❌ Error de conexión con el Bot.");
-    }
-};
 // --- GENERADOR VISUAL DE LOS 5 ESTADOS ---
 window.renderStatusSlots = () => {
     const container = document.getElementById('statusSlotsContainer');
