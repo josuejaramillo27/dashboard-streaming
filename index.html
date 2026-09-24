@@ -449,7 +449,13 @@
             <button type="button" class="pwd-toggle" onclick="window.togglePassword('loginPassword', this)"><i class='bx bx-show'></i></button>
         </div>
         <button class="btn-primary" onclick="window.doLogin()">Ingresar</button>
-        <span class="auth-link" onclick="window.showRegister()">¿No tienes cuenta? Regístrate</span>
+        
+        <!-- BOTÓN DEMO MOVIDO AQUÍ AFUERA -->
+        <button type="button" class="btn-secondary" onclick="window.chooseDemoMode()" style="margin-top: 15px; border: 1px dashed var(--mac-blue); color: var(--mac-blue); background: rgba(0, 122, 255, 0.05); padding: 12px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer;">
+            <i class='bx bx-play-circle' style="font-size:18px; vertical-align:middle;"></i> Probar Demo Sin Registro
+        </button>
+
+        <span class="auth-link" onclick="window.showRegister()" style="margin-top: 15px;">¿No tienes cuenta? Regístrate</span>
         <span class="auth-link" onclick="window.showReset()">¿Olvidaste tu contraseña?</span>
     </div>
 
@@ -492,9 +498,6 @@
             <button type="button" class="pwd-toggle" onclick="window.togglePassword('regPassword', this)"><i class='bx bx-show'></i></button>
         </div>
         <button class="btn-primary" onclick="window.doRegister()">Crear Cuenta</button>
-        <button type="button" class="btn-secondary" onclick="window.chooseDemoMode()" style="margin-top: 10px; border: 1px dashed var(--mac-blue); color: var(--mac-blue); background: rgba(0, 122, 255, 0.05); padding: 12px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer;">
-            <i class='bx bx-play-circle' style="font-size:18px; vertical-align:middle;"></i> Probar Demo Sin Registro
-        </button>
         <span class="auth-link" onclick="window.showLogin()">Ya tengo cuenta. Iniciar sesión</span>
     </div>
 
@@ -1397,14 +1400,13 @@
                 </div>
             </div>
 
-            <!-- 5. SPAM EN GRUPOS -->
+            <!-- 5. SPAM EN GRUPOS (MÚLTIPLES MENSAJES) -->
             <div style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border);">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px; margin-bottom: 15px;">
                     <div>
                         <h4 style="margin: 0 0 5px 0; color: #FF9500; font-size: 15px;"><i class='bx bxs-group'></i> Difusión en Grupos</h4>
-                        <p style="font-size: 11px; color: var(--mac-text-secondary); margin: 0;">Programa un mensaje recurrente a tus grupos.</p>
+                        <p style="font-size: 11px; color: var(--mac-text-secondary); margin: 0;">Programa mensajes rotativos a tus grupos.</p>
                     </div>
-                    <!-- 🔥 BOTÓN FIXEADO -->
                     <div style="display: flex; align-items: center;">
                         <input type="checkbox" id="autoGroupActive" class="bot-toggle-checkbox">
                         <label for="autoGroupActive" class="bot-toggle-label"></label>
@@ -1419,18 +1421,17 @@
                     <p style="font-size: 12px; color: var(--mac-text-secondary); text-align: center; margin: 10px 0;">Presiona el botón para listar tus grupos aquí.</p>
                 </div>
 
-                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Mensaje publicitario (Spintax permitido):</label>
-                <textarea id="autoGroupText" rows="3" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none; margin-bottom: 10px;"></textarea>
-
-                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Imagen URL (Opcional):</label>
-                <input type="url" id="autoGroupImg" placeholder="https://i.postimg.cc/..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 10px;">
-
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Frecuencia del Spam:</label>
-                <select id="autoGroupInterval" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 5px;">
+                <select id="autoGroupInterval" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 15px;">
                     <option value="1">Cada 1 Hora</option>
                     <option value="2">Cada 2 Horas</option>
                     <option value="4">Cada 4 Horas</option>
                 </select>
+
+                <!-- Slots para los 5 Mensajes Rotativos de Grupos -->
+                <div id="groupSlotsContainer" style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Se inyectan desde JS -->
+                </div>
             </div>
             
             <button class="btn-secondary mobile-only-btn" style="width: 100%; padding: 14px; font-size: 15px; margin-top: 15px;" onclick="window.closeModals()">Cerrar Perfil</button>
