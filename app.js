@@ -526,9 +526,14 @@ window.closeModals = (resetTab = true) => {
 window.openWaModal = () => { 
     const defaultMsg = "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*. Para renovar, usa estos datos:\n\n{pago}"; 
     const defaultDelivery = `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tu nueva cuenta de *{plataforma}*:\n\n📧 *Correo:* {correo}\n🔑 *Clave:* {pass}\n📌 *PIN:* {pin}\n\n📅 *Vence el:* {fecha}\n\n⚠️ *Reglas:* {reglas}\n\n¡Que disfrutes el contenido! 🍿`;
+    const defaultRenew = `🎉 *¡Renovación Exitosa, {nombre}!*\n\nTu servicio de *{plataforma}* ha sido renovado correctamente.\n📅 Nueva fecha de vencimiento: *{fecha}*\n\n🌐 *Tu Portal:* {link}\n🔑 *Código Web:* {codigo}\n\n¡Gracias por seguir confiando en nosotros! 🚀`;
 
     document.getElementById('editWaMessage').value = currentUserData.waTemplate || defaultMsg; 
     document.getElementById('editWaDeliveryMessage').value = currentUserData.waDeliveryMessage || defaultDelivery; 
+    // Nuevo campo para renovación
+    if(document.getElementById('editWaRenewMessage')) {
+        document.getElementById('editWaRenewMessage').value = currentUserData.waRenewMessage || defaultRenew; 
+    }
     
     document.getElementById('waModal').style.display = 'flex'; 
 };
@@ -537,13 +542,17 @@ window.saveWaMessage = async () => {
     const btn = document.querySelector('#waModal .btn-primary');
     btn.innerText = "Guardando..."; btn.disabled = true;
     try { 
+        const newRenewMsg = document.getElementById('editWaRenewMessage') ? document.getElementById('editWaRenewMessage').value : "";
+
         await updateDoc(doc(db, "users", currentUser.uid), { 
             waTemplate: document.getElementById('editWaMessage').value,
-            waDeliveryMessage: document.getElementById('editWaDeliveryMessage').value
+            waDeliveryMessage: document.getElementById('editWaDeliveryMessage').value,
+            waRenewMessage: newRenewMsg // Se guarda en la base de datos
         }); 
         
         currentUserData.waTemplate = document.getElementById('editWaMessage').value;
         currentUserData.waDeliveryMessage = document.getElementById('editWaDeliveryMessage').value;
+        if(newRenewMsg) currentUserData.waRenewMessage = newRenewMsg; // Se actualiza en memoria
         
         window.showNotification("Configuración de WhatsApp guardada."); 
         window.closeModals();
@@ -1886,7 +1895,7 @@ const aplicarRenovacionFirebase = async (id, strFirebase, nuevaFechaBonita, c) =
         if (plan === 'pro' || plan === 'elite') {
             
             // 👈 AHORA SÍ CONSTRUIMOS TU MENSAJE PERSONALIZADO DE RENOVACIÓN
-            let baseMsg = currentUserData.waTemplate || "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*.";
+            let baseMsg = currentUserData.waRenewMessage || "🎉 *¡Renovación Exitosa, {nombre}!*\n\nTu servicio de *{plataforma}* ha sido renovado correctamente.\n📅 Nueva fecha de vencimiento: *{fecha}*\n\n🌐 *Tu Portal:* {link}\n🔑 *Código Web:* {codigo}\n\n¡Gracias por seguir confiando en nosotros! 🚀";
             let uCount = c.accountUnits || 1;
             let precioCalculado = (c.price || 0) * uCount;
             let moneda = currentUserData.currency || "S/";
@@ -4989,7 +4998,7 @@ window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVe
 
             // 4. Preparamos el Mensaje
             const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
-            let baseMsg = currentUserData.waTemplate || "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*.";
+            let baseMsg = currentUserData.waRenewMessage || "🎉 *¡Renovación Exitosa, {nombre}!*\n\nTu servicio de *{plataforma}* ha sido renovado correctamente.\n📅 Nueva fecha de vencimiento: *{fecha}*\n\n🌐 *Tu Portal:* {link}\n🔑 *Código Web:* {codigo}\n\n¡Gracias por seguir confiando en nosotros! 🚀";
             
             const baseUrl = window.location.origin + window.location.pathname;
             const portalAlias = currentUserData.storeAlias || currentUser.uid;
