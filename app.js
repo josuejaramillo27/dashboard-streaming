@@ -556,6 +556,22 @@ window.saveWaMessage = async () => {
 // 🔥 NUEVO SISTEMA DE MEMORIA TEMPORAL PARA MÉTODOS DE PAGO
 let tempPaymentMethods = []; 
 
+// --- MANEJO DE PESTAÑAS DENTRO DEL PERFIL ---
+window.switchProfileTab = (tabId, element) => {
+    document.querySelectorAll('.profile-tab-content').forEach(tab => tab.style.display = 'none');
+    document.getElementById(tabId).style.display = 'block';
+    document.querySelectorAll('.profile-tab-btn').forEach(btn => btn.classList.remove('active'));
+    element.classList.add('active');
+};
+
+window.openUpgradeWa = () => {
+    // Aquí pon tu número real
+    const adminPhone = "+51961341323"; 
+    const msg = encodeURIComponent("¡Hola! Quiero subir al Plan PRO para desbloquear el envío de Campañas Masivas y la subida de Estados automáticos.");
+    window.open(`https://wa.me/${adminPhone}?text=${msg}`, '_blank');
+};
+
+// --- ABRIR MODAL DE PERFIL MODIFICADO PARA VERIFICAR PLAN ---
 window.openProfileModal = () => { 
     // 1. Carga los datos de texto del perfil
     document.getElementById('editProfileName').value = currentUserData.name || ''; 
@@ -564,14 +580,148 @@ window.openProfileModal = () => {
     document.getElementById('editProfileAlias').value = currentUserData.storeAlias || ''; 
     document.getElementById('editReferencesLink').value = currentUserData.referencesLink || '';
     
-    // 2. Carga los chips de servicios personalizados
-    if (typeof window.renderCustomServicesChips === 'function') {
-        window.renderCustomServicesChips();
-    }
-
-    // 🔥 3. CARGA LOS MÉTODOS DE PAGO DESDE FIREBASE
+    // 2. Carga los chips de servicios y pagos
+    if (typeof window.renderCustomServicesChips === 'function') window.renderCustomServicesChips();
     tempPaymentMethods = (currentUserData.paymentMethods || []).map(m => ({ ...m, isEditing: false }));
     window.renderPaymentMethodsList();
+
+    // 3. VERIFICADOR DE PLAN PARA LA PESTAÑA DEL BOT
+    const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
+    if (plan === 'pro' || plan === 'elite') {
+        document.getElementById('botBasicWarning').style.display = 'none';
+        document.getElementById('botProContent').style.display = 'block';
+    } else {
+        document.getElementById('botBasicWarning').style.display = 'block';
+        document.getElementById('botProContent').style.display = 'none';
+    }
+
+    // 4. Reiniciar a la primera pestaña siempre que se abre
+    const primeraPestana = document.querySelector('.profile-tab-btn');
+    if(primeraPestana) window.switchProfileTab('tabPerfilMarca', primeraPestana);
+};
+
+// --- FUNCIÓN HÍBRIDA: ENVIAR CAMPAÑA MASIVA ---
+window.sendMassCampaign = async () => {
+    const msg = document.getElementById('campaignMessage').value.trim();
+    const imgUrl = document.getElementById('campaignImage').value.trim();
+    const dbFilter = document.getElementById('campaignDbClients').value;
+    const externalRaw = document.getElementById('campaignExternal').value.trim();
+
+    if (!msg) return window.showNotification("⚠️ Escribe un mensaje para tu campaña.");
+
+    // 1. Recopilar clientes de la BD (Si lo seleccionó)
+    let finalRecipients = [];
+    const today = new Date(); today.setHours(0,0,0,0);
+
+    if (dbFilter !== 'none') {
+        clients.forEach(c => {
+            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+            const diffDays = Math.ceil((exp - today) / 86400000);
+            
+            let apply = false;
+            if (dbFilter === 'all') apply = true;
+            if (dbFilter === 'expired' && diffDays < 0) apply = true;
+            if (dbFilter === 'active' && diffDays >= 0) apply = true;
+
+            if (apply && c.phone) {
+                finalRecipients.push({ phone: c.phone, name: c.name || "amigo" });
+            }
+        });
+    }
+
+    // 2. Recopilar números externos
+    if (externalRaw) {
+        const extArray = externalRaw.split(',').map(n => n.trim()).filter(n => n !== '');
+        extArray.forEach(num => {
+            // Aseguramos que tenga el +
+            let cleanNum = num.replace(/[^\d+]/g, '');
+            if(cleanNum) {
+                if(!cleanNum.startsWith('+')) cleanNum = '+' + cleanNum;
+                finalRecipients.push({ phone: cleanNum, name: "amigo" });
+            }
+        });
+    }
+
+    // 3. Quitar duplicados por teléfono
+    const uniqueRecipients = [];
+    const seenPhones = new Set();
+    finalRecipients.forEach(r => {
+        if (!seenPhones.has(r.phone)) {
+            seenPhones.add(r.phone);
+            uniqueRecipients.push(r);
+        }
+    });
+
+    if (uniqueRecipients.length === 0) return window.showNotification("⚠️ No se encontraron destinatarios válidos.");
+
+    // 4. Confirmación antes de disparar
+    const confirm = await Swal.fire({
+        title: 'Lanzar Campaña',
+        text: `Se enviará tu promoción a ${uniqueRecipients.length} contacto(s) en modo Anti-Ban (uno por uno con pausas largas). ¿Continuar?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, enviar ahora',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#007AFF',
+        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+    });
+
+    if (confirm.isConfirmed) {
+        window.showNotification("🚀 Campaña enviada a la cola lenta de tu servidor.");
+        
+        try {
+            await fetch('https://bot.panelagc.com/api/campana-masiva', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    distribuidorId: currentUser.uid,
+                    clientes: uniqueRecipients,
+                    imageUrl: imgUrl,
+                    mensajeBase: msg
+                })
+            });
+            // Limpiar campos
+            document.getElementById('campaignMessage').value = '';
+            document.getElementById('campaignImage').value = '';
+            document.getElementById('campaignExternal').value = '';
+            document.getElementById('campaignDbClients').value = 'none';
+        } catch(e) {
+            console.error("Error en campaña:", e);
+        }
+    }
+};
+
+// --- SUBIR ESTADO DE WHATSAPP ---
+window.uploadWhatsAppStatus = async () => {
+    const msg = document.getElementById('statusDesc').value.trim();
+    const imgUrl = document.getElementById('statusImage').value.trim();
+
+    if (!msg && !imgUrl) return window.showNotification("⚠️ Escribe una descripción o pon una imagen.");
+
+    try {
+        window.showNotification("⏳ Subiendo estado a tu celular...");
+        const response = await fetch('https://bot.panelagc.com/api/subir-estado', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                distribuidorId: currentUser.uid,
+                textContent: msg,
+                imageUrl: imgUrl
+            })
+        });
+
+        const data = await response.json();
+        if(data.status === 'ok') {
+            window.showNotification("✅ Estado subido con éxito a WhatsApp");
+            document.getElementById('statusDesc').value = '';
+            document.getElementById('statusImage').value = '';
+        } else {
+            window.showNotification("❌ Error: " + data.message);
+        }
+    } catch(e) {
+        window.showNotification("❌ Error de conexión con el Bot.");
+    }
 };
 
 window.renderPaymentMethodsList = () => {
