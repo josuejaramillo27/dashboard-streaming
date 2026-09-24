@@ -961,7 +961,15 @@
                     </div>
                 </div>
 
-                <div id="storeItemsList" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; margin-bottom: 15px;"></div>
+                <!-- BOTÓN PARA DESCARGAR ESTADOS -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0 10px 0; padding-top: 15px; border-top: 1px dashed var(--mac-border);">
+    <span style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Tus Productos Guardados:</span>
+    <button class="btn-primary" style="width: auto; padding: 8px 15px; font-size: 12px; background: linear-gradient(135deg, #FF2D55 0%, #AF52DE 100%); border: none; font-weight: bold; box-shadow: 0 4px 12px rgba(255, 45, 85, 0.3);" onclick="window.generateCatalogImages()">
+        <i class='bx bx-images'></i> Exportar para Estados
+    </button>
+</div>
+
+<div id="storeItemsList" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; margin-bottom: 15px;"></div>
             </div>
 
             <!-- VENTANA 2: DESCUENTOS Y CUPONES (¡NUEVO!) -->
