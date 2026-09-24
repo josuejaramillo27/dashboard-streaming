@@ -594,7 +594,11 @@ window.openProfileModal = () => {
         document.getElementById('botBasicWarning').style.display = 'block';
         document.getElementById('botProContent').style.display = 'none';
     }
-    window.renderStatusSlots();
+
+    // 🔥 AQUÍ ESTÁ LA LÍNEA CORREGIDA 🔥
+    if (typeof window.renderBotSlots === 'function') {
+        window.renderBotSlots();
+    }
     
     // 4. Reiniciar a la primera pestaña siempre que se abre
     const primeraPestana = document.querySelector('.profile-tab-btn');
