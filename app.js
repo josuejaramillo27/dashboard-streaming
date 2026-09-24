@@ -709,26 +709,26 @@ window.renderBotSlots = () => {
     const estados = config.estados || [];
     const grupos = config.gruposMensajes || [];
 
-    // Pintar 5 Cajas de Estados
+    // Pintar 5 Cajas de Estados en formato Tarjeta
     for (let i = 0; i < 5; i++) {
         const est = estados[i] || { texto: '', imgUrl: '' };
         contEstados.innerHTML += `
-            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border: 1px dashed var(--mac-border);">
-                <span style="font-size: 11px; font-weight: bold; color: var(--mac-blue); margin-bottom: 5px; display: block;">Estado ${i + 1}</span>
-                <input type="text" id="slotTxt_${i}" placeholder="Texto del estado..." value="${est.texto}" style="width: 100%; padding: 8px; margin-bottom: 6px; border-radius: 6px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px;">
-                <input type="url" id="slotImg_${i}" placeholder="URL Imagen (Opcional)" value="${est.imgUrl}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px;">
+            <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border: 1px solid var(--mac-border); display: flex; flex-direction: column; gap: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+                <span style="font-size: 12px; font-weight: 800; color: var(--mac-blue); display: flex; align-items: center; gap: 5px;"><i class='bx bx-image'></i> Estado ${i + 1}</span>
+                <input type="text" id="slotTxt_${i}" placeholder="Texto del estado..." value="${est.texto}" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px; box-sizing: border-box;">
+                <input type="url" id="slotImg_${i}" placeholder="URL Imagen (Opcional)" value="${est.imgUrl}" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px; box-sizing: border-box;">
             </div>
         `;
     }
 
-    // Pintar 5 Cajas de Grupos
+    // Pintar 5 Cajas de Grupos en formato Tarjeta
     for (let i = 0; i < 5; i++) {
         const grp = grupos[i] || { texto: '', imgUrl: '' };
         contGrupos.innerHTML += `
-            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border: 1px dashed var(--mac-border);">
-                <span style="font-size: 11px; font-weight: bold; color: var(--mac-orange); margin-bottom: 5px; display: block;">Mensaje Grupal ${i + 1}</span>
-                <textarea id="grpTxt_${i}" rows="2" placeholder="Mensaje publicitario (Spintax permitido)..." style="width: 100%; padding: 8px; margin-bottom: 6px; border-radius: 6px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px; resize: none;">${grp.texto}</textarea>
-                <input type="url" id="grpImg_${i}" placeholder="URL Imagen (Opcional)" value="${grp.imgUrl}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px;">
+            <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border: 1px solid var(--mac-border); display: flex; flex-direction: column; gap: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+                <span style="font-size: 12px; font-weight: 800; color: var(--mac-orange); display: flex; align-items: center; gap: 5px;"><i class='bx bx-message-square-dots'></i> Mensaje ${i + 1}</span>
+                <textarea id="grpTxt_${i}" rows="3" placeholder="Mensaje (Spintax permitido)..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px; resize: none; box-sizing: border-box;">${grp.texto}</textarea>
+                <input type="url" id="grpImg_${i}" placeholder="URL Imagen (Opcional)" value="${grp.imgUrl}" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px; box-sizing: border-box;">
             </div>
         `;
     }
