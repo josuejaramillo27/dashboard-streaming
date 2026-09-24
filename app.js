@@ -952,7 +952,6 @@ window.saveProfile = async () => {
         for (let i = 0; i < tempPaymentMethods.length; i++) {
             let m = tempPaymentMethods[i];
             
-            // Por si le dio a "Guardar Perfil" olvidando confirmar un método que estaba abierto
             if (m.isEditing) {
                  m.bank = document.getElementById(`pmBank_${i}`).value.trim();
                  m.number = document.getElementById(`pmNumber_${i}`).value.trim();
@@ -961,11 +960,10 @@ window.saveProfile = async () => {
                  if (fInput && fInput.files.length > 0) m.fileObj = fInput.files[0];
             }
             
-            if (!m.bank && !m.number) continue; // Ignora los vacíos
+            if (!m.bank && !m.number) continue; 
 
             let finalQrUrl = m.qrUrl;
             
-            // Si hay un archivo File esperando, lo subimos a Firebase
             if (m.fileObj) {
                 const storageRefQR = ref(storage, `qrs/${currentUser.uid}_qr_${Date.now()}_${i}`);
                 await uploadBytes(storageRefQR, m.fileObj);
@@ -1000,7 +998,6 @@ window.saveProfile = async () => {
             estadosActivos: document.getElementById('autoStatusActive').checked,
             estadosIntervaloHoras: parseInt(document.getElementById('autoStatusInterval').value) || 2,
             estados: estadosArray,
-            // Conservamos el historial para que no se resetee el cron
             estadosLastRun: (currentUserData.botConfig && currentUserData.botConfig.estadosLastRun) ? currentUserData.botConfig.estadosLastRun : null,
             estadosCurrentIndex: (currentUserData.botConfig && currentUserData.botConfig.estadosCurrentIndex) ? currentUserData.botConfig.estadosCurrentIndex : 0,
 
@@ -1012,12 +1009,12 @@ window.saveProfile = async () => {
             gruposLastRun: (currentUserData.botConfig && currentUserData.botConfig.gruposLastRun) ? currentUserData.botConfig.gruposLastRun : null
         };
         
-        // Guardar absolutamente todo en Firebase de un solo tiro
+        // 🔥 AQUÍ ESTABA EL ERROR: Faltaba la coma después de finalPaymentMethods
         await updateDoc(doc(db, "users", currentUser.uid), { 
             name: name, country: country, currency: getCurrencyForCountry(country), 
             phone: phone, logoUrl: logoUrl, bannerUrl: bannerUrl, storeAlias: finalAlias,
             referencesLink: referencesLink,
-            paymentMethods: finalPaymentMethods // 🔥 Se guarda el arreglo limpio
+            paymentMethods: finalPaymentMethods, 
             botConfig: botConfig
         });
         
@@ -1054,7 +1051,7 @@ window.saveProfile = async () => {
         const priceInput = document.getElementById('clientPrice');
         if (priceInput) priceInput.placeholder = `Precio de Venta (${globalCurrency})`;
 
-        window.showNotification("Perfil y Métodos de Pago guardados."); 
+        window.showNotification("Perfil, Bot y Métodos de Pago guardados."); 
         window.closeModals();
         
         if (document.getElementById('tableBody')) window.renderTable();
