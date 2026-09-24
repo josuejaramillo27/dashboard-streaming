@@ -692,19 +692,23 @@ window.sendMassCampaign = async () => {
         }
     }
 };
-// --- GENERADOR VISUAL DE LOS 5 ESTADOS ---
-window.renderStatusSlots = () => {
-    const container = document.getElementById('statusSlotsContainer');
-    if (!container) return;
-    container.innerHTML = '';
+// --- GENERADOR VISUAL DE LOS 10 SLOTS (5 ESTADOS + 5 GRUPOS) ---
+window.renderBotSlots = () => {
+    const contEstados = document.getElementById('statusSlotsContainer');
+    const contGrupos = document.getElementById('groupSlotsContainer');
+    if (!contEstados || !contGrupos) return;
     
-    // Leemos de Firebase si ya tiene estados guardados, si no, creamos un array vacío
+    contEstados.innerHTML = '';
+    contGrupos.innerHTML = '';
+    
     const config = currentUserData.botConfig || {};
     const estados = config.estados || [];
+    const grupos = config.gruposMensajes || [];
 
+    // Pintar 5 Cajas de Estados
     for (let i = 0; i < 5; i++) {
         const est = estados[i] || { texto: '', imgUrl: '' };
-        container.innerHTML += `
+        contEstados.innerHTML += `
             <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border: 1px dashed var(--mac-border);">
                 <span style="font-size: 11px; font-weight: bold; color: var(--mac-blue); margin-bottom: 5px; display: block;">Estado ${i + 1}</span>
                 <input type="text" id="slotTxt_${i}" placeholder="Texto del estado..." value="${est.texto}" style="width: 100%; padding: 8px; margin-bottom: 6px; border-radius: 6px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px;">
@@ -713,14 +717,23 @@ window.renderStatusSlots = () => {
         `;
     }
 
-    // Cargamos los otros valores del bot en los selects
+    // Pintar 5 Cajas de Grupos
+    for (let i = 0; i < 5; i++) {
+        const grp = grupos[i] || { texto: '', imgUrl: '' };
+        contGrupos.innerHTML += `
+            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border: 1px dashed var(--mac-border);">
+                <span style="font-size: 11px; font-weight: bold; color: var(--mac-orange); margin-bottom: 5px; display: block;">Mensaje Grupal ${i + 1}</span>
+                <textarea id="grpTxt_${i}" rows="2" placeholder="Mensaje publicitario (Spintax permitido)..." style="width: 100%; padding: 8px; margin-bottom: 6px; border-radius: 6px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px; resize: none;">${grp.texto}</textarea>
+                <input type="url" id="grpImg_${i}" placeholder="URL Imagen (Opcional)" value="${grp.imgUrl}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px;">
+            </div>
+        `;
+    }
+
+    // Cargar Checkboxes y Selects guardados
     document.getElementById('autoStatusActive').checked = config.estadosActivos || false;
     document.getElementById('autoStatusInterval').value = config.estadosIntervaloHoras || 2;
-    
     document.getElementById('autoGroupActive').checked = config.gruposActivos || false;
     document.getElementById('autoGroupInterval').value = config.gruposIntervaloHoras || 2;
-    document.getElementById('autoGroupText').value = config.gruposTexto || '';
-    document.getElementById('autoGroupImg').value = config.gruposImgUrl || '';
 };
 
 // --- EXTRAER GRUPOS DEL BOT ---
@@ -954,10 +967,16 @@ window.saveProfile = async () => {
 
         // --- GUARDADO DE LA CONFIGURACIÓN AUTOMÁTICA DEL BOT ---
         let estadosArray = [];
+        let gruposArray = [];
         for (let i = 0; i < 5; i++) {
-            const txt = document.getElementById(`slotTxt_${i}`).value.trim();
-            const img = document.getElementById(`slotImg_${i}`).value.trim();
-            estadosArray.push({ texto: txt, imgUrl: img });
+            estadosArray.push({ 
+                texto: document.getElementById(`slotTxt_${i}`).value.trim(), 
+                imgUrl: document.getElementById(`slotImg_${i}`).value.trim() 
+            });
+            gruposArray.push({ 
+                texto: document.getElementById(`grpTxt_${i}`).value.trim(), 
+                imgUrl: document.getElementById(`grpImg_${i}`).value.trim() 
+            });
         }
 
         const selectedGroups = Array.from(document.querySelectorAll('.wa-group-checkbox:checked')).map(cb => cb.value);
@@ -971,10 +990,10 @@ window.saveProfile = async () => {
 
             gruposActivos: document.getElementById('autoGroupActive').checked,
             gruposIntervaloHoras: parseInt(document.getElementById('autoGroupInterval').value) || 2,
-            gruposTexto: document.getElementById('autoGroupText').value.trim(),
-            gruposImgUrl: document.getElementById('autoGroupImg').value.trim(),
+            gruposMensajes: gruposArray, // 🔥 NUEVO ARRAY
             gruposTarget: selectedGroups,
-            gruposLastRun: (currentUserData.botConfig && currentUserData.botConfig.gruposLastRun) ? currentUserData.botConfig.gruposLastRun : null
+            gruposLastRun: (currentUserData.botConfig && currentUserData.botConfig.gruposLastRun) ? currentUserData.botConfig.gruposLastRun : null,
+            gruposCurrentIndex: (currentUserData.botConfig && currentUserData.botConfig.gruposCurrentIndex) ? currentUserData.botConfig.gruposCurrentIndex : 0
         };
         
         // 🔥 AQUÍ ESTABA EL ERROR: Faltaba la coma después de finalPaymentMethods
@@ -7439,3 +7458,51 @@ window.startVisualDemo = (plan) => {
     
     window.showNotification("¡Bienvenido al Modo Demo! Explora las herramientas.");
 };
+
+// ==========================================================================
+// 📱 SISTEMA NATIVO DEL BOTÓN "ATRÁS" (ANDROID / IOS / PC)
+// ==========================================================================
+
+// 1. Iniciamos la app empujando un estado artificial al historial
+window.history.pushState({ page: "panel" }, "");
+
+// 2. Escuchamos cuando el usuario pulsa el botón físico o gesto de "Atrás"
+window.addEventListener("popstate", function(event) {
+    
+    // Lo primero es volver a inyectar el estado para atrapar el próximo "Atrás" 
+    // y evitar que el navegador cierre la aplicación web por accidente.
+    window.history.pushState({ page: "panel" }, "");
+
+    // A) ¿Está abierto el menú lateral móvil? (Spotify Menu)
+    const sidebar = document.getElementById('mainSidebar');
+    if (sidebar && sidebar.classList.contains('mobile-open')) {
+        window.toggleMobileMenu();
+        return;
+    }
+
+    // B) ¿Está abierto el panel deslizante del carrito?
+    const cartPanel = document.getElementById('cartPanel');
+    if (cartPanel && cartPanel.classList.contains('active')) {
+        window.toggleCartPanel();
+        return;
+    }
+
+    // C) ¿Hay algún Modal Flotante abierto (Perfil, Inventario, WA, Checkout)?
+    const modalesAbiertos = Array.from(document.querySelectorAll('.modal-overlay'))
+                                 .filter(m => m.style.display === 'flex' || m.style.display === 'block');
+    
+    if (modalesAbiertos.length > 0) {
+        // Cierra los modales sin forzar el reset de fondo
+        window.closeModals(false); 
+        return;
+    }
+
+    // D) Si no hay modales, ¿El usuario está en una sección que no es el Home?
+    const homeSection = document.getElementById('homeSection');
+    // Solo aplica para los vendedores, no para la cuenta Admin global
+    if (homeSection && !homeSection.classList.contains('active-section') && currentUserData && currentUserData.role !== 'admin') {
+        // Devuelve al usuario a la página de inicio (Dashboard Central)
+        window.switchDashboardSection('homeSection', document.querySelector('.sidebar-item[title="Dashboard Central"]'));
+        return;
+    }
+});
