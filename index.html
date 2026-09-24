@@ -1334,9 +1334,9 @@
                 </div>
             </div>
 
-            <!-- 2. Mini Tutorial Global para URL de Imagen -->
+            <!-- 2. Mini Tutorial Global -->
             <div style="background: rgba(0, 122, 255, 0.05); border: 1px dashed var(--mac-blue); padding: 15px; border-radius: 12px; margin-bottom: 20px; font-size: 12px; color: var(--mac-text-main); line-height: 1.5;">
-                <strong style="color: var(--mac-blue); font-size: 13px;"><i class='bx bx-bulb'></i> ¿Cómo obtener la URL de una Imagen (PC, Android o iOS)?</strong>
+                <strong style="color: var(--mac-blue); font-size: 13px;"><i class='bx bx-bulb'></i> ¿Cómo obtener la URL de una Imagen?</strong>
                 <ol style="margin: 5px 0 0 0; padding-left: 20px; color: var(--mac-text-secondary);">
                     <li>Entra a <a href="https://postimages.org" target="_blank" style="color: var(--mac-blue); font-weight: bold;">postimages.org</a> desde tu navegador.</li>
                     <li>Sube la foto que deseas enviar en tu campaña o estado.</li>
@@ -1344,28 +1344,36 @@
                 </ol>
             </div>
 
-            <!-- 3. Campañas Masivas (Sistema Híbrido) -->
+            <!-- 3. Campañas Masivas -->
             <div style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border); margin-bottom: 20px;">
                 <h4 style="margin: 0 0 5px 0; color: var(--mac-blue); font-size: 15px;"><i class='bx bxs-megaphone'></i> Campaña Masiva Segura</h4>
                 <p style="font-size: 11px; color: var(--mac-text-secondary); margin-bottom: 15px;">El envío incluye pausas automáticas Anti-Ban. Evita enviar a más de 100 personas de golpe.</p>
 
-                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Mensaje de la promoción:</label>
-                <p style="font-size: 10px; color: var(--mac-orange); margin: 2px 0 5px 0;">* Tip: Usa el formato {Palabra1|Palabra2} para rotar textos y evitar baneos.</p>
-                <textarea id="campaignMessage" rows="4" placeholder="Ej: {Hola|Qué tal} {nombre}, mira nuestra nueva oferta..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none; margin-bottom: 10px;"></textarea>
-
-                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">URL de la Imagen (Opcional):</label>
-                <input type="url" id="campaignImage" placeholder="https://i.postimg.cc/..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 15px;">
-
-                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main); display: block; margin-bottom: 5px;">¿A quiénes enviamos?</label>
+                <!-- Diseño Grid para la PC -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                    <div style="display: flex; flex-direction: column;">
+                        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Mensaje de la promoción:</label>
+                        <p style="font-size: 10px; color: var(--mac-orange); margin: 2px 0 5px 0;">* Tip: Usa {Palabra1|Palabra2} para rotar textos.</p>
+                        <textarea id="campaignMessage" rows="4" placeholder="Ej: {Hola|Qué tal} {nombre}, mira nuestra nueva oferta..." style="flex: 1; width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none; box-sizing: border-box;"></textarea>
+                    </div>
+                    <div style="display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">URL de la Imagen (Opcional):</label>
+                            <input type="url" id="campaignImage" placeholder="https://i.postimg.cc/..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-top: 5px; box-sizing: border-box;">
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main); display: block; margin-bottom: 5px;">¿A quiénes enviamos?</label>
+                            <select id="campaignDbClients" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
+                                <option value="none">-- No enviar a mi lista de clientes --</option>
+                                <option value="all">A todos mis clientes registrados</option>
+                                <option value="expired">Solo a clientes vencidos (Win-Back)</option>
+                                <option value="active">Solo a clientes activos</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
                 
-                <select id="campaignDbClients" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 10px;">
-                    <option value="none">-- No enviar a mi lista de clientes --</option>
-                    <option value="all">A todos mis clientes registrados</option>
-                    <option value="expired">Solo a clientes vencidos (Win-Back)</option>
-                    <option value="active">Solo a clientes activos</option>
-                </select>
-
-                <textarea id="campaignExternal" rows="2" placeholder="Contactos externos (Opcional). Pega los WhatsApp separados por comas. Ej: +51999888777, +5212345678" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none; margin-bottom: 15px;"></textarea>
+                <textarea id="campaignExternal" rows="2" placeholder="Contactos externos (Opcional). Pega los WhatsApp separados por comas. Ej: +51999888777, +5212345678" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none; margin-bottom: 15px; box-sizing: border-box;"></textarea>
 
                 <button class="btn-primary" style="width: 100%; padding: 12px;" onclick="window.sendMassCampaign()">
                     <i class='bx bx-send'></i> Lanzar Campaña
@@ -1374,42 +1382,56 @@
 
             <!-- 4. ESTADOS AUTOMÁTICOS (HASTA 5) -->
             <div style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border); margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px; margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                     <div>
                         <h4 style="margin: 0 0 5px 0; color: #34C759; font-size: 15px;"><i class='bx bx-carousel'></i> Estados Automáticos</h4>
-                        <p style="font-size: 11px; color: var(--mac-text-secondary); margin: 0;">El bot rotará estos estados cada cierto tiempo.</p>
+                        <p style="font-size: 11px; color: var(--mac-text-secondary); margin: 0;">El bot rotará estos estados.</p>
                     </div>
-                    <!-- 🔥 BOTÓN FIXEADO -->
-                    <div style="display: flex; align-items: center;">
-                        <input type="checkbox" id="autoStatusActive" class="bot-toggle-checkbox">
-                        <label for="autoStatusActive" class="bot-toggle-label"></label>
+                    
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Frecuencia:</label>
+                            <select id="autoStatusInterval" style="padding: 6px 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px; outline: none;">
+                                <option value="1">Cada 1 Hora</option>
+                                <option value="2">Cada 2 Horas</option>
+                                <option value="3">Cada 3 Horas</option>
+                                <option value="6">Cada 6 Horas</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <input type="checkbox" id="autoStatusActive" class="bot-toggle-checkbox">
+                            <label for="autoStatusActive" class="bot-toggle-label" style="margin: 0;"></label>
+                        </div>
                     </div>
                 </div>
 
-                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Frecuencia de publicación:</label>
-                <select id="autoStatusInterval" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 15px;">
-                    <option value="1">Cada 1 Hora</option>
-                    <option value="2">Cada 2 Horas</option>
-                    <option value="3">Cada 3 Horas</option>
-                    <option value="6">Cada 6 Horas</option>
-                </select>
-
-                <!-- Slots para los 5 Estados -->
-                <div id="statusSlotsContainer" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Contenedor Grid Mágico -->
+                <div id="statusSlotsContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">
                     <!-- Se inyectan desde JS -->
                 </div>
             </div>
 
-            <!-- 5. SPAM EN GRUPOS (MÚLTIPLES MENSAJES) -->
+            <!-- 5. SPAM EN GRUPOS -->
             <div style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border);">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px; margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                     <div>
                         <h4 style="margin: 0 0 5px 0; color: #FF9500; font-size: 15px;"><i class='bx bxs-group'></i> Difusión en Grupos</h4>
-                        <p style="font-size: 11px; color: var(--mac-text-secondary); margin: 0;">Programa mensajes rotativos a tus grupos.</p>
+                        <p style="font-size: 11px; color: var(--mac-text-secondary); margin: 0;">Programa mensajes a tus grupos.</p>
                     </div>
-                    <div style="display: flex; align-items: center;">
-                        <input type="checkbox" id="autoGroupActive" class="bot-toggle-checkbox">
-                        <label for="autoGroupActive" class="bot-toggle-label"></label>
+
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Frecuencia:</label>
+                            <select id="autoGroupInterval" style="padding: 6px 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px; outline: none;">
+                                <option value="1">Cada 1 Hora</option>
+                                <option value="2">Cada 2 Horas</option>
+                                <option value="4">Cada 4 Horas</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <input type="checkbox" id="autoGroupActive" class="bot-toggle-checkbox">
+                            <label for="autoGroupActive" class="bot-toggle-label" style="margin: 0;"></label>
+                        </div>
                     </div>
                 </div>
 
@@ -1421,15 +1443,10 @@
                     <p style="font-size: 12px; color: var(--mac-text-secondary); text-align: center; margin: 10px 0;">Presiona el botón para listar tus grupos aquí.</p>
                 </div>
 
-                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Frecuencia del Spam:</label>
-                <select id="autoGroupInterval" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 15px;">
-                    <option value="1">Cada 1 Hora</option>
-                    <option value="2">Cada 2 Horas</option>
-                    <option value="4">Cada 4 Horas</option>
-                </select>
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main); display: block; margin-bottom: 10px;">2. Configura hasta 5 mensajes rotativos:</label>
 
-                <!-- Slots para los 5 Mensajes Rotativos de Grupos -->
-                <div id="groupSlotsContainer" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Contenedor Grid Mágico -->
+                <div id="groupSlotsContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">
                     <!-- Se inyectan desde JS -->
                 </div>
             </div>
