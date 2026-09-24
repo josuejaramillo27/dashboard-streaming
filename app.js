@@ -594,7 +594,8 @@ window.openProfileModal = () => {
         document.getElementById('botBasicWarning').style.display = 'block';
         document.getElementById('botProContent').style.display = 'none';
     }
-
+    window.renderStatusSlots();
+    
     // 4. Reiniciar a la primera pestaña siempre que se abre
     const primeraPestana = document.querySelector('.profile-tab-btn');
     if(primeraPestana) window.switchProfileTab('tabPerfilMarca', primeraPestana);
@@ -723,7 +724,73 @@ window.uploadWhatsAppStatus = async () => {
         window.showNotification("❌ Error de conexión con el Bot.");
     }
 };
+// --- GENERADOR VISUAL DE LOS 5 ESTADOS ---
+window.renderStatusSlots = () => {
+    const container = document.getElementById('statusSlotsContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    // Leemos de Firebase si ya tiene estados guardados, si no, creamos un array vacío
+    const config = currentUserData.botConfig || {};
+    const estados = config.estados || [];
 
+    for (let i = 0; i < 5; i++) {
+        const est = estados[i] || { texto: '', imgUrl: '' };
+        container.innerHTML += `
+            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border: 1px dashed var(--mac-border);">
+                <span style="font-size: 11px; font-weight: bold; color: var(--mac-blue); margin-bottom: 5px; display: block;">Estado ${i + 1}</span>
+                <input type="text" id="slotTxt_${i}" placeholder="Texto del estado..." value="${est.texto}" style="width: 100%; padding: 8px; margin-bottom: 6px; border-radius: 6px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px;">
+                <input type="url" id="slotImg_${i}" placeholder="URL Imagen (Opcional)" value="${est.imgUrl}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px;">
+            </div>
+        `;
+    }
+
+    // Cargamos los otros valores del bot en los selects
+    document.getElementById('autoStatusActive').checked = config.estadosActivos || false;
+    document.getElementById('autoStatusInterval').value = config.estadosIntervaloHoras || 2;
+    
+    document.getElementById('autoGroupActive').checked = config.gruposActivos || false;
+    document.getElementById('autoGroupInterval').value = config.gruposIntervaloHoras || 2;
+    document.getElementById('autoGroupText').value = config.gruposTexto || '';
+    document.getElementById('autoGroupImg').value = config.gruposImgUrl || '';
+};
+
+// --- EXTRAER GRUPOS DEL BOT ---
+window.fetchWhatsAppGroups = async () => {
+    const container = document.getElementById('waGroupsList');
+    container.innerHTML = '<p style="text-align:center; font-size:12px; color:var(--mac-blue);">⏳ Conectando con tu WhatsApp para leer grupos...</p>';
+
+    try {
+        const response = await fetch(`https://bot.panelagc.com/api/obtener-grupos/${currentUser.uid}`);
+        const data = await response.json();
+
+        if (data.status === 'ok') {
+            if (data.grupos.length === 0) {
+                container.innerHTML = '<p style="font-size:12px; color:var(--mac-orange); text-align:center;">No perteneces a ningún grupo o el bot aún está cargando mensajes.</p>';
+                return;
+            }
+            
+            // Leemos los seleccionados en Firebase
+            const savedGroups = (currentUserData.botConfig && currentUserData.botConfig.gruposTarget) ? currentUserData.botConfig.gruposTarget : [];
+
+            container.innerHTML = '';
+            data.grupos.forEach(g => {
+                const isChecked = savedGroups.includes(g.id) ? 'checked' : '';
+                container.innerHTML += `
+                    <label style="display:flex; align-items:center; gap:8px; padding: 6px 0; border-bottom: 1px solid var(--mac-border); font-size: 13px; color: var(--mac-text-main); cursor: pointer;">
+                        <input type="checkbox" class="wa-group-checkbox" value="${g.id}" ${isChecked}>
+                        <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${g.name}</span>
+                    </label>
+                `;
+            });
+            window.showNotification(`✅ Se encontraron ${data.grupos.length} grupos.`);
+        } else {
+            container.innerHTML = `<p style="color:var(--mac-red); font-size:12px; text-align:center;">❌ Error: ${data.message}</p>`;
+        }
+    } catch (e) {
+        container.innerHTML = `<p style="color:var(--mac-red); font-size:12px; text-align:center;">❌ No se pudo contactar al servidor.</p>`;
+    }
+};
 window.renderPaymentMethodsList = () => {
     const container = document.getElementById('paymentMethodsContainer');
     if (!container) return;
@@ -919,15 +986,43 @@ window.saveProfile = async () => {
         let refInput = document.getElementById('editReferencesLink');
         let referencesLink = refInput ? refInput.value.trim() : '';
 
+        // --- GUARDADO DE LA CONFIGURACIÓN AUTOMÁTICA DEL BOT ---
+        let estadosArray = [];
+        for (let i = 0; i < 5; i++) {
+            const txt = document.getElementById(`slotTxt_${i}`).value.trim();
+            const img = document.getElementById(`slotImg_${i}`).value.trim();
+            estadosArray.push({ texto: txt, imgUrl: img });
+        }
+
+        const selectedGroups = Array.from(document.querySelectorAll('.wa-group-checkbox:checked')).map(cb => cb.value);
+
+        const botConfig = {
+            estadosActivos: document.getElementById('autoStatusActive').checked,
+            estadosIntervaloHoras: parseInt(document.getElementById('autoStatusInterval').value) || 2,
+            estados: estadosArray,
+            // Conservamos el historial para que no se resetee el cron
+            estadosLastRun: (currentUserData.botConfig && currentUserData.botConfig.estadosLastRun) ? currentUserData.botConfig.estadosLastRun : null,
+            estadosCurrentIndex: (currentUserData.botConfig && currentUserData.botConfig.estadosCurrentIndex) ? currentUserData.botConfig.estadosCurrentIndex : 0,
+
+            gruposActivos: document.getElementById('autoGroupActive').checked,
+            gruposIntervaloHoras: parseInt(document.getElementById('autoGroupInterval').value) || 2,
+            gruposTexto: document.getElementById('autoGroupText').value.trim(),
+            gruposImgUrl: document.getElementById('autoGroupImg').value.trim(),
+            gruposTarget: selectedGroups,
+            gruposLastRun: (currentUserData.botConfig && currentUserData.botConfig.gruposLastRun) ? currentUserData.botConfig.gruposLastRun : null
+        };
+        
         // Guardar absolutamente todo en Firebase de un solo tiro
         await updateDoc(doc(db, "users", currentUser.uid), { 
             name: name, country: country, currency: getCurrencyForCountry(country), 
             phone: phone, logoUrl: logoUrl, bannerUrl: bannerUrl, storeAlias: finalAlias,
             referencesLink: referencesLink,
             paymentMethods: finalPaymentMethods // 🔥 Se guarda el arreglo limpio
+            botConfig: botConfig
         });
         
         // Actualizar la memoria global
+        currentUserData.botConfig = botConfig;
         currentUserData.storeAlias = finalAlias; 
         currentUserData.name = name;
         currentUserData.country = country;
