@@ -1184,37 +1184,45 @@
 
 </div>    
 <!-- SECCIÓN 6: MI PERFIL & BOT -->
-        <div id="profileSection" class="dashboard-section" style="display: none;">
-            <div style="margin-bottom: 20px; border-bottom: 1px solid var(--mac-border); padding-bottom: 15px;">
-                <h2 style="margin: 0; font-size: 24px; color: var(--mac-text-main);"><i class='bx bx-user-circle'></i> Mi Perfil y Marca Blanca</h2>
-                <p style="color:var(--mac-text-secondary); font-size:14px; margin:5px 0 0 0;">Personaliza tu marca, tus servicios y conecta tu bot de WhatsApp.</p>
-            </div>
-            <!-- 🔥 NUEVO BOTÓN DE INSTALACIÓN -->
-            <button id="btnInstallApp" class="btn-primary" style="display: none; width: 100%; margin-bottom: 20px; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); border: none; font-size: 15px; padding: 14px;" onclick="window.installApp()">
-                <i class='bx bx-download'></i> Instalar App en mi Dispositivo
-            </button>
-            <div style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border); box-shadow: var(--glass-shadow);">
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-    
-    <!-- INICIO: Modificación para poner Logo y Banner en la misma fila -->
-    <div style="display: flex; gap: 10px;">
-        <div style="flex: 1; display: flex; flex-direction: column;">
-            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Logo de empresa (500x500px):</label>
-            <input type="file" id="editLogoUpload" accept="image/*" style="margin-top: 5px; padding: 5px; font-size: 12px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); width: 100%; box-sizing: border-box;">
-        </div>
-        <div style="flex: 1; display: flex; flex-direction: column;">
-            <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Banner de tienda (Horizontal):</label>
-            <input type="file" id="editBannerUpload" accept="image/*" style="margin-top: 5px; padding: 5px; font-size: 12px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); width: 100%; box-sizing: border-box;">
-        </div>
+<div id="profileSection" class="dashboard-section" style="display: none;">
+    <div style="margin-bottom: 20px; border-bottom: 1px solid var(--mac-border); padding-bottom: 15px;">
+        <h2 style="margin: 0; font-size: 24px; color: var(--mac-text-main);"><i class='bx bx-user-circle'></i> Mi Perfil y Bot</h2>
+        <p style="color:var(--mac-text-secondary); font-size:14px; margin:5px 0 0 0;">Personaliza tu marca y configura tu asistente virtual.</p>
     </div>
-    <!-- FIN: Modificación -->
-    
-    <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Link de Referencias (Instagram, TikTok, etc):</label>
-    <input type="url" id="editReferencesLink" placeholder="https://..." style="padding: 10px; font-size: 13px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
-                    
-                    <input type="text" id="editProfileName" placeholder="Nombre Comercial / Marca" style="padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
-                    <label style="font-size: 11px; font-weight: bold; color: var(--mac-blue); margin-top: 5px;">Link personalizado de tu tienda (Sin espacios):</label>
-                    <input type="text" id="editProfileAlias" placeholder="Ej: mariano-store" style="padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+
+    <!-- PESTAÑAS TIPO CHROME PARA SEPARAR PERFIL DEL BOT -->
+    <div class="chrome-tabs-container" style="margin: 0 0 20px 0; border: none; background: transparent; padding: 0;">
+        <div class="chrome-tab active profile-tab-btn" onclick="window.switchProfileTab('tabPerfilMarca', this)"><i class='bx bx-store'></i> Datos y Marca</div>
+        <div class="chrome-tab profile-tab-btn" onclick="window.switchProfileTab('tabPerfilBot', this)"><i class='bx bx-bot'></i> 🤖 Bot WhatsApp</div>
+    </div>
+
+    <button id="btnInstallApp" class="btn-primary" style="display: none; width: 100%; margin-bottom: 20px; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); border: none; font-size: 15px; padding: 14px;" onclick="window.installApp()">
+        <i class='bx bx-download'></i> Instalar App en mi Dispositivo
+    </button>
+
+    <!-- PESTAÑA 1: DATOS Y MARCA (Lo que ya tenías) -->
+    <div id="tabPerfilMarca" class="profile-tab-content" style="display: block;">
+        <div style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border); box-shadow: var(--glass-shadow);">
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1; display: flex; flex-direction: column;">
+                        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Logo de empresa (500x500px):</label>
+                        <input type="file" id="editLogoUpload" accept="image/*" style="margin-top: 5px; padding: 5px; font-size: 12px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); width: 100%; box-sizing: border-box;">
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column;">
+                        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Banner de tienda (Horizontal):</label>
+                        <input type="file" id="editBannerUpload" accept="image/*" style="margin-top: 5px; padding: 5px; font-size: 12px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); width: 100%; box-sizing: border-box;">
+                    </div>
+                </div>
+                
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary); margin-top: 10px;">Link de Referencias (Instagram, TikTok, etc):</label>
+                <input type="url" id="editReferencesLink" placeholder="https://..." style="padding: 10px; font-size: 13px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                
+                <input type="text" id="editProfileName" placeholder="Nombre Comercial / Marca" style="padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                
+                <label style="font-size: 11px; font-weight: bold; color: var(--mac-blue); margin-top: 5px;">Link personalizado de tu tienda (Sin espacios):</label>
+                <input type="text" id="editProfileAlias" placeholder="Ej: mariano-store" style="padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
                     
                     <div style="display: flex; gap: 10px;">
                         <select id="editProfileCountry" style="flex: 1; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
@@ -1244,58 +1252,122 @@
                     </div>
                 </div>
 
-                <!-- NUEVA SECCIÓN: MIS SERVICIOS -->
-                <div style="margin-top: 20px; border-top: 1px dashed var(--mac-border); padding-top: 15px;">
-                    <label style="font-size: 14px; font-weight: bold; color: var(--mac-blue); display: block; margin-bottom: 5px;">
-                        <i class='bx bx-list-plus'></i> Mis Servicios / Plataformas
-                    </label>
-                    <p style="font-size: 12px; color: var(--mac-text-secondary); margin-top: 0; margin-bottom: 10px;">
-                        Agrega solo las plataformas que tú vendes. Se actualizarán automáticamente en todo tu panel.
-                    </p>
-                    <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                        <input type="text" id="newCustomServiceInput" placeholder="Ej: Magis TV, Canva Pro..." style="flex: 1; padding: 10px; font-size: 13px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
-                        <button type="button" class="btn-primary" style="width: auto; padding: 0 15px; border-radius: 8px;" onclick="window.addCustomService()"><i class='bx bx-plus'></i></button>
-                    </div>
-                    <div id="customServicesChips" style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 150px; overflow-y: auto; background: var(--mac-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border);">
-                        <!-- Se inyectan dinámicamente -->
-                    </div>
+                <!-- MIS SERVICIOS -->
+            <div style="margin-top: 20px; border-top: 1px dashed var(--mac-border); padding-top: 15px;">
+                <label style="font-size: 14px; font-weight: bold; color: var(--mac-blue); display: block; margin-bottom: 5px;"><i class='bx bx-list-plus'></i> Mis Servicios / Plataformas</label>
+                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                    <input type="text" id="newCustomServiceInput" placeholder="Ej: Magis TV, Canva Pro..." style="flex: 1; padding: 10px; font-size: 13px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                    <button type="button" class="btn-primary" style="width: auto; padding: 0 15px; border-radius: 8px;" onclick="window.addCustomService()"><i class='bx bx-plus'></i></button>
                 </div>
-                <!-- NUEVA SECCIÓN: MÉTODOS DE PAGO -->
-                <div style="margin-top: 20px; border-top: 1px dashed var(--mac-border); padding-top: 15px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <div>
-                            <label style="font-size: 14px; font-weight: bold; color: var(--mac-blue); display: block;">
-                                <i class='bx bx-wallet'></i> Mis Métodos de Pago
-                            </label>
-                            <p style="font-size: 12px; color: var(--mac-text-secondary); margin-top: 0; margin-bottom: 0;">
-                                Agrega hasta 5 opciones para que tus clientes paguen desde tu Tiendita.
-                            </p>
-                        </div>
-                        <button type="button" class="action-btn" style="background: rgba(0, 122, 255, 0.1); color: var(--mac-blue); border: 1px solid var(--mac-blue); padding: 6px 12px; border-radius: 8px; font-size: 12px;" onclick="window.addPaymentMethod()">
-                            <i class='bx bx-plus'></i> Agregar
-                        </button>
-                    </div>
-                    <div id="paymentMethodsContainer" style="display: flex; flex-direction: column; gap: 15px;">
-                        <!-- Aquí se inyectan las tarjetas de pago con JS -->
-                    </div>
+                <div id="customServicesChips" style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 150px; overflow-y: auto; background: var(--mac-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border);"></div>
+            </div>
+
+            <!-- MÉTODOS DE PAGO -->
+            <div style="margin-top: 20px; border-top: 1px dashed var(--mac-border); padding-top: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <label style="font-size: 14px; font-weight: bold; color: var(--mac-blue); display: block;"><i class='bx bx-wallet'></i> Mis Métodos de Pago</label>
+                    <button type="button" class="action-btn" style="background: rgba(0, 122, 255, 0.1); color: var(--mac-blue); border: 1px solid var(--mac-blue); padding: 6px 12px; border-radius: 8px; font-size: 12px;" onclick="window.addPaymentMethod()"><i class='bx bx-plus'></i> Agregar</button>
                 </div>
-                <div style="margin-top: 20px; border-top: 1px dashed var(--mac-border); padding-top: 15px;">
-                    <label style="font-size: 13px; font-weight: bold; color: var(--mac-text-secondary);">Automatización de WhatsApp (Bot):</label>
-                    <button class="btn-secondary" style="width: 100%; margin-top: 5px; padding: 12px; background: rgba(52, 199, 89, 0.1); color: var(--mac-green); border: 1px solid var(--mac-green);" onclick="window.vincularBot()">
-                        <i class='bx bx-bot'></i> Activar Mensajes Automáticos
-                    </button>
-                    <div id="qrContainer" style="text-align: center; margin-top: 10px; display: none;">
-                        <img id="botQrImage" src="" style="width: 180px; height: 180px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                        <p id="botStatus" style="font-size: 12px; color: var(--mac-text-secondary); margin-top: 8px; font-weight: bold;">Cargando...</p>
-                    </div>
-                </div>
-                
-                <div style="margin-top: 20px;">
-                    <button class="btn-primary" style="width: 100%; padding: 14px; font-size: 15px;" onclick="window.saveProfile()">Guardar Perfil</button>
-                    <button class="btn-secondary mobile-only-btn" style="width: 100%; padding: 14px; font-size: 15px; margin-top: 10px;" onclick="window.closeModals()">Cerrar Perfil</button>
-                </div>
+                <div id="paymentMethodsContainer" style="display: flex; flex-direction: column; gap: 15px;"></div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button class="btn-primary" style="width: 100%; padding: 14px; font-size: 15px;" onclick="window.saveProfile()">Guardar Perfil</button>
+                <button class="btn-secondary mobile-only-btn" style="width: 100%; padding: 14px; font-size: 15px; margin-top: 10px;" onclick="window.closeModals()">Cerrar Perfil</button>
             </div>
         </div>
+    </div>
+
+    <!-- PESTAÑA 2: BOT WHATSAPP (CON RESTRICCIÓN PRO) -->
+    <div id="tabPerfilBot" class="profile-tab-content" style="display: none;">
+        
+        <!-- BLOQUE PARA USUARIOS BASICOS (MURO DE PAGO) -->
+        <div id="botBasicWarning" style="display: none; background: var(--mac-surface); border: 1px solid var(--mac-red); padding: 30px 20px; border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(255, 59, 48, 0.1);">
+            <i class='bx bxs-lock-alt' style="font-size: 50px; color: var(--mac-red); margin-bottom: 15px;"></i>
+            <h3 style="color: var(--mac-text-main); margin: 0 0 10px 0;">Función Exclusiva del Plan PRO</h3>
+            <p style="color: var(--mac-text-secondary); font-size: 14px; margin-bottom: 25px; line-height: 1.5;">El envío masivo de campañas, subida de estados y las notificaciones automáticas (Anti-Ban) están disponibles únicamente para usuarios del Plan PRO.</p>
+            <button class="btn-primary" style="background: linear-gradient(135deg, #FF9500 0%, #FF3B30 100%); border: none; padding: 14px 24px; font-weight: 800; font-size: 15px; box-shadow: 0 8px 20px rgba(255, 59, 48, 0.3);" onclick="window.openUpgradeWa()">
+                <i class='bx bx-rocket'></i> Subir de Categoría a PRO
+            </button>
+        </div>
+
+        <!-- BLOQUE PARA USUARIOS PRO -->
+        <div id="botProContent" style="display: none;">
+            
+            <!-- 1. Estado de Conexión -->
+            <div style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border); margin-bottom: 20px;">
+                <label style="font-size: 14px; font-weight: bold; color: var(--mac-green);"><i class='bx bx-link'></i> Estado de Conexión</label>
+                <p style="font-size: 12px; color: var(--mac-text-secondary); margin-bottom: 15px;">Vincula tu celular escaneando el código QR para que el bot empiece a trabajar por ti.</p>
+                <button class="btn-secondary" style="width: 100%; padding: 12px; background: rgba(52, 199, 89, 0.1); color: var(--mac-green); border: 1px solid var(--mac-green);" onclick="window.vincularBot()">
+                    <i class='bx bx-qr-scan'></i> Activar / Ver Código QR
+                </button>
+                <div id="qrContainer" style="text-align: center; margin-top: 15px; display: none;">
+                    <img id="botQrImage" src="" style="width: 180px; height: 180px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                    <p id="botStatus" style="font-size: 13px; font-weight: bold; margin-top: 8px;">Cargando...</p>
+                </div>
+            </div>
+
+            <!-- 2. Mini Tutorial Global para URL de Imagen -->
+            <div style="background: rgba(0, 122, 255, 0.05); border: 1px dashed var(--mac-blue); padding: 15px; border-radius: 12px; margin-bottom: 20px; font-size: 12px; color: var(--mac-text-main); line-height: 1.5;">
+                <strong style="color: var(--mac-blue); font-size: 13px;"><i class='bx bx-bulb'></i> ¿Cómo obtener la URL de una Imagen (PC, Android o iOS)?</strong>
+                <ol style="margin: 5px 0 0 0; padding-left: 20px; color: var(--mac-text-secondary);">
+                    <li>Entra a <a href="https://postimages.org" target="_blank" style="color: var(--mac-blue); font-weight: bold;">postimages.org</a> desde tu navegador.</li>
+                    <li>Sube la foto que deseas enviar en tu campaña o estado.</li>
+                    <li>Copia estrictamente el enlace que dice <b>"Enlace directo"</b> (Debe terminar en .jpg o .png).</li>
+                </ol>
+            </div>
+
+            <!-- 3. Campañas Masivas (Sistema Híbrido) -->
+            <div style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border); margin-bottom: 20px;">
+                <h4 style="margin: 0 0 5px 0; color: var(--mac-blue); font-size: 15px;"><i class='bx bxs-megaphone'></i> Campaña Masiva Segura</h4>
+                <p style="font-size: 11px; color: var(--mac-text-secondary); margin-bottom: 15px;">El envío incluye pausas automáticas Anti-Ban. Evita enviar a más de 100 personas de golpe.</p>
+
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Mensaje de la promoción:</label>
+                <p style="font-size: 10px; color: var(--mac-orange); margin: 2px 0 5px 0;">* Tip: Usa el formato {Palabra1|Palabra2} para rotar textos y evitar baneos.</p>
+                <textarea id="campaignMessage" rows="4" placeholder="Ej: {Hola|Qué tal} {nombre}, mira nuestra nueva oferta..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none; margin-bottom: 10px;"></textarea>
+
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">URL de la Imagen (Opcional):</label>
+                <input type="url" id="campaignImage" placeholder="https://i.postimg.cc/..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 15px;">
+
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main); display: block; margin-bottom: 5px;">¿A quiénes enviamos?</label>
+                
+                <!-- Opcion A: Clientes de BD -->
+                <select id="campaignDbClients" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 10px;">
+                    <option value="none">-- No enviar a mi lista de clientes --</option>
+                    <option value="all">A todos mis clientes registrados</option>
+                    <option value="expired">Solo a clientes vencidos (Win-Back)</option>
+                    <option value="active">Solo a clientes activos</option>
+                </select>
+
+                <!-- Opcion B: Numeros externos -->
+                <textarea id="campaignExternal" rows="2" placeholder="Contactos externos (Opcional). Pega los WhatsApp separados por comas. Ej: +51999888777, +5212345678" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none; margin-bottom: 15px;"></textarea>
+
+                <button class="btn-primary" style="width: 100%; padding: 12px;" onclick="window.sendMassCampaign()">
+                    <i class='bx bx-send'></i> Lanzar Campaña
+                </button>
+            </div>
+
+            <!-- 4. Estados de WhatsApp -->
+            <div style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border);">
+                <h4 style="margin: 0 0 5px 0; color: #AF52DE; font-size: 15px;"><i class='bx bx-images'></i> Subir Estado a WhatsApp</h4>
+                <p style="font-size: 11px; color: var(--mac-text-secondary); margin-bottom: 15px;">Sube estados a tu WhatsApp directamente desde tu panel. 0% riesgo de Ban.</p>
+
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Descripción del Estado:</label>
+                <textarea id="statusDesc" rows="2" placeholder="¡Nuevas cuentas de Max disponibles hoy!" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none; margin-bottom: 10px;"></textarea>
+
+                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">URL de la Imagen (Opcional):</label>
+                <input type="url" id="statusImage" placeholder="https://i.postimg.cc/..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 15px;">
+
+                <button class="btn-primary" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #AF52DE 0%, #5856D6 100%); border: none;" onclick="window.uploadWhatsAppStatus()">
+                    <i class='bx bx-upload'></i> Subir Estado
+                </button>
+            </div>
+            
+            <!-- Botón de Cerrar (Móvil) -->
+            <button class="btn-secondary mobile-only-btn" style="width: 100%; padding: 14px; font-size: 15px; margin-top: 15px;" onclick="window.closeModals()">Cerrar Perfil</button>
+        </div>
+    </div>
+</div>
     </div> <!-- Fin del dashboard-main -->
 </div> 
 
