@@ -388,6 +388,30 @@
         .time-option.active { background: rgba(0, 122, 255, 0.1); color: #fff; font-weight: bold; }
         .time-option.active i { color: var(--mac-blue); }
         .time-option i { font-size: 16px; transition: 0.2s; }
+
+        /* EL INTERRUPTOR DEL BOT (ON/OFF) */
+.bot-toggle-checkbox { display: none; }
+.bot-toggle-label {
+    position: relative; display: inline-block; width: 80px; height: 32px;
+    background-color: var(--mac-red, #FF3B30); border-radius: 20px;
+    cursor: pointer; transition: background-color 0.3s;
+    box-shadow: inset 0 1px 4px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1);
+}
+.bot-toggle-label::before {
+    content: 'OFF'; position: absolute; right: 12px; top: 50%;
+    transform: translateY(-50%); color: white; font-size: 11px;
+    font-weight: 800; letter-spacing: 0.5px; transition: 0.3s;
+}
+.bot-toggle-label::after {
+    content: ''; position: absolute; top: 2px; left: 2px;
+    width: 26px; height: 26px; background-color: white;
+    border-radius: 50%; transition: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+.bot-toggle-checkbox:checked + .bot-toggle-label { background-color: var(--mac-green, #34C759); }
+.bot-toggle-checkbox:checked + .bot-toggle-label::before { content: 'ON'; left: 12px; right: auto; }
+.bot-toggle-checkbox:checked + .bot-toggle-label::after { left: calc(100% - 30px); }
+        
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
     <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
@@ -1331,7 +1355,6 @@
 
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main); display: block; margin-bottom: 5px;">¿A quiénes enviamos?</label>
                 
-                <!-- Opcion A: Clientes de BD -->
                 <select id="campaignDbClients" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 10px;">
                     <option value="none">-- No enviar a mi lista de clientes --</option>
                     <option value="all">A todos mis clientes registrados</option>
@@ -1339,7 +1362,6 @@
                     <option value="active">Solo a clientes activos</option>
                 </select>
 
-                <!-- Opcion B: Numeros externos -->
                 <textarea id="campaignExternal" rows="2" placeholder="Contactos externos (Opcional). Pega los WhatsApp separados por comas. Ej: +51999888777, +5212345678" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none; margin-bottom: 15px;"></textarea>
 
                 <button class="btn-primary" style="width: 100%; padding: 12px;" onclick="window.sendMassCampaign()">
@@ -1347,32 +1369,18 @@
                 </button>
             </div>
 
-            <!-- 4. Estados de WhatsApp -->
-            <div style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border);">
-                <h4 style="margin: 0 0 5px 0; color: #AF52DE; font-size: 15px;"><i class='bx bx-images'></i> Subir Estado a WhatsApp</h4>
-                <p style="font-size: 11px; color: var(--mac-text-secondary); margin-bottom: 15px;">Sube estados a tu WhatsApp directamente desde tu panel. 0% riesgo de Ban.</p>
-
-                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Descripción del Estado:</label>
-                <textarea id="statusDesc" rows="2" placeholder="¡Nuevas cuentas de Max disponibles hoy!" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-family: inherit; resize: none; margin-bottom: 10px;"></textarea>
-
-                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">URL de la Imagen (Opcional):</label>
-                <input type="url" id="statusImage" placeholder="https://i.postimg.cc/..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 15px;">
-
-                <button class="btn-primary" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #AF52DE 0%, #5856D6 100%); border: none;" onclick="window.uploadWhatsAppStatus()">
-                    <i class='bx bx-upload'></i> Subir Estado
-                </button>
-            </div>
-            <!-- NUEVO: ESTADOS AUTOMÁTICOS (HASTA 5) -->
-            <div style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border); margin-top: 20px;">
+            <!-- 4. ESTADOS AUTOMÁTICOS (HASTA 5) -->
+            <div style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border); margin-bottom: 20px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px; margin-bottom: 15px;">
                     <div>
                         <h4 style="margin: 0 0 5px 0; color: #34C759; font-size: 15px;"><i class='bx bx-carousel'></i> Estados Automáticos</h4>
-                        <p style="font-size: 11px; color: var(--mac-text-secondary); margin: 0;">El bot rotará estos estados cada cierto tiempo en tu WhatsApp.</p>
+                        <p style="font-size: 11px; color: var(--mac-text-secondary); margin: 0;">El bot rotará estos estados cada cierto tiempo.</p>
                     </div>
-                    <label class="store-toggle-label" style="transform: scale(0.8);">
-                        <input type="checkbox" id="autoStatusActive" class="store-toggle-checkbox">
-                        <span class="store-toggle-label"></span>
-                    </label>
+                    <!-- 🔥 BOTÓN FIXEADO -->
+                    <div style="display: flex; align-items: center;">
+                        <input type="checkbox" id="autoStatusActive" class="bot-toggle-checkbox">
+                        <label for="autoStatusActive" class="bot-toggle-label"></label>
+                    </div>
                 </div>
 
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Frecuencia de publicación:</label>
@@ -1384,22 +1392,23 @@
                 </select>
 
                 <!-- Slots para los 5 Estados -->
-                <div id="statusSlotsContainer" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                <div id="statusSlotsContainer" style="display: flex; flex-direction: column; gap: 10px;">
                     <!-- Se inyectan desde JS -->
                 </div>
             </div>
 
-            <!-- NUEVO: SPAM EN GRUPOS -->
-            <div style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border); margin-top: 20px;">
+            <!-- 5. SPAM EN GRUPOS -->
+            <div style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border);">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px; margin-bottom: 15px;">
                     <div>
                         <h4 style="margin: 0 0 5px 0; color: #FF9500; font-size: 15px;"><i class='bx bxs-group'></i> Difusión en Grupos</h4>
-                        <p style="font-size: 11px; color: var(--mac-text-secondary); margin: 0;">Programa un mensaje recurrente a tus grupos seleccionados.</p>
+                        <p style="font-size: 11px; color: var(--mac-text-secondary); margin: 0;">Programa un mensaje recurrente a tus grupos.</p>
                     </div>
-                    <label class="store-toggle-label" style="transform: scale(0.8);">
-                        <input type="checkbox" id="autoGroupActive" class="store-toggle-checkbox">
-                        <span class="store-toggle-label"></span>
-                    </label>
+                    <!-- 🔥 BOTÓN FIXEADO -->
+                    <div style="display: flex; align-items: center;">
+                        <input type="checkbox" id="autoGroupActive" class="bot-toggle-checkbox">
+                        <label for="autoGroupActive" class="bot-toggle-label"></label>
+                    </div>
                 </div>
 
                 <button class="btn-secondary" style="width: 100%; margin-bottom: 15px; padding: 10px;" onclick="window.fetchWhatsAppGroups()">
@@ -1417,14 +1426,13 @@
                 <input type="url" id="autoGroupImg" placeholder="https://i.postimg.cc/..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 10px;">
 
                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Frecuencia del Spam:</label>
-                <select id="autoGroupInterval" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 15px;">
+                <select id="autoGroupInterval" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 5px;">
                     <option value="1">Cada 1 Hora</option>
                     <option value="2">Cada 2 Horas</option>
                     <option value="4">Cada 4 Horas</option>
                 </select>
             </div>
             
-            <!-- Botón de Cerrar (Móvil) -->
             <button class="btn-secondary mobile-only-btn" style="width: 100%; padding: 14px; font-size: 15px; margin-top: 15px;" onclick="window.closeModals()">Cerrar Perfil</button>
         </div>
     </div>
