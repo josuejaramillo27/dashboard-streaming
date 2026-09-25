@@ -6320,7 +6320,7 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
                             <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.pin || ''}', 'PIN')"><i class='bx bx-copy'></i></button>
                         </div>
                     </div>
-                    <button onclick="window.openReviewModal('${clientObj.id}', '${platName}', '${clientObj.name.replace(/'/g, "\\'")}')" class="btn-secondary" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; border: 1px solid var(--mac-orange); color: var(--mac-orange); background: rgba(255, 149, 0, 0.1); transition: 0.2s;"><i class='bx bxs-star'></i> Calificar Servicio</button>
+                    <button onclick="window.openReviewModal('${clientObj.id}', '${platName}', '${clientObj.name.replace(/'/g, "\\'")}', '${clientObj.phone || ''}')" class="btn-secondary" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; border: 1px solid var(--mac-orange); color: var(--mac-orange); background: rgba(255, 149, 0, 0.1); transition: 0.2s;"><i class='bx bxs-star'></i> Calificar Servicio</button>
                 </div>
             `;
         });
@@ -7753,12 +7753,11 @@ document.querySelectorAll('.star-btn').forEach(btn => {
     });
 });
 
-window.openReviewModal = (clientId, platform, clientName) => {
-    window.currentReviewData = { clientId, platform, clientName };
+window.openReviewModal = (clientId, platform, clientName, clientPhone) => {
+    window.currentReviewData = { clientId, platform, clientName, clientPhone };
     document.getElementById('reviewPlatformName').innerText = platform;
     document.getElementById('reviewComment').value = '';
     
-    // Resetear estrellas a 5
     window.currentStarRating = 5;
     document.querySelectorAll('.star-btn').forEach(s => s.style.color = '#FFD700');
     
@@ -7778,6 +7777,7 @@ window.submitReview = async () => {
             vendedorId: portalStoreData.uid,
             clientId: window.currentReviewData.clientId,
             clientName: window.currentReviewData.clientName,
+            clientPhone: window.currentReviewData.clientPhone || '',
             platform: window.currentReviewData.platform,
             rating: window.currentStarRating,
             comment: comment,
@@ -7899,11 +7899,34 @@ window.openProductDesc = (title, desc) => {
             for(let i = 0; i < 5; i++) {
                 stars += `<i class='bx bxs-star' style="color: ${i < r.rating ? '#FFD700' : 'var(--mac-text-secondary)'};"></i>`;
             }
+
+            // 1. ENMASCARAR NOMBRE (Ej: "Carlos Perez" -> "Carlos P.")
+            let parts = (r.clientName || 'Cliente').split(' ');
+            let maskedName = parts[0];
+            if(parts.length > 1) maskedName += ' ' + parts[1].charAt(0) + '.';
+
+            // 2. ENMASCARAR TELÉFONO (Ej: "+51987654321" -> "+51 987 *** *21")
+            let maskedPhone = '';
+            if (r.clientPhone) {
+                let p = r.clientPhone.replace(/\s+/g, ''); 
+                if (p.length >= 8) {
+                    let start = p.substring(0, 6); // Toma ej: +51987
+                    let end = p.substring(p.length - 2); // Toma últimos 2 ej: 21
+                    maskedPhone = `${start} *** *${end}`;
+                }
+            }
+            
+            let userInfoHtml = `<strong style="font-size: 13px; color: var(--mac-text-main);"><i class='bx bxs-user-circle'></i> ${maskedName}</strong>`;
+            if (maskedPhone) {
+                userInfoHtml += `<span style="font-size: 11px; color: var(--mac-text-secondary); margin-left: 6px; letter-spacing: 0.5px;">${maskedPhone}</span>`;
+            }
             
             reviewsContainer.innerHTML += `
                 <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px; border: 1px solid var(--mac-border);">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <strong style="font-size: 13px; color: var(--mac-text-main);"><i class='bx bxs-user-circle'></i> ${r.clientName}</strong>
+                        <div>
+                            ${userInfoHtml}
+                        </div>
                         <span style="font-size: 10px; color: var(--mac-text-secondary);">${new Date(r.date).toLocaleDateString('es-ES')}</span>
                     </div>
                     <div style="font-size: 14px; margin-bottom: 6px;">${stars}</div>
