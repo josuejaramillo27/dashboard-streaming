@@ -7847,8 +7847,8 @@ window.loadAdminReviews = async () => {
                     
                     <div style="display: flex; gap: 8px;">
                         ${r.status === 'pendiente' || r.status === 'oculta' 
-                            ? `<button class="btn-primary" style="padding: 6px 12px; font-size: 12px; background: var(--mac-green); border: none;" onclick="window.changeReviewStatus('${r.id}', 'aprobada')"><i class='bx bx-check'></i> Aprobar</button>` 
-                            : `<button class="btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="window.changeReviewStatus('${r.id}', 'oculta')"><i class='bx bx-hide'></i> Ocultar</button>`}
+                            ? `<button class="btn-primary" style="padding: 6px 12px; font-size: 12px; background: var(--mac-green); border: none;" onclick="window.changeReviewStatus('${r.id}', 'aprobada', '${r.platform.replace(/'/g, "\\'")}')"><i class='bx bx-check'></i> Aprobar</button>` 
+                            : `<button class="btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="window.changeReviewStatus('${r.id}', 'oculta', '')"><i class='bx bx-hide'></i> Ocultar</button>`}
                         <button class="action-btn btn-del" style="padding: 6px 10px; font-size: 14px;" onclick="window.deleteReview('${r.id}')"><i class='bx bx-trash'></i></button>
                     </div>
                 </div>
@@ -7860,12 +7860,64 @@ window.loadAdminReviews = async () => {
     }
 };
 
-window.changeReviewStatus = async (id, newStatus) => {
-    try {
-        await updateDoc(doc(db, "reviews", id), { status: newStatus });
-        window.showNotification(`Reseña ${newStatus === 'aprobada' ? 'hecha pública ✅' : 'ocultada 👁️‍🗨️'}`);
-        window.loadAdminReviews();
-    } catch(e) { window.showNotification("Error cambiando estado."); }
+window.changeReviewStatus = async (id, newStatus, currentPlatform) => {
+    if (newStatus === 'aprobada') {
+        // 1. Obtenemos el catálogo de la tiendita del usuario
+        const catalog = currentUserData.storeCatalog || [];
+        
+        if (catalog.length === 0) {
+            return window.showNotification("⚠️ No tienes productos en tu tienda para asignar esta reseña.");
+        }
+
+        // 2. Creamos las opciones del selector (Si hay coincidencia exacta, se pre-selecciona)
+        let optionsHtml = '';
+        catalog.forEach(item => {
+            const isSelected = (item.platform.toLowerCase() === currentPlatform.toLowerCase()) ? 'selected' : '';
+            optionsHtml += `<option value="${item.platform}" ${isSelected}>${item.platform}</option>`;
+        });
+
+        // 3. Modal para elegir a dónde va la reseña
+        const { value: selectedProduct, isConfirmed } = await Swal.fire({
+            title: 'Aprobar Reseña',
+            html: `
+                <p style="font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 15px; text-align: left;">¿En qué producto de tu tienda pública quieres mostrar este comentario?</p>
+                <div style="text-align: left;">
+                    <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Vincular al producto:</label>
+                    <select id="swal-review-product" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-top: 5px; outline: none;">
+                        ${optionsHtml}
+                    </select>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: '<i class="bx bx-check"></i> Publicar en Tienda',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#34C759',
+            background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+            color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
+            preConfirm: () => {
+                return document.getElementById('swal-review-product').value;
+            }
+        });
+
+        // 4. Si confirma, actualizamos el estado y renombramos la plataforma en la reseña
+        if (isConfirmed && selectedProduct) {
+            try {
+                await updateDoc(doc(db, "reviews", id), { 
+                    status: newStatus,
+                    platform: selectedProduct // <-- AQUÍ SOBREESCRIBIMOS EL NOMBRE PARA QUE HAGA MATCH EXACTO EN LA TIENDITA
+                });
+                window.showNotification("Reseña aprobada y vinculada ✅");
+                window.loadAdminReviews();
+            } catch(e) { window.showNotification("Error cambiando estado."); }
+        }
+    } else {
+        // Lógica para ocultar (se mantiene igual)
+        try {
+            await updateDoc(doc(db, "reviews", id), { status: newStatus });
+            window.showNotification("Reseña ocultada 👁️‍🗨️");
+            window.loadAdminReviews();
+        } catch(e) { window.showNotification("Error cambiando estado."); }
+    }
 };
 
 window.deleteReview = async (id) => {
