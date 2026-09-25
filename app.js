@@ -413,6 +413,7 @@ onAuthStateChanged(auth, async (user) => {
                         window.renderInventory();
                         window.syncUserServices();
                         if(document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'flex'; // 👈 MOSTRAR ASISTENTE
+                        setTimeout(() => window.checkUrlRouting(), 300);
                         
                         // --- LANZADOR DEL TUTORIAL ---
                         if (!currentUserData.tutorialVisto && window.innerWidth > 768) {
