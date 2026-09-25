@@ -1819,7 +1819,42 @@
     </div>
     <div style="margin-top: auto;"><p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.3); letter-spacing: 1px;">POTENCIADO POR PANEL A.G.C.</p></div>
 </div>
+<!-- PLANTILLA PARA ESTADOS DE WHATSAPP / INSTAGRAM (1080x1920) -->
+<div id="statusExportTemplate" style="position: fixed; left: -9999px; top: -9999px; width: 1080px; height: 1920px; background: #0a0a0c; color: #fff; font-family: -apple-system, sans-serif; box-sizing: border-box; display: flex; flex-direction: column; z-index: -9999;">
+    
+    <!-- Fondo decorativo -->
+    <div id="statusBannerBg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; opacity: 0.15; z-index: 0;"></div>
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, rgba(10,10,12,0.8) 0%, rgba(10,10,12,0.95) 100%); z-index: 1;"></div>
 
+    <!-- Contenido Frontal -->
+    <div style="position: relative; z-index: 2; display: flex; flex-direction: column; height: 100%;">
+        
+        <!-- HEADER: Logo, Marca y Categoría -->
+        <div style="text-align: center; padding: 80px 60px 40px 60px;">
+            <img id="statusLogo" src="" style="width: 200px; height: 200px; border-radius: 45px; object-fit: cover; border: 8px solid #1c1c1e; box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: none; margin: 0 auto 30px auto;">
+            <h1 id="statusBrandName" style="margin: 0; font-size: 65px; font-weight: 900; letter-spacing: 2px;">Mi Marca</h1>
+            <div style="margin-top: 25px;">
+                <span id="statusCategoryTitle" style="background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); color: white; padding: 15px 40px; border-radius: 40px; font-size: 32px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase;">CATEGORÍA</span>
+            </div>
+        </div>
+
+        <!-- CUERPO: Lista de Productos -->
+        <div id="statusItemsContainer" style="flex: 1; padding: 20px 80px; display: flex; flex-direction: column; gap: 40px; justify-content: center;">
+            <!-- Los productos se inyectarán aquí dinámicamente -->
+        </div>
+
+        <!-- FOOTER: Footer fijo -->
+        <div style="padding: 50px 80px 80px 80px; text-align: center; border-top: 3px dashed rgba(255,255,255,0.1);">
+            <p style="margin: 0 0 25px 0; font-size: 28px; color: #86868b; font-weight: bold; letter-spacing: 2px;">ACEPTAMOS</p>
+            <div id="statusPaymentMethods" style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 40px;">
+                <!-- Bancos -->
+            </div>
+            <div style="background: rgba(48, 209, 88, 0.15); border: 2px solid #30d158; padding: 20px; border-radius: 20px; display: inline-block;">
+                <p style="margin: 0; font-size: 30px; font-weight: 900; color: #30d158;"><i class='bx bxl-whatsapp' style="vertical-align: middle;"></i> ¡Link de compra en nuestro perfil!</p>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- ==============================================
      VISTA DEL CATÁLOGO PÚBLICO (TIENDITA CLIENTE)
 =================================================== -->
