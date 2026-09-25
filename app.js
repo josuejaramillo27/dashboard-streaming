@@ -7098,7 +7098,201 @@ window.openCheckoutFromCart = () => {
     }
     if(currentCheckoutItem) currentCheckoutItem.price = window.currentCartFinalTotal; // Para que pase a la BD
 };
+/* =========================================================
+   MÓDULO: EXPORTADOR DE CATÁLOGO A ESTADOS (IMÁGENES HD)
+========================================================= */
+window.generateCatalogImages = async () => {
+    const catalog = currentUserData.storeCatalog || [];
+    const availableItems = catalog.filter(i => i.status !== 'agotado');
 
+    if (availableItems.length === 0) {
+        return window.showNotification("⚠️ No tienes productos disponibles en el catálogo para exportar.");
+    }
+
+    // Modal de espera
+    Swal.fire({
+        title: '📸 Preparando Estudio Fotográfico',
+        html: '<p style="color:var(--mac-text-secondary); font-size:14px;">Estamos agrupando tus productos y generando las imágenes en alta calidad (1080x1920). Esto puede tomar unos segundos.</p>',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); },
+        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+    });
+
+    try {
+        // 1. Agrupar productos por categoría
+        const categories = {};
+        availableItems.forEach(item => {
+            const cat = item.category || 'VARIOS';
+            if (!categories[cat]) categories[cat] = [];
+            categories[cat].push(item);
+        });
+
+        // 2. Pre-cargar el Logo y Banner del usuario (Conversión a Base64 para evitar errores CORS en html2canvas)
+        const loadImgToBase64 = async (url) => {
+            if (!url) return null;
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.src = url + (url.includes('?') ? '&' : '?') + 'cb=' + new Date().getTime();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width; canvas.height = img.height;
+                    canvas.getContext('2d').drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                img.onerror = () => resolve(null);
+            });
+        };
+
+        const safeLogoBase64 = await loadImgToBase64(currentUserData.logoUrl);
+        const safeBannerBase64 = await loadImgToBase64(currentUserData.bannerUrl);
+
+        // Referencias de la plantilla DOM
+        const template = document.getElementById('statusExportTemplate');
+        template.style.left = '0px'; // Lo traemos al frente visiblemente invisible (z-index negativo)
+        
+        document.getElementById('statusBrandName').innerText = currentUserData.name || 'Mi Marca';
+        
+        const logoEl = document.getElementById('statusLogo');
+        if (safeLogoBase64) {
+            logoEl.src = safeLogoBase64;
+            logoEl.style.display = 'block';
+        } else {
+            logoEl.style.display = 'none';
+        }
+
+        const bannerEl = document.getElementById('statusBannerBg');
+        if (safeBannerBase64) {
+            bannerEl.style.backgroundImage = `url(${safeBannerBase64})`;
+        } else {
+            bannerEl.style.backgroundImage = 'none';
+        }
+
+        // Llenar métodos de pago
+        const pmContainer = document.getElementById('statusPaymentMethods');
+        pmContainer.innerHTML = '';
+        const methods = currentUserData.paymentMethods || [];
+        if (methods.length > 0) {
+            methods.forEach(m => {
+                pmContainer.innerHTML += `<span style="background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 15px; font-size: 20px; font-weight: bold;">🏦 ${m.bank}</span>`;
+            });
+        } else {
+            pmContainer.innerHTML = `<span style="background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 15px; font-size: 20px; font-weight: bold;">💳 Pregunta por nuestros medios de pago</span>`;
+        }
+
+        // 3. Crear imágenes página por página
+        let generatedImagesUrls = [];
+        const itemsPerPage = 4; // Máximo 4 productos por estado para que se vea legible
+
+        for (const cat in categories) {
+            const items = categories[cat];
+            document.getElementById('statusCategoryTitle').innerText = cat;
+
+            for (let i = 0; i < items.length; i += itemsPerPage) {
+                const chunk = items.slice(i, i + itemsPerPage);
+                
+                // Llenar los productos en el contenedor
+                const itemsContainer = document.getElementById('statusItemsContainer');
+                itemsContainer.innerHTML = '';
+
+                for (const item of chunk) {
+                    // Cargar imagen del producto si tiene
+                    let prodImgHtml = `<div style="width: 220px; height: 220px; background: rgba(255,255,255,0.05); border-radius: 30px; display:flex; align-items:center; justify-content:center; border: 2px dashed rgba(255,255,255,0.2);"><i class='bx bx-play-circle' style='font-size:80px; color:rgba(255,255,255,0.2);'></i></div>`;
+                    if (item.imgUrl) {
+                        const safeProdImg = await loadImgToBase64(item.imgUrl);
+                        if (safeProdImg) {
+                            prodImgHtml = `<img src="${safeProdImg}" style="width: 220px; height: 220px; border-radius: 30px; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">`;
+                        }
+                    }
+
+                    // Armar los precios (máximo mostrar 2 para no romper el diseño)
+                    let preciosHtml = '';
+                    const opciones = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{ label: '1 Mes', price: item.price }];
+                    
+                    opciones.slice(0, 2).forEach(opt => {
+                        preciosHtml += `
+                            <div style="background: rgba(255,255,255,0.1); padding: 12px 25px; border-radius: 20px; display: inline-flex; flex-direction: column; justify-content: center; border: 1px solid rgba(255,255,255,0.15);">
+                                <span style="font-size: 16px; color: #86868b; font-weight: bold; text-transform: uppercase;">${opt.label}</span>
+                                <span style="font-size: 28px; color: #fff; font-weight: 900;">${currentUserData.currency || 'S/'}${opt.price.toFixed(2)}</span>
+                            </div>
+                        `;
+                    });
+
+                    // Etiqueta destacada
+                    let tagHtml = '';
+                    if (item.badgeOption === 'oferta') tagHtml = `<span style="background: #FF2D55; color: white; font-size: 18px; padding: 6px 15px; border-radius: 12px; font-weight: bold; margin-left: 15px;">🔥 OFERTA</span>`;
+                    else if (item.badgeOption === 'nuevo') tagHtml = `<span style="background: #34C759; color: white; font-size: 18px; padding: 6px 15px; border-radius: 12px; font-weight: bold; margin-left: 15px;">✨ NUEVO</span>`;
+
+                    // Ensamblar tarjeta horizontal
+                    itemsContainer.innerHTML += `
+                        <div style="background: rgba(255,255,255,0.03); border: 2px solid rgba(255,255,255,0.08); border-radius: 40px; padding: 30px; display: flex; gap: 40px; align-items: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                            ${prodImgHtml}
+                            <div style="flex: 1;">
+                                <h3 style="margin: 0 0 15px 0; font-size: 42px; color: #ffffff; line-height: 1.1; font-weight: 800;">${item.platform} ${tagHtml}</h3>
+                                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                                    ${preciosHtml}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Dar tiempo al DOM para renderizar
+                await new Promise(r => setTimeout(r, 200));
+
+                // Tomar la foto
+                const canvas = await html2canvas(template, { 
+                    backgroundColor: '#1c1c1e',
+                    scale: 1, // Escala 1 = 1080x1920 nativo
+                    useCORS: true,
+                    logging: false
+                });
+
+                generatedImagesUrls.push({
+                    url: canvas.toDataURL('image/png'),
+                    name: `Estado_${cat.replace(/\s+/g, '_')}_Parte_${(i/itemsPerPage)+1}.png`
+                });
+            }
+        }
+
+        template.style.left = '-9999px'; // Ocultar plantilla nuevamente
+
+        // 4. Descargar imágenes automáticamente en secuencia
+        Swal.fire({
+            icon: 'success',
+            title: '¡Listo!',
+            text: `Se generaron ${generatedImagesUrls.length} imagen(es). Comenzando la descarga...`,
+            timer: 2000,
+            showConfirmButton: false,
+            background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+            color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+        });
+
+        // Loop de descarga con pausa para que el navegador no bloquee los popups
+        for (let i = 0; i < generatedImagesUrls.length; i++) {
+            const imgData = generatedImagesUrls[i];
+            const link = document.createElement('a');
+            link.download = imgData.name;
+            link.href = imgData.url;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            await new Promise(r => setTimeout(r, 800)); // Pausa de 800ms entre descargas
+        }
+
+    } catch (error) {
+        console.error("Error generando estados:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un problema al generar las imágenes. Intenta subir tu logo y banner nuevamente.',
+            background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+            color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+        });
+        document.getElementById('statusExportTemplate').style.left = '-9999px';
+    }
+};
 /* =========================================================
    🤖 TUTORIAL CONTEXTUAL DINÁMICO (DRIVER.JS)
 ========================================================= */
