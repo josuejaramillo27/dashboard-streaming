@@ -8036,3 +8036,22 @@ window.openProductDesc = (title, desc) => {
     
     document.getElementById('productDescModal').style.display = 'flex';
 };
+
+window.checkUrlRouting = () => {
+    const params = new URLSearchParams(window.location.search);
+    const seccion = params.get('seccion');
+
+    if (!seccion) return; // Si no hay parámetro, no hace nada
+
+    // Enrutador según la sección
+    if (seccion === 'ventas') {
+        window.openPedidosModal();
+        window.switchDashboardSection('pedidosModal');
+    } else if (seccion === 'novedades') {
+        window.openNewsModal();
+    }
+
+    // Limpiamos la URL sin recargar la página
+    const urlLimpia = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.replaceState({}, '', urlLimpia);
+};
