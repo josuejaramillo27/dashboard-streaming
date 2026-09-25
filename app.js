@@ -7772,24 +7772,56 @@ window.submitReview = async () => {
     btn.disabled = true;
 
     try {
-        // Guardamos la reseña en la colección general usando el ID del vendedor del portal
-        await addDoc(collection(db, "reviews"), {
-            vendedorId: portalStoreData.uid,
-            clientId: window.currentReviewData.clientId,
-            clientName: window.currentReviewData.clientName,
-            clientPhone: window.currentReviewData.clientPhone || '',
-            platform: window.currentReviewData.platform,
-            rating: window.currentStarRating,
-            comment: comment,
-            status: 'pendiente', // Siempre entra oculta hasta que el admin aprueba
-            date: new Date().toISOString()
+        // 1. VALIDACIÓN ANTI-SPAM Y ACTUALIZACIÓN
+        // Buscamos si ya existe una reseña de este teléfono para este vendedor
+        const qCheck = query(
+            collection(db, "reviews"), 
+            where("vendedorId", "==", portalStoreData.uid),
+            where("clientPhone", "==", window.currentReviewData.clientPhone || '')
+        );
+        const snapCheck = await getDocs(qCheck);
+        
+        let yaComento = false;
+        let idResenaAnterior = null;
+        
+        snapCheck.forEach(doc => {
+            const data = doc.data();
+            // Verificamos si la plataforma original base (ej: "Netflix") coincide
+            if (data.originalPlatform === window.currentReviewData.platform) {
+                yaComento = true;
+                idResenaAnterior = doc.id;
+            }
         });
+
+        if (yaComento) {
+            // Si ya había comentado, ACTUALIZAMOS su comentario y lo volvemos a poner en "Pendiente"
+            await updateDoc(doc(db, "reviews", idResenaAnterior), {
+                rating: window.currentStarRating,
+                comment: comment,
+                status: 'pendiente', // Pasa a pendiente para que tú lo vuelvas a aprobar
+                date: new Date().toISOString()
+            });
+        } else {
+            // Si es su primera vez, creamos la reseña nueva
+            await addDoc(collection(db, "reviews"), {
+                vendedorId: portalStoreData.uid,
+                clientId: window.currentReviewData.clientId,
+                clientName: window.currentReviewData.clientName,
+                clientPhone: window.currentReviewData.clientPhone || '', 
+                platform: window.currentReviewData.platform, 
+                originalPlatform: window.currentReviewData.platform, // <-- CLAVE: Guarda el nombre original intocable
+                rating: window.currentStarRating,
+                comment: comment,
+                status: 'pendiente', 
+                date: new Date().toISOString()
+            });
+        }
 
         document.getElementById('clientReviewModal').style.display = 'none';
         Swal.fire({
             icon: 'success',
             title: '¡Gracias por tu reseña!',
-            text: 'Tu calificación ha sido enviada al proveedor.',
+            text: yaComento ? 'Tu calificación anterior ha sido actualizada.' : 'Tu calificación ha sido enviada al proveedor.',
             background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
             color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
         });
@@ -7801,7 +7833,6 @@ window.submitReview = async () => {
         btn.disabled = false;
     }
 };
-
 // ---------------------------------------------------------
 // FUNCIONES DEL VENDEDOR (ADMIN) PARA GESTIONAR RESEÑAS
 // ---------------------------------------------------------
