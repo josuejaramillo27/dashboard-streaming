@@ -3960,6 +3960,15 @@ const checkPublicStore = async () => {
                     </div>
                 `;
             }
+            // --- NUEVO: OBTENER RESEÑAS APROBADAS PARA LA TIENDA ---
+            try {
+                const qRev = query(collection(db, "reviews"), where("vendedorId", "==", portalStoreData.uid), where("status", "==", "aprobada"));
+                const snapRev = await getDocs(qRev);
+                window.publicReviewsCache = snapRev.docs.map(d => d.data());
+            } catch (errRev) {
+                console.error("Error cargando reseñas:", errRev);
+                window.publicReviewsCache = [];
+            }
             // Primer renderizado general automático
             window.renderPublicCatalog('Todos');
             // Primer renderizado general automático
@@ -6311,6 +6320,7 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
                             <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.pin || ''}', 'PIN')"><i class='bx bx-copy'></i></button>
                         </div>
                     </div>
+                    <button onclick="window.openReviewModal('${clientObj.id}', '${platName}', '${clientObj.name.replace(/'/g, "\\'")}')" class="btn-secondary" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; border: 1px solid var(--mac-orange); color: var(--mac-orange); background: rgba(255, 149, 0, 0.1); transition: 0.2s;"><i class='bx bxs-star'></i> Calificar Servicio</button>
                 </div>
             `;
         });
@@ -7023,6 +7033,14 @@ window.renderPublicCatalog = () => {
                 else if (item.badgeOption === 'nuevo') typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #34C759 0%, #28CD41 100%); margin-left: 5px;"><i class='bx bxs-star'></i> Nuevo Ingreso</div>`;
                 else if (item.badgeOption === 'a_pedido' && !item.requiresInvite) typeBadgeHtml += `<div class="store-vibrant-badge badge-oferta" style="background: linear-gradient(135deg, #007AFF 0%, #0056b3 100%); margin-left: 5px;"><i class='bx bx-package'></i> A Pedido</div>`;
             }
+            // --- INICIO NUEVO BADGE DE RESEÑAS ---
+            let ratingHtml = '';
+            const productReviews = (window.publicReviewsCache || []).filter(r => r.platform === item.platform);
+            if (productReviews.length > 0) {
+                const sum = productReviews.reduce((acc, r) => acc + r.rating, 0);
+                const avg = (sum / productReviews.length).toFixed(1);
+                ratingHtml = `<div style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 13px; color: #FFD700; font-weight: bold; margin-bottom: 8px;"><i class='bx bxs-star'></i> ${avg} <span style="color: var(--mac-text-secondary); font-size: 11px;">(${productReviews.length})</span></div>`;
+            }
 
             const titleSafe = item.platform.replace(/'/g, "\\'").replace(/"/g, '&quot;');
             const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n').replace(/\r/g, '') : 'Sin detalles adicionales.';
@@ -7069,6 +7087,7 @@ window.renderPublicCatalog = () => {
                     <div class="store-product-visual-overlay"><span class="view-desc-hint"><i class='bx bx-zoom-in'></i> Detalles</span></div>
                 </div>
                 <div class="store-product-glass-footer" style="padding: 15px; display: flex; flex-direction: column;">
+                ${ratingHtml}
                     <strong class="store-product-title" style="display:block; font-size:18px; line-height:1.3; color: var(--mac-text-main); word-break: break-word; text-align: center;">${item.platform}</strong>
                     ${stockHtml ? `<div style="text-align:center; margin-top:5px;">${stockHtml}</div>` : ''}
                     
@@ -7713,3 +7732,188 @@ window.addEventListener("popstate", function(event) {
         return;
     }
 });
+
+/* =========================================================
+   MÓDULO: SISTEMA DE RESEÑAS Y CALIFICACIONES (ALIEXPRESS)
+========================================================= */
+window.currentReviewData = { clientId: null, platform: null, clientName: null };
+window.currentStarRating = 5;
+
+// Interacción visual de las estrellas en el modal del cliente
+document.querySelectorAll('.star-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        window.currentStarRating = parseInt(e.target.getAttribute('data-val'));
+        document.querySelectorAll('.star-btn').forEach(s => {
+            if (parseInt(s.getAttribute('data-val')) <= window.currentStarRating) {
+                s.style.color = '#FFD700'; // Dorado
+            } else {
+                s.style.color = 'var(--mac-text-secondary)'; // Gris
+            }
+        });
+    });
+});
+
+window.openReviewModal = (clientId, platform, clientName) => {
+    window.currentReviewData = { clientId, platform, clientName };
+    document.getElementById('reviewPlatformName').innerText = platform;
+    document.getElementById('reviewComment').value = '';
+    
+    // Resetear estrellas a 5
+    window.currentStarRating = 5;
+    document.querySelectorAll('.star-btn').forEach(s => s.style.color = '#FFD700');
+    
+    document.getElementById('clientReviewModal').style.display = 'flex';
+};
+
+window.submitReview = async () => {
+    const comment = document.getElementById('reviewComment').value.trim();
+    const btn = document.getElementById('btnSubmitReview');
+    const origText = btn.innerHTML;
+    btn.innerHTML = "Enviando... <i class='bx bx-loader-alt bx-spin'></i>";
+    btn.disabled = true;
+
+    try {
+        // Guardamos la reseña en la colección general usando el ID del vendedor del portal
+        await addDoc(collection(db, "reviews"), {
+            vendedorId: portalStoreData.uid,
+            clientId: window.currentReviewData.clientId,
+            clientName: window.currentReviewData.clientName,
+            platform: window.currentReviewData.platform,
+            rating: window.currentStarRating,
+            comment: comment,
+            status: 'pendiente', // Siempre entra oculta hasta que el admin aprueba
+            date: new Date().toISOString()
+        });
+
+        document.getElementById('clientReviewModal').style.display = 'none';
+        Swal.fire({
+            icon: 'success',
+            title: '¡Gracias por tu reseña!',
+            text: 'Tu calificación ha sido enviada al proveedor.',
+            background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+            color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+        });
+    } catch (e) {
+        console.error(e);
+        window.showNotification("Error enviando reseña.");
+    } finally {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+    }
+};
+
+// ---------------------------------------------------------
+// FUNCIONES DEL VENDEDOR (ADMIN) PARA GESTIONAR RESEÑAS
+// ---------------------------------------------------------
+window.loadAdminReviews = async () => {
+    const list = document.getElementById('adminReviewsList');
+    list.innerHTML = '<p style="text-align: center; color: var(--mac-text-secondary); font-size: 13px;">Cargando reseñas...</p>';
+    
+    try {
+        const qRev = query(collection(db, "reviews"), where("vendedorId", "==", currentUser.uid));
+        const snap = await getDocs(qRev);
+        
+        if (snap.empty) {
+            list.innerHTML = '<p style="text-align: center; color: var(--mac-text-secondary); font-size: 13px; padding: 20px;">Tus clientes aún no han dejado reseñas.</p>';
+            return;
+        }
+        
+        list.innerHTML = '';
+        let reviews = [];
+        snap.forEach(d => reviews.push({id: d.id, ...d.data()}));
+        reviews.sort((a,b) => new Date(b.date) - new Date(a.date)); // Las más nuevas primero
+
+        reviews.forEach(r => {
+            let stars = '';
+            for(let i = 0; i < 5; i++) { 
+                stars += `<i class='bx bxs-star' style="color: ${i < r.rating ? '#FFD700' : 'var(--mac-text-secondary)'};"></i>`; 
+            }
+            
+            let statusBadge = r.status === 'aprobada' 
+                ? `<span style="color: var(--mac-green); font-size: 10px; font-weight: bold; padding: 3px 8px; background: rgba(52, 199, 89, 0.1); border-radius: 6px;">Aprobada (Pública)</span>` 
+                : `<span style="color: var(--mac-orange); font-size: 10px; font-weight: bold; padding: 3px 8px; background: rgba(255, 149, 0, 0.1); border-radius: 6px;">Pendiente (Oculta)</span>`;
+
+            list.innerHTML += `
+                <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border: 1px solid var(--mac-border);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div>
+                            <strong style="font-size: 14px; color: var(--mac-text-main);">${r.clientName}</strong> 
+                            <span style="font-size: 11px; color: var(--mac-text-secondary); display: block; margin-top: 2px;">Servicio: <span style="color: var(--mac-blue); font-weight: bold;">${r.platform}</span></span>
+                        </div>
+                        ${statusBadge}
+                    </div>
+                    <div style="font-size: 16px; margin-bottom: 8px;">${stars}</div>
+                    <p style="margin: 0 0 15px 0; font-size: 13px; color: var(--mac-text-secondary); font-style: italic;">"${r.comment || 'Solo dejó calificación por estrellas.'}"</p>
+                    
+                    <div style="display: flex; gap: 8px;">
+                        ${r.status === 'pendiente' || r.status === 'oculta' 
+                            ? `<button class="btn-primary" style="padding: 6px 12px; font-size: 12px; background: var(--mac-green); border: none;" onclick="window.changeReviewStatus('${r.id}', 'aprobada')"><i class='bx bx-check'></i> Aprobar</button>` 
+                            : `<button class="btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="window.changeReviewStatus('${r.id}', 'oculta')"><i class='bx bx-hide'></i> Ocultar</button>`}
+                        <button class="action-btn btn-del" style="padding: 6px 10px; font-size: 14px;" onclick="window.deleteReview('${r.id}')"><i class='bx bx-trash'></i></button>
+                    </div>
+                </div>
+            `;
+        });
+    } catch(e) { 
+        console.error(e); 
+        list.innerHTML = '<p style="color: red;">Error al cargar reseñas.</p>';
+    }
+};
+
+window.changeReviewStatus = async (id, newStatus) => {
+    try {
+        await updateDoc(doc(db, "reviews", id), { status: newStatus });
+        window.showNotification(`Reseña ${newStatus === 'aprobada' ? 'hecha pública ✅' : 'ocultada 👁️‍🗨️'}`);
+        window.loadAdminReviews();
+    } catch(e) { window.showNotification("Error cambiando estado."); }
+};
+
+window.deleteReview = async (id) => {
+    if(!confirm("¿Seguro que deseas eliminar esta reseña permanentemente?")) return;
+    try {
+        await deleteDoc(doc(db, "reviews", id));
+        window.showNotification("🗑️ Reseña eliminada.");
+        window.loadAdminReviews();
+    } catch(e) { window.showNotification("Error al eliminar."); }
+};
+
+// ---------------------------------------------------------
+// REESCRITURA DE LA FUNCIÓN openProductDesc (PARA MOSTRAR RESEÑAS PÚBLICAS)
+// ---------------------------------------------------------
+window.openProductDesc = (title, desc) => {
+    document.getElementById('descModalTitle').innerText = title;
+    document.getElementById('descModalText').innerText = desc;
+    
+    const reviewsContainer = document.getElementById('publicReviewsList');
+    reviewsContainer.innerHTML = '';
+    
+    // Filtramos las reseñas guardadas en caché que correspondan a este servicio
+    const productReviews = (window.publicReviewsCache || []).filter(r => r.platform === title);
+    
+    // Las ordenamos de más nuevas a más viejas
+    productReviews.sort((a,b) => new Date(b.date) - new Date(a.date));
+    
+    if (productReviews.length > 0) {
+        productReviews.forEach(r => {
+            let stars = '';
+            for(let i = 0; i < 5; i++) {
+                stars += `<i class='bx bxs-star' style="color: ${i < r.rating ? '#FFD700' : 'var(--mac-text-secondary)'};"></i>`;
+            }
+            
+            reviewsContainer.innerHTML += `
+                <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px; border: 1px solid var(--mac-border);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <strong style="font-size: 13px; color: var(--mac-text-main);"><i class='bx bxs-user-circle'></i> ${r.clientName}</strong>
+                        <span style="font-size: 10px; color: var(--mac-text-secondary);">${new Date(r.date).toLocaleDateString('es-ES')}</span>
+                    </div>
+                    <div style="font-size: 14px; margin-bottom: 6px;">${stars}</div>
+                    <p style="margin: 0; font-size: 13px; color: var(--mac-text-secondary); font-style: italic;">${r.comment ? `"${r.comment}"` : '<i>(Dejó una calificación por estrellas)</i>'}</p>
+                </div>
+            `;
+        });
+    } else {
+        reviewsContainer.innerHTML = '<p style="font-size: 12px; color: var(--mac-text-secondary); margin: 0; text-align: center; padding: 15px;">Aún no hay reseñas para este servicio. ¡Sé el primero en comprar y calificar!</p>';
+    }
+    
+    document.getElementById('productDescModal').style.display = 'flex';
+};
