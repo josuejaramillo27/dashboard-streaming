@@ -7685,50 +7685,63 @@ window.startVisualDemo = (plan) => {
     window.showNotification("¡Bienvenido al Modo Demo! Explora las herramientas.");
 };
 
-// ==========================================================================
-// 📱 SISTEMA NATIVO DEL BOTÓN "ATRÁS" (ANDROID / IOS / PC)
-// ==========================================================================
+/* =========================================================
+   🚀 NAVEGACIÓN NATIVA (BOTÓN ATRÁS EN MÓVILES)
+========================================================= */
 
-// 1. Iniciamos la app empujando un estado artificial al historial
-window.history.pushState({ page: "panel" }, "");
+// 1. Modificamos el cambio de secciones para inyectar historial
+const nativeSwitchDashboardSection = window.switchDashboardSection;
+window.switchDashboardSection = (sectionId, menuElement) => {
+    // Evitamos empujar historial si ya estamos yendo al Home
+    if (sectionId !== 'homeSection') {
+        history.pushState({ section: sectionId }, '', '#' + sectionId);
+    }
+    nativeSwitchDashboardSection(sectionId, menuElement);
+};
 
-// 2. Escuchamos cuando el usuario pulsa el botón físico o gesto de "Atrás"
-window.addEventListener("popstate", function(event) {
-    
-    // Lo primero es volver a inyectar el estado para atrapar el próximo "Atrás" 
-    // y evitar que el navegador cierre la aplicación web por accidente.
-    window.history.pushState({ page: "panel" }, "");
+// 2. Modificamos la apertura del menú móvil para inyectar historial
+const nativeToggleMobileMenu = window.toggleMobileMenu;
+window.toggleMobileMenu = () => {
+    const sidebar = document.getElementById('mainSidebar');
+    // Si se está ABRIENDO en un celular, agregamos un estado al historial
+    if (sidebar && !sidebar.classList.contains('mobile-open') && window.innerWidth <= 768) {
+        history.pushState({ menu: 'open' }, '', '#menu');
+    }
+    nativeToggleMobileMenu();
+};
 
-    // A) ¿Está abierto el menú lateral móvil? (Spotify Menu)
+// 3. Modificamos closeModals para limpiar la URL visualmente
+const nativeCloseModalsNative = window.closeModals;
+window.closeModals = (resetTab = true) => {
+    nativeCloseModalsNative(resetTab);
+    if (resetTab) {
+        // Limpiamos el #hash de la URL cuando volvemos al inicio
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+};
+
+// 4. EL CEREBRO: Escuchar el botón físico/gesto "Atrás" del celular
+window.addEventListener('popstate', (event) => {
+    // Capa A: Si el menú lateral está abierto en celular, lo cerramos
     const sidebar = document.getElementById('mainSidebar');
     if (sidebar && sidebar.classList.contains('mobile-open')) {
-        window.toggleMobileMenu();
+        nativeToggleMobileMenu(); // Cierra el menú visualmente
         return;
     }
 
-    // B) ¿Está abierto el panel deslizante del carrito?
-    const cartPanel = document.getElementById('cartPanel');
-    if (cartPanel && cartPanel.classList.contains('active')) {
-        window.toggleCartPanel();
-        return;
-    }
-
-    // C) ¿Hay algún Modal Flotante abierto (Perfil, Inventario, WA, Checkout)?
-    const modalesAbiertos = Array.from(document.querySelectorAll('.modal-overlay'))
-                                 .filter(m => m.style.display === 'flex' || m.style.display === 'block');
-    
-    if (modalesAbiertos.length > 0) {
-        // Cierra los modales sin forzar el reset de fondo
+    // Capa B: Si hay modales emergentes (Opciones de WhatsApp, Checkout, etc.), cerrarlos
+    const openModals = Array.from(document.querySelectorAll('.modal-overlay')).filter(m => 
+        m.style.display === 'flex' && !m.classList.contains('active-section')
+    );
+    if (openModals.length > 0) {
         window.closeModals(false); 
         return;
     }
 
-    // D) Si no hay modales, ¿El usuario está en una sección que no es el Home?
+    // Capa C: Si estamos dentro de Tiendita, Inventario o Finanzas -> Volver al Dashboard Central
     const homeSection = document.getElementById('homeSection');
-    // Solo aplica para los vendedores, no para la cuenta Admin global
-    if (homeSection && !homeSection.classList.contains('active-section') && currentUserData && currentUserData.role !== 'admin') {
-        // Devuelve al usuario a la página de inicio (Dashboard Central)
-        window.switchDashboardSection('homeSection', document.querySelector('.sidebar-item[title="Dashboard Central"]'));
+    if (homeSection && !homeSection.classList.contains('active-section')) {
+        window.closeModals(true); 
         return;
     }
 });
