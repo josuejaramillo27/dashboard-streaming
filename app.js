@@ -8065,10 +8065,11 @@ window.checkUrlRouting = () => {
     window.history.replaceState({}, '', urlLimpia);
 };
 
-// --- FUNCIÓN TEMPORAL: SINCRONIZAR COSTOS ANTIGUOS ---
+// --- FUNCIÓN PARA SINCRONIZAR COSTOS ANTIGUOS ---
 window.actualizarCostosAntiguos = async () => {
     const btn = document.getElementById('btnSyncCostos');
-    if(btn) btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> <span>Calculando...</span>";
+    const origText = btn.innerHTML;
+    if(btn) btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Sync...";
     
     try {
         window.showNotification("⏳ Actualizando costos en la base de datos... no cierres la ventana.");
@@ -8084,9 +8085,8 @@ window.actualizarCostosAntiguos = async () => {
         // 2. Revisar todos los clientes actuales en memoria
         for (let i = 0; i < clients.length; i++) {
             let c = clients[i];
-            let masterId = c.linkedMasterId; // Intentar método antiguo
+            let masterId = c.linkedMasterId; 
             
-            // Intentar método nuevo (Multi-Pestaña)
             if (!masterId && c.multiAccounts) {
                 for (let platKey in c.multiAccounts) {
                     if (c.multiAccounts[platKey].masterAccountId) {
@@ -8101,10 +8101,9 @@ window.actualizarCostosAntiguos = async () => {
                 let matriz = masterMap[masterId];
                 let costoCorrecto = matriz.maxProfiles > 0 ? (matriz.cost / matriz.maxProfiles) : 0;
                 
-                // Si el costo actual en la BD es distinto al correcto, lo reescribimos
                 if (parseFloat(c.cost) !== parseFloat(costoCorrecto)) {
                     await updateDoc(doc(db, "clients", c.id), { cost: costoCorrecto });
-                    c.cost = costoCorrecto; // Actualizamos la memoria rápida
+                    c.cost = costoCorrecto; 
                     actualizados++;
                 }
             }
@@ -8123,6 +8122,6 @@ window.actualizarCostosAntiguos = async () => {
     } catch (e) {
         window.showNotification("Error: " + e.message);
     } finally {
-        if(btn) btn.innerHTML = "<i class='bx bx-check-double'></i> <span>Costos Sincronizados</span>";
+        if(btn) btn.innerHTML = origText;
     }
 };
