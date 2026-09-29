@@ -8064,3 +8064,65 @@ window.checkUrlRouting = () => {
     const urlLimpia = window.location.protocol + "//" + window.location.host + window.location.pathname;
     window.history.replaceState({}, '', urlLimpia);
 };
+
+// --- FUNCIÓN TEMPORAL: SINCRONIZAR COSTOS ANTIGUOS ---
+window.actualizarCostosAntiguos = async () => {
+    const btn = document.getElementById('btnSyncCostos');
+    if(btn) btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> <span>Calculando...</span>";
+    
+    try {
+        window.showNotification("⏳ Actualizando costos en la base de datos... no cierres la ventana.");
+        
+        // 1. Obtener todas las matrices del usuario
+        const qMat = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
+        const snapMat = await getDocs(qMat);
+        let masterMap = {};
+        snapMat.forEach(doc => { masterMap[doc.id] = doc.data(); });
+
+        let actualizados = 0;
+
+        // 2. Revisar todos los clientes actuales en memoria
+        for (let i = 0; i < clients.length; i++) {
+            let c = clients[i];
+            let masterId = c.linkedMasterId; // Intentar método antiguo
+            
+            // Intentar método nuevo (Multi-Pestaña)
+            if (!masterId && c.multiAccounts) {
+                for (let platKey in c.multiAccounts) {
+                    if (c.multiAccounts[platKey].masterAccountId) {
+                        masterId = c.multiAccounts[platKey].masterAccountId;
+                        break;
+                    }
+                }
+            }
+
+            // 3. Si pertenece a una matriz, calculamos la división
+            if (masterId && masterMap[masterId]) {
+                let matriz = masterMap[masterId];
+                let costoCorrecto = matriz.maxProfiles > 0 ? (matriz.cost / matriz.maxProfiles) : 0;
+                
+                // Si el costo actual en la BD es distinto al correcto, lo reescribimos
+                if (parseFloat(c.cost) !== parseFloat(costoCorrecto)) {
+                    await updateDoc(doc(db, "clients", c.id), { cost: costoCorrecto });
+                    c.cost = costoCorrecto; // Actualizamos la memoria rápida
+                    actualizados++;
+                }
+            }
+        }
+        
+        window.showNotification(`✅ ¡Listo! Se actualizaron los costos de ${actualizados} clientes.`);
+        
+        // 4. Forzar el recálculo visual en las tablas y gráficos
+        window.renderTable();
+        if (document.getElementById('financeSection').classList.contains('active-section')) {
+            window.loadFinanceData();
+        } else if (document.getElementById('statsPanel').style.display === 'grid') {
+            window.toggleStats(true);
+        }
+        
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
+    } finally {
+        if(btn) btn.innerHTML = "<i class='bx bx-check-double'></i> <span>Costos Sincronizados</span>";
+    }
+};
