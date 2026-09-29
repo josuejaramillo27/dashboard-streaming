@@ -724,11 +724,21 @@
             </form>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;" id="topControlsBar">
-                <div class="expandable-search">
-                    <input type="text" id="searchInput" placeholder="Buscar..." oninput="if(document.getElementById('btnTabClientes').style.background !== 'transparent') { window.renderTable(); } else { window.renderMasterAccounts(); }">
-                    <i class='bx bx-search'></i>
-                </div>
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-left: auto;">
+    
+    <!-- Agrupamos el buscador y el nuevo botón -->
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <div class="expandable-search">
+            <input type="text" id="searchInput" placeholder="Buscar..." oninput="if(document.getElementById('btnTabClientes').style.background !== 'transparent') { window.renderTable(); } else { window.renderMasterAccounts(); }">
+            <i class='bx bx-search'></i>
+        </div>
+        
+        <!-- NUEVO BOTÓN DE SINCRONIZACIÓN -->
+        <button class="action-btn" id="btnSyncCostos" onclick="window.actualizarCostosAntiguos()" style="background: rgba(255, 149, 0, 0.1); color: var(--mac-orange); border: 1px solid var(--mac-orange); font-weight: bold; padding: 10px 15px; border-radius: 10px; font-size: 13px; cursor: pointer;">
+            <i class='bx bx-sync'></i> Sync Costos
+        </button>
+    </div>
+
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-left: auto;">
                     <select id="filterSelect" onchange="window.renderTable()" style="width: auto; padding: 12px 14px; border-radius: 10px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); outline: none; transition: all 0.25s; cursor: pointer;">
                         <option value="all">Todos los estados</option>
                         <option value="active">🟢 Activos</option>
