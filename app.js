@@ -5508,7 +5508,7 @@ window.renderMasterAccounts = async () => {
                             <div>
                                 <strong style="color: var(--mac-green); font-size: 12px; display: block; margin-bottom: 4px;">🟢 Perfil ${i} Libre</strong>
                             </div>
-                            <button class="btn-primary" style="font-size: 11px; padding: 4px 8px; width: 100%; text-align: center; background: rgba(48, 209, 88, 0.15); color: var(--mac-green); border: 1px solid var(--mac-green);" onclick="window.vincularClienteAMatriz('${accId}', '${pPlat}', '${pMail}', '${pPass}', ${i})">
+                            <button class="btn-primary" style="font-size: 11px; padding: 4px 8px; width: 100%; text-align: center; background: rgba(48, 209, 88, 0.15); color: var(--mac-green); border: 1px solid var(--mac-green);" onclick="window.vincularClienteAMatriz('${accId}', '${pPlat}', '${pMail}', '${pPass}', ${i}, ${acc.cost}, ${acc.maxProfiles})">
                                 <i class='bx bx-plus'></i> Asignar
                             </button>
                         </div>
@@ -5555,7 +5555,7 @@ window.renderMasterAccounts = async () => {
 };
 
 // 7. ACCIÓN PARA SALTAR AL FORMULARIO DE CLIENTE DESDE LA MATRIZ
-window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) => {
+window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum, matCost = 0, matMaxProfiles = 1) => {
     variablesEnlaceMatriz.masterId = masterId;
     variablesEnlaceMatriz.profileNum = profileNum;
 
@@ -5563,6 +5563,14 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) =>
     document.getElementById('clientForm').reset();
     document.getElementById('clientName').value = "Perfil " + profileNum;
     
+    // --- LÓGICA NUEVA: CÁLCULO DE INVERSIÓN AUTOMÁTICA ---
+    const costInput = document.getElementById('clientCost');
+    if (costInput) {
+        const costoCalculado = matMaxProfiles > 0 ? (matCost / matMaxProfiles) : 0;
+        costInput.value = costoCalculado.toFixed(2); // Redondeado a 2 decimales
+    }
+    // -----------------------------------------------------
+
     const cbs = document.querySelectorAll('#checkboxDropdown input'); 
     cbs.forEach(cb => cb.checked = false); 
     cbs.forEach(cb => { if(cb.value === platform) cb.checked = true; });
@@ -5601,7 +5609,7 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum) =>
     
     window.switchMainTab('clientes');
     document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
-    window.showNotification("Completa el teléfono y los precios para guardar.");
+    window.showNotification("Completa el teléfono y el precio de venta para guardar.");
 };
 /* --- MODAL PARA VINCULAR CLIENTE SUELTO A MATRIZ (MULTIPLE) --- */
 window.openLinkModal = async (clientId, clientPlatform) => {
