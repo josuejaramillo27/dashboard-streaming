@@ -8125,3 +8125,72 @@ window.actualizarCostosAntiguos = async () => {
         if(btn) btn.innerHTML = origText;
     }
 };
+
+window.currentReviewRating = 5; 
+window.currentReviewClient = null;
+window.currentReviewPlatform = null;
+
+// Lógica para pintar las estrellas al hacer clic
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.star-btn').forEach(star => {
+        star.addEventListener('click', function() {
+            window.currentReviewRating = parseInt(this.getAttribute('data-val'));
+            document.querySelectorAll('.star-btn').forEach(s => {
+                if (parseInt(s.getAttribute('data-val')) <= window.currentReviewRating) {
+                    s.style.color = '#FFD700'; // Estrella encendida
+                } else {
+                    s.style.color = 'var(--mac-gray)'; // Estrella apagada
+                }
+            });
+        });
+    });
+});
+
+window.openReviewModal = (clientId, platform, clientName, clientPhone) => {
+    window.currentReviewClient = { id: clientId, name: clientName, phone: clientPhone };
+    window.currentReviewPlatform = platform;
+    window.currentReviewRating = 5; 
+    
+    document.getElementById('reviewPlatformName').innerText = platform;
+    document.getElementById('reviewComment').value = '';
+    document.querySelectorAll('.star-btn').forEach(s => s.style.color = '#FFD700');
+    
+    document.getElementById('clientReviewModal').style.display = 'flex';
+};
+
+window.submitReview = async () => {
+    const comment = document.getElementById('reviewComment').value.trim();
+    const btn = document.getElementById('btnSubmitReview');
+    const origText = btn.innerText;
+    
+    btn.innerText = "Enviando..."; 
+    btn.disabled = true;
+
+    try {
+        // Se usa la variable global portalStoreData que tu código ya define al abrir el portal
+        const vendedorId = typeof portalStoreData !== 'undefined' ? portalStoreData.uid : null;
+        if(!vendedorId) throw new Error("ID del vendedor no encontrado.");
+
+        // Guardado nativo en Firestore
+        await addDoc(collection(db, "reviews"), {
+            vendedorId: vendedorId,
+            clienteId: window.currentReviewClient.id,
+            clienteNombre: window.currentReviewClient.name,
+            plataforma: window.currentReviewPlatform,
+            rating: window.currentReviewRating,
+            comentario: comment,
+            status: 'pendiente', // Para que la apruebes manualmente luego
+            fecha: new Date().toISOString()
+        });
+
+        window.showNotification("¡Reseña enviada con éxito! 🎉");
+        document.getElementById('clientReviewModal').style.display = 'none';
+
+    } catch (e) {
+        console.error("Error enviando reseña:", e);
+        window.showNotification("Error enviando reseña."); 
+    } finally {
+        btn.innerText = origText;
+        btn.disabled = false;
+    }
+};
