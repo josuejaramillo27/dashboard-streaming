@@ -7908,8 +7908,8 @@ window.loadAdminReviews = async () => {
                     
                     <div style="display: flex; gap: 8px;">
                         ${r.status === 'pendiente' || r.status === 'oculta' 
-                            ? `<button class="btn-primary" style="padding: 6px 12px; font-size: 12px; background: var(--mac-green); border: none;" onclick="window.changeReviewStatus('${r.id}', 'aprobada', '${plataformaLimpia}')"><i class='bx bx-check'></i> Aprobar</button>` 
-                            : `<button class="btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="window.changeReviewStatus('${r.id}', 'oculta', '')"><i class='bx bx-hide'></i> Ocultar</button>`}
+                            ? `<button class="btn-primary" style="width: max-content; padding: 6px 12px; font-size: 12px; background: var(--mac-green); border: none;" onclick="window.changeReviewStatus('${r.id}', 'aprobada', '${plataformaLimpia}')"><i class='bx bx-check'></i> Aprobar</button>` 
+                            : `<button class="btn-secondary" style="width: max-content; padding: 6px 12px; font-size: 12px;" onclick="window.changeReviewStatus('${r.id}', 'oculta', '')"><i class='bx bx-hide'></i> Ocultar</button>`}
                         <button class="action-btn btn-del" style="padding: 6px 10px; font-size: 14px;" onclick="window.deleteReview('${r.id}')"><i class='bx bx-trash'></i></button>
                     </div>
                 </div>
