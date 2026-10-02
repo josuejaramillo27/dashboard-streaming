@@ -7874,7 +7874,9 @@ window.loadAdminReviews = async () => {
         list.innerHTML = '';
         let reviews = [];
         snap.forEach(d => reviews.push({id: d.id, ...d.data()}));
-        reviews.sort((a,b) => new Date(b.date) - new Date(a.date)); // Las más nuevas primero
+        
+        // Soporte para fecha en inglés (date) o español (fecha)
+        reviews.sort((a,b) => new Date(b.fecha || b.date) - new Date(a.fecha || a.date)); 
 
         reviews.forEach(r => {
             let stars = '';
@@ -7886,21 +7888,27 @@ window.loadAdminReviews = async () => {
                 ? `<span style="color: var(--mac-green); font-size: 10px; font-weight: bold; padding: 3px 8px; background: rgba(52, 199, 89, 0.1); border-radius: 6px;">Aprobada (Pública)</span>` 
                 : `<span style="color: var(--mac-orange); font-size: 10px; font-weight: bold; padding: 3px 8px; background: rgba(255, 149, 0, 0.1); border-radius: 6px;">Pendiente (Oculta)</span>`;
 
+            // 🔥 Variables seguras que evitan el error undefined
+            const nombreSeguro = r.clienteNombre || r.clientName || 'Cliente';
+            const plataformaSegura = r.plataforma || r.platform || 'Servicio';
+            const comentarioSeguro = r.comentario || r.comment || 'Solo dejó calificación por estrellas.';
+            const plataformaLimpia = plataformaSegura.replace(/'/g, "\\'"); // Aplicación segura del replace
+
             list.innerHTML += `
                 <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border: 1px solid var(--mac-border);">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                         <div>
-                            <strong style="font-size: 14px; color: var(--mac-text-main);">${r.clientName}</strong> 
-                            <span style="font-size: 11px; color: var(--mac-text-secondary); display: block; margin-top: 2px;">Servicio: <span style="color: var(--mac-blue); font-weight: bold;">${r.platform}</span></span>
+                            <strong style="font-size: 14px; color: var(--mac-text-main);">${nombreSeguro}</strong> 
+                            <span style="font-size: 11px; color: var(--mac-text-secondary); display: block; margin-top: 2px;">Servicio: <span style="color: var(--mac-blue); font-weight: bold;">${plataformaSegura}</span></span>
                         </div>
                         ${statusBadge}
                     </div>
                     <div style="font-size: 16px; margin-bottom: 8px;">${stars}</div>
-                    <p style="margin: 0 0 15px 0; font-size: 13px; color: var(--mac-text-secondary); font-style: italic;">"${r.comment || 'Solo dejó calificación por estrellas.'}"</p>
+                    <p style="margin: 0 0 15px 0; font-size: 13px; color: var(--mac-text-secondary); font-style: italic;">"${comentarioSeguro}"</p>
                     
                     <div style="display: flex; gap: 8px;">
                         ${r.status === 'pendiente' || r.status === 'oculta' 
-                            ? `<button class="btn-primary" style="padding: 6px 12px; font-size: 12px; background: var(--mac-green); border: none;" onclick="window.changeReviewStatus('${r.id}', 'aprobada', '${r.platform.replace(/'/g, "\\'")}')"><i class='bx bx-check'></i> Aprobar</button>` 
+                            ? `<button class="btn-primary" style="padding: 6px 12px; font-size: 12px; background: var(--mac-green); border: none;" onclick="window.changeReviewStatus('${r.id}', 'aprobada', '${plataformaLimpia}')"><i class='bx bx-check'></i> Aprobar</button>` 
                             : `<button class="btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="window.changeReviewStatus('${r.id}', 'oculta', '')"><i class='bx bx-hide'></i> Ocultar</button>`}
                         <button class="action-btn btn-del" style="padding: 6px 10px; font-size: 14px;" onclick="window.deleteReview('${r.id}')"><i class='bx bx-trash'></i></button>
                     </div>
@@ -7909,7 +7917,7 @@ window.loadAdminReviews = async () => {
         });
     } catch(e) { 
         console.error(e); 
-        list.innerHTML = '<p style="color: red;">Error al cargar reseñas.</p>';
+        list.innerHTML = '<p style="color: var(--mac-red);">Error al cargar reseñas.</p>';
     }
 };
 
