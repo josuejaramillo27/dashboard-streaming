@@ -3963,7 +3963,7 @@ const checkPublicStore = async () => {
             }
             // --- NUEVO: OBTENER RESEÑAS APROBADAS PARA LA TIENDA ---
             try {
-                const qRev = query(collection(db, "reviews"), where("vendedorId", "==", portalStoreData.uid), where("status", "==", "aprobada"));
+                const qRev = query(collection(db, "reviews"), where("vendedorId", "==", data.uid), where("status", "==", "aprobada"));
                 const snapRev = await getDocs(qRev);
                 window.publicReviewsCache = snapRev.docs.map(d => d.data());
             } catch (errRev) {
