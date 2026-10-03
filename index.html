@@ -958,11 +958,14 @@
 
                     <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 15px;">
                         <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 15px;">
-                        <input type="text" id="storePlatform" placeholder="Nombre del Producto" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 14px; box-sizing: border-box;">
-                        
-                        <select id="storeCategorySelect" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 13px; outline: none;">
-                            <option value="">Sin Categoría</option>
-                        </select>
+                        <!-- FILA: Nombre y Categoría -->
+<div style="display: flex; gap: 10px; width: 100%;">
+    <input type="text" id="storePlatform" placeholder="Nombre del Producto" style="flex: 2; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 14px; box-sizing: border-box; outline: none;">
+    
+    <select id="storeCategorySelect" style="flex: 1; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 13px; outline: none;">
+        <option value="">Sin Categoría</option>
+    </select>
+</div>
 
                         <!-- NUEVO CREADOR DE PESTAÑAS (BUILDER) -->
                         <div style="background: rgba(94, 92, 230, 0.05); padding: 15px; border-radius: 10px; border: 1px dashed var(--mac-blue); margin-top: 10px;">
@@ -2482,15 +2485,18 @@
         <div style="overflow-y: auto; padding-right: 10px; flex: 1; display: flex; flex-direction: column; gap: 12px;">
             <input type="hidden" id="editProdIndex">
             
-            <div>
-                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Nombre del Producto:</label>
-                <input type="text" id="editProdName" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); box-sizing: border-box; margin-top: 4px; outline: none;">
-            </div>
-            
-            <div>
-                <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Categoría:</label>
-                <select id="editProdCat" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); box-sizing: border-box; margin-top: 4px; outline: none;"></select>
-            </div>
+            <!-- FILA: Nombre y Categoría (Edición) -->
+<div style="display: flex; gap: 10px; width: 100%;">
+    <div style="flex: 2;">
+        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Nombre del Producto:</label>
+        <input type="text" id="editProdName" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); box-sizing: border-box; margin-top: 4px; outline: none;">
+    </div>
+    
+    <div style="flex: 1;">
+        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Categoría:</label>
+        <select id="editProdCat" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); box-sizing: border-box; margin-top: 4px; outline: none;"></select>
+    </div>
+</div>
 
             <div style="background: rgba(94, 92, 230, 0.05); padding: 15px; border-radius: 10px; border: 1px dashed var(--mac-blue);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
