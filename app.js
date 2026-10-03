@@ -1682,15 +1682,23 @@ window.saveClientData = async () => {
             window.showNotification("Agregado"); 
         }
 
-        // 🗑️ MAGIA AUTOMÁTICA: Eliminamos del stock lo que hayamos entregado en las pestañas
+        // 🗑️ MAGIA AUTOMÁTICA: Eliminamos del stock lo que haya coincidido
         let stock = currentUserData.inventory || [];
         let updatedStock = false;
+        
         Object.values(multiAccData).forEach(acc => {
-            if (acc.inventoryId) {
-                stock = stock.filter(item => item.id !== acc.inventoryId);
+            // Buscamos coincidencia por inventoryId o por coincidencia exacta de datos
+            const matchIndex = stock.findIndex(item => 
+                (acc.inventoryId && item.id === acc.inventoryId) || 
+                (item.email && item.email.toLowerCase() === acc.email.toLowerCase() && String(item.profile) === String(acc.profile) && item.platform === acc.platform && item.status === 'libre')
+            );
+            
+            if (matchIndex !== -1) {
+                stock.splice(matchIndex, 1); // ELIMINA POR COMPLETO DEL INVENTARIO
                 updatedStock = true;
             }
         });
+        
         if (updatedStock) {
             await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
             currentUserData.inventory = stock;
@@ -3362,19 +3370,17 @@ window.removeStoreCategory = async (index) => {
 window.addStoreItem = async () => {
     const type = document.getElementById('storeType') ? document.getElementById('storeType').value : 'Servicio';
     const plat = document.getElementById('storePlatform').value.trim();
-    const p1L = document.getElementById('storeLabel1').value || '1 Mes';
-    const p1P = parseFloat(document.getElementById('storePrice').value);
-    const p2L = document.getElementById('storeLabel2').value;
-    const p2P = parseFloat(document.getElementById('storePrice2').value);
-    const p3L = document.getElementById('storeLabel3').value;
-    const p3P = parseFloat(document.getElementById('storePrice3').value);
-
+    
     let opcionesPrecio = [];
-    if (!isNaN(p1P)) opcionesPrecio.push({ label: p1L, price: p1P });
-    if (p2L && !isNaN(p2P)) opcionesPrecio.push({ label: p2L, price: p2P });
-    if (p3L && !isNaN(p3P)) opcionesPrecio.push({ label: p3L, price: p3P });
+    const rows = document.querySelectorAll('#dynamicPricingOptionsContainer .pricing-option-row');
+    rows.forEach(row => {
+        const lbl = row.querySelector('.opt-label').value.trim();
+        const prc = parseFloat(row.querySelector('.opt-price').value);
+        if (lbl && !isNaN(prc)) opcionesPrecio.push({ label: lbl, price: prc });
+    });
 
-    if (!plat || isNaN(p1P)) return window.showNotification("Completa plataforma y precio base");
+    if (!plat || opcionesPrecio.length === 0) return window.showNotification("Completa plataforma y al menos una opción de precio");
+    const p1P = opcionesPrecio[0].price;
     const cat = document.getElementById('storeCategorySelect').value;
     const desc = document.getElementById('storeDesc') ? document.getElementById('storeDesc').value.trim() : '';
     const autoStock = document.getElementById('storeAutoStock').checked;
@@ -4793,7 +4799,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
                 
                 if (!primerClienteId) primerClienteId = docRef.id;
                 cuenta.rules = rulesDB[cuenta.platform] || "Uso personal, no modificar los datos de acceso.";
-                stock = stock.map(item => item.id === cuenta.id ? { ...item, status: 'vendida' } : item);
+                stock = stock.filter(item => item.id !== cuenta.id);
             }
             await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
             currentUserData.inventory = stock;
@@ -7055,24 +7061,31 @@ window.renderPublicCatalog = () => {
             const descSafe = item.desc ? item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n').replace(/\r/g, '') : 'Sin detalles adicionales.';
             const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}" alt="${item.platform}">` : `<div style="width:100%; height:100%; background:var(--mac-gray); display:flex; align-items:center; justify-content:center;"><i class='bx bx-play-circle' style='font-size:48px; color:var(--mac-text-secondary); opacity:0.3;'></i></div>`;
 
-            // Generador de la lista de opciones estilo Canva
+            // Generador de Pestañas de Precios
             const opcionesGuardadas = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{ label: '1 Mes', price: item.price }];
             
-            let pricingHtml = `<div style="display:flex; flex-direction:column; gap:8px; width:100%; margin-top:15px; margin-bottom:15px;">`;
+            let pricingHtml = `
+            <div style="margin: 15px 0;">
+                <div style="display:flex; overflow-x:auto; gap:8px; padding-bottom: 5px; scrollbar-width: none;">`;
+                
             opcionesGuardadas.forEach((opt, i) => {
                 const isSelected = i === 0;
-                const borderColor = isSelected ? 'var(--mac-blue)' : 'var(--mac-border)';
-                const bg = isSelected ? 'rgba(0, 122, 255, 0.1)' : 'var(--mac-surface)';
+                const bg = isSelected ? 'var(--mac-blue)' : 'var(--mac-surface)';
+                const color = isSelected ? 'white' : 'var(--mac-text-secondary)';
+                const border = isSelected ? 'var(--mac-blue)' : 'var(--mac-border)';
                 
                 pricingHtml += `
-                    <label id="opt_label_${item.id}_${i}" onclick="window.selectPricingOption('${item.id}', ${i})" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-radius:12px; border:1px solid ${borderColor}; background:${bg}; cursor:pointer; transition:all 0.2s;">
-                        <span style="font-size:14px; font-weight:600; color:var(--mac-text-main);">${opt.label}</span>
-                        <span style="font-size:15px; font-weight:800; color:var(--mac-text-main);">${data.currency || 'S/'}${opt.price.toFixed(2)}</span>
-                        <input type="radio" name="opt_${item.id}" value="${i}" data-price="${opt.price}" data-label="${opt.label}" ${isSelected ? 'checked' : ''} style="display:none;">
-                    </label>
+                    <div id="tab_${item.id}_${i}" onclick="window.selectStoreTabPricing('${item.id}', ${i}, ${opt.price}, '${opt.label}')" style="background:${bg}; color:${color}; border: 1px solid ${border}; padding:6px 14px; border-radius:20px; font-size:12px; font-weight:bold; cursor:pointer; white-space:nowrap; transition: 0.2s;">
+                        ${opt.label}
+                    </div>
                 `;
             });
-            pricingHtml += `</div>`;
+            
+            pricingHtml += `</div>
+                <div style="text-align: center; margin-top: 10px; font-size: 22px; font-weight: 900; color: var(--mac-green);" id="priceDisplay_${item.id}">
+                    ${data.currency || 'S/'}${opcionesGuardadas[0].price.toFixed(2)}
+                </div>
+            </div>`;
 
             let btnHTML = '';
             if (!isStoreOpen) {
@@ -8236,5 +8249,174 @@ window.submitReview = async () => {
     } finally {
         btn.innerText = origText;
         btn.disabled = false;
+    }
+};
+
+window.addPricingOptionField = (label = '', price = '') => {
+    const container = document.getElementById('dynamicPricingOptionsContainer');
+    const div = document.createElement('div');
+    div.className = 'pricing-option-row';
+    div.style.cssText = 'display: flex; gap: 8px; align-items: center; margin-top: 5px;';
+    div.innerHTML = `
+        <input type="text" placeholder="Ej: 3 Meses" value="${label}" class="opt-label" style="flex:1; padding: 10px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px;">
+        <input type="number" step="0.1" placeholder="Precio" value="${price}" class="opt-price" style="flex:1; padding: 10px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px;">
+        <button type="button" class="action-btn btn-del" style="padding: 6px; border-radius: 6px;" onclick="this.parentElement.remove()"><i class='bx bx-trash'></i></button>
+    `;
+    container.appendChild(div);
+};
+
+window.storeSelectedOptions = {}; // Guarda la opción seleccionada por producto
+
+window.selectStoreTabPricing = (itemId, index, price, label) => {
+    // Pintar pestaña activa
+    const allTabs = document.querySelectorAll(`[id^="tab_${itemId}_"]`);
+    allTabs.forEach(t => {
+        t.style.background = 'var(--mac-surface)';
+        t.style.color = 'var(--mac-text-secondary)';
+        t.style.borderColor = 'var(--mac-border)';
+    });
+    
+    const activeTab = document.getElementById(`tab_${itemId}_${index}`);
+    if (activeTab) {
+        activeTab.style.background = 'var(--mac-blue)';
+        activeTab.style.color = 'white';
+        activeTab.style.borderColor = 'var(--mac-blue)';
+    }
+
+    // Cambiar precio en pantalla
+    const data = window.publicStoreDataCache;
+    const priceDisplay = document.getElementById(`priceDisplay_${itemId}`);
+    if (priceDisplay) priceDisplay.innerText = `${data.currency || 'S/'}${price.toFixed(2)}`;
+
+    // Guardar en memoria para el carrito
+    window.storeSelectedOptions[itemId] = { price, label };
+};
+
+// Y modificar addToCartWithOptions para leer esto:
+window.addToCartWithOptions = (itemId) => {
+    const catalog = window.publicCatalogCache || [];
+    const originalItem = catalog.find(i => i.id === itemId);
+    if (!originalItem) return;
+
+    const selectedOpt = window.storeSelectedOptions[itemId] || (originalItem.pricingOptions && originalItem.pricingOptions.length > 0 ? originalItem.pricingOptions[0] : { price: originalItem.price, label: '' });
+    
+    const cartItem = { ...originalItem }; 
+    cartItem.price = selectedOpt.price;
+    if (selectedOpt.label && selectedOpt.label !== '1 Mes') {
+        cartItem.platform = `${originalItem.platform} (${selectedOpt.label})`;
+    }
+
+    window.storeCart.push(cartItem);
+    document.getElementById('cartBadge').innerText = window.storeCart.length;
+    document.getElementById('floatingCartBtn').style.display = 'flex';
+    document.getElementById('cartPanelOverlay').classList.add('active');
+    document.getElementById('cartPanel').classList.add('active');
+    window.renderCartItems();
+};
+
+window.openProvidersModal = () => {
+    document.getElementById('providersModal').style.display = 'flex';
+    // Llenar select del modal de agregar proveedor con los servicios actuales
+    const select = document.getElementById('newProvPlatform');
+    select.innerHTML = '';
+    (currentUserData.customServices || DEFAULT_SERVICES).forEach(s => {
+        select.innerHTML += `<option value="${s}">${s}</option>`;
+    });
+    window.renderProviders();
+};
+
+window.saveProvider = async () => {
+    const name = document.getElementById('newProvName').value.trim();
+    const platform = document.getElementById('newProvPlatform').value;
+    const cost = parseFloat(document.getElementById('newProvCost').value) || 0;
+    
+    if(!name) return window.showNotification("Escribe el nombre del proveedor.");
+    
+    let provs = currentUserData.providers || [];
+    provs.push({ id: 'prov_' + Date.now(), name, platform, cost });
+    
+    try {
+        await updateDoc(doc(db, "users", currentUser.uid), { providers: provs });
+        currentUserData.providers = provs;
+        document.getElementById('newProvName').value = '';
+        document.getElementById('newProvCost').value = '';
+        window.renderProviders();
+        window.updateProviderDropdown();
+        window.showNotification("✅ Proveedor añadido.");
+    } catch(e) { window.showNotification("Error: " + e.message); }
+};
+
+window.renderProviders = () => {
+    const list = document.getElementById('providersListContainer');
+    list.innerHTML = '';
+    const provs = currentUserData.providers || [];
+    
+    provs.forEach((p, idx) => {
+        list.innerHTML += `
+            <div style="background: var(--mac-surface); border: 1px solid var(--mac-border); padding: 10px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong style="color: var(--mac-text-main); font-size: 14px;">${p.name}</strong>
+                    <div style="color: var(--mac-text-secondary); font-size: 12px; margin-top: 2px;">${p.platform} | Costo: ${globalCurrency}${p.cost.toFixed(2)}</div>
+                </div>
+                <button class="action-btn btn-del" onclick="window.deleteProvider(${idx})"><i class='bx bx-trash'></i></button>
+            </div>
+        `;
+    });
+};
+
+window.deleteProvider = async (idx) => {
+    let provs = currentUserData.providers || [];
+    provs.splice(idx, 1);
+    await updateDoc(doc(db, "users", currentUser.uid), { providers: provs });
+    currentUserData.providers = provs;
+    window.renderProviders();
+    window.updateProviderDropdown();
+};
+
+window.updateProviderDropdown = () => {
+    const checkedBoxes = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value);
+    const select = document.getElementById('clientProviderSelect');
+    if(!select) return;
+    
+    select.innerHTML = '<option value="">Seleccionar Proveedor...</option>';
+    const provs = currentUserData.providers || [];
+    
+    // Filtrar los que pertenezcan a la plataforma marcada
+    const filtered = provs.filter(p => checkedBoxes.includes(p.platform));
+    
+    filtered.forEach(p => {
+        select.innerHTML += `<option value="${p.id}" data-cost="${p.cost}">${p.name} - ${p.platform} (${globalCurrency}${p.cost.toFixed(2)})</option>`;
+    });
+    
+    select.innerHTML += `<option value="custom">+ Escribir manual...</option>`;
+};
+
+// Escuchar cambios en los checks para disparar actualización del Select
+document.querySelectorAll('#checkboxDropdown input').forEach(cb => { 
+    cb.addEventListener('change', () => { 
+        // Tu código anterior ya lo hace...
+        window.updateProviderDropdown(); 
+    }); 
+});
+
+// Llenar auto-costo al seleccionar
+window.onProviderSelected = () => {
+    const select = document.getElementById('clientProviderSelect');
+    const customInput = document.getElementById('clientProviderName');
+    const costInput = document.getElementById('clientCost');
+    
+    if (select.value === 'custom') {
+        customInput.style.display = 'block';
+        customInput.value = '';
+    } else if (select.value) {
+        customInput.style.display = 'none';
+        const provData = currentUserData.providers.find(p => p.id === select.value);
+        if (provData) {
+            customInput.value = provData.name;
+            costInput.value = provData.cost; // Auto-fill del costo
+        }
+    } else {
+        customInput.style.display = 'none';
+        customInput.value = '';
     }
 };
