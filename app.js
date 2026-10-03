@@ -7997,60 +7997,96 @@ window.openProductDesc = (title, desc) => {
     document.getElementById('descModalTitle').innerText = title;
     document.getElementById('descModalText').innerText = desc;
     
-    const reviewsContainer = document.getElementById('publicReviewsList');
-    reviewsContainer.innerHTML = '';
-    
-    // Filtramos las reseñas guardadas en caché que correspondan a este servicio
-    const productReviews = (window.publicReviewsCache || []).filter(r => r.platform === title);
-    
-    // Las ordenamos de más nuevas a más viejas
-    productReviews.sort((a,b) => new Date(b.date) - new Date(a.date));
-    
-    if (productReviews.length > 0) {
-        productReviews.forEach(r => {
-            let stars = '';
-            for(let i = 0; i < 5; i++) {
-                stars += `<i class='bx bxs-star' style="color: ${i < r.rating ? '#FFD700' : 'var(--mac-text-secondary)'};"></i>`;
-            }
-
-            // 1. ENMASCARAR NOMBRE (Ej: "Carlos Perez" -> "Carlos P.")
-            let parts = (r.clientName || 'Cliente').split(' ');
-            let maskedName = parts[0];
-            if(parts.length > 1) maskedName += ' ' + parts[1].charAt(0) + '.';
-
-            // 2. ENMASCARAR TELÉFONO (Ej: "+51987654321" -> "+51 987 *** *21")
-            let maskedPhone = '';
-            if (r.clientPhone) {
-                let p = r.clientPhone.replace(/\s+/g, ''); 
-                if (p.length >= 8) {
-                    let start = p.substring(0, 6); // Toma ej: +51987
-                    let end = p.substring(p.length - 2); // Toma últimos 2 ej: 21
-                    maskedPhone = `${start} *** *${end}`;
+    // 1. Obtener el contenedor de reseñas
+    const reviewsList = document.getElementById('publicReviewsList');
+    if (reviewsList) {
+        reviewsList.innerHTML = '';
+        
+        // 2. Filtrar reseñas por la plataforma seleccionada
+        const productReviews = (window.publicReviewsCache || []).filter(r => 
+            (r.platform || r.plataforma || '').toLowerCase() === title.toLowerCase()
+        );
+        
+        if (productReviews.length === 0) {
+            reviewsList.innerHTML = '<p style="font-size: 13px; color: var(--mac-text-secondary); text-align: center; margin: 0;">Aún no hay reseñas para este servicio.</p>';
+        } else {
+            productReviews.forEach(r => {
+                // A) Manejo Seguro del Nombre
+                const clientName = r.clienteNombre || r.clientName || r.nombre || 'Cliente';
+                
+                // B) Manejo Seguro de la Fecha (Evita "Invalid Date")
+                let dateStr = "Fecha reciente";
+                const dateVal = r.fechaIso || r.fecha || r.date || r.timestamp;
+                if (dateVal) {
+                    const dateObj = new Date(dateVal);
+                    if (!isNaN(dateObj.getTime())) {
+                        dateStr = dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+                    }
                 }
-            }
-            
-            let userInfoHtml = `<strong style="font-size: 13px; color: var(--mac-text-main);"><i class='bx bxs-user-circle'></i> ${maskedName}</strong>`;
-            if (maskedPhone) {
-                userInfoHtml += `<span style="font-size: 11px; color: var(--mac-text-secondary); margin-left: 6px; letter-spacing: 0.5px;">${maskedPhone}</span>`;
-            }
-            
-            reviewsContainer.innerHTML += `
-                <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px; border: 1px solid var(--mac-border);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+
+                // C) Manejo Seguro del Comentario
+                const rawComment = r.comentario || r.comment || r.text || '';
+                const reviewText = rawComment.trim() !== '' 
+                    ? `"${rawComment}"` 
+                    : '<span style="font-style: italic; color: var(--mac-text-secondary);">(Dejó una calificación por estrellas)</span>';
+
+                // D) Manejo y Enmascaramiento del Número de Teléfono
+                let hiddenPhoneHtml = '';
+                const phoneRaw = r.clienteNumero || r.clientPhone || r.phone || r.numero || '';
+                
+                if (phoneRaw) {
+                    // Quitamos espacios en blanco para evaluar
+                    let num = phoneRaw.replace(/\s+/g, '');
+                    // Separamos el código de país del resto del número (Ej: +51 y 999888777)
+                    const match = num.match(/^(\+\d{2,3})(\d+)$/);
+                    let maskedPhone = num;
+                    
+                    if (match) {
+                        const countryCode = match[1];
+                        const localNum = match[2];
+                        if (localNum.length >= 6) {
+                            const visibleStart = localNum.substring(0, 3);
+                            const visibleEnd = localNum.substring(localNum.length - 1);
+                            const masked = 'X'.repeat(localNum.length - 4);
+                            maskedPhone = `${countryCode} ${visibleStart}${masked}${visibleEnd}`;
+                        }
+                    } else if (num.length >= 8) {
+                        // Fallback si no detecta el código de país con "+"
+                        const visibleStart = num.substring(0, 6);
+                        const visibleEnd = num.substring(num.length - 1);
+                        const masked = 'X'.repeat(num.length - 7);
+                        maskedPhone = `${visibleStart}${masked}${visibleEnd}`;
+                    }
+                    
+                    hiddenPhoneHtml = `<span style="font-size: 11px; color: var(--mac-text-secondary); display: block; margin-top: 2px;"><i class='bx bxl-whatsapp'></i> ${maskedPhone}</span>`;
+                }
+
+                // E) Manejo de Estrellas
+                const rating = parseInt(r.rating || r.estrellas || 5);
+                let starsHtml = '';
+                for (let i = 1; i <= 5; i++) {
+                    starsHtml += `<i class='bx bxs-star' style="color: ${i <= rating ? '#FFD700' : 'var(--mac-border)'};"></i>`;
+                }
+
+                // F) Renderizar la tarjeta de la reseña
+                const div = document.createElement('div');
+                div.style.cssText = "background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px; border: 1px solid var(--mac-border);";
+                div.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px;">
                         <div>
-                            ${userInfoHtml}
+                            <strong style="color: var(--mac-text-main); font-size: 13px; display: flex; align-items: center; gap: 4px;"><i class='bx bx-user-circle'></i> ${clientName}</strong>
+                            ${hiddenPhoneHtml}
                         </div>
-                        <span style="font-size: 10px; color: var(--mac-text-secondary);">${new Date(r.date).toLocaleDateString('es-ES')}</span>
+                        <span style="font-size: 11px; color: var(--mac-text-secondary); white-space: nowrap;">${dateStr}</span>
                     </div>
-                    <div style="font-size: 14px; margin-bottom: 6px;">${stars}</div>
-                    <p style="margin: 0; font-size: 13px; color: var(--mac-text-secondary); font-style: italic;">${r.comment ? `"${r.comment}"` : '<i>(Dejó una calificación por estrellas)</i>'}</p>
-                </div>
-            `;
-        });
-    } else {
-        reviewsContainer.innerHTML = '<p style="font-size: 12px; color: var(--mac-text-secondary); margin: 0; text-align: center; padding: 15px;">Aún no hay reseñas para este servicio. ¡Sé el primero en comprar y calificar!</p>';
+                    <div style="margin-bottom: 5px; font-size: 14px;">${starsHtml}</div>
+                    <p style="margin: 0; font-size: 13px; color: var(--mac-text-main); line-height: 1.4;">${reviewText}</p>
+                `;
+                reviewsList.appendChild(div);
+            });
+        }
     }
-    
+
     document.getElementById('productDescModal').style.display = 'flex';
 };
 
