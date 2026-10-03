@@ -957,12 +957,15 @@
                     </div>
 
                     <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 15px;">
+                        <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 15px;">
                         <input type="text" id="storePlatform" placeholder="Nombre del Producto" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 14px; box-sizing: border-box;">
+                        
                         <select id="storeCategorySelect" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 13px; outline: none;">
-    <option value="">Sin Categoría</option>
-</select>
+                            <option value="">Sin Categoría</option>
+                        </select>
 
-<div style="background: rgba(94, 92, 230, 0.05); padding: 15px; border-radius: 10px; border: 1px dashed var(--mac-blue); margin-top: 10px;">
+                        <!-- NUEVO CREADOR DE PESTAÑAS (BUILDER) -->
+                        <div style="background: rgba(94, 92, 230, 0.05); padding: 15px; border-radius: 10px; border: 1px dashed var(--mac-blue); margin-top: 10px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                                 <label style="font-size: 12px; font-weight: bold; color: var(--mac-blue);"><i class='bx bx-layer'></i> Variantes y Precios (Pestañas):</label>
                                 <button type="button" class="action-btn" style="background: var(--mac-blue); color: white; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: bold;" onclick="window.addTabToBuilder('builder-crear')"><i class='bx bx-plus'></i> Nueva Pestaña</button>
@@ -972,14 +975,10 @@
                             </div>
                             <p style="font-size: 10px; color: var(--mac-text-secondary); margin: 10px 0 0 0;">💡 Tip: Crea pestañas para tiempos (Ej: 1 Mes, 6 Meses) y dentro de ellas añade opciones (Ej: Perfil, Completa).</p>
                         </div>
-    <div id="dynamicPricingOptionsContainer" style="display: flex; flex-direction: column; gap: 8px;">
-        <div class="pricing-option-row" style="display: flex; gap: 8px; align-items: center;">
-            <input type="text" placeholder="Ej: 1 Mes" value="1 Mes" class="opt-label" style="flex:1; padding: 10px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px;">
-            <input type="number" step="0.1" placeholder="Precio Base *" class="opt-price" style="flex:1; padding: 10px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 12px;">
-        </div>
-    </div>
-</div>
+                        <!-- FIN DEL CREADOR DE PESTAÑAS -->
+
                         <input type="file" id="storeImg" accept="image/*" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 13px; box-sizing: border-box;">
+                        
                         <textarea id="storeDesc" placeholder="Descripción del producto..." style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border); font-size: 14px; resize: vertical; min-height: 80px; box-sizing: border-box;"></textarea>
                         
                         <button class="btn-primary" style="padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 800; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); border: none;" onclick="window.addStoreItem()">
