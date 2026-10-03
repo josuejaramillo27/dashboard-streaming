@@ -106,6 +106,44 @@ body {
     }
 }
 
+/* =========================================================
+   MARCA DE AGUA (LOGO DE FONDO MEZCLADO)
+========================================================= */
+body::after {
+    content: "";
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100vw;
+    height: 100vh;
+    
+    /* 👇 PON AQUÍ EL NOMBRE EXACTO DE TU IMAGEN PNG 👇 */
+    background-image: url('AGC-LOGO-FONDO.png'); 
+    
+    background-repeat: no-repeat;
+    background-position: center;
+    
+    /* Tamaño del logo (45vh significa que ocupará el 45% del alto de la pantalla) */
+    background-size: 45vh; 
+    
+    /* Transparencia general (0.04 es súper sutil, súbelo a 0.08 si quieres que se note más) */
+    opacity: 0.05; 
+    
+    /* Esta propiedad es la que hace que el logo se "tiña" con los colores de la aurora animada */
+    mix-blend-mode: overlay; 
+    
+    /* CRÍTICO: Evita que el logo bloquee los clics en el panel */
+    pointer-events: none; 
+    z-index: 0;
+}
+
+/* Aseguramos que el panel principal siempre esté una capa por encima del logo */
+#appView, .container {
+    position: relative;
+    z-index: 1;
+}
+
 /* RECUPERANDO LOS ESPACIOS Y BORDES DEL CONTENEDOR PRINCIPAL */
 .container {
     max-width: 1200px; 
