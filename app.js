@@ -3371,16 +3371,13 @@ window.addStoreItem = async () => {
     const type = document.getElementById('storeType') ? document.getElementById('storeType').value : 'Servicio';
     const plat = document.getElementById('storePlatform').value.trim();
     
-    let opcionesPrecio = [];
-    const rows = document.querySelectorAll('#dynamicPricingOptionsContainer .pricing-option-row');
-    rows.forEach(row => {
-        const lbl = row.querySelector('.opt-label').value.trim();
-        const prc = parseFloat(row.querySelector('.opt-price').value);
-        if (lbl && !isNaN(prc)) opcionesPrecio.push({ label: lbl, price: prc });
-    });
+    // Leemos el nuevo builder visual
+    const storeTabs = window.extractBuilderData('builder-crear');
+    
+    if (!plat || storeTabs.length === 0) return window.showNotification("Completa la plataforma y al menos una Pestaña con precio");
+    
+    const p1P = storeTabs[0].options[0].price; // Precio base visual
 
-    if (!plat || opcionesPrecio.length === 0) return window.showNotification("Completa plataforma y al menos una opción de precio");
-    const p1P = opcionesPrecio[0].price;
     const cat = document.getElementById('storeCategorySelect').value;
     const desc = document.getElementById('storeDesc') ? document.getElementById('storeDesc').value.trim() : '';
     const autoStock = document.getElementById('storeAutoStock').checked;
@@ -3410,55 +3407,37 @@ window.addStoreItem = async () => {
 
         let catalog = currentUserData.storeCatalog || [];
         catalog.push({ 
-            id: 'item_' + Date.now(), 
-            platform: plat, 
-            price: p1P,
-            pricingOptions: opcionesPrecio,
-            category: cat,
-            desc: desc, imgUrl: imgUrl, type: type, 
-            autoStock: autoStock, stockPlatforms: stockPlatforms,
-            requiresInvite: requiresInvite,
-            badgeOption: badgeOption, status: 'disponible' 
+            id: 'item_' + Date.now(), platform: plat, price: p1P, 
+            storeTabs: storeTabs, pricingOptions: storeTabs[0].options, // Guardado Dual (Soporta Legacy)
+            category: cat, desc: desc, imgUrl: imgUrl, type: type, 
+            autoStock: autoStock, stockPlatforms: stockPlatforms, requiresInvite: requiresInvite, badgeOption: badgeOption, status: 'disponible' 
         });
 
         await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
         currentUserData.storeCatalog = catalog;
 
+        // Limpiar
         document.getElementById('storePlatform').value = '';
-        document.getElementById('storePrice').value = '';
-        document.getElementById('storeLabel2').value = '';
-        document.getElementById('storePrice2').value = '';
-        document.getElementById('storeLabel3').value = '';
-        document.getElementById('storePrice3').value = '';
         if (document.getElementById('storeDesc')) document.getElementById('storeDesc').value = '';
         if (fileInput) fileInput.value = '';
-        document.getElementById('storeCategorySelect').value = '';
-        
-        // Reset de checkboxes
+        document.getElementById('builder-crear').innerHTML = ''; // Resetea el builder
+        window.addTabToBuilder('builder-crear', '1 Mes', [{label: 'Perfil', price: ''}]); // Tab Default
+
         document.getElementById('storeAutoStock').checked = false;
         if(document.getElementById('storeRequiresInvite')) document.getElementById('storeRequiresInvite').checked = false;
         
-        // 🔥 Apagar las luces de las tarjetas visuales
         document.querySelectorAll('.store-toggle-card').forEach(label => {
-            label.style.border = '1px solid var(--mac-border)';
-            label.style.background = 'var(--mac-surface)';
+            label.style.border = '1px solid var(--mac-border)'; label.style.background = 'var(--mac-surface)';
             const icon = label.querySelector('.store-toggle-icon');
-            if(icon) {
-                icon.className = 'bx bx-circle store-toggle-icon';
-                icon.style.color = 'var(--mac-text-secondary)';
-            }
+            if(icon) { icon.className = 'bx bx-circle store-toggle-icon'; icon.style.color = 'var(--mac-text-secondary)'; }
         });
 
         document.getElementById('storeBadgeOption').value = '';
         window.toggleStoreStockFields();
         window.renderStoreItems();
         window.showNotification("✅ Producto añadido al catálogo");
-    } catch(e) { 
-        window.showNotification("Error: " + e.message); 
-    } finally { 
-        btn.innerHTML = "<i class='bx bx-plus-circle' style='font-size: 22px;'></i> Añadir al Catálogo"; 
-        btn.disabled = false; 
-    }
+    } catch(e) { window.showNotification("Error: " + e.message); } 
+    finally { btn.innerHTML = "<i class='bx bx-plus-circle' style='font-size: 22px;'></i> Añadir al Catálogo"; btn.disabled = false; }
 };
 window.renderStoreItems = () => {
     const list = document.getElementById('storeItemsList');
@@ -7476,33 +7455,32 @@ window.selectPricingOption = (itemId, index) => {
 };
 
 // Manda al carrito leyendo el radio button invisible
+const originalOpenStoreModal = window.openStoreModal;
+window.openStoreModal = () => {
+    originalOpenStoreModal();
+    const builder = document.getElementById('builder-crear');
+    if (builder && builder.children.length === 0) {
+        window.addTabToBuilder('builder-crear', '1 Mes', [{label: 'Perfil', price: ''}]);
+    }
+};
+
 window.addToCartWithOptions = (itemId) => {
     const catalog = window.publicCatalogCache || [];
     const originalItem = catalog.find(i => i.id === itemId);
     if (!originalItem) return;
 
-    // Buscamos qué opción está marcada
-    const selectedRadio = document.querySelector(`input[name="opt_${itemId}"]:checked`);
-    let finalPrice = originalItem.price;
-    let optionLabel = '';
-
-    if (selectedRadio) {
-        finalPrice = parseFloat(selectedRadio.getAttribute('data-price'));
-        optionLabel = selectedRadio.getAttribute('data-label');
-    }
-
-    const cartItem = { ...originalItem }; 
-    cartItem.price = finalPrice;
+    // Recupera la opción seleccionada por la función de Pestañas
+    const selectedOpt = window.storeSelectedOptions[itemId] || { price: originalItem.price, label: '' };
     
-    // Le agregamos la etiqueta al nombre (Ej: "Canva Pro (1 Año)")
-    if (optionLabel) {
-        cartItem.platform = `${originalItem.platform} (${optionLabel})`;
+    const cartItem = { ...originalItem }; 
+    cartItem.price = selectedOpt.price;
+    if (selectedOpt.label && selectedOpt.label !== '1 Mes' && selectedOpt.label !== 'General') {
+        cartItem.platform = `${originalItem.platform} (${selectedOpt.label})`;
     }
 
     window.storeCart.push(cartItem);
     document.getElementById('cartBadge').innerText = window.storeCart.length;
     document.getElementById('floatingCartBtn').style.display = 'flex';
-    
     document.getElementById('cartPanelOverlay').classList.add('active');
     document.getElementById('cartPanel').classList.add('active');
     window.renderCartItems();
@@ -8419,4 +8397,131 @@ window.onProviderSelected = () => {
         customInput.style.display = 'none';
         customInput.value = '';
     }
+};
+
+/* ==========================================================================
+   MOTOR DE PRODUCTOS AVANZADOS (PESTAÑAS Y VARIANTES)
+   ========================================================================== */
+
+// 1. Dibuja el HTML de una Pestaña (Builder)
+window.getTabTemplate = (tabName = '', options = []) => {
+    let optsHtml = '';
+    if (options.length === 0) options = [{ label: '', price: '' }];
+    
+    options.forEach(o => {
+        optsHtml += `
+            <div class="builder-option-row" style="display: flex; gap: 8px; align-items: center; margin-top: 8px;">
+                <input type="text" placeholder="Ej: Perfil" value="${o.label}" class="b-opt-label" style="flex:1; padding: 10px; border-radius: 6px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px; outline:none;">
+                <input type="number" step="0.1" placeholder="Precio" value="${o.price}" class="b-opt-price" style="width: 80px; padding: 10px; border-radius: 6px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px; outline:none;">
+                <button type="button" class="action-btn btn-del" style="padding: 8px; border-radius: 6px;" onclick="this.parentElement.remove()"><i class='bx bx-trash'></i></button>
+            </div>
+        `;
+    });
+
+    return `
+        <div class="builder-tab-group" style="background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 8px; padding: 15px; position: relative;">
+            <button type="button" class="action-btn btn-del" style="position: absolute; top: 12px; right: 12px; padding: 4px; border-radius: 6px;" onclick="this.parentElement.remove()"><i class='bx bx-x' style="font-size: 18px;"></i></button>
+            <input type="text" placeholder="Nombre Pestaña (Ej: 1 Mes, 6 Meses)" value="${tabName}" class="b-tab-name" style="width: calc(100% - 40px); padding: 10px; border-radius: 6px; border: 1px solid var(--mac-blue); background: rgba(0,122,255,0.05); color: var(--mac-blue); font-weight: bold; font-size: 13px; margin-bottom: 5px; box-sizing: border-box; outline:none;">
+            
+            <div class="b-options-container">
+                ${optsHtml}
+            </div>
+            <button type="button" class="action-btn" style="background: rgba(52,199,89,0.1); color: var(--mac-green); padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; margin-top: 12px; border: 1px dashed var(--mac-green);" onclick="window.addOptionToTab(this)"><i class='bx bx-plus'></i> Añadir Variante</button>
+        </div>
+    `;
+};
+
+// 2. Funciones para agregar al DOM
+window.addTabToBuilder = (containerId, tabName = '', options = []) => {
+    const container = document.getElementById(containerId);
+    const div = document.createElement('div');
+    div.innerHTML = window.getTabTemplate(tabName, options);
+    container.appendChild(div.firstElementChild);
+};
+
+window.addOptionToTab = (btn) => {
+    const container = btn.previousElementSibling;
+    const div = document.createElement('div');
+    div.className = 'builder-option-row';
+    div.style.cssText = 'display: flex; gap: 8px; align-items: center; margin-top: 8px;';
+    div.innerHTML = `
+        <input type="text" placeholder="Ej: Cuenta Completa" class="b-opt-label" style="flex:1; padding: 10px; border-radius: 6px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px; outline:none;">
+        <input type="number" step="0.1" placeholder="Precio" class="b-opt-price" style="width: 80px; padding: 10px; border-radius: 6px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px; outline:none;">
+        <button type="button" class="action-btn btn-del" style="padding: 8px; border-radius: 6px;" onclick="this.parentElement.remove()"><i class='bx bx-trash'></i></button>
+    `;
+    container.appendChild(div);
+};
+
+// 3. Extraer Data del DOM para guardar en Firebase
+window.extractBuilderData = (containerId) => {
+    const container = document.getElementById(containerId);
+    const tabGroups = container.querySelectorAll('.builder-tab-group');
+    let result = [];
+    
+    tabGroups.forEach(group => {
+        const tabName = group.querySelector('.b-tab-name').value.trim() || 'General';
+        let options = [];
+        group.querySelectorAll('.builder-option-row').forEach(row => {
+            const lbl = row.querySelector('.b-opt-label').value.trim();
+            const prc = parseFloat(row.querySelector('.b-opt-price').value);
+            if (lbl && !isNaN(prc)) {
+                options.push({ label: lbl, price: prc });
+            }
+        });
+        if (options.length > 0) result.push({ name: tabName, options: options });
+    });
+    return result;
+};
+
+// 4. Lógica de Interacción en el Catálogo Público (Tiendita)
+window.storeItemsTabsData = {};
+window.storeSelectedOptions = {};
+
+window.selectPubTab = (itemId, tabIndex) => {
+    // Iluminar la pestaña tocada
+    document.querySelectorAll(`.pub-tab-${itemId}`).forEach((t, i) => {
+        t.style.background = i === tabIndex ? 'var(--mac-blue)' : 'var(--mac-surface)';
+        t.style.color = i === tabIndex ? 'white' : 'var(--mac-text-secondary)';
+        t.style.borderColor = i === tabIndex ? 'var(--mac-blue)' : 'var(--mac-border)';
+    });
+
+    const data = window.publicStoreDataCache;
+    const tabsData = window.storeItemsTabsData[itemId];
+    const activeTab = tabsData[tabIndex];
+
+    // Pintar las opciones de la pestaña activa
+    let optionsHtml = '';
+    activeTab.options.forEach((opt, i) => {
+        const isSelected = i === 0;
+        const borderColor = isSelected ? 'var(--mac-blue)' : 'var(--mac-border)';
+        const bg = isSelected ? 'rgba(0, 122, 255, 0.1)' : 'var(--mac-surface)';
+        optionsHtml += `
+            <label id="opt_label_${itemId}_${i}" onclick="window.selectPubOption('${itemId}', ${tabIndex}, ${i}, ${opt.price}, '${opt.label.replace(/'/g,"\\'")}')" class="pub-opt-${itemId}" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-radius:12px; border:1px solid ${borderColor}; background:${bg}; cursor:pointer; transition:all 0.2s;">
+                <span style="font-size:14px; font-weight:600; color:var(--mac-text-main);">${opt.label}</span>
+                <span style="font-size:15px; font-weight:800; color:var(--mac-text-main);">${data.currency || 'S/'}${opt.price.toFixed(2)}</span>
+            </label>
+        `;
+    });
+    document.getElementById(`pub_options_${itemId}`).innerHTML = optionsHtml;
+
+    // Autoseleccionar la primera opción de la pestaña
+    window.selectPubOption(itemId, tabIndex, 0, activeTab.options[0].price, activeTab.options[0].label);
+};
+
+window.selectPubOption = (itemId, tabIndex, optIndex, price, optLabel) => {
+    document.querySelectorAll(`.pub-opt-${itemId}`).forEach((el, i) => {
+        el.style.borderColor = i === optIndex ? 'var(--mac-blue)' : 'var(--mac-border)';
+        el.style.background = i === optIndex ? 'rgba(0, 122, 255, 0.1)' : 'var(--mac-surface)';
+    });
+
+    const data = window.publicStoreDataCache;
+    document.getElementById(`priceDisplay_${itemId}`).innerText = `${data.currency || 'S/'}${price.toFixed(2)}`;
+
+    const tabsData = window.storeItemsTabsData[itemId];
+    const tabName = tabsData[tabIndex].name;
+    const showTabs = tabsData.length > 1 || (tabsData.length === 1 && tabsData[0].name !== 'General');
+    
+    // El nombre a mostrar en el carrito será "Pestaña - Opción" (Ej: "1 Mes - Perfil")
+    let finalLabel = showTabs && tabName ? `${tabName} - ${optLabel}` : optLabel;
+    window.storeSelectedOptions[itemId] = { price: price, label: finalLabel };
 };
