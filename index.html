@@ -2398,13 +2398,16 @@
             <h3 id="descModalTitle" style="margin: 0; font-size: 18px; color: var(--mac-text-main); flex: 1; word-break: break-word; line-height: 1.3;"></h3>
             <button onclick="document.getElementById('productDescModal').style.display='none'" style="background: transparent; border: none; font-size: 28px; color: var(--mac-text-secondary); cursor: pointer; padding: 0; margin: 0; line-height: 1; width: 24px; text-align: right; flex-shrink: 0;">&times;</button>
         </div>
-        <p id="descModalText" style="color: var(--mac-text-main); font-size: 14px; line-height: 1.6; white-space: pre-wrap; background: var(--mac-bg); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border);"></p>
-        <!-- INICIO NUEVO: CONTENEDOR DE RESEÑAS PÚBLICAS -->
-<div id="publicReviewsContainer" style="margin-top: 20px; border-top: 1px dashed var(--mac-border); padding-top: 15px;">
-    <h4 style="margin: 0 0 10px 0; font-size: 14px; color: var(--mac-text-main);"><i class='bx bxs-message-square-detail'></i> Reseñas de clientes</h4>
-    <div id="publicReviewsList" style="display: flex; flex-direction: column; gap: 10px; max-height: 200px; overflow-y: auto;"></div>
-</div>
-<!-- FIN NUEVO -->
+        
+        <!-- 1. CONTENEDOR DE RESEÑAS MOVIDO AQUÍ (ARRIBA) -->
+        <div id="publicReviewsContainer" style="margin-bottom: 15px;">
+            <h4 style="margin: 0 0 10px 0; font-size: 14px; color: var(--mac-text-main);"><i class='bx bxs-message-square-detail'></i> Reseñas de clientes</h4>
+            <div id="publicReviewsList" style="display: flex; flex-direction: column; gap: 10px; max-height: 200px; overflow-y: auto;"></div>
+        </div>
+        
+        <!-- 2. DESCRIPCIÓN MOVIDA ABAJO -->
+        <p id="descModalText" style="color: var(--mac-text-main); font-size: 14px; line-height: 1.6; white-space: pre-wrap; background: var(--mac-bg); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border); margin: 0;"></p>
+        
         <button class="btn-primary" style="width: 100%; margin-top: 15px;" onclick="document.getElementById('productDescModal').style.display='none'">Entendido</button>
     </div>
 </div>
