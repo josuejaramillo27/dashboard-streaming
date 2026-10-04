@@ -4204,32 +4204,90 @@ window.iniciarPagoAutomatico = async (metodo) => {
         });
 
         // 2. Hacer fetch a tu VPS en DigitalOcean
-        const urlEndpoint = metodo === 'mercadopago' ? 'https://bot.panelagc.com/api/crear-pago-mp' : 'https://bot.panelagc.com/api/crear-pago-binance';
+        if (metodo === 'binance') {
+            Swal.close(); // Cerrar modal de carga inicial
+            
+            // Pedir el ID de la transacción al cliente
+            const { value: transactionId } = await Swal.fire({
+                title: 'Pagar con Binance',
+                html: `
+                    <p>Envía exactamente <b>${currentCheckoutItem.price} USDT</b> a nuestro Binance Pay.</p>
+                    <p style="font-size: 0.9em; color: gray;"><i>(Revisa nuestro Pay ID en la sección superior o pregúntanos)</i></p>
+                    <br>
+                    <p>Una vez transferido, pega aquí el <b>Order ID (Número de Orden)</b> de tu pago:</p>
+                `,
+                input: 'text',
+                inputPlaceholder: 'Ej: 1234567890123456',
+                showCancelButton: true,
+                confirmButtonText: 'Verificar Pago',
+                cancelButtonText: 'Cancelar'
+            });
 
-        const response = await fetch(urlEndpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                vendedorId: vendedorId,
-                pedidoId: pedidoId,
-                titulo: currentCheckoutItem.platform,
-                precio: currentCheckoutItem.price
-            })
-        });
+            if (!transactionId) return; // Si cancela o deja vacío
 
-        const dataResp = await response.json();
+            // Mostrar modal de verificación
+            Swal.fire({
+                title: 'Verificando pago...',
+                html: 'Estamos buscando tu transacción en Binance. Esto tomará unos segundos...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading() }
+            });
 
-        if (dataResp.status === 'ok') {
-            // Vaciar carrito
-            window.storeCart = [];
-            document.getElementById('cartBadge').innerText = '0';
-            document.getElementById('floatingCartBtn').style.display = 'none';
-            document.getElementById('checkoutModal').style.display = 'none';
+            const response = await fetch('https://bot.panelagc.com/api/verificar-pago-binance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    vendedorId: vendedorId,
+                    pedidoId: pedidoId,
+                    transactionId: transactionId.trim(),
+                    precio: currentCheckoutItem.price
+                })
+            });
 
-            // Redirigir a Mercado Pago / Binance
-            window.location.href = dataResp.init_point;
+            const dataResp = await response.json();
+
+            if (dataResp.status === 'ok') {
+                window.storeCart = [];
+                document.getElementById('cartBadge').innerText = '0';
+                document.getElementById('floatingCartBtn').style.display = 'none';
+                document.getElementById('checkoutModal').style.display = 'none';
+
+                Swal.fire({
+                    title: '¡Pago Confirmado!',
+                    text: 'Tu pago fue verificado correctamente. Tu servicio llegará a tu WhatsApp en unos instantes.',
+                    icon: 'success',
+                    confirmButtonText: 'Excelente'
+                });
+            } else {
+                Swal.fire('Error al Verificar', dataResp.error || 'No se encontró tu pago. Revisa el ID e intenta nuevamente.', 'error');
+            }
+
         } else {
-            Swal.fire('Error', dataResp.error || 'El vendedor no tiene configurado este método de pago.', 'error');
+            // LÓGICA DE MERCADO PAGO (Automática con Redirección)
+            const response = await fetch('https://bot.panelagc.com/api/crear-pago-mp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    vendedorId: vendedorId,
+                    pedidoId: pedidoId,
+                    titulo: currentCheckoutItem.platform,
+                    precio: currentCheckoutItem.price
+                })
+            });
+
+            const dataResp = await response.json();
+
+            if (dataResp.status === 'ok') {
+                window.storeCart = [];
+                document.getElementById('cartBadge').innerText = '0';
+                document.getElementById('floatingCartBtn').style.display = 'none';
+                document.getElementById('checkoutModal').style.display = 'none';
+
+                // Redirigir a Mercado Pago
+                window.location.href = dataResp.init_point;
+            } else {
+                Swal.fire('Error', dataResp.error || 'El vendedor no tiene configurado este método de pago.', 'error');
+            }
         }
 
     } catch (error) {
@@ -6863,27 +6921,17 @@ window.switchStoreAdminTab = (tabId, element) => {
     // Cambiar color de pestaña
     document.querySelectorAll('#storeModal .chrome-tab').forEach(tab => tab.classList.remove('active'));
     element.classList.add('active');
-    
+
     // Si entra a ajustes, cargar datos
-    if(tabId === 'tabDescuentos') {
+    if (tabId === 'tabDescuentos') {
         const d = currentUserData.storeDiscounts || { qty2: 0, qty3: 0, qty4: 0 };
         document.getElementById('descCombo2').value = d.qty2 || '';
         document.getElementById('descCombo3').value = d.qty3 || '';
         document.getElementById('descCombo4').value = d.qty4 || '';
-        
-        // --- NUEVO: Cargar productos al desplegable ---
-        const targetSelect = document.getElementById('newCouponTarget');
-        if (targetSelect) {
-            targetSelect.innerHTML = '<option value="global">Todo el Catálogo</option>';
-            const catalog = currentUserData.storeCatalog || [];
-            catalog.forEach(item => {
-                targetSelect.innerHTML += `<option value="${item.id}">${item.platform}</option>`;
-            });
-        }
-        
         window.renderStoreCoupons();
     }
 };
+
 window.saveStoreSettings = async () => {
     try {
         const qty2 = parseFloat(document.getElementById('descCombo2').value) || 0;
@@ -6901,48 +6949,32 @@ window.saveStoreSettings = async () => {
 window.addStoreCoupon = async () => {
     const code = document.getElementById('newCouponCode').value.trim().toUpperCase();
     const percent = parseFloat(document.getElementById('newCouponPercent').value) || 0;
-    // Capturamos el producto seleccionado
-    const target = document.getElementById('newCouponTarget') ? document.getElementById('newCouponTarget').value : 'global';
-    
+
     if (!code || percent <= 0) return window.showNotification("⚠️ Ingresa un código y un descuento válido.");
-    
+
     let coupons = currentUserData.storeCoupons || [];
     if (coupons.some(c => c.code === code)) return window.showNotification("Ese código ya existe.");
-    
-    // Guardamos con el objetivo (target)
-    coupons.push({ code, percent, target });
+
+    coupons.push({ code, percent });
     try {
         await updateDoc(doc(db, "users", currentUser.uid), { storeCoupons: coupons });
         currentUserData.storeCoupons = coupons;
         document.getElementById('newCouponCode').value = '';
         document.getElementById('newCouponPercent').value = '';
-        if(document.getElementById('newCouponTarget')) document.getElementById('newCouponTarget').value = 'global';
-        
         window.renderStoreCoupons();
         window.showNotification("🎟️ Cupón creado");
-    } catch(e) {}
+    } catch (e) { }
 };
 
 window.renderStoreCoupons = () => {
     const list = document.getElementById('storeCouponsList');
     list.innerHTML = '';
     const coupons = currentUserData.storeCoupons || [];
-    
-    coupons.forEach((c, index) => {
-        // Detectar a qué aplica para mostrarlo visualmente
-        let targetText = "Todo el Catálogo";
-        if (c.target && c.target !== 'global') {
-            const catalog = currentUserData.storeCatalog || [];
-            const prod = catalog.find(item => item.id === c.target);
-            if (prod) targetText = prod.platform;
-        }
 
+    coupons.forEach((c, index) => {
         list.innerHTML += `
-            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mac-surface); border: 1px dashed var(--mac-green); padding: 10px 15px; border-radius: 8px; margin-bottom: 8px;">
-                <div>
-                    <span style="font-weight: 900; color: var(--mac-green); letter-spacing: 1px; display: block;">${c.code} <span style="font-size: 11px; color: var(--mac-text-secondary);">(-${c.percent}%)</span></span>
-                    <span style="font-size: 11px; color: var(--mac-text-main);">Aplica a: <strong>${targetText}</strong></span>
-                </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mac-surface); border: 1px dashed var(--mac-green); padding: 10px 15px; border-radius: 8px;">
+                <span style="font-weight: 900; color: var(--mac-green); letter-spacing: 1px;">${c.code} <span style="font-size: 11px; color: var(--mac-text-secondary);">(-${c.percent}%)</span></span>
                 <button class="action-btn btn-del" style="padding: 4px; font-size: 14px;" onclick="window.deleteStoreCoupon(${index})"><i class='bx bx-trash'></i></button>
             </div>
         `;
@@ -7039,19 +7071,7 @@ window.renderCartItems = () => {
     // CÁLCULO DE CUPÓN
     let couponDiscountAmount = 0;
     if (activeCoupon) {
-        if (!activeCoupon.target || activeCoupon.target === 'global') {
-            // Aplica el descuento a todo el carrito (comportamiento original)
-            couponDiscountAmount = afterComboPrice * (activeCoupon.percent / 100);
-        } else {
-            // Solo aplica el descuento al producto específico
-            let targetItemsTotal = 0;
-            window.storeCart.forEach(item => {
-                if (item.id === activeCoupon.target) {
-                    targetItemsTotal += item.price;
-                }
-            });
-            couponDiscountAmount = targetItemsTotal * (activeCoupon.percent / 100);
-        }
+        couponDiscountAmount = afterComboPrice * (activeCoupon.percent / 100);
     }
 
     let finalTotal = afterComboPrice - couponDiscountAmount;
