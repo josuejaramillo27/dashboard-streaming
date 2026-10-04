@@ -743,13 +743,17 @@
                     <input type="number" id="clientCost" placeholder="Monto (S/)" step="0.1" required style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">
                 </div>
 
-                <!-- 6. Proveedor -->
-                <div style="display:flex; flex-direction:column; gap:4px; justify-content: flex-end;">
-                    <label style="font-size:11px; color:var(--mac-text-secondary); font-weight: bold; padding-left: 2px;">Proveedor:</label>
-                    <select id="clientProviderSelect" style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); outline: none; height: 46px; box-sizing: border-box;" onchange="window.onProviderSelected()">
-                        <option value="">Selecciona plataforma...</option>
-                    </select>
-                    <input type="text" id="clientProviderName" placeholder="O escribe manual..." style="display:none; width: 100%; padding: 13px; margin-top: 5px; border-radius: 8px; border: 1px dashed var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">
+                <!-- 6. Proveedor(es) Dinámico(s) -->
+                <div id="dynamicProvidersWrapper" style="display:flex; flex-direction:column; gap:4px; grid-column: span 1; justify-content: flex-end;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label style="font-size:11px; color:var(--mac-text-secondary); font-weight: bold; padding-left: 2px;">Proveedor(es):</label>
+                        <button type="button" onclick="window.openProvidersModal()" style="background: transparent; border: none; color: var(--mac-blue); font-size: 11px; cursor: pointer; font-weight: bold;"><i class='bx bx-cog'></i> Gestionar</button>
+                    </div>
+                    
+                    <!-- Aquí el sistema inyectará las cajas de texto automáticamente -->
+                    <div id="dynamicProvidersList" style="display:flex; flex-direction:column; gap:6px;">
+                        <input type="text" placeholder="Selecciona plataforma primero..." disabled style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-secondary); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">
+                    </div>
                 </div>
 
                 <!-- 7. Precio -->
