@@ -590,6 +590,17 @@ window.openProfileModal = () => {
     document.getElementById('editProfileAlias').value = currentUserData.storeAlias || ''; 
     document.getElementById('editReferencesLink').value = currentUserData.referencesLink || '';
     
+    / --- NUEVO: Cargar Pasarelas (Ocultas por seguridad) ---
+    if (document.getElementById('mpAccessTokenInput')) {
+        document.getElementById('mpAccessTokenInput').value = currentUserData.mpAccessToken ? `APP_USR-***${currentUserData.mpAccessToken.slice(-5)}` : '';
+    }
+    if (document.getElementById('binanceApiKeyInput')) {
+        document.getElementById('binanceApiKeyInput').value = currentUserData.binanceApiKey ? `***${currentUserData.binanceApiKey.slice(-5)}` : '';
+    }
+    if (document.getElementById('binanceSecretKeyInput')) {
+        document.getElementById('binanceSecretKeyInput').value = currentUserData.binanceSecretKey ? `***${currentUserData.binanceSecretKey.slice(-5)}` : '';
+    }
+    
     // 2. Carga los chips de servicios y pagos
     if (typeof window.renderCustomServicesChips === 'function') window.renderCustomServicesChips();
     tempPaymentMethods = (currentUserData.paymentMethods || []).map(m => ({ ...m, isEditing: false }));
@@ -604,8 +615,6 @@ window.openProfileModal = () => {
         document.getElementById('botBasicWarning').style.display = 'block';
         document.getElementById('botProContent').style.display = 'none';
     }
-
-    // 🔥 AQUÍ ESTÁ LA LÍNEA CORREGIDA 🔥
     if (typeof window.renderBotSlots === 'function') {
         window.renderBotSlots();
     }
@@ -917,6 +926,13 @@ window.saveProfile = async () => {
     const phone = document.getElementById('editProfilePhone').value.trim(); 
     const name = document.getElementById('editProfileName').value;
     const country = document.getElementById('editProfileCountry').value;
+    
+    // --- NUEVO: Capturar datos de Pasarelas de Pago ---
+    // (Asegúrate de que los IDs en tu HTML coincidan con estos)
+    const mpAccessToken = document.getElementById('mpAccessTokenInput') ? document.getElementById('mpAccessTokenInput').value.trim() : '';
+    const binanceApiKey = document.getElementById('binanceApiKeyInput') ? document.getElementById('binanceApiKeyInput').value.trim() : '';
+    const binanceSecretKey = document.getElementById('binanceSecretKeyInput') ? document.getElementById('binanceSecretKeyInput').value.trim() : '';
+
     if(!phone.startsWith('+')) return window.showNotification("⚠️ El teléfono DEBE incluir el código de país"); 
     
     const btn = document.querySelector('#profileModal .btn-primary');
@@ -941,9 +957,8 @@ window.saveProfile = async () => {
             bannerUrl = await getDownloadURL(storageRefBanner);
         }
 
-        // 🔥 PROCESAR Y SUBIR LOS MÉTODOS DE PAGO CONFIRMADOS
+        // Procesar métodos de pago manuales
         let finalPaymentMethods = [];
-        
         for (let i = 0; i < tempPaymentMethods.length; i++) {
             let m = tempPaymentMethods[i];
             
@@ -979,7 +994,7 @@ window.saveProfile = async () => {
         let refInput = document.getElementById('editReferencesLink');
         let referencesLink = refInput ? refInput.value.trim() : '';
 
-        // --- GUARDADO DE LA CONFIGURACIÓN AUTOMÁTICA DEL BOT ---
+        // Guardado de botConfig
         let estadosArray = [];
         let gruposArray = [];
         for (let i = 0; i < 5; i++) {
@@ -1004,20 +1019,34 @@ window.saveProfile = async () => {
 
             gruposActivos: document.getElementById('autoGroupActive').checked,
             gruposIntervaloHoras: parseInt(document.getElementById('autoGroupInterval').value) || 2,
-            gruposMensajes: gruposArray, // 🔥 NUEVO ARRAY
+            gruposMensajes: gruposArray,
             gruposTarget: selectedGroups,
             gruposLastRun: (currentUserData.botConfig && currentUserData.botConfig.gruposLastRun) ? currentUserData.botConfig.gruposLastRun : null,
             gruposCurrentIndex: (currentUserData.botConfig && currentUserData.botConfig.gruposCurrentIndex) ? currentUserData.botConfig.gruposCurrentIndex : 0
         };
         
-        // 🔥 AQUÍ ESTABA EL ERROR: Faltaba la coma después de finalPaymentMethods
-        await updateDoc(doc(db, "users", currentUser.uid), { 
+        // --- NUEVO: OBJETO DE ACTUALIZACIÓN CON PASARELAS ---
+        let updateData = { 
             name: name, country: country, currency: getCurrencyForCountry(country), 
             phone: phone, logoUrl: logoUrl, bannerUrl: bannerUrl, storeAlias: finalAlias,
             referencesLink: referencesLink,
             paymentMethods: finalPaymentMethods, 
             botConfig: botConfig
-        });
+        };
+
+        // Solo guardamos si el usuario escribió algo, o si quiso borrarlas
+        if (document.getElementById('mpAccessTokenInput')) {
+            // Solo lo actualizamos si el input NO tiene los asteriscos de seguridad
+            if (!mpAccessToken.includes('***')) updateData.mpAccessToken = mpAccessToken;
+        }
+        if (document.getElementById('binanceApiKeyInput')) {
+            if (!binanceApiKey.includes('***')) updateData.binanceApiKey = binanceApiKey;
+        }
+        if (document.getElementById('binanceSecretKeyInput')) {
+            if (!binanceSecretKey.includes('***')) updateData.binanceSecretKey = binanceSecretKey;
+        }
+
+        await updateDoc(doc(db, "users", currentUser.uid), updateData);
         
         // Actualizar la memoria global
         currentUserData.botConfig = botConfig;
@@ -1029,6 +1058,10 @@ window.saveProfile = async () => {
         currentUserData.bannerUrl = bannerUrl;
         currentUserData.referencesLink = referencesLink;
         currentUserData.paymentMethods = finalPaymentMethods; 
+        // Actualizamos en memoria local las pasarelas
+        if (updateData.mpAccessToken !== undefined) currentUserData.mpAccessToken = updateData.mpAccessToken;
+        if (updateData.binanceApiKey !== undefined) currentUserData.binanceApiKey = updateData.binanceApiKey;
+        if (updateData.binanceSecretKey !== undefined) currentUserData.binanceSecretKey = updateData.binanceSecretKey;
 
         globalCurrency = getCurrencyForCountry(country);
         currentUserData.currency = globalCurrency;
@@ -1052,7 +1085,7 @@ window.saveProfile = async () => {
         const priceInput = document.getElementById('clientPrice');
         if (priceInput) priceInput.placeholder = `Precio de Venta (${globalCurrency})`;
 
-        window.showNotification("Perfil, Bot y Métodos de Pago guardados."); 
+        window.showNotification("Perfil, Bot y Pasarelas guardadas."); 
         window.closeModals();
         
         if (document.getElementById('tableBody')) window.renderTable();
