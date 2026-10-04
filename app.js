@@ -1118,13 +1118,14 @@ window.saveProfile = async () => {
 
 // --- NUEVO: GUARDAR PASARELAS DE PAGO (PRO) ---
 window.saveGateways = async () => {
-    // 🔥 ESTA ALERTA ES LA PRUEBA DE FUEGO 🔥
-    alert("¡El nuevo código ya está funcionando!");
-
     let mpAccessToken = "";
     let binanceApiKey = "";
     let binanceSecretKey = "";
+    let binancePayId = "";
+    let binanceAlias = "";
+    let binanceExchangeRate = null;
 
+    // Atrapamos las cajas HTML
     const cajaMp = document.getElementById('mpAccessTokenInput');
     const cajaBinApi = document.getElementById('binanceApiKeyInput');
     const cajaBinSec = document.getElementById('binanceSecretKeyInput');
@@ -1132,13 +1133,13 @@ window.saveGateways = async () => {
     const cajaBinAlias = document.getElementById('binanceAliasInput');
     const cajaBinRate = document.getElementById('binanceExchangeRateInput');
 
-    // Extraemos los valores SOLO si las cajas existen en el HTML
+    // Extraemos sus valores
     if (cajaMp) mpAccessToken = cajaMp.value.trim();
     if (cajaBinApi) binanceApiKey = cajaBinApi.value.trim();
     if (cajaBinSec) binanceSecretKey = cajaBinSec.value.trim();
-    if (cajaBinPayId) updateData.binancePayId = cajaBinPayId.value.trim();
-    if (cajaBinAlias) updateData.binanceAlias = cajaBinAlias.value.trim();
-    if (cajaBinRate) updateData.binanceExchangeRate = parseFloat(cajaBinRate.value) || null;
+    if (cajaBinPayId) binancePayId = cajaBinPayId.value.trim();
+    if (cajaBinAlias) binanceAlias = cajaBinAlias.value.trim();
+    if (cajaBinRate) binanceExchangeRate = parseFloat(cajaBinRate.value) || null;
 
     const btn = document.querySelector('#tabPasarelas .btn-primary');
     const origText = btn ? btn.innerHTML : 'Guardar Pasarelas';
@@ -1149,28 +1150,36 @@ window.saveGateways = async () => {
     }
 
     try {
-        let updateData = {};
+        // Empaquetamos los nuevos datos primero
+        let updateData = {
+            binancePayId: binancePayId,
+            binanceAlias: binanceAlias,
+            binanceExchangeRate: binanceExchangeRate
+        };
 
-        // Solo guardamos si hay texto y NO son asteriscos
+        // Solo guardamos claves si hay texto y NO son asteriscos
         if (mpAccessToken && !mpAccessToken.includes('***')) updateData.mpAccessToken = mpAccessToken;
         if (binanceApiKey && !binanceApiKey.includes('***')) updateData.binanceApiKey = binanceApiKey;
         if (binanceSecretKey && !binanceSecretKey.includes('***')) updateData.binanceSecretKey = binanceSecretKey;
 
-        // Si vació la caja, borramos de la BD
+        // Si vació las cajas de claves, borramos de la BD
         if (mpAccessToken === '') updateData.mpAccessToken = null;
         if (binanceApiKey === '') updateData.binanceApiKey = null;
         if (binanceSecretKey === '') updateData.binanceSecretKey = null;
 
+        // Actualizamos Firebase
         if (Object.keys(updateData).length > 0) {
             await updateDoc(doc(db, "users", currentUser.uid), updateData);
 
+            // Actualizamos la memoria local de la página
             if (updateData.mpAccessToken !== undefined) currentUserData.mpAccessToken = updateData.mpAccessToken;
             if (updateData.binanceApiKey !== undefined) currentUserData.binanceApiKey = updateData.binanceApiKey;
             if (updateData.binanceSecretKey !== undefined) currentUserData.binanceSecretKey = updateData.binanceSecretKey;
-            if (updateData.binancePayId !== undefined) currentUserData.binancePayId = updateData.binancePayId;
-            if (updateData.binanceAlias !== undefined) currentUserData.binanceAlias = updateData.binanceAlias;
-            if (updateData.binanceExchangeRate !== undefined) currentUserData.binanceExchangeRate = updateData.binanceExchangeRate;
-                    }
+            
+            currentUserData.binancePayId = updateData.binancePayId;
+            currentUserData.binanceAlias = updateData.binanceAlias;
+            currentUserData.binanceExchangeRate = updateData.binanceExchangeRate;
+        }
 
         window.showNotification("✅ Pasarelas de pago guardadas exitosamente.");
         if (typeof window.openProfileModal === 'function') window.openProfileModal();
