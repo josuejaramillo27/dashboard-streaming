@@ -1101,17 +1101,12 @@ window.saveProfile = async () => {
 
 // --- NUEVO: GUARDAR PASARELAS DE PAGO (PRO) ---
 window.saveGateways = async () => {
-    // 1. Capturamos los elementos HTML primero (protección anti-nulos)
-    const inputMp = document.getElementById('mpAccessTokenInput');
-    const inputBinApi = document.getElementById('binanceApiKeyInput');
-    const inputBinSec = document.getElementById('binanceSecretKeyInput');
+    // 1. Protección Extrema: Usamos '?.' para evitar errores si el HTML tarda en cargar
+    const mpAccessToken = document.getElementById('mpAccessTokenInput')?.value?.trim() || '';
+    const binanceApiKey = document.getElementById('binanceApiKeyInput')?.value?.trim() || '';
+    const binanceSecretKey = document.getElementById('binanceSecretKeyInput')?.value?.trim() || '';
 
-    // 2. Solo leemos '.value' si el elemento realmente existe en la pantalla
-    const mpAccessToken = inputMp ? inputMp.value.trim() : '';
-    const binanceApiKey = inputBinApi ? inputBinApi.value.trim() : '';
-    const binanceSecretKey = inputBinSec ? inputBinSec.value.trim() : '';
-
-    // 3. Capturamos el botón con protección
+    // 2. Capturamos el botón
     const btn = document.querySelector('#tabPasarelas .btn-primary');
     const origText = btn ? btn.innerHTML : 'Guardar Pasarelas';
     
