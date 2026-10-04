@@ -612,7 +612,6 @@ window.openProfileModal = () => {
     window.renderPaymentMethodsList();
 
     // 3. VERIFICADOR DE PLAN PARA LA PESTAÑA DEL BOT
-    const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
     if (plan === 'pro' || plan === 'elite') {
         document.getElementById('botBasicWarning').style.display = 'none';
         document.getElementById('botProContent').style.display = 'block';
