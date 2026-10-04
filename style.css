@@ -125,7 +125,7 @@ body::after {
     background-position: center;
     
     /* Tamaño del logo (45vh significa que ocupará el 45% del alto de la pantalla) */
-    background-size: 45vh; 
+    background-size: 60vh; 
     
     /* 🪄 SUBIMOS LA OPACIDAD (0.15 a 0.25 es ideal para modo oscuro) */
     opacity: 0.30; 
