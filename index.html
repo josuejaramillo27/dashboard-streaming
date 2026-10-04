@@ -1301,6 +1301,9 @@
     <div class="chrome-tabs-container" style="margin: 0 0 20px 0; border: none; background: transparent; padding: 0;">
         <div class="chrome-tab active profile-tab-btn" onclick="window.switchProfileTab('tabPerfilMarca', this)"><i class='bx bx-store'></i> Datos y Marca</div>
         <div class="chrome-tab profile-tab-btn" onclick="window.switchProfileTab('tabPerfilBot', this)"><i class='bx bx-bot'></i> Bot WhatsApp</div>
+        <div class="chrome-tab profile-tab-btn" onclick="window.switchProfileTab('tabPasarelas', this)">
+    <i class='bx bx-credit-card'></i> Pasarelas (PRO)
+</div>
     </div>
 
     <button id="btnInstallApp" class="btn-primary" style="display: none; width: 100%; margin-bottom: 20px; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); border: none; font-size: 15px; padding: 14px;" onclick="window.installApp()">
@@ -1533,6 +1536,18 @@
             
             <button class="btn-secondary mobile-only-btn" style="width: 100%; padding: 14px; font-size: 15px; margin-top: 15px;" onclick="window.closeModals()">Cerrar Perfil</button>
         </div>
+    </div>
+</div>
+        <div id="tabPasarelas" class="profile-tab-content" style="display: none;">
+    <div style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border);">
+        <h4 style="color: var(--mac-blue); margin-top: 0;"><i class='bx bx-money'></i> Mercado Pago</h4>
+        <input type="text" id="mpAccessToken" placeholder="Access Token (APP_USR-...)" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main);">
+        
+        <h4 style="color: #F3BA2F; margin-top: 10px;"><i class='bx bxl-bitcoin'></i> Binance Pay</h4>
+        <input type="text" id="binanceApiKey" placeholder="API Key" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main);">
+        <input type="password" id="binanceSecretKey" placeholder="Secret Key" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main);">
+        
+        <button class="btn-primary" style="width: 100%; padding: 14px;" onclick="window.saveGateways()">Guardar Pasarelas</button>
     </div>
 </div>
     </div> <!-- Fin del dashboard-main -->
