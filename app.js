@@ -8944,3 +8944,227 @@ window.renderCartItems = () => {
     document.getElementById('cartTotalPrice').innerText = `${data.currency || 'S/'}${finalTotal.toFixed(2)}`;
     window.currentCartFinalTotal = finalTotal;
 };
+
+/* ==========================================================================
+   SISTEMA AVANZADO DE PROVEEDORES MULTI-PLATAFORMA
+   ========================================================================== */
+
+// 1. Generar múltiples cajas según las plataformas seleccionadas
+window.updateProviderDropdown = () => {
+    const checkedBoxes = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value);
+    const container = document.getElementById('dynamicProvidersList');
+    if(!container) return;
+    
+    // Si no hay nada marcado, mostramos el cuadro bloqueado
+    if (checkedBoxes.length === 0) {
+        container.innerHTML = '<input type="text" placeholder="Selecciona plataforma..." disabled style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-secondary); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">';
+        return;
+    }
+
+    // Guardamos lo que ya habías escrito para que no se borre si marcas otra casilla
+    const existingInputs = {};
+    document.querySelectorAll('.dyn-prov-input').forEach(inp => {
+        existingInputs[inp.dataset.platform] = inp.value;
+    });
+
+    container.innerHTML = '';
+    const provs = currentUserData.providers || [];
+    
+    // Creamos un buscador (Datalist) por CADA plataforma marcada
+    checkedBoxes.forEach(plat => {
+        const platProvs = provs.filter(p => p.platform === plat);
+        let optionsHtml = '';
+        platProvs.forEach(p => {
+            optionsHtml += `<option value="${p.name}" data-cost="${p.cost}">${p.platform} - ${globalCurrency}${p.cost.toFixed(2)}</option>`;
+        });
+
+        const prevValue = existingInputs[plat] || '';
+        const safePlatId = plat.replace(/[^a-zA-Z0-9]/g, ''); // Para que el ID no tenga símbolos raros
+
+        container.innerHTML += `
+            <div style="position:relative; width: 100%;">
+                <input type="text" class="dyn-prov-input" data-platform="${plat}" list="provList_${safePlatId}" placeholder="Prov. de ${plat}..." value="${prevValue}" oninput="window.onDynamicProviderSelected(this)" style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">
+                <datalist id="provList_${safePlatId}">
+                    ${optionsHtml}
+                </datalist>
+            </div>
+        `;
+    });
+};
+
+// 2. Extraer el costo cuando seleccionas uno de la lista
+window.onDynamicProviderSelected = (inputEl) => {
+    const val = inputEl.value;
+    const listId = inputEl.getAttribute('list');
+    const datalist = document.getElementById(listId);
+    
+    let foundCost = 0;
+    if (datalist) {
+        // Busca si lo que escribiste coincide exactamente con una opción
+        const option = Array.from(datalist.options).find(opt => opt.value === val);
+        if (option) foundCost = parseFloat(option.getAttribute('data-cost')) || 0;
+    }
+    
+    inputEl.dataset.cost = foundCost;
+    window.sumTotalCost();
+};
+
+// 3. Sumar el costo de TODOS los proveedores al campo principal
+window.sumTotalCost = () => {
+    let total = 0;
+    let anyAutoFilled = false;
+    
+    document.querySelectorAll('.dyn-prov-input').forEach(inp => {
+        const cost = parseFloat(inp.dataset.cost) || 0;
+        total += cost;
+        if (cost > 0) anyAutoFilled = true;
+    });
+    
+    if (anyAutoFilled || total > 0) {
+        const costInput = document.getElementById('clientCost');
+        costInput.value = total;
+        // Brillo verde de éxito
+        costInput.style.backgroundColor = "rgba(52, 199, 89, 0.1)";
+        costInput.style.borderColor = "var(--mac-green)";
+        setTimeout(() => {
+            costInput.style.backgroundColor = "var(--mac-surface)";
+            costInput.style.borderColor = "var(--mac-border)";
+        }, 800);
+    }
+};
+
+// 4. Asegurarnos de que el menú de plataformas active esta función
+const originalPopulate = window.populateAllServiceSelects;
+window.populateAllServiceSelects = () => {
+    const services = currentUserData.customServices || ["Netflix", "Disney+", "Spotify Premium", "HBO Max", "Paramount", "Amazon Prime", "YouTube Premium", "Crunchyroll", "IPTV", "Flujo TV", "Apple TV", "Gemini Pro", "ChatGPT", "Canva Pro", "CapCut Pro", "Directv GO", "Movistar"];
+
+    const chkDropdown = document.getElementById('checkboxDropdown');
+    if (chkDropdown) {
+        chkDropdown.innerHTML = '';
+        services.forEach(s => {
+            const label = document.createElement('label');
+            label.innerHTML = `<input type="checkbox" value="${s}"> ${s}`;
+            chkDropdown.appendChild(label);
+        });
+        
+        // LA MAGIA: Cada vez que tocas un check, reconstruimos los proveedores
+        document.querySelectorAll('#checkboxDropdown input').forEach(cb => { 
+            cb.addEventListener('change', () => { 
+                const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value); 
+                const el = document.getElementById('selectText'); 
+                if(checked.length) { el.textContent = checked.join(', '); el.classList.add('has-selection'); } 
+                else { el.textContent = 'Plataforma(s)...'; el.classList.remove('has-selection'); } 
+                
+                window.updateProviderDropdown(); // 👈 Llama a nuestro nuevo sistema
+            }); 
+        });
+    }
+    
+    const selectIds = [{ id: 'invPlatform', defaultOpt: 'Plataforma...' }, { id: 'matPlatform', defaultOpt: null }, { id: 'rulePlatformSelect', defaultOpt: null }];
+    selectIds.forEach(item => {
+        const select = document.getElementById(item.id);
+        if (select) {
+            select.innerHTML = item.defaultOpt ? `<option value="">${item.defaultOpt}</option>` : '';
+            services.forEach(s => { select.innerHTML += `<option value="${s}">${s}</option>`; });
+        }
+    });
+};
+
+// 5. Reescribir StartEdit para que llene múltiples proveedores al editar un cliente
+window.startEdit = (id) => {
+    editingClientId = id; 
+    const c = clients.find(x => x.id === id);
+    window.currentClientNote = c.notes || '';
+    document.getElementById('clientName').value = c.name; 
+    document.getElementById('phone').value = c.phone; 
+    document.getElementById('expirationDate').value = c.date;
+    document.getElementById('clientCost').value = c.cost || ''; 
+    document.getElementById('clientPrice').value = c.price || ''; 
+    
+    if (c.multiAccounts) {
+        multiAccData = c.multiAccounts;
+    } else {
+        const platforms = c.platform.split(', ');
+        multiAccData = {};
+        platforms.forEach(p => {
+            multiAccData[p] = { email: c.accountEmail || '', password: c.accountPassword || '', profile: c.accountProfile || '', pin: c.accountPin || '', saleType: c.accountSaleType || 'Perfil', units: c.accountUnits || 1, deviceName: c.accountDeviceName || '', deviceType: c.accountDeviceType || '' };
+        });
+    }
+    
+    const totalUnits = Object.values(multiAccData).reduce((sum, acc) => sum + (parseInt(acc.units) || 1), 0);
+    const btn = document.getElementById('btnAccountData'); 
+    btn.innerText = `✅ Datos de Cuenta (${totalUnits} ud)`; 
+    btn.style.backgroundColor = "var(--mac-green)"; btn.style.color = "white";
+    
+    const cbs = document.querySelectorAll('#checkboxDropdown input'); 
+    cbs.forEach(cb => cb.checked = false); 
+    c.platform.split(', ').forEach(p => { cbs.forEach(cb => { if(cb.value === p) cb.checked = true; }); });
+    document.getElementById('selectText').textContent = c.platform; 
+    document.getElementById('selectText').classList.add('has-selection');
+    document.getElementById('actionButtonsContainer').innerHTML = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button type="button" class="btn-primary" onclick="window.saveClientData()">Guardar</button><button type="button" class="btn-secondary" onclick="window.cancelEdit()">Cancelar</button></div>`;
+    
+    // --- Llenar los proveedores en las cajitas generadas ---
+    window.updateProviderDropdown();
+    setTimeout(() => {
+        if (c.multiAccounts) {
+            Object.keys(c.multiAccounts).forEach(plat => {
+                const inp = document.querySelector(`.dyn-prov-input[data-platform="${plat}"]`);
+                if (inp && c.multiAccounts[plat].provider) inp.value = c.multiAccounts[plat].provider;
+            });
+        } else {
+            // Soporte para clientes viejos
+            const provs = c.providerName ? c.providerName.split(' | ') : [];
+            if (provs.length === 1 && !provs[0].includes(':')) {
+                const inp = document.querySelector('.dyn-prov-input');
+                if (inp) inp.value = provs[0];
+            } else {
+                provs.forEach(p => {
+                    const parts = p.split(': ');
+                    if (parts.length === 2) {
+                        const inp = document.querySelector(`.dyn-prov-input[data-platform="${parts[0]}"]`);
+                        if (inp) inp.value = parts[1];
+                    }
+                });
+            }
+        }
+    }, 50);
+
+    document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
+};
+
+// 6. Reescribir GuardarCliente para que lea todos los proveedores
+const originalSaveClientData = window.saveClientData;
+window.saveClientData = async () => {
+    // Recopilamos todos los proveedores antes de llamar a la lógica de guardado
+    let provNamesArray = [];
+    document.querySelectorAll('.dyn-prov-input').forEach(inp => {
+        const val = inp.value.trim();
+        if (val) {
+            provNamesArray.push(`${inp.dataset.platform}: ${val}`);
+            if (multiAccData[inp.dataset.platform]) {
+                multiAccData[inp.dataset.platform].provider = val;
+            }
+        }
+    });
+    
+    // Inyectamos el string consolidado (Ej: "Netflix: Carlos | Disney+: Maria") en un campo oculto 
+    // para que la función original lo recoja de forma invisible
+    let hiddenProvider = document.getElementById('clientProviderName');
+    if(!hiddenProvider) {
+        hiddenProvider = document.createElement('input');
+        hiddenProvider.type = 'hidden';
+        hiddenProvider.id = 'clientProviderName';
+        document.body.appendChild(hiddenProvider);
+    }
+    hiddenProvider.value = provNamesArray.join(' | ');
+
+    // Llamamos a tu guardado normal
+    await originalSaveClientData();
+};
+
+// 7. Resetear al cancelar
+const originalCancelEdit = window.cancelEdit;
+window.cancelEdit = () => {
+    originalCancelEdit();
+    window.updateProviderDropdown();
+};
