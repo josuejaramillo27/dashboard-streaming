@@ -130,6 +130,15 @@ body::after {
     
     pointer-events: none; 
     z-index: 0;
+    /* Transición suave para cuando el usuario presione el botón de cambiar tema */
+    transition: filter 0.3s ease, opacity 0.3s ease; 
+}
+
+/* 🌙 CUANDO EL USUARIO ACTIVA EL MODO OSCURO */
+body.dark-mode::after {
+    /* Quitamos la inversión para que el logo vuelva a ser blanco original */
+    filter: invert(0); 
+    opacity: 0.15; /* Subimos la opacidad para que brille bien sobre el fondo negro */
 }
 
 /* Aseguramos que el panel principal siempre esté una capa por encima del logo */
