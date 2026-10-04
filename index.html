@@ -604,13 +604,23 @@
                 </div>
                 
                 <!-- BOTONES DE PC -->
-                <div class="mac-controls" style="display: flex; gap: 10px;">
-    <button class="action-btn" onclick="window.openPortalManagerModal()" style="background: rgba(94, 92, 230, 0.15); color: var(--mac-blue); border: 1px solid var(--mac-blue); font-weight: bold; padding: 8px 15px; font-size: 14px;">
-        <i class='bx bx-globe'></i> Portal Clientes
-    </button>
-    <button class="action-btn" style="background: var(--mac-surface); border: 1px solid var(--mac-border); padding: 8px 15px; font-size: 14px;" onclick="window.switchDashboardSection('financeSection', document.querySelector('.sidebar-item[title=\'Finanzas y Metas\']')); window.loadFinanceData();"><i class='bx bx-line-chart'></i> Finanzas</button>
-    <button class="action-btn" style="background: rgba(52, 199, 89, 0.15); color: var(--mac-green); font-weight: bold; padding: 8px 15px; font-size: 14px;" onclick="window.openWaModal()"><i class='bx bxl-whatsapp'></i> Auto-WA</button>
-</div>
+                <div class="mac-controls" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="action-btn" onclick="window.toggleClientInputMode()" style="background: rgba(0, 122, 255, 0.15); color: var(--mac-blue); border: 1px solid var(--mac-blue); font-weight: bold; padding: 8px 15px; font-size: 14px;">
+                        <i class='bx bx-search'></i> <span id="clientModeText">Clientes Frecuentes</span>
+                    </button>
+                    <button class="action-btn" onclick="window.openProvidersModal()" style="background: rgba(255, 149, 0, 0.15); color: var(--mac-orange); border: 1px solid var(--mac-orange); font-weight: bold; padding: 8px 15px; font-size: 14px;">
+                        <i class='bx bx-buildings'></i> Mis Proveedores
+                    </button>
+                    <button class="action-btn" onclick="window.openPortalManagerModal()" style="background: rgba(94, 92, 230, 0.15); color: #5e5ce6; border: 1px solid #5e5ce6; font-weight: bold; padding: 8px 15px; font-size: 14px;">
+                        <i class='bx bx-globe'></i> Portal Clientes
+                    </button>
+                    <button class="action-btn" style="background: var(--mac-surface); border: 1px solid var(--mac-border); padding: 8px 15px; font-size: 14px;" onclick="window.switchDashboardSection('financeSection', document.querySelector('.sidebar-item[title=\'Finanzas y Metas\']')); window.loadFinanceData();">
+                        <i class='bx bx-line-chart'></i> Finanzas
+                    </button>
+                    <button class="action-btn" style="background: rgba(52, 199, 89, 0.15); color: var(--mac-green); font-weight: bold; padding: 8px 15px; font-size: 14px;" onclick="window.openWaModal()">
+                        <i class='bx bxl-whatsapp'></i> Auto-WA
+                    </button>
+                </div>
             </div>
 
             <div class="stats-panel" id="statsPanel">    
@@ -678,10 +688,8 @@
 
             <form id="clientForm" class="form-grid" style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border); box-shadow: var(--glass-shadow);">
                 <div style="display:flex; flex-direction:column; gap:4px; grid-column: span 1; justify-content: flex-end;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <label style="font-size:11px; color:var(--mac-text-secondary); font-weight: bold; padding-left: 2px;">Nombre del Cliente:</label>
-                        <button type="button" onclick="window.toggleClientInputMode()" style="background: transparent; border: none; color: var(--mac-blue); font-size: 11px; cursor: pointer; font-weight: bold;"><i class='bx bx-search'></i> <span id="clientModeText">Buscar Existente</span></button>
-                    </div>
+                    <div style="display:flex; flex-direction:column; gap:4px; grid-column: span 1; justify-content: flex-end;">
+                    <label style="font-size:11px; color:var(--mac-text-secondary); font-weight: bold; padding-left: 2px;">Nombre del Cliente:</label>
                     <input type="text" id="clientName" placeholder="Escribe el nombre..." required style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none;">
                     
                     <select id="clientNameSelect" style="display:none; width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none;" onchange="window.onFrequentClientSelected()">
@@ -718,10 +726,7 @@
                 
                 <!-- INICIO FILA 2 PERFECTAMENTE ALINEADA -->
                 <div style="display:flex; flex-direction:column; gap:4px; grid-column: span 1; justify-content: flex-end;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <label style="font-size:11px; color:var(--mac-text-secondary); font-weight: bold;">Proveedor:</label>
-                        <button type="button" onclick="window.openProvidersModal()" style="background: transparent; border: none; color: var(--mac-blue); font-size: 11px; cursor: pointer; font-weight: bold;"><i class='bx bx-cog'></i> Gestionar</button>
-                    </div>
+                    <label style="font-size:11px; color:var(--mac-text-secondary); font-weight: bold; padding-left: 2px;">Proveedor:</label>
                     <select id="clientProviderSelect" style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); outline: none;" onchange="window.onProviderSelected()">
                         <option value="">Selecciona plataforma primero...</option>
                     </select>
