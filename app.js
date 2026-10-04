@@ -8687,156 +8687,133 @@ window.generateCatalogImages = async () => {
 };
 
 /* ==========================================================================
-   NUEVAS FUNCIONES: CLIENTES FRECUENTES Y CUPONES ESPECÍFICOS
+   NUEVAS FUNCIONES: AUTOCOMPLETADO INTELIGENTE (DATALIST)
    ========================================================================== */
 
-// --- 1. Lógica de Clientes Frecuentes ---
+// --- 1. Lógica de Clientes Frecuentes (Híbrido) ---
 window.isClientSelectMode = false;
 
 window.toggleClientInputMode = () => {
     window.isClientSelectMode = !window.isClientSelectMode;
     const input = document.getElementById('clientName');
-    const select = document.getElementById('clientNameSelect');
-    const text = document.getElementById('clientModeText');
+    const text = document.getElementById('clientModeText'); // El texto del botón superior
     
     if (window.isClientSelectMode) {
-        input.style.display = 'none';
-        select.style.display = 'block';
-        input.removeAttribute('required');
+        // Modo Búsqueda: Le acoplamos la lista desplegable al input
+        input.setAttribute('list', 'clientsDatalist');
+        input.placeholder = "🔍 Escribe para buscar cliente...";
+        input.value = '';
+        input.oninput = function() { window.onFrequentClientSelected(this.value); };
+        
         if(text) {
             text.innerHTML = "Nuevo Cliente";
             text.previousElementSibling.className = 'bx bx-user-plus';
         }
     } else {
-        input.style.display = 'block';
-        select.style.display = 'none';
-        input.setAttribute('required', 'true');
+        // Modo Normal: Quitamos la lista desplegable
+        input.removeAttribute('list');
+        input.placeholder = "Escribe el nombre...";
+        input.value = '';
+        input.oninput = null;
+        document.getElementById('phone').value = ''; // Limpiamos el teléfono
+        
         if(text) {
             text.innerHTML = "Clientes Frecuentes";
             text.previousElementSibling.className = 'bx bx-search';
         }
-        input.value = '';
-        document.getElementById('phone').value = '';
-    }
-};
-
-window.onFrequentClientSelected = () => {
-    const select = document.getElementById('clientNameSelect');
-    const phoneInput = document.getElementById('phone');
-    const nameInput = document.getElementById('clientName');
-    
-    if (select.value) {
-        const data = JSON.parse(select.value);
-        nameInput.value = data.name;
-        phoneInput.value = data.phone;
-        // Efecto visual de que se autocompletó
-        phoneInput.style.backgroundColor = "rgba(52, 199, 89, 0.1)";
-        setTimeout(() => phoneInput.style.backgroundColor = "var(--mac-bg)", 800);
-    } else {
-        nameInput.value = '';
-        phoneInput.value = '';
     }
 };
 
 window.updateFrequentClientsList = () => {
-    const select = document.getElementById('clientNameSelect');
-    if(!select) return;
-    select.innerHTML = '<option value="">Selecciona un cliente frecuente...</option>';
+    const datalist = document.getElementById('clientsDatalist');
+    if(!datalist) return;
+    datalist.innerHTML = '';
     
     const uniqueClients = {};
     clients.forEach(c => {
         if (c.phone && c.name) {
-            const cleanPhone = c.phone.replace(/[^\d+]/g, '');
+            const cleanPhone = c.phone.replace(/[^\d+]/g, ''); // Quitamos espacios del celular
             if (!uniqueClients[cleanPhone]) {
                 uniqueClients[cleanPhone] = c.name;
             }
         }
     });
     
-    // Rellenamos alfabéticamente
+    // Rellenamos la lista oculta alfabéticamente
     Object.keys(uniqueClients).sort((a, b) => uniqueClients[a].localeCompare(uniqueClients[b])).forEach(phone => {
         const name = uniqueClients[phone];
-        const valObj = JSON.stringify({name: name, phone: phone});
-        select.innerHTML += `<option value='${valObj}'>${name} (${phone})</option>`;
+        // El formato será: "Juan Perez - +51999888777"
+        datalist.innerHTML += `<option value="${name} - +${phone}"></option>`;
     });
 };
 
-// Inyectamos la actualización de la lista justo cuando la tabla de clientes se recarga
-const originalRenderTable = window.renderTable;
-window.renderTable = () => {
-    originalRenderTable();
-    window.updateFrequentClientsList();
+window.onFrequentClientSelected = (val) => {
+    if (!val) return;
+    
+    // Si el usuario hace clic en una opción de la lista, la cortamos para separar nombre de número
+    const parts = val.split(' - +');
+    if (parts.length === 2) {
+        const name = parts[0].trim();
+        const phone = '+' + parts[1].trim();
+        
+        // Dejamos solo el nombre limpio en la caja de texto
+        document.getElementById('clientName').value = name;
+        
+        // Auto-llenamos el teléfono
+        const phoneInput = document.getElementById('phone');
+        phoneInput.value = phone;
+        
+        // Efecto visual verde brillante para que sepas que se autocompletó
+        phoneInput.style.backgroundColor = "rgba(52, 199, 89, 0.1)";
+        phoneInput.style.borderColor = "var(--mac-green)";
+        setTimeout(() => {
+            phoneInput.style.backgroundColor = "var(--mac-surface)";
+            phoneInput.style.borderColor = "var(--mac-border)";
+        }, 800);
+    }
 };
 
-
-// --- 2. Lógica de Cupones Específicos ---
-
-// Actualiza el menú desplegable al abrir el modal de crear cupones
-window.updateCouponTargets = () => {
-    const select = document.getElementById('newCouponTarget');
-    if (!select) return;
-    select.innerHTML = '<option value="global">Todo el Catálogo</option>';
-    const catalog = currentUserData.storeCatalog || [];
+// --- 2. Lógica de Proveedores Inteligente ---
+window.updateProviderDropdown = () => {
+    const checkedBoxes = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value);
+    const datalist = document.getElementById('providersDatalist');
+    if(!datalist) return;
     
-    // Obtenemos nombres únicos de productos para no repetir
-    const uniquePlatforms = [...new Set(catalog.map(item => item.platform))];
-    uniquePlatforms.forEach(plat => {
-        select.innerHTML += `<option value="${plat}">${plat}</option>`;
+    datalist.innerHTML = '';
+    const provs = currentUserData.providers || [];
+    
+    // Filtramos solo los proveedores de la plataforma que marcaste arriba
+    const filtered = provs.filter(p => checkedBoxes.includes(p.platform));
+    
+    filtered.forEach(p => {
+        // Guardamos el costo oculto en un data-attribute para extraerlo luego
+        datalist.innerHTML += `<option value="${p.name}" data-cost="${p.cost}">${p.platform} - ${globalCurrency}${p.cost.toFixed(2)}</option>`;
     });
 };
 
-// Sobrescribimos la apertura de la tienda para que siempre actualice la lista de objetivos
-const openStoreHook = window.openStoreModal;
-window.openStoreModal = () => {
-    if(typeof openStoreHook === 'function') openStoreHook();
-    setTimeout(() => window.updateCouponTargets(), 100);
-};
+window.onProviderSelected = (val) => {
+    const datalist = document.getElementById('providersDatalist');
+    const costInput = document.getElementById('clientCost');
+    if (!val) return;
 
-// Sobrescribimos el guardado del cupón
-window.addStoreCoupon = async () => {
-    const code = document.getElementById('newCouponCode').value.trim().toUpperCase();
-    const percent = parseFloat(document.getElementById('newCouponPercent').value) || 0;
-    const target = document.getElementById('newCouponTarget').value;
+    // Buscamos si lo que el usuario escribió coincide EXACTAMENTE con algo de la base de datos
+    const option = Array.from(datalist.options).find(opt => opt.value === val);
     
-    if (!code || percent <= 0) return window.showNotification("⚠️ Ingresa un código y un descuento válido.");
-    
-    let coupons = currentUserData.storeCoupons || [];
-    if (coupons.some(c => c.code === code)) return window.showNotification("Ese código ya existe.");
-    
-    coupons.push({ code, percent, target });
-    try {
-        await updateDoc(doc(db, "users", currentUser.uid), { storeCoupons: coupons });
-        currentUserData.storeCoupons = coupons;
-        document.getElementById('newCouponCode').value = '';
-        document.getElementById('newCouponPercent').value = '';
-        document.getElementById('newCouponTarget').value = 'global';
-        window.renderStoreCoupons();
-        window.showNotification("🎟️ Cupón creado exitosamente");
-    } catch(e) { window.showNotification("Error: " + e.message); }
-};
-
-// Sobrescribimos la renderización para mostrar la insignia del objetivo (Target)
-window.renderStoreCoupons = () => {
-    const list = document.getElementById('storeCouponsList');
-    list.innerHTML = '';
-    const coupons = currentUserData.storeCoupons || [];
-    
-    coupons.forEach((c, index) => {
-        const isGlobal = c.target === 'global' || !c.target;
-        const targetBadge = isGlobal ? 
-            `<span style="background:var(--mac-blue); color:white; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:bold;">TODA LA TIENDA</span>` : 
-            `<span style="background:var(--mac-orange); color:white; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:bold;">SOLO ${c.target}</span>`;
-
-        list.innerHTML += `
-            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mac-surface); border: 1px dashed var(--mac-border); padding: 12px 15px; border-radius: 8px;">
-                <div>
-                    <span style="font-weight: 900; color: var(--mac-text-main); font-size: 15px; display:block; margin-bottom: 4px;">${c.code} <span style="font-size: 12px; color: var(--mac-green);">(-${c.percent}%)</span></span>
-                    ${targetBadge}
-                </div>
-                <button class="action-btn btn-del" style="padding: 6px; font-size: 15px;" onclick="window.deleteStoreCoupon(${index})"><i class='bx bx-trash'></i></button>
-            </div>
-        `;
-    });
+    if (option) {
+        // ¡Lo encontró! Es un proveedor guardado. Extraemos su costo y lo pegamos.
+        const cost = option.getAttribute('data-cost');
+        if (cost) costInput.value = cost;
+        
+        // Efecto visual verde brillante
+        costInput.style.backgroundColor = "rgba(52, 199, 89, 0.1)";
+        costInput.style.borderColor = "var(--mac-green)";
+        setTimeout(() => {
+            costInput.style.backgroundColor = "var(--mac-surface)";
+            costInput.style.borderColor = "var(--mac-border)";
+        }, 800);
+    }
+    // Si no coincide con nada, significa que estás escribiendo un nombre nuevo manualmente,
+    // así que el sistema simplemente te deja escribir sin interferir.
 };
 
 // --- 3. Lógica del Carrito (El Cerebro Matemático) ---
