@@ -950,6 +950,9 @@ window.saveProfile = async () => {
     const mpAccessToken = document.getElementById('mpAccessTokenInput') ? document.getElementById('mpAccessTokenInput').value.trim() : '';
     const binanceApiKey = document.getElementById('binanceApiKeyInput') ? document.getElementById('binanceApiKeyInput').value.trim() : '';
     const binanceSecretKey = document.getElementById('binanceSecretKeyInput') ? document.getElementById('binanceSecretKeyInput').value.trim() : '';
+    const binancePayId = document.getElementById('binancePayIdInput') ? document.getElementById('binancePayIdInput').value.trim() : '';
+const binanceAlias = document.getElementById('binanceAliasInput') ? document.getElementById('binanceAliasInput').value.trim() : '';
+const binanceExchangeRate = document.getElementById('binanceExchangeRateInput') ? parseFloat(document.getElementById('binanceExchangeRateInput').value) || null : null;
 
     if (!phone.startsWith('+')) return window.showNotification("⚠️ El teléfono DEBE incluir el código de país");
 
@@ -1049,7 +1052,10 @@ window.saveProfile = async () => {
             phone: phone, logoUrl: logoUrl, bannerUrl: bannerUrl, storeAlias: finalAlias,
             referencesLink: referencesLink,
             paymentMethods: finalPaymentMethods,
-            botConfig: botConfig
+            botConfig: botConfig,
+            binancePayId: binancePayId,
+            binanceAlias: binanceAlias,
+            binanceExchangeRate: binanceExchangeRate
         };
 
         // Solo guardamos si el usuario escribió algo, o si quiso borrarlas
@@ -1182,8 +1188,6 @@ window.saveGateways = async () => {
         }
 
         window.showNotification("✅ Pasarelas de pago guardadas exitosamente.");
-        if (typeof window.openProfileModal === 'function') window.openProfileModal();
-
     } catch (e) {
         window.showNotification("Error al guardar pasarelas: " + e.message);
         console.error(e);
