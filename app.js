@@ -4279,7 +4279,7 @@ if (metodo === 'binance') {
                     Envía exactamente <b style="color: #FCD535; font-size: 18px;">${priceUSDT} USDT</b> a nuestro Binance Pay.
                 </p>
                 <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; border: 1px dashed #555; margin-bottom: 20px; width: 100%; box-sizing: border-box;">
-                    <p style="margin: 0; font-size: 13px; color: var(--mac-text-secondary);">Binance Pay ID / Correo:</p>
+                    <p style="margin: 0; font-size: 13px; color: var(--mac-text-secondary);">Binance Pay ID:</p>
                     <p style="margin: 5px 0 0 0; font-size: 20px; font-weight: 800; color: #fff; letter-spacing: 1.5px;">${payId}</p>
                     ${alias ? `<p style="margin: 5px 0 0 0; font-size: 13px; color: #FCD535; font-weight: bold;">${alias}</p>` : ''}
                 </div>
