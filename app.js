@@ -9168,3 +9168,23 @@ window.cancelEdit = () => {
     originalCancelEdit();
     window.updateProviderDropdown();
 };
+
+window.saveGateways = async () => {
+    const mpToken = document.getElementById('mpAccessToken').value.trim();
+    const binApiKey = document.getElementById('binanceApiKey').value.trim();
+    const binSecret = document.getElementById('binanceSecretKey').value.trim();
+
+    try {
+        const gateways = {
+            mercadoPago: { accessToken: mpToken, active: !!mpToken },
+            binance: { apiKey: binApiKey, secretKey: binSecret, active: !!binApiKey }
+        };
+
+        // ADVERTENCIA DE SEGURIDAD: En producción, estos datos deben ir en una subcolección protegida
+        await updateDoc(doc(db, "users", currentUser.uid), { gateways: gateways });
+        currentUserData.gateways = gateways;
+        window.showNotification("✅ Credenciales de pago guardadas");
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
+    }
+};
