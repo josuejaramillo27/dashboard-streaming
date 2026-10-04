@@ -691,10 +691,9 @@
                 <!-- 1. Nombre -->
                 <div style="display:flex; flex-direction:column; gap:4px;">
                     <label style="font-size:11px; color:var(--mac-text-secondary); font-weight: bold; padding-left: 2px;">Nombre del Cliente:</label>
+                    <!-- Eliminamos el botón de aquí y añadimos el datalist invisible -->
                     <input type="text" id="clientName" placeholder="Escribe el nombre..." required style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none;">
-                    <select id="clientNameSelect" style="display:none; width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none;" onchange="window.onFrequentClientSelected()">
-                        <option value="">Selecciona un cliente frecuente...</option>
-                    </select>
+                    <datalist id="clientsDatalist"></datalist>
                 </div>
 
                 <!-- 2. Plataforma -->
@@ -747,10 +746,9 @@
                 <!-- 6. Proveedor -->
                 <div style="display:flex; flex-direction:column; gap:4px;">
                     <label style="font-size:11px; color:var(--mac-text-secondary); font-weight: bold; padding-left: 2px;">Proveedor:</label>
-                    <select id="clientProviderSelect" style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); outline: none; height: 46px; box-sizing: border-box;" onchange="window.onProviderSelected()">
-                        <option value="">Selecciona plataforma...</option>
-                    </select>
-                    <input type="text" id="clientProviderName" placeholder="O escribe manual..." style="display:none; width: 100%; padding: 13px; margin-top: 5px; border-radius: 8px; border: 1px dashed var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">
+                    <!-- Ahora es un campo híbrido (escribes o seleccionas) -->
+                    <input type="text" id="clientProviderName" list="providersDatalist" placeholder="Busca o escribe manual..." style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;" oninput="window.onProviderSelected(this.value)">
+                    <datalist id="providersDatalist"></datalist>
                 </div>
 
                 <!-- 7. Precio -->
