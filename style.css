@@ -128,7 +128,7 @@ body::after {
     background-size: 60vh; 
     
     /* 🪄 SUBIMOS LA OPACIDAD (0.15 a 0.25 es ideal para modo oscuro) */
-    opacity: 0.30; 
+    opacity: 0.23; 
     
     /* CRÍTICO: Evita que el logo bloquee los clics en el panel */
     pointer-events: none; 
