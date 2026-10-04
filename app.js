@@ -1101,12 +1101,22 @@ window.saveProfile = async () => {
 
 // --- NUEVO: GUARDAR PASARELAS DE PAGO (PRO) ---
 window.saveGateways = async () => {
-    // 1. Protección Extrema: Usamos '?.' para evitar errores si el HTML tarda en cargar
-    const mpAccessToken = document.getElementById('mpAccessTokenInput')?.value?.trim() || '';
-    const binanceApiKey = document.getElementById('binanceApiKeyInput')?.value?.trim() || '';
-    const binanceSecretKey = document.getElementById('binanceSecretKeyInput')?.value?.trim() || '';
+    // 🔥 ESTA ALERTA ES LA PRUEBA DE FUEGO 🔥
+    alert("¡El nuevo código ya está funcionando!"); 
 
-    // 2. Capturamos el botón
+    let mpAccessToken = "";
+    let binanceApiKey = "";
+    let binanceSecretKey = "";
+
+    const cajaMp = document.getElementById('mpAccessTokenInput');
+    const cajaBinApi = document.getElementById('binanceApiKeyInput');
+    const cajaBinSec = document.getElementById('binanceSecretKeyInput');
+
+    // Extraemos los valores SOLO si las cajas existen en el HTML
+    if (cajaMp) mpAccessToken = cajaMp.value.trim();
+    if (cajaBinApi) binanceApiKey = cajaBinApi.value.trim();
+    if (cajaBinSec) binanceSecretKey = cajaBinSec.value.trim();
+
     const btn = document.querySelector('#tabPasarelas .btn-primary');
     const origText = btn ? btn.innerHTML : 'Guardar Pasarelas';
     
@@ -1118,32 +1128,26 @@ window.saveGateways = async () => {
     try {
         let updateData = {};
 
-        // Solo guardamos si el usuario escribió algo y si NO son los asteriscos de seguridad
+        // Solo guardamos si hay texto y NO son asteriscos
         if (mpAccessToken && !mpAccessToken.includes('***')) updateData.mpAccessToken = mpAccessToken;
         if (binanceApiKey && !binanceApiKey.includes('***')) updateData.binanceApiKey = binanceApiKey;
         if (binanceSecretKey && !binanceSecretKey.includes('***')) updateData.binanceSecretKey = binanceSecretKey;
 
-        // Si el usuario vació el campo a propósito, lo borramos de la BD
+        // Si vació la caja, borramos de la BD
         if (mpAccessToken === '') updateData.mpAccessToken = null;
         if (binanceApiKey === '') updateData.binanceApiKey = null;
         if (binanceSecretKey === '') updateData.binanceSecretKey = null;
 
-        // Si hay algo que actualizar, lo enviamos a Firebase
         if (Object.keys(updateData).length > 0) {
             await updateDoc(doc(db, "users", currentUser.uid), updateData);
             
-            // Actualizar la memoria local para no tener que recargar
             if (updateData.mpAccessToken !== undefined) currentUserData.mpAccessToken = updateData.mpAccessToken;
             if (updateData.binanceApiKey !== undefined) currentUserData.binanceApiKey = updateData.binanceApiKey;
             if (updateData.binanceSecretKey !== undefined) currentUserData.binanceSecretKey = updateData.binanceSecretKey;
         }
 
         window.showNotification("✅ Pasarelas de pago guardadas exitosamente.");
-        
-        // Refrescamos los asteriscos de seguridad
-        if (typeof window.openProfileModal === 'function') {
-            window.openProfileModal();
-        }
+        if (typeof window.openProfileModal === 'function') window.openProfileModal();
 
     } catch (e) {
         window.showNotification("Error al guardar pasarelas: " + e.message);
