@@ -738,29 +738,30 @@
                 </div>
 
                 <!-- 5. Costo -->
-                <div style="display:flex; flex-direction:column; gap:4px;">
+                <div style="display:flex; flex-direction:column; gap:4px; justify-content: flex-end;">
                     <label style="font-size:11px; color:var(--mac-text-secondary); font-weight: bold; padding-left: 2px;">Costo Proveedor:</label>
                     <input type="number" id="clientCost" placeholder="Monto (S/)" step="0.1" required style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">
                 </div>
 
                 <!-- 6. Proveedor -->
-                <div style="display:flex; flex-direction:column; gap:4px;">
+                <div style="display:flex; flex-direction:column; gap:4px; justify-content: flex-end;">
                     <label style="font-size:11px; color:var(--mac-text-secondary); font-weight: bold; padding-left: 2px;">Proveedor:</label>
-                    <!-- Ahora es un campo híbrido (escribes o seleccionas) -->
-                    <input type="text" id="clientProviderName" list="providersDatalist" placeholder="Busca o escribe manual..." style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;" oninput="window.onProviderSelected(this.value)">
-                    <datalist id="providersDatalist"></datalist>
+                    <select id="clientProviderSelect" style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); outline: none; height: 46px; box-sizing: border-box;" onchange="window.onProviderSelected()">
+                        <option value="">Selecciona plataforma...</option>
+                    </select>
+                    <input type="text" id="clientProviderName" placeholder="O escribe manual..." style="display:none; width: 100%; padding: 13px; margin-top: 5px; border-radius: 8px; border: 1px dashed var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">
                 </div>
 
                 <!-- 7. Precio -->
-                <div style="display:flex; flex-direction:column; gap:4px;">
+                <div style="display:flex; flex-direction:column; gap:4px; justify-content: flex-end;">
                     <label style="font-size:11px; color:var(--mac-text-secondary); font-weight: bold; padding-left: 2px;">Precio de Venta:</label>
-                    <input type="number" id="clientPrice" placeholder="Monto (S/)" step="0.1" required style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">
+                    <input type="number" id="clientPrice" placeholder="Monto (S/)" step="0.1" required style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">
                 </div>
 
                 <!-- 8. Fecha -->
-                <div class="date-wrapper" style="display: flex; flex-direction: column; gap: 4px;">
-                    <label class="mobile-date-label" style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary); padding-left: 2px;">Fecha de Vencimiento:</label>
-                    <input type="date" id="expirationDate" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">
+                <div style="display: flex; flex-direction: column; gap: 4px; justify-content: flex-end;">
+                    <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary); padding-left: 2px;">Fecha de Vencimiento:</label>
+                    <input type="date" id="expirationDate" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">
                 </div>
 
                 <div id="actionButtonsContainer" style="grid-column: 1 / -1; margin-top: 10px;">
