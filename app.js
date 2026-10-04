@@ -21,7 +21,7 @@ const messaging = getMessaging(app);
 const googleProvider = new GoogleAuthProvider();
 
 let currentUser = null; let currentUserData = null; let clients = []; let editingClientId = null;
-let currentManageUserId = null; 
+let currentManageUserId = null;
 let multiAccData = {};
 let currentActiveTab = '';
 window.getDefaultAccData = () => ({ email: '', password: '', profile: '', pin: '', units: 1, months: 1, deviceName: '', deviceType: '', saleType: 'Perfil', inventoryId: null });
@@ -31,9 +31,9 @@ let editingNewsId = null;
 let editingNewsOldImg = null;
 
 const macPalette = ['#FF2D55', '#5856D6', '#FF9500', '#34C759', '#007AFF', '#AF52DE', '#FF3B30', '#FFCC00', '#5AC8FA'];
-const getCurrencyForCountry = (country) => { 
-    const dict = { 
-        "Perú": "S/", 
+const getCurrencyForCountry = (country) => {
+    const dict = {
+        "Perú": "S/",
         "Colombia": "COP $",
         "México": "MXN $",
         "Argentina": "ARS $",
@@ -53,39 +53,39 @@ const getCurrencyForCountry = (country) => {
         "Nicaragua": "C$",
         "Puerto Rico": "$",
         "Cuba": "CUP $"
-    }; 
+    };
     return dict[country] || "USD $"; // Por defecto USD si es "Otro País"
 };
-const updateThemeIcon = () => { 
-    const isDark = document.body.classList.contains('dark-mode'); 
-    document.querySelectorAll('.theme-toggle').forEach(btn => { 
-        btn.innerHTML = isDark ? "<i class='bx bx-sun'></i> Modo claro" : "<i class='bx bx-moon'></i> Modo oscuro"; 
-    }); 
+const updateThemeIcon = () => {
+    const isDark = document.body.classList.contains('dark-mode');
+    document.querySelectorAll('.theme-toggle').forEach(btn => {
+        btn.innerHTML = isDark ? "<i class='bx bx-sun'></i> Modo claro" : "<i class='bx bx-moon'></i> Modo oscuro";
+    });
 };
-if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode'); updateThemeIcon(); 
-window.toggleTheme = () => { 
-    document.body.classList.toggle('dark-mode'); 
-    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode')); 
-    updateThemeIcon(); 
-    
+if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode'); updateThemeIcon();
+window.toggleTheme = () => {
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    updateThemeIcon();
+
     // Si los gráficos están abiertos, los repintamos con el nuevo tema
     if (document.getElementById('analyticsSection') && document.getElementById('analyticsSection').style.display === 'flex') {
-        if(typeof window.toggleStats === 'function') window.toggleStats(true); 
+        if (typeof window.toggleStats === 'function') window.toggleStats(true);
     }
 };
 window.showNotification = (msg) => { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 5000); }
-function showView(viewId) { 
-    document.getElementById('authView').style.display = 'none'; 
-    document.getElementById('appView').style.display = 'none'; 
-    document.getElementById('adminView').style.display = 'none'; 
-    document.getElementById(viewId).style.display = 'block'; 
-    
+function showView(viewId) {
+    document.getElementById('authView').style.display = 'none';
+    document.getElementById('appView').style.display = 'none';
+    document.getElementById('adminView').style.display = 'none';
+    document.getElementById(viewId).style.display = 'block';
+
     if (viewId === 'appView') {
         document.body.classList.add('logged-in');
     } else {
         document.body.classList.remove('logged-in');
     }
-    
+
     const bottomNav = document.querySelector('.bottom-nav');
     if (bottomNav) {
         if (viewId === 'appView' && window.innerWidth <= 768) {
@@ -95,25 +95,25 @@ function showView(viewId) {
         }
     }
 }
-window.showLogin = () => { document.getElementById('loginForm').style.display='flex'; document.getElementById('registerForm').style.display='none'; document.getElementById('resetForm').style.display='none'; document.getElementById('authSubtitle').innerText='Iniciar Sesión'; }
-window.showRegister = () => { document.getElementById('loginForm').style.display='none'; document.getElementById('registerForm').style.display='flex'; document.getElementById('resetForm').style.display='none'; document.getElementById('authSubtitle').innerText='Crear Cuenta'; }
-window.showReset = () => { document.getElementById('loginForm').style.display='none'; document.getElementById('registerForm').style.display='none'; document.getElementById('resetForm').style.display='flex'; document.getElementById('authSubtitle').innerText='Recuperar Contraseña'; }
+window.showLogin = () => { document.getElementById('loginForm').style.display = 'flex'; document.getElementById('registerForm').style.display = 'none'; document.getElementById('resetForm').style.display = 'none'; document.getElementById('authSubtitle').innerText = 'Iniciar Sesión'; }
+window.showRegister = () => { document.getElementById('loginForm').style.display = 'none'; document.getElementById('registerForm').style.display = 'flex'; document.getElementById('resetForm').style.display = 'none'; document.getElementById('authSubtitle').innerText = 'Crear Cuenta'; }
+window.showReset = () => { document.getElementById('loginForm').style.display = 'none'; document.getElementById('registerForm').style.display = 'none'; document.getElementById('resetForm').style.display = 'flex'; document.getElementById('authSubtitle').innerText = 'Recuperar Contraseña'; }
 window.goToRegisterFromPlanes = () => {
     // 1. Ocultar la vista del catálogo de planes
     document.getElementById('planesPublicView').style.display = 'none';
-    
+
     // 2. Limpiar la URL (Quitar ?planes=true) para que no vuelva a atrapar la pantalla
     const url = new URL(window.location);
     url.searchParams.delete('planes');
     window.history.pushState({}, '', url);
-    
+
     // 3. Mandar al usuario directo a crear su cuenta
     showView('authView');
     window.showRegister();
 };
 window.togglePassword = (inputId, btn) => {
     const input = document.getElementById(inputId);
-    if (input.type === "password") { input.type = "text"; btn.innerText = "🙈"; } 
+    if (input.type === "password") { input.type = "text"; btn.innerText = "🙈"; }
     else { input.type = "password"; btn.innerText = "👁️"; }
 };
 
@@ -125,25 +125,25 @@ window.loginWithGoogle = async () => {
         const result = await signInWithPopup(auth, googleProvider);
         const user = result.user;
         const docSnap = await getDoc(doc(db, "users", user.uid));
-        
+
         if (!docSnap.exists()) {
             // NO se crea en Firebase aún. Guardamos temporal y mostramos el formulario pre-llenado.
             window.isGoogleSignup = true;
             window.tempGoogleUser = user;
-            
+
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('registerForm').style.display = 'flex';
             document.getElementById('authSubtitle').innerText = 'Completa tu Registro';
-            
+
             document.getElementById('regName').value = user.displayName || '';
             document.getElementById('regEmail').value = user.email || '';
             document.getElementById('regEmail').disabled = true; // Bloqueado para que no lo cambien
-            
+
             // Ocultamos la contraseña porque ya se autenticó con Google
             const pwdWrapper = document.getElementById('regPassword').parentElement;
-            if(pwdWrapper) pwdWrapper.style.display = 'none';
+            if (pwdWrapper) pwdWrapper.style.display = 'none';
             document.getElementById('regPassword').removeAttribute('required');
-            
+
             window.showNotification("¡Casi listo! Completa tu número y país.");
         } else {
             // Si ya existe, el onAuthStateChanged se encarga de cargarlo.
@@ -162,16 +162,16 @@ window.doRegister = async () => {
     const password = document.getElementById('regPassword').value;
     const country = document.getElementById('regCountry').value;
     const planElegido = document.getElementById('regPlanDemo').value;
-    
-    if(!name || !email || !country || !phone || !planElegido) return window.showNotification("Llena todos los campos");
-    if(!window.isGoogleSignup && !password) return window.showNotification("Falta la contraseña");
-    if(!phone.startsWith('+')) return window.showNotification("⚠️ El teléfono DEBE incluir el código de país (Ej: +51...)");
-    
-    const btn = document.querySelector('#registerForm .btn-primary'); 
-    const orig = btn.innerText; 
-    btn.innerText = "Creando... ⏳"; 
+
+    if (!name || !email || !country || !phone || !planElegido) return window.showNotification("Llena todos los campos");
+    if (!window.isGoogleSignup && !password) return window.showNotification("Falta la contraseña");
+    if (!phone.startsWith('+')) return window.showNotification("⚠️ El teléfono DEBE incluir el código de país (Ej: +51...)");
+
+    const btn = document.querySelector('#registerForm .btn-primary');
+    const orig = btn.innerText;
+    btn.innerText = "Creando... ⏳";
     btn.disabled = true;
-    
+
     try {
         let user = window.tempGoogleUser;
         // Solo creamos credencial con contraseña si NO viene de Google
@@ -179,7 +179,7 @@ window.doRegister = async () => {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             user = userCredential.user;
         }
-        
+
         const idToken = await user.getIdToken();
 
         const response = await fetch('https://bot.panelagc.com/api/completar-registro', {
@@ -195,39 +195,39 @@ window.doRegister = async () => {
         });
 
         if (!response.ok) throw new Error("Error del servidor al asignar perfil.");
-        
+
         window.isGoogleSignup = false;
         window.showNotification("¡Cuenta creada con éxito! Disfruta tu prueba gratuita.");
         window.location.reload(); // Recarga limpia para que Firebase atrape la sesión
-        
-    } catch (e) { 
-        window.showNotification("Error Reg: " + e.message); 
+
+    } catch (e) {
+        window.showNotification("Error Reg: " + e.message);
     } finally {
-        btn.innerText = orig; 
+        btn.innerText = orig;
         btn.disabled = false;
     }
 };
 
 window.doLogin = async () => {
     const email = document.getElementById('loginEmail').value, password = document.getElementById('loginPassword').value;
-    if(!email || !password) return window.showNotification("Ingresa tus datos");
-    
-    const btn = document.querySelector('#loginForm .btn-primary'); 
+    if (!email || !password) return window.showNotification("Ingresa tus datos");
+
+    const btn = document.querySelector('#loginForm .btn-primary');
     const orig = btn.innerHTML; // Cambiamos innerText por innerHTML
     btn.innerHTML = "Iniciando... <i class='bx bx-loader-alt bx-spin'></i>"; // Usamos el spinner
     btn.disabled = true;
-    
-    try { 
-        await signInWithEmailAndPassword(auth, email, password); 
-    } catch (e) { 
-        window.showNotification("Error Login: " + e.message); 
-        btn.innerHTML = orig; 
-        btn.disabled = false; 
+
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+    } catch (e) {
+        window.showNotification("Error Login: " + e.message);
+        btn.innerHTML = orig;
+        btn.disabled = false;
     }
 };
 
 window.doResetPassword = async () => {
-    const email = document.getElementById('resetEmail').value; if(!email) return window.showNotification("Ingresa tu correo");
+    const email = document.getElementById('resetEmail').value; if (!email) return window.showNotification("Ingresa tu correo");
     try { await sendPasswordResetEmail(auth, email); window.showNotification("Link enviado a tu correo"); window.showLogin(); } catch (e) { window.showNotification("Error Reset: " + e.message); }
 };
 /* --- BOTÓN NUCLEAR: FORZAR ACTUALIZACIÓN Y LIMPIAR CACHÉ --- */
@@ -271,7 +271,7 @@ window.forceAppUpdate = async () => {
 };
 window.doLogout = async () => {
     localStorage.removeItem('agc_owner_uid');
-    if(document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'none';
+    if (document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'none';
     clients = []; currentUser = null; currentUserData = null; document.getElementById('tableBody').innerHTML = ''; showView('authView'); window.showLogin();
     try { await signOut(auth); window.showNotification("Sesión cerrada"); } catch (e) { console.error(e); }
 };
@@ -281,7 +281,7 @@ onAuthStateChanged(auth, async (user) => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('planes') || urlParams.get('tienda') || urlParams.get('portal') || urlParams.get('store')) {
         if (document.getElementById('authView')) document.getElementById('authView').style.display = 'none';
-        
+
         // Ejecutar las vistas correspondientes si existen
         if (typeof window.checkPlanesView === 'function') window.checkPlanesView();
         if (typeof window.checkClientPortal === 'function') window.checkClientPortal();
@@ -294,7 +294,7 @@ onAuthStateChanged(auth, async (user) => {
 
         // 🔥 MEJORA VISUAL: Ocultar login y dar feedback INMEDIATO
         document.getElementById('loginForm').style.display = 'none';
-        if(document.getElementById('authSubtitle')) {
+        if (document.getElementById('authSubtitle')) {
             document.getElementById('authSubtitle').innerHTML = "Cargando tu panel... <i class='bx bx-loader-alt bx-spin'></i>";
         }
 
@@ -304,15 +304,15 @@ onAuthStateChanged(auth, async (user) => {
                 currentUserData = docSnap.data();
                 globalCurrency = currentUserData.currency || "S/";
 
-                if(document.getElementById('brandName')) document.getElementById('brandName').innerText = currentUserData.name || 'Mi Panel';
-                
+                if (document.getElementById('brandName')) document.getElementById('brandName').innerText = currentUserData.name || 'Mi Panel';
+
                 // --- 1. LÓGICA DE LA INSIGNIA ORIGINAL (MÓVIL / CABECERA) ---
                 const planBadge = document.getElementById('userPlanBadge');
                 if (planBadge && currentUserData.role !== 'admin') {
                     const planActual = (currentUserData.plan_actual || 'demo').toLowerCase();
                     planBadge.style.display = 'inline-block';
                     planBadge.innerText = `Plan ${planActual}`;
-                    
+
                     if (planActual === 'pro' || planActual === 'elite') {
                         planBadge.style.color = '#FFD700'; planBadge.style.backgroundColor = 'rgba(255, 215, 0, 0.1)';
                     } else if (planActual === 'basico') {
@@ -325,14 +325,14 @@ onAuthStateChanged(auth, async (user) => {
                 }
 
                 // --- 2. LÓGICA DE LA BARRA LATERAL EN PC Y CELULAR ---
-                if(document.getElementById('brandNameSidebar')) document.getElementById('brandNameSidebar').innerText = currentUserData.name || 'Mi Panel';
-                if(document.getElementById('mobileBrandName')) document.getElementById('mobileBrandName').innerText = currentUserData.name || 'Mi Panel';    
-                
+                if (document.getElementById('brandNameSidebar')) document.getElementById('brandNameSidebar').innerText = currentUserData.name || 'Mi Panel';
+                if (document.getElementById('mobileBrandName')) document.getElementById('mobileBrandName').innerText = currentUserData.name || 'Mi Panel';
+
                 const planBadgeSide = document.getElementById('userPlanBadgeSidebar');
                 if (planBadgeSide && currentUserData.role !== 'admin') {
                     const planActual = (currentUserData.plan_actual || 'demo').toLowerCase();
                     planBadgeSide.innerText = `Plan ${planActual}`;
-                    
+
                     if (planActual === 'pro' || planActual === 'elite') {
                         // AQUÍ SE ACTIVA LA ANIMACIÓN ESTILO PASS ROYALE
                         planBadgeSide.className = 'badge-pro-animated';
@@ -356,21 +356,21 @@ onAuthStateChanged(auth, async (user) => {
                 }
 
                 // Inyección del logo
-                if(currentUserData.logoUrl) {
-                    if(document.getElementById('brandLogoSidebar')) { document.getElementById('brandLogoSidebar').src = currentUserData.logoUrl; document.getElementById('brandLogoSidebar').style.display = 'block'; }
-                    if(document.getElementById('mobileBrandLogo')) { document.getElementById('mobileBrandLogo').src = currentUserData.logoUrl; document.getElementById('mobileBrandLogo').style.display = 'block'; }
+                if (currentUserData.logoUrl) {
+                    if (document.getElementById('brandLogoSidebar')) { document.getElementById('brandLogoSidebar').src = currentUserData.logoUrl; document.getElementById('brandLogoSidebar').style.display = 'block'; }
+                    if (document.getElementById('mobileBrandLogo')) { document.getElementById('mobileBrandLogo').src = currentUserData.logoUrl; document.getElementById('mobileBrandLogo').style.display = 'block'; }
                 }
 
-                if(document.getElementById('clientCost')) document.getElementById('clientCost').placeholder = `Costo Proveedor (${globalCurrency})`;
-                if(document.getElementById('clientPrice')) document.getElementById('clientPrice').placeholder = `Precio de Venta (${globalCurrency})`;
-                
+                if (document.getElementById('clientCost')) document.getElementById('clientCost').placeholder = `Costo Proveedor (${globalCurrency})`;
+                if (document.getElementById('clientPrice')) document.getElementById('clientPrice').placeholder = `Precio de Venta (${globalCurrency})`;
+
                 // 🔥 MEJORA DE RENDIMIENTO Y AUTO-BLOQUEO
                 const now = new Date(); let needsUpdate = false;
-                if (currentUserData.active === true && currentUserData.activeUntil) { 
-                    if (now > new Date(currentUserData.activeUntil)) { 
+                if (currentUserData.active === true && currentUserData.activeUntil) {
+                    if (now > new Date(currentUserData.activeUntil)) {
                         // --- CIERRE AUTOMÁTICO DE DEMO CON ALERTA ---
                         await updateDoc(doc(db, "users", user.uid), { active: false, activeUntil: null });
-                        
+
                         Swal.fire({
                             icon: 'warning',
                             title: '⏳ ¡Tu Demo ha expirado!',
@@ -385,73 +385,73 @@ onAuthStateChanged(auth, async (user) => {
                             window.doLogout();
                         });
                         return; // Detiene la carga del Dashboard
-                    } 
-                } else if (currentUserData.active === false && currentUserData.suspendedUntil) { 
-                    if (now > new Date(currentUserData.suspendedUntil)) { currentUserData.active = true; currentUserData.suspendedUntil = null; needsUpdate = true; } 
+                    }
+                } else if (currentUserData.active === false && currentUserData.suspendedUntil) {
+                    if (now > new Date(currentUserData.suspendedUntil)) { currentUserData.active = true; currentUserData.suspendedUntil = null; needsUpdate = true; }
                 }
-                
-                if (needsUpdate) { 
-                    updateDoc(doc(db, "users", user.uid), { active: currentUserData.active, activeUntil: currentUserData.activeUntil || null, suspendedUntil: currentUserData.suspendedUntil || null }); 
+
+                if (needsUpdate) {
+                    updateDoc(doc(db, "users", user.uid), { active: currentUserData.active, activeUntil: currentUserData.activeUntil || null, suspendedUntil: currentUserData.suspendedUntil || null });
                 }
-                
-                const loginBtn = document.querySelector('#loginForm .btn-primary'); 
+
+                const loginBtn = document.querySelector('#loginForm .btn-primary');
                 if (loginBtn) { loginBtn.innerText = "Ingresar"; loginBtn.disabled = false; }
-                
+
                 // Carga de vistas
-                if (currentUserData.role === 'admin') { 
-                    showView('adminView'); 
-                    loadAdminData(); 
-                    window.requestNotificationPermission(); 
-                    if(document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'flex'; // 👈 MOSTRAR ASISTENTE
-                } else { 
-                    if (currentUserData.active === true) { 
-                        showView('appView'); 
-                        if(document.getElementById('userGreeting')) document.getElementById('userGreeting').innerText = `Gestión de clientes`; 
+                if (currentUserData.role === 'admin') {
+                    showView('adminView');
+                    loadAdminData();
+                    window.requestNotificationPermission();
+                    if (document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'flex'; // 👈 MOSTRAR ASISTENTE
+                } else {
+                    if (currentUserData.active === true) {
+                        showView('appView');
+                        if (document.getElementById('userGreeting')) document.getElementById('userGreeting').innerText = `Gestión de clientes`;
                         loadUserClients();
                         window.checkNewNews();
-                        window.requestNotificationPermission(); 
+                        window.requestNotificationPermission();
                         window.renderInventory();
                         window.syncUserServices();
-                        if(document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'flex'; // 👈 MOSTRAR ASISTENTE
+                        if (document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'flex'; // 👈 MOSTRAR ASISTENTE
                         setTimeout(() => window.checkUrlRouting(), 300);
-                        
+
                         // --- LANZADOR DEL TUTORIAL ---
                         if (!currentUserData.tutorialVisto && window.innerWidth > 768) {
                             setTimeout(() => window.startTutorial(), 1500);
                         }
-                    } else { 
-                // NUEVO: Solo desloguea si no viene del botón de Google
-                if (!window.isGoogleSignup) {
-                    await signOut(auth); 
-                    showView('authView'); 
-                    window.showLogin(); 
-                }
-            }
-            } // <--- AÑADE ESTA LLAVE AQUÍ PARA CERRAR EL BLOQUE ANTERIOR
+                    } else {
+                        // NUEVO: Solo desloguea si no viene del botón de Google
+                        if (!window.isGoogleSignup) {
+                            await signOut(auth);
+                            showView('authView');
+                            window.showLogin();
+                        }
+                    }
+                } // <--- AÑADE ESTA LLAVE AQUÍ PARA CERRAR EL BLOQUE ANTERIOR
             } else { await signOut(auth); showView('authView'); window.showLogin(); }
-        } catch (e) { 
-            console.error(e); 
-            window.showNotification("ERROR DB: " + e.message); 
-            showView('authView'); 
+        } catch (e) {
+            console.error(e);
+            window.showNotification("ERROR DB: " + e.message);
+            showView('authView');
             window.showLogin();
         }
-    } else { 
-        currentUser = null; currentUserData = null; 
-        showView('authView'); 
-        window.showLogin(); 
-        if(document.getElementById('authSubtitle')) document.getElementById('authSubtitle').innerText = 'Área de Gestión y Control';
+    } else {
+        currentUser = null; currentUserData = null;
+        showView('authView');
+        window.showLogin();
+        if (document.getElementById('authSubtitle')) document.getElementById('authSubtitle').innerText = 'Área de Gestión y Control';
     }
 });
 
-window.closeModals = (resetTab = true) => { 
-    document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); 
+window.closeModals = (resetTab = true) => {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
     document.body.style.overflow = 'auto'; // Devuelve el scroll al fondo
-    
+
     // Solo devuelve el foco al botón de Clientes si es un cierre total (ej: tocar la X)
     if (resetTab === true) {
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         const btnClientes = document.getElementById('navClientes');
-        if(btnClientes) btnClientes.classList.add('active');
+        if (btnClientes) btnClientes.classList.add('active');
     }
 };
 /* --- CONTROLADOR DE SECCIONES DASHBOARD (PC Y MÓVIL) --- */
@@ -461,14 +461,14 @@ window.switchDashboardSection = (sectionId, menuElement) => {
         // 1. Apagamos TODAS las secciones
         document.querySelectorAll('.dashboard-section').forEach(sec => {
             sec.classList.remove('active-section');
-            sec.style.setProperty('display', 'none', 'important'); 
+            sec.style.setProperty('display', 'none', 'important');
         });
-        
+
         // 2. Encendemos SOLO la seleccionada
         const targetSection = document.getElementById(sectionId);
         if (targetSection) {
             targetSection.classList.add('active-section');
-            targetSection.style.setProperty('display', 'block', 'important'); 
+            targetSection.style.setProperty('display', 'block', 'important');
         }
 
         // 3. Pintamos de azul el botón
@@ -476,7 +476,7 @@ window.switchDashboardSection = (sectionId, menuElement) => {
             document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
             menuElement.classList.add('active');
         }
-        
+
         // 4. SI ESTAMOS EN CELULAR: Ocultamos el menú automáticamente
         if (window.innerWidth <= 768) {
             const sidebar = document.getElementById('mainSidebar');
@@ -493,18 +493,18 @@ window.switchDashboardSection = (sectionId, menuElement) => {
         if (mainContainer) mainContainer.scrollTop = 0;
         window.scrollTo(0, 0);
 
-    }, 60); 
+    }, 60);
 };
 // Blindaje del botón "Cerrar" para que regrese correctamente al Home en PC y CELULAR
 const originalCloseModals = window.closeModals;
 window.closeModals = (resetTab = true) => {
     originalCloseModals(resetTab);
-    
+
     // 👈 RESTAURAR ASISTENTE AL CERRAR MODALES (Solo si tiene sesión activa)
     if (currentUser && document.getElementById('aiFloatingBtn')) {
         document.getElementById('aiFloatingBtn').style.display = 'flex';
     }
-    
+
     // Le quitamos la validación de PC para que en celular también restaure el inicio
     if (resetTab === true) {
         document.querySelectorAll('.dashboard-section').forEach(sec => {
@@ -516,55 +516,55 @@ window.closeModals = (resetTab = true) => {
             home.classList.add('active-section');
             home.style.setProperty('display', 'block', 'important');
         }
-        
+
         document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
         const homeBtn = document.querySelector('.sidebar-item[onclick*="homeSection"]');
-        if(homeBtn) homeBtn.classList.add('active');
+        if (homeBtn) homeBtn.classList.add('active');
     }
 };
 
 /* --- CONFIGURACIÓN DE WHATSAPP Y PAGOS --- */
-window.openWaModal = () => { 
-    const defaultMsg = "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*. Para renovar, usa estos datos:\n\n{pago}"; 
+window.openWaModal = () => {
+    const defaultMsg = "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*. Para renovar, usa estos datos:\n\n{pago}";
     const defaultDelivery = `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tu nueva cuenta de *{plataforma}*:\n\n📧 *Correo:* {correo}\n🔑 *Clave:* {pass}\n📌 *PIN:* {pin}\n\n📅 *Vence el:* {fecha}\n\n⚠️ *Reglas:* {reglas}\n\n¡Que disfrutes el contenido! 🍿`;
     const defaultRenew = `🎉 *¡Renovación Exitosa, {nombre}!*\n\nTu servicio de *{plataforma}* ha sido renovado correctamente.\n📅 Nueva fecha de vencimiento: *{fecha}*\n\n🌐 *Tu Portal:* {link}\n🔑 *Código Web:* {codigo}\n\n¡Gracias por seguir confiando en nosotros! 🚀`;
 
-    document.getElementById('editWaMessage').value = currentUserData.waTemplate || defaultMsg; 
-    document.getElementById('editWaDeliveryMessage').value = currentUserData.waDeliveryMessage || defaultDelivery; 
+    document.getElementById('editWaMessage').value = currentUserData.waTemplate || defaultMsg;
+    document.getElementById('editWaDeliveryMessage').value = currentUserData.waDeliveryMessage || defaultDelivery;
     // Nuevo campo para renovación
-    if(document.getElementById('editWaRenewMessage')) {
-        document.getElementById('editWaRenewMessage').value = currentUserData.waRenewMessage || defaultRenew; 
+    if (document.getElementById('editWaRenewMessage')) {
+        document.getElementById('editWaRenewMessage').value = currentUserData.waRenewMessage || defaultRenew;
     }
-    
-    document.getElementById('waModal').style.display = 'flex'; 
+
+    document.getElementById('waModal').style.display = 'flex';
 };
 
-window.saveWaMessage = async () => { 
+window.saveWaMessage = async () => {
     const btn = document.querySelector('#waModal .btn-primary');
     btn.innerText = "Guardando..."; btn.disabled = true;
-    try { 
+    try {
         const newRenewMsg = document.getElementById('editWaRenewMessage') ? document.getElementById('editWaRenewMessage').value : "";
 
-        await updateDoc(doc(db, "users", currentUser.uid), { 
+        await updateDoc(doc(db, "users", currentUser.uid), {
             waTemplate: document.getElementById('editWaMessage').value,
             waDeliveryMessage: document.getElementById('editWaDeliveryMessage').value,
             waRenewMessage: newRenewMsg // Se guarda en la base de datos
-        }); 
-        
+        });
+
         currentUserData.waTemplate = document.getElementById('editWaMessage').value;
         currentUserData.waDeliveryMessage = document.getElementById('editWaDeliveryMessage').value;
-        if(newRenewMsg) currentUserData.waRenewMessage = newRenewMsg; // Se actualiza en memoria
-        
-        window.showNotification("Configuración de WhatsApp guardada."); 
+        if (newRenewMsg) currentUserData.waRenewMessage = newRenewMsg; // Se actualiza en memoria
+
+        window.showNotification("Configuración de WhatsApp guardada.");
         window.closeModals();
-    } catch(e) { 
-        window.showNotification("Error: " + e.message); 
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
     } finally {
         btn.innerText = "Guardar Configuración"; btn.disabled = false;
     }
 };
 // 🔥 NUEVO SISTEMA DE MEMORIA TEMPORAL PARA MÉTODOS DE PAGO
-let tempPaymentMethods = []; 
+let tempPaymentMethods = [];
 
 // --- MANEJO DE PESTAÑAS DENTRO DEL PERFIL ---
 window.switchProfileTab = (tabId, element) => {
@@ -576,20 +576,20 @@ window.switchProfileTab = (tabId, element) => {
 
 window.openUpgradeWa = () => {
     // Aquí pon tu número real
-    const adminPhone = "+51961341323"; 
+    const adminPhone = "+51961341323";
     const msg = encodeURIComponent("¡Hola! Quiero subir al Plan PRO para desbloquear el envío de Campañas Masivas y la subida de Estados automáticos.");
     window.open(`https://wa.me/${adminPhone}?text=${msg}`, '_blank');
 };
 
 // --- ABRIR MODAL DE PERFIL MODIFICADO PARA VERIFICAR PLAN ---
-window.openProfileModal = () => { 
+window.openProfileModal = () => {
     // 1. Carga los datos de texto del perfil
-    document.getElementById('editProfileName').value = currentUserData.name || ''; 
-    document.getElementById('editProfileCountry').value = currentUserData.country || ''; 
-    document.getElementById('editProfilePhone').value = currentUserData.phone || ''; 
-    document.getElementById('editProfileAlias').value = currentUserData.storeAlias || ''; 
+    document.getElementById('editProfileName').value = currentUserData.name || '';
+    document.getElementById('editProfileCountry').value = currentUserData.country || '';
+    document.getElementById('editProfilePhone').value = currentUserData.phone || '';
+    document.getElementById('editProfileAlias').value = currentUserData.storeAlias || '';
     document.getElementById('editReferencesLink').value = currentUserData.referencesLink || '';
-    
+
     // --- NUEVO: Cargar Pasarelas (Ocultas por seguridad) ---
     if (document.getElementById('mpAccessTokenInput')) {
         document.getElementById('mpAccessTokenInput').value = currentUserData.mpAccessToken ? `APP_USR-***${currentUserData.mpAccessToken.slice(-5)}` : '';
@@ -619,10 +619,10 @@ window.openProfileModal = () => {
     if (typeof window.renderBotSlots === 'function') {
         window.renderBotSlots();
     }
-    
+
     // 4. Reiniciar a la primera pestaña siempre que se abre
     const primeraPestana = document.querySelector('.profile-tab-btn');
-    if(primeraPestana) window.switchProfileTab('tabPerfilMarca', primeraPestana);
+    if (primeraPestana) window.switchProfileTab('tabPerfilMarca', primeraPestana);
 };
 
 // --- FUNCIÓN HÍBRIDA: ENVIAR CAMPAÑA MASIVA ---
@@ -636,13 +636,13 @@ window.sendMassCampaign = async () => {
 
     // 1. Recopilar clientes de la BD (Si lo seleccionó)
     let finalRecipients = [];
-    const today = new Date(); today.setHours(0,0,0,0);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
 
     if (dbFilter !== 'none') {
         clients.forEach(c => {
-            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0);
             const diffDays = Math.ceil((exp - today) / 86400000);
-            
+
             let apply = false;
             if (dbFilter === 'all') apply = true;
             if (dbFilter === 'expired' && diffDays < 0) apply = true;
@@ -660,8 +660,8 @@ window.sendMassCampaign = async () => {
         extArray.forEach(num => {
             // Aseguramos que tenga el +
             let cleanNum = num.replace(/[^\d+]/g, '');
-            if(cleanNum) {
-                if(!cleanNum.startsWith('+')) cleanNum = '+' + cleanNum;
+            if (cleanNum) {
+                if (!cleanNum.startsWith('+')) cleanNum = '+' + cleanNum;
                 finalRecipients.push({ phone: cleanNum, name: "amigo" });
             }
         });
@@ -694,7 +694,7 @@ window.sendMassCampaign = async () => {
 
     if (confirm.isConfirmed) {
         window.showNotification("🚀 Campaña enviada a la cola lenta de tu servidor.");
-        
+
         try {
             await fetch('https://bot.panelagc.com/api/campana-masiva', {
                 method: 'POST',
@@ -711,7 +711,7 @@ window.sendMassCampaign = async () => {
             document.getElementById('campaignImage').value = '';
             document.getElementById('campaignExternal').value = '';
             document.getElementById('campaignDbClients').value = 'none';
-        } catch(e) {
+        } catch (e) {
             console.error("Error en campaña:", e);
         }
     }
@@ -721,10 +721,10 @@ window.renderBotSlots = () => {
     const contEstados = document.getElementById('statusSlotsContainer');
     const contGrupos = document.getElementById('groupSlotsContainer');
     if (!contEstados || !contGrupos) return;
-    
+
     contEstados.innerHTML = '';
     contGrupos.innerHTML = '';
-    
+
     const config = currentUserData.botConfig || {};
     const estados = config.estados || [];
     const grupos = config.gruposMensajes || [];
@@ -774,7 +774,7 @@ window.fetchWhatsAppGroups = async () => {
                 container.innerHTML = '<p style="font-size:12px; color:var(--mac-orange); text-align:center;">No perteneces a ningún grupo o el bot aún está cargando mensajes.</p>';
                 return;
             }
-            
+
             // Leemos los seleccionados en Firebase
             const savedGroups = (currentUserData.botConfig && currentUserData.botConfig.gruposTarget) ? currentUserData.botConfig.gruposTarget : [];
 
@@ -800,13 +800,13 @@ window.renderPaymentMethodsList = () => {
     const container = document.getElementById('paymentMethodsContainer');
     if (!container) return;
     container.innerHTML = '';
-    
+
     tempPaymentMethods.forEach((m, idx) => {
         if (m.isEditing) {
             // MODO EDICIÓN: Muestra el formulario para llenar los datos
             const div = document.createElement('div');
             div.style.cssText = "background: var(--mac-bg); border: 1px solid var(--mac-blue); border-radius: 12px; padding: 15px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,122,255,0.1);";
-            
+
             // Permite previsualizar la foto temporal si acaba de subir una
             let imgPreview = m.qrUrl ? `<img src="${m.qrUrl}" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid var(--mac-border); flex-shrink: 0;">` : '';
 
@@ -845,9 +845,9 @@ window.renderPaymentMethodsList = () => {
             // MODO RESUMEN: Muestra la tarjetita compacta y elegante
             const div = document.createElement('div');
             div.style.cssText = "background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 10px; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;";
-            
-            const iconHtml = (m.qrUrl || m.fileObj) 
-                ? `<div style="width: 35px; height: 35px; background: rgba(0, 122, 255, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--mac-blue); border: 1px solid var(--mac-blue);"><i class='bx bx-qr-scan'></i></div>` 
+
+            const iconHtml = (m.qrUrl || m.fileObj)
+                ? `<div style="width: 35px; height: 35px; background: rgba(0, 122, 255, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--mac-blue); border: 1px solid var(--mac-blue);"><i class='bx bx-qr-scan'></i></div>`
                 : `<div style="width: 35px; height: 35px; background: var(--mac-bg); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--mac-text-secondary); border: 1px solid var(--mac-border);"><i class='bx bxs-bank'></i></div>`;
 
             div.innerHTML = `
@@ -911,33 +911,33 @@ window.confirmPaymentMethod = (idx) => {
     m.bank = bank;
     m.number = number;
     m.holder = holder;
-    
+
     // Si acaba de subir una foto, la guardamos temporalmente en memoria
     if (fileInput && fileInput.files.length > 0) {
         m.fileObj = fileInput.files[0];
         // Creamos una URL temporal para que la vea de inmediato si vuelve a editar
-        m.qrUrl = URL.createObjectURL(m.fileObj); 
+        m.qrUrl = URL.createObjectURL(m.fileObj);
     }
 
     m.isEditing = false;
     window.renderPaymentMethodsList();
 };
 
-window.saveProfile = async () => { 
-    const phone = document.getElementById('editProfilePhone').value.trim(); 
+window.saveProfile = async () => {
+    const phone = document.getElementById('editProfilePhone').value.trim();
     const name = document.getElementById('editProfileName').value;
     const country = document.getElementById('editProfileCountry').value;
-    
+
     // --- NUEVO: Capturar datos de Pasarelas de Pago ---
     // (Asegúrate de que los IDs en tu HTML coincidan con estos)
     const mpAccessToken = document.getElementById('mpAccessTokenInput') ? document.getElementById('mpAccessTokenInput').value.trim() : '';
     const binanceApiKey = document.getElementById('binanceApiKeyInput') ? document.getElementById('binanceApiKeyInput').value.trim() : '';
     const binanceSecretKey = document.getElementById('binanceSecretKeyInput') ? document.getElementById('binanceSecretKeyInput').value.trim() : '';
 
-    if(!phone.startsWith('+')) return window.showNotification("⚠️ El teléfono DEBE incluir el código de país"); 
-    
+    if (!phone.startsWith('+')) return window.showNotification("⚠️ El teléfono DEBE incluir el código de país");
+
     const btn = document.querySelector('#profileModal .btn-primary');
-    if(btn) { btn.innerText = "Subiendo... ⏳"; btn.disabled = true; }
+    if (btn) { btn.innerText = "Subiendo... ⏳"; btn.disabled = true; }
 
     try {
         let logoUrl = currentUserData.logoUrl || null;
@@ -962,19 +962,19 @@ window.saveProfile = async () => {
         let finalPaymentMethods = [];
         for (let i = 0; i < tempPaymentMethods.length; i++) {
             let m = tempPaymentMethods[i];
-            
+
             if (m.isEditing) {
-                 m.bank = document.getElementById(`pmBank_${i}`).value.trim();
-                 m.number = document.getElementById(`pmNumber_${i}`).value.trim();
-                 m.holder = document.getElementById(`pmHolder_${i}`).value.trim();
-                 const fInput = document.getElementById(`pmQrFile_${i}`);
-                 if (fInput && fInput.files.length > 0) m.fileObj = fInput.files[0];
+                m.bank = document.getElementById(`pmBank_${i}`).value.trim();
+                m.number = document.getElementById(`pmNumber_${i}`).value.trim();
+                m.holder = document.getElementById(`pmHolder_${i}`).value.trim();
+                const fInput = document.getElementById(`pmQrFile_${i}`);
+                if (fInput && fInput.files.length > 0) m.fileObj = fInput.files[0];
             }
-            
-            if (!m.bank && !m.number) continue; 
+
+            if (!m.bank && !m.number) continue;
 
             let finalQrUrl = m.qrUrl;
-            
+
             if (m.fileObj) {
                 const storageRefQR = ref(storage, `qrs/${currentUser.uid}_qr_${Date.now()}_${i}`);
                 await uploadBytes(storageRefQR, m.fileObj);
@@ -999,13 +999,13 @@ window.saveProfile = async () => {
         let estadosArray = [];
         let gruposArray = [];
         for (let i = 0; i < 5; i++) {
-            estadosArray.push({ 
-                texto: document.getElementById(`slotTxt_${i}`).value.trim(), 
-                imgUrl: document.getElementById(`slotImg_${i}`).value.trim() 
+            estadosArray.push({
+                texto: document.getElementById(`slotTxt_${i}`).value.trim(),
+                imgUrl: document.getElementById(`slotImg_${i}`).value.trim()
             });
-            gruposArray.push({ 
-                texto: document.getElementById(`grpTxt_${i}`).value.trim(), 
-                imgUrl: document.getElementById(`grpImg_${i}`).value.trim() 
+            gruposArray.push({
+                texto: document.getElementById(`grpTxt_${i}`).value.trim(),
+                imgUrl: document.getElementById(`grpImg_${i}`).value.trim()
             });
         }
 
@@ -1025,13 +1025,13 @@ window.saveProfile = async () => {
             gruposLastRun: (currentUserData.botConfig && currentUserData.botConfig.gruposLastRun) ? currentUserData.botConfig.gruposLastRun : null,
             gruposCurrentIndex: (currentUserData.botConfig && currentUserData.botConfig.gruposCurrentIndex) ? currentUserData.botConfig.gruposCurrentIndex : 0
         };
-        
+
         // --- NUEVO: OBJETO DE ACTUALIZACIÓN CON PASARELAS ---
-        let updateData = { 
-            name: name, country: country, currency: getCurrencyForCountry(country), 
+        let updateData = {
+            name: name, country: country, currency: getCurrencyForCountry(country),
             phone: phone, logoUrl: logoUrl, bannerUrl: bannerUrl, storeAlias: finalAlias,
             referencesLink: referencesLink,
-            paymentMethods: finalPaymentMethods, 
+            paymentMethods: finalPaymentMethods,
             botConfig: botConfig
         };
 
@@ -1048,17 +1048,17 @@ window.saveProfile = async () => {
         }
 
         await updateDoc(doc(db, "users", currentUser.uid), updateData);
-        
+
         // Actualizar la memoria global
         currentUserData.botConfig = botConfig;
-        currentUserData.storeAlias = finalAlias; 
+        currentUserData.storeAlias = finalAlias;
         currentUserData.name = name;
         currentUserData.country = country;
         currentUserData.phone = phone;
         currentUserData.logoUrl = logoUrl;
         currentUserData.bannerUrl = bannerUrl;
         currentUserData.referencesLink = referencesLink;
-        currentUserData.paymentMethods = finalPaymentMethods; 
+        currentUserData.paymentMethods = finalPaymentMethods;
         // Actualizamos en memoria local las pasarelas
         if (updateData.mpAccessToken !== undefined) currentUserData.mpAccessToken = updateData.mpAccessToken;
         if (updateData.binanceApiKey !== undefined) currentUserData.binanceApiKey = updateData.binanceApiKey;
@@ -1070,39 +1070,39 @@ window.saveProfile = async () => {
         // Actualización DOM
         const brandSidebar = document.getElementById('brandNameSidebar');
         if (brandSidebar) brandSidebar.innerText = name || 'Mi Panel';
-        
+
         const mobileBrand = document.getElementById('mobileBrandName');
         if (mobileBrand) mobileBrand.innerText = name || 'Mi Panel';
-        
+
         const logoSidebar = document.getElementById('brandLogoSidebar');
         if (logoSidebar && logoUrl) { logoSidebar.src = logoUrl; logoSidebar.style.display = 'block'; }
-        
+
         const mobileLogo = document.getElementById('mobileBrandLogo');
         if (mobileLogo && logoUrl) { mobileLogo.src = logoUrl; mobileLogo.style.display = 'block'; }
 
         const costInput = document.getElementById('clientCost');
         if (costInput) costInput.placeholder = `Costo Proveedor (${globalCurrency})`;
-        
+
         const priceInput = document.getElementById('clientPrice');
         if (priceInput) priceInput.placeholder = `Precio de Venta (${globalCurrency})`;
 
-        window.showNotification("Perfil, Bot y Pasarelas guardadas."); 
+        window.showNotification("Perfil, Bot y Pasarelas guardadas.");
         window.closeModals();
-        
+
         if (document.getElementById('tableBody')) window.renderTable();
         if (document.getElementById('statsPanel')) window.toggleStats(true);
-        
-    } catch(e) { 
-        window.showNotification("Error: " + e.message); 
+
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
     } finally {
-        if(btn) { btn.innerText = "Guardar Perfil"; btn.disabled = false; }
+        if (btn) { btn.innerText = "Guardar Perfil"; btn.disabled = false; }
     }
 };
 
 // --- NUEVO: GUARDAR PASARELAS DE PAGO (PRO) ---
 window.saveGateways = async () => {
     // 🔥 ESTA ALERTA ES LA PRUEBA DE FUEGO 🔥
-    alert("¡El nuevo código ya está funcionando!"); 
+    alert("¡El nuevo código ya está funcionando!");
 
     let mpAccessToken = "";
     let binanceApiKey = "";
@@ -1119,9 +1119,9 @@ window.saveGateways = async () => {
 
     const btn = document.querySelector('#tabPasarelas .btn-primary');
     const origText = btn ? btn.innerHTML : 'Guardar Pasarelas';
-    
+
     if (btn) {
-        btn.innerHTML = "Guardando... ⏳"; 
+        btn.innerHTML = "Guardando... ⏳";
         btn.disabled = true;
     }
 
@@ -1140,7 +1140,7 @@ window.saveGateways = async () => {
 
         if (Object.keys(updateData).length > 0) {
             await updateDoc(doc(db, "users", currentUser.uid), updateData);
-            
+
             if (updateData.mpAccessToken !== undefined) currentUserData.mpAccessToken = updateData.mpAccessToken;
             if (updateData.binanceApiKey !== undefined) currentUserData.binanceApiKey = updateData.binanceApiKey;
             if (updateData.binanceSecretKey !== undefined) currentUserData.binanceSecretKey = updateData.binanceSecretKey;
@@ -1154,18 +1154,18 @@ window.saveGateways = async () => {
         console.error(e);
     } finally {
         if (btn) {
-            btn.innerHTML = origText; 
+            btn.innerHTML = origText;
             btn.disabled = false;
         }
     }
 };
 
 window.openSuggestionModal = () => { document.getElementById('suggestionText').value = ''; document.getElementById('suggestionModal').style.display = 'flex'; };
-window.sendSuggestion = async () => { const text = document.getElementById('suggestionText').value; if (!text) return window.showNotification("Escribe algo primero."); const btn = document.querySelector('#suggestionModal .btn-primary'); btn.innerText = "Enviando..."; btn.disabled = true; try { await addDoc(collection(db, "suggestions"), { userId: currentUser.uid, userName: currentUserData.name, text: text, date: new Date().toISOString(), approved: false }); window.showNotification("¡Gracias! 🚀"); window.closeModals(); } catch(e) { window.showNotification("Error: " + e.message); } finally { btn.innerText = "Enviar Idea 🚀"; btn.disabled = false; } };
+window.sendSuggestion = async () => { const text = document.getElementById('suggestionText').value; if (!text) return window.showNotification("Escribe algo primero."); const btn = document.querySelector('#suggestionModal .btn-primary'); btn.innerText = "Enviando..."; btn.disabled = true; try { await addDoc(collection(db, "suggestions"), { userId: currentUser.uid, userName: currentUserData.name, text: text, date: new Date().toISOString(), approved: false }); window.showNotification("¡Gracias! 🚀"); window.closeModals(); } catch (e) { window.showNotification("Error: " + e.message); } finally { btn.innerText = "Enviar Idea 🚀"; btn.disabled = false; } };
 
-window.openAccountModal = () => { 
-    const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(cb => cb.value); 
-    if(checked.length === 0) return window.showNotification("⚠️ Primero selecciona las plataformas en el menú desplegable.");
+window.openAccountModal = () => {
+    const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(cb => cb.value);
+    if (checked.length === 0) return window.showNotification("⚠️ Primero selecciona las plataformas en el menú desplegable.");
 
     // Creamos/Mantenemos las pestañas según las plataformas elegidas
     const newMultiAccData = {};
@@ -1173,7 +1173,7 @@ window.openAccountModal = () => {
     multiAccData = newMultiAccData;
 
     window.renderAccTabs(checked, 'accountModal');
-    document.getElementById('accountModal').style.display = 'flex'; 
+    document.getElementById('accountModal').style.display = 'flex';
 };
 
 // 🪄 Creador de Pestañas
@@ -1209,7 +1209,7 @@ window.switchAccTab = (platform, modalType) => {
         document.getElementById('accPin').value = data.pin || '';
         document.getElementById('accSaleType').value = data.saleType || 'Perfil';
         document.getElementById('accUnits').value = data.units || 1;
-        if(document.getElementById('accMonths')) document.getElementById('accMonths').value = data.months || 1;
+        if (document.getElementById('accMonths')) document.getElementById('accMonths').value = data.months || 1;
         document.getElementById('accDeviceName').value = data.deviceName || '';
         document.getElementById('accDeviceType').value = data.deviceType || '';
     } else {
@@ -1218,8 +1218,8 @@ window.switchAccTab = (platform, modalType) => {
         document.getElementById('viewAccPassword').innerText = data.password || '-';
         document.getElementById('viewAccProfile').innerText = data.profile || '-';
         document.getElementById('viewAccPin').innerText = data.pin || '-';
-        if(document.getElementById('viewAccMonths')) document.getElementById('viewAccMonths').innerText = data.months || '1';
-        
+        if (document.getElementById('viewAccMonths')) document.getElementById('viewAccMonths').innerText = data.months || '1';
+
         let deviceText = 'Sin configurar';
         if (data.deviceType) {
             let iconHtml = data.deviceType === 'TV' ? "<i class='bx bx-tv'></i>" : (data.deviceType === 'PC' ? "<i class='bx bx-laptop'></i>" : "<i class='bx bx-mobile-alt'></i>");
@@ -1235,17 +1235,17 @@ window.updateActiveTab = (field, value) => {
     if (currentActiveTab && multiAccData[currentActiveTab]) multiAccData[currentActiveTab][field] = value;
 };
 
-window.confirmAccountData = () => { 
-    window.closeModals(); 
+window.confirmAccountData = () => {
+    window.closeModals();
     const totalUnits = Object.values(multiAccData).reduce((sum, acc) => sum + (parseInt(acc.units) || 1), 0);
-    const btn = document.getElementById('btnAccountData'); 
-    btn.innerText = `✅ Datos Ingresados (${totalUnits} ud)`; 
-    btn.style.backgroundColor = "var(--mac-green)"; btn.style.color = "white"; 
+    const btn = document.getElementById('btnAccountData');
+    btn.innerText = `✅ Datos Ingresados (${totalUnits} ud)`;
+    btn.style.backgroundColor = "var(--mac-green)"; btn.style.color = "white";
 };
 
-window.viewAccountData = (id) => { 
+window.viewAccountData = (id) => {
     const c = clients.find(x => x.id === id);
-    
+
     // Adaptabilidad para leer clientes con pestañas o clientes viejos sin pestañas
     if (c.multiAccounts) {
         multiAccData = c.multiAccounts;
@@ -1262,17 +1262,17 @@ window.viewAccountData = (id) => {
 
     document.getElementById('viewAccProvider').innerText = c.providerName || 'Sin especificar';
     document.getElementById('viewAccPortalCode').innerText = c.portalCode || 'Sin Código';
-    document.getElementById('viewAccountModal').style.display = 'flex'; 
+    document.getElementById('viewAccountModal').style.display = 'flex';
 };
 
-window.openManageModal = (id, name, isActive, planActual) => { 
-    currentManageUserId = id; 
-    document.getElementById('manageUserName').innerText = name; 
-    document.getElementById('manageAction').value = isActive ? "true" : "false"; 
-    
+window.openManageModal = (id, name, isActive, planActual) => {
+    currentManageUserId = id;
+    document.getElementById('manageUserName').innerText = name;
+    document.getElementById('manageAction').value = isActive ? "true" : "false";
+
     const p = (planActual || 'demo').toLowerCase();
     const durationSelect = document.getElementById('manageDuration');
-    
+
     // Si es plan básico, ocultar opciones temporales. Si es PRO, permitirlas.
     if (p === 'basico') {
         durationSelect.style.display = 'none';
@@ -1281,9 +1281,9 @@ window.openManageModal = (id, name, isActive, planActual) => {
         durationSelect.style.display = 'block';
         durationSelect.value = 'permanent';
     }
-    
-    window.toggleDurationFields(); 
-    document.getElementById('adminManageModal').style.display = 'flex'; 
+
+    window.toggleDurationFields();
+    document.getElementById('adminManageModal').style.display = 'flex';
 };
 window.toggleDurationFields = () => { document.getElementById('temporaryFields').style.display = document.getElementById('manageDuration').value === 'temporary' ? 'flex' : 'none'; };
 window.toggleTempType = () => { document.getElementById('manageDays').style.display = document.getElementById('manageTempType').value === 'days' ? 'block' : 'none'; };
@@ -1291,30 +1291,30 @@ window.saveManageStatus = async () => {
     const action = document.getElementById('manageAction').value === "true";
     const duration = document.getElementById('manageDuration').value;
     let activeUntil = null, suspendedUntil = null;
-    
-    if (duration === 'temporary') { 
-        const targetDate = new Date(); 
-        if (document.getElementById('manageTempType').value === '3hours') { 
-            targetDate.setHours(targetDate.getHours() + 3); 
-        } else { 
-            targetDate.setDate(targetDate.getDate() + 30); 
-        } 
-        if (action === true) activeUntil = targetDate.toISOString(); 
-        else suspendedUntil = targetDate.toISOString(); 
+
+    if (duration === 'temporary') {
+        const targetDate = new Date();
+        if (document.getElementById('manageTempType').value === '3hours') {
+            targetDate.setHours(targetDate.getHours() + 3);
+        } else {
+            targetDate.setDate(targetDate.getDate() + 30);
+        }
+        if (action === true) activeUntil = targetDate.toISOString();
+        else suspendedUntil = targetDate.toISOString();
     }
-    
-    const btn = document.querySelector('#adminManageModal .btn-primary'); 
+
+    const btn = document.querySelector('#adminManageModal .btn-primary');
     btn.innerText = "Guardando..."; btn.disabled = true;
-    
-    try { 
-        await updateDoc(doc(db, "users", currentManageUserId), { active: action, activeUntil: activeUntil, suspendedUntil: suspendedUntil }); 
-        window.showNotification("Configuración aplicada."); 
-        window.closeModals(); 
-        loadAdminData(); 
-    } catch (e) { 
-        window.showNotification("Error: " + e.message); 
-    } finally { 
-        btn.innerText = "Guardar y Aplicar"; btn.disabled = false; 
+
+    try {
+        await updateDoc(doc(db, "users", currentManageUserId), { active: action, activeUntil: activeUntil, suspendedUntil: suspendedUntil });
+        window.showNotification("Configuración aplicada.");
+        window.closeModals();
+        loadAdminData();
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
+    } finally {
+        btn.innerText = "Guardar y Aplicar"; btn.disabled = false;
     }
 };
 /* --- SISTEMA DE GESTIÓN DE PLANES (ADMIN) --- */
@@ -1330,21 +1330,21 @@ window.openPlanModal = (id, name, planActual) => {
 window.savePlan = async () => {
     const btn = document.querySelector('#planModal .btn-primary');
     const originalText = btn.innerText;
-    btn.innerText = "Guardando... ⏳"; 
+    btn.innerText = "Guardando... ⏳";
     btn.disabled = true;
 
     const nuevoPlan = document.getElementById('newPlanSelect').value;
-    
+
     // Asignación matemática de límites según tu modelo de negocio
     let limite = 20;
     let dias = 3;
 
-    if (nuevoPlan === 'basico') { 
-        limite = 100; 
-        dias = 30; 
-    } else if (nuevoPlan === 'pro') { 
+    if (nuevoPlan === 'basico') {
+        limite = 100;
+        dias = 30;
+    } else if (nuevoPlan === 'pro') {
         limite = 9999; // Ilimitado
-        dias = 30; 
+        dias = 30;
     }
 
     // Calculamos la nueva fecha de vencimiento
@@ -1358,14 +1358,14 @@ window.savePlan = async () => {
             limite_clientes: limite,
             vencimiento_plan: fechaVencimiento.toISOString()
         });
-        
+
         window.showNotification(`Plan ${nuevoPlan.toUpperCase()} activado con éxito 💎`);
         window.closeModals();
         loadAdminData(); // Recarga la tabla para ver el cambio instantáneo
     } catch (e) {
         window.showNotification("Error: " + e.message);
     } finally {
-        btn.innerText = originalText; 
+        btn.innerText = originalText;
         btn.disabled = false;
     }
 };
@@ -1379,7 +1379,7 @@ window.toggleAdminPlanFilter = () => {
 };
 
 window.renderAdminUsers = () => {
-    const tbody = document.getElementById('adminTableBody'); 
+    const tbody = document.getElementById('adminTableBody');
     tbody.innerHTML = '';
     const statusFilter = document.getElementById('adminFilterStatus').value;
     const planFilter = document.getElementById('adminFilterPlan').value;
@@ -1392,17 +1392,17 @@ window.renderAdminUsers = () => {
 
         const id = data.id;
         const statusHtml = data.active ? `<span class="status active">Activado</span>` : `<span class="status expired">Suspendido</span>`;
-        let expText = ""; 
-        if (data.active && data.activeUntil) { expText = `<br><span style="font-size:11px; color:var(--mac-text-secondary);">Vence: ${new Date(data.activeUntil).toLocaleString('es-ES', {dateStyle:'short', timeStyle:'short'})}</span>`; } else if (!data.active && data.suspendedUntil) { expText = `<br><span style="font-size:11px; color:var(--mac-text-secondary);">Hasta: ${new Date(data.suspendedUntil).toLocaleString('es-ES', {dateStyle:'short', timeStyle:'short'})}</span>`; }
-        
+        let expText = "";
+        if (data.active && data.activeUntil) { expText = `<br><span style="font-size:11px; color:var(--mac-text-secondary);">Vence: ${new Date(data.activeUntil).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })}</span>`; } else if (!data.active && data.suspendedUntil) { expText = `<br><span style="font-size:11px; color:var(--mac-text-secondary);">Hasta: ${new Date(data.suspendedUntil).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })}</span>`; }
+
         const planDisplay = (data.plan_actual || 'demo').toUpperCase();
         const planColor = planDisplay === 'PRO' ? 'var(--mac-blue)' : (planDisplay === 'BASICO' ? 'var(--mac-green)' : 'var(--mac-text-secondary)');
         const safeName = (data.name || 'Usuario').replace(/'/g, "\\'");
-        
-        const tr = document.createElement('tr'); 
+
+        const tr = document.createElement('tr');
         tr.innerHTML = `
             <td data-label="Nombre"><strong>${data.name}</strong></td>
-            <td data-label="País">${data.country||'-'}</td>
+            <td data-label="País">${data.country || '-'}</td>
             <td data-label="Correo">${data.email}</td>
             <td data-label="Teléfono">${data.phone || '-'}</td>
             <td data-label="Plan"><strong style="color: ${planColor};">${planDisplay}</strong></td>
@@ -1410,7 +1410,7 @@ window.renderAdminUsers = () => {
             <td data-label="Acción" class="actions-cell" style="display: flex; gap: 5px;">
                 <button class="action-btn" style="border: 1px solid var(--mac-border); background: transparent;" onclick="window.openManageModal('${id}', '${safeName}', ${data.active}, '${data.plan_actual}')">⚙️ Estado</button>
                 <button class="action-btn" style="border: 1px solid var(--mac-blue); color: var(--mac-blue); background: transparent;" onclick="window.openPlanModal('${id}', '${safeName}', '${data.plan_actual || 'demo'}')">💎 Plan</button>
-            </td>`; 
+            </td>`;
         tbody.appendChild(tr);
     });
 };
@@ -1425,26 +1425,26 @@ async function loadAdminData() {
     // Llenar la caché y renderizar
     adminUsersCache = [];
     qUsers.forEach((d) => {
-        if(d.data().role !== 'admin') adminUsersCache.push({ id: d.id, ...d.data() });
+        if (d.data().role !== 'admin') adminUsersCache.push({ id: d.id, ...d.data() });
     });
     window.toggleAdminPlanFilter();
 
     // 2. Cargar Sugerencias
-    const sBody = document.getElementById('adminSuggestionsBody'); sBody.innerHTML = ''; 
-    let arrS = []; qSuggestions.forEach(d => arrS.push({ id: d.id, ...d.data() })); 
-    arrS.sort((a,b) => new Date(b.date) - new Date(a.date));
-    
-    arrS.forEach(s => { 
-        const tr = document.createElement('tr'); 
-        tr.innerHTML = `<td>${new Date(s.date).toLocaleDateString('es-ES')}</td><td><strong>${s.userName}</strong></td><td style="color:var(--mac-text-secondary);">${s.text}</td><td>${s.approved ? '<span style="color:var(--mac-green);font-weight:bold;">✅ Aprobada</span>' : '<span style="color:var(--mac-orange);font-weight:bold;">⏳ Pendiente</span>'}</td><td class="actions-cell">${s.approved ? '' : `<button class="action-btn btn-wa" onclick="window.approveSuggestion('${s.id}')">✔️ Aprobar</button>`} <button class="action-btn btn-del" onclick="window.deleteSuggestion('${s.id}')">🗑️</button></td>`; 
-        sBody.appendChild(tr); 
+    const sBody = document.getElementById('adminSuggestionsBody'); sBody.innerHTML = '';
+    let arrS = []; qSuggestions.forEach(d => arrS.push({ id: d.id, ...d.data() }));
+    arrS.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    arrS.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${new Date(s.date).toLocaleDateString('es-ES')}</td><td><strong>${s.userName}</strong></td><td style="color:var(--mac-text-secondary);">${s.text}</td><td>${s.approved ? '<span style="color:var(--mac-green);font-weight:bold;">✅ Aprobada</span>' : '<span style="color:var(--mac-orange);font-weight:bold;">⏳ Pendiente</span>'}</td><td class="actions-cell">${s.approved ? '' : `<button class="action-btn btn-wa" onclick="window.approveSuggestion('${s.id}')">✔️ Aprobar</button>`} <button class="action-btn btn-del" onclick="window.deleteSuggestion('${s.id}')">🗑️</button></td>`;
+        sBody.appendChild(tr);
     });
 
     // 3. Cargar Noticias
-    const nBody = document.getElementById('adminNewsBody'); nBody.innerHTML = ''; 
-    let arrN = []; qNews.forEach(d => arrN.push({ id: d.id, ...d.data() })); 
-    
-    arrN.sort((a,b) => {
+    const nBody = document.getElementById('adminNewsBody'); nBody.innerHTML = '';
+    let arrN = []; qNews.forEach(d => arrN.push({ id: d.id, ...d.data() }));
+
+    arrN.sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
         return new Date(b.fechaIso) - new Date(a.fechaIso);
@@ -1453,14 +1453,14 @@ async function loadAdminData() {
     arrN.forEach(n => {
         const dateStr = new Date(n.fechaIso).toLocaleDateString('es-ES');
         const imgHtml = n.img ? `<a href="${n.img}" target="_blank" style="color:var(--mac-blue); font-size:12px;">Ver Foto</a>` : '<span style="font-size:12px; color:var(--mac-text-secondary);">Sin foto</span>';
-        
+
         const titleSafe = n.titulo ? n.titulo.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
         const descSafe = n.desc ? n.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : '';
 
         const pinnedIcon = n.isPinned ? '<i class="bx bxs-pin" style="color: var(--mac-orange); margin-right: 5px;" title="Noticia Fijada"></i>' : '';
         const pinBtnColor = n.isPinned ? 'var(--mac-orange)' : 'var(--mac-text-secondary)';
 
-        const tr = document.createElement('tr'); 
+        const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${dateStr}</td>
             <td>${pinnedIcon}<strong>${n.titulo}</strong></td>
@@ -1469,7 +1469,7 @@ async function loadAdminData() {
                 <button class="action-btn" style="border: 1px solid ${pinBtnColor}; color: ${pinBtnColor}; background: transparent;" onclick="window.togglePinNews('${n.id}', ${!!n.isPinned})" title="Fijar / Desfijar"><i class='bx bx-pin'></i></button>
                 <button class="action-btn" style="border: 1px solid var(--mac-blue); color: var(--mac-blue); background: transparent;" onclick="window.startEditNews('${n.id}', '${titleSafe}', '${descSafe}', '${n.img || ''}')"><i class='bx bx-edit-alt'></i></button>
                 <button class="action-btn btn-del" onclick="window.deleteNews('${n.id}')"><i class='bx bx-trash'></i></button>
-            </td>`; 
+            </td>`;
         nBody.appendChild(tr);
     });
 }
@@ -1478,49 +1478,49 @@ async function loadAdminData() {
 window.startEditNews = (id, title, desc, img) => {
     editingNewsId = id;
     editingNewsOldImg = img;
-    
+
     document.getElementById('newsInputTitle').value = title;
     document.getElementById('newsInputDesc').value = desc;
-    
+
     const btnSubmit = document.getElementById('btnSubmitNews');
-    if(btnSubmit) btnSubmit.innerHTML = "<i class='bx bx-save'></i> Guardar Cambios";
-    
+    if (btnSubmit) btnSubmit.innerHTML = "<i class='bx bx-save'></i> Guardar Cambios";
+
     const btnCancel = document.getElementById('btnCancelEditNews');
-    if(btnCancel) btnCancel.style.display = 'block';
-    
+    if (btnCancel) btnCancel.style.display = 'block';
+
     document.getElementById('newsInputTitle').scrollIntoView({ behavior: 'smooth' });
 };
 
 window.cancelEditNews = () => {
     editingNewsId = null;
     editingNewsOldImg = null;
-    
-    document.getElementById('newsInputTitle').value = ''; 
-    document.getElementById('newsInputDesc').value = ''; 
+
+    document.getElementById('newsInputTitle').value = '';
+    document.getElementById('newsInputDesc').value = '';
     document.getElementById('newsInputImg').value = '';
-    
+
     const btnSubmit = document.getElementById('btnSubmitNews');
-    if(btnSubmit) btnSubmit.innerHTML = "<i class='bx bx-send'></i> Publicar Noticia a Todos";
-    
+    if (btnSubmit) btnSubmit.innerHTML = "<i class='bx bx-send'></i> Publicar Noticia a Todos";
+
     const btnCancel = document.getElementById('btnCancelEditNews');
-    if(btnCancel) btnCancel.style.display = 'none';
+    if (btnCancel) btnCancel.style.display = 'none';
 };
 
 window.saveNews = async () => {
     const title = document.getElementById('newsInputTitle').value;
     const desc = document.getElementById('newsInputDesc').value;
     const fileInput = document.getElementById('newsInputImg');
-    
+
     if (!title || !desc) return window.showNotification("Falta título o descripción");
-    
+
     const btn = document.getElementById('btnSubmitNews') || document.querySelector('#adminView .btn-primary');
-    const origText = btn.innerHTML; 
-    btn.innerText = "Procesando... ⏳"; 
+    const origText = btn.innerHTML;
+    btn.innerText = "Procesando... ⏳";
     btn.disabled = true;
 
     try {
         let imgUrl = editingNewsOldImg || ""; // Si editamos, usamos la antigua por defecto
-        
+
         // Si el admin sube una nueva imagen, la reemplazamos
         if (fileInput.files.length > 0) {
             const file = fileInput.files[0];
@@ -1528,26 +1528,26 @@ window.saveNews = async () => {
             await uploadBytes(storageRef, file);
             imgUrl = await getDownloadURL(storageRef);
         }
-        
+
         if (editingNewsId) {
             // MODO EDICIÓN
-            await updateDoc(doc(db, "news", editingNewsId), { 
-                titulo: title, 
-                desc: desc, 
-                img: imgUrl 
+            await updateDoc(doc(db, "news", editingNewsId), {
+                titulo: title,
+                desc: desc,
+                img: imgUrl
             });
             window.showNotification("Noticia actualizada con éxito ✏️");
-            window.cancelEditNews(); 
+            window.cancelEditNews();
         } else {
             // MODO CREACIÓN
-            await addDoc(collection(db, "news"), { 
-                titulo: title, 
-                desc: desc, 
-                img: imgUrl, 
+            await addDoc(collection(db, "news"), {
+                titulo: title,
+                desc: desc,
+                img: imgUrl,
                 fechaIso: new Date().toISOString(),
                 isPinned: false
             });
-            
+
             // 🔥 EL GATILLO DEL MEGÁFONO (Avisa al bot para que haga sonar los celulares)
             fetch('https://bot.panelagc.com/api/notificar-noticia', {
                 method: 'POST',
@@ -1559,26 +1559,26 @@ window.saveNews = async () => {
             }).catch(e => console.error("Error al notificar al bot:", e));
 
             window.showNotification("Noticia publicada con éxito 📢");
-            document.getElementById('newsInputTitle').value = ''; 
-            document.getElementById('newsInputDesc').value = ''; 
+            document.getElementById('newsInputTitle').value = '';
+            document.getElementById('newsInputDesc').value = '';
             fileInput.value = '';
         }
-        
+
         loadAdminData(); // Recarga la tabla
-    } catch(e) { 
-        window.showNotification("Error: " + e.message); 
-    } finally { 
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
+    } finally {
         // Restaurar estado del botón si hubo error o si fue creación
         if (!editingNewsId) {
-            btn.innerHTML = "<i class='bx bx-send'></i> Publicar Noticia a Todos"; 
+            btn.innerHTML = "<i class='bx bx-send'></i> Publicar Noticia a Todos";
         }
-        btn.disabled = false; 
+        btn.disabled = false;
     }
 };
 
 window.deleteNews = async (id) => {
     // ... tu código de deleteNews se queda igual ...
-    if(confirm("¿Seguro que deseas eliminar esta noticia de todos los paneles?")) {
+    if (confirm("¿Seguro que deseas eliminar esta noticia de todos los paneles?")) {
         await deleteDoc(doc(db, "news", id));
         window.showNotification("Noticia eliminada");
         loadAdminData();
@@ -1586,39 +1586,39 @@ window.deleteNews = async (id) => {
 };
 window.togglePinNews = async (id, currentStatus) => {
     try {
-        await updateDoc(doc(db, "news", id), { 
-            isPinned: !currentStatus 
+        await updateDoc(doc(db, "news", id), {
+            isPinned: !currentStatus
         });
         window.showNotification(currentStatus ? "Noticia desfijada" : "Noticia fijada 📌");
         loadAdminData(); // Recarga la tabla
-    } catch(e) { 
-        window.showNotification("Error: " + e.message); 
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
     }
 };
 window.approveSuggestion = async (id) => { await updateDoc(doc(db, "suggestions", id), { approved: true }); window.showNotification("Idea aprobada."); loadAdminData(); };
-window.deleteSuggestion = async (id) => { if(confirm("¿Eliminar sugerencia?")) { await deleteDoc(doc(db, "suggestions", id)); loadAdminData(); } };
+window.deleteSuggestion = async (id) => { if (confirm("¿Eliminar sugerencia?")) { await deleteDoc(doc(db, "suggestions", id)); loadAdminData(); } };
 
-async function loadUserClients() { 
-    document.getElementById('tableLoader').style.display = 'block'; 
-    document.getElementById('mainTable').style.display = 'none'; 
-    if(document.getElementById('loadMoreContainer')) document.getElementById('loadMoreContainer').style.display = 'none';
-    clients = []; 
-    
+async function loadUserClients() {
+    document.getElementById('tableLoader').style.display = 'block';
+    document.getElementById('mainTable').style.display = 'none';
+    if (document.getElementById('loadMoreContainer')) document.getElementById('loadMoreContainer').style.display = 'none';
+    clients = [];
+
     try {
-        const q = query(collection(db, "clients"), where("userId", "==", currentUser.uid), limit(30)); 
-        const snapshot = await getDocs(q); 
-        
-        if(!snapshot.empty) {
+        const q = query(collection(db, "clients"), where("userId", "==", currentUser.uid), limit(30));
+        const snapshot = await getDocs(q);
+
+        if (!snapshot.empty) {
             lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
-            if(snapshot.docs.length === 30 && document.getElementById('loadMoreContainer')) {
+            if (snapshot.docs.length === 30 && document.getElementById('loadMoreContainer')) {
                 document.getElementById('loadMoreContainer').style.display = 'block';
             }
         }
 
-        snapshot.forEach((d) => { clients.push({ id: d.id, ...d.data() }); }); 
-        window.renderTable(); 
-        document.getElementById('tableLoader').style.display = 'none'; 
-        document.getElementById('mainTable').style.display = 'table'; 
+        snapshot.forEach((d) => { clients.push({ id: d.id, ...d.data() }); });
+        window.renderTable();
+        document.getElementById('tableLoader').style.display = 'none';
+        document.getElementById('mainTable').style.display = 'table';
     } catch (e) {
         window.showNotification("Error leyendo clientes: " + e.message);
         console.error(e);
@@ -1626,7 +1626,7 @@ async function loadUserClients() {
 }
 
 window.loadMoreClients = async () => {
-    if(!lastVisibleDoc) return;
+    if (!lastVisibleDoc) return;
     const btn = document.querySelector('#loadMoreContainer button');
     btn.innerText = "Cargando..."; btn.disabled = true;
 
@@ -1634,13 +1634,13 @@ window.loadMoreClients = async () => {
         const q = query(collection(db, "clients"), where("userId", "==", currentUser.uid), startAfter(lastVisibleDoc), limit(30));
         const snapshot = await getDocs(q);
 
-        if(!snapshot.empty) {
+        if (!snapshot.empty) {
             lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
-            snapshot.forEach((d) => { clients.push({ id: d.id, ...d.data() }); }); 
+            snapshot.forEach((d) => { clients.push({ id: d.id, ...d.data() }); });
             window.renderTable();
         }
-        
-        if(snapshot.docs.length < 30 && document.getElementById('loadMoreContainer')) {
+
+        if (snapshot.docs.length < 30 && document.getElementById('loadMoreContainer')) {
             document.getElementById('loadMoreContainer').style.display = 'none';
         }
     } catch (e) {
@@ -1650,23 +1650,23 @@ window.loadMoreClients = async () => {
     }
 };
 
-const resetAccountButton = () => { 
+const resetAccountButton = () => {
     multiAccData = {}; currentActiveTab = '';
-    const btn = document.getElementById('btnAccountData'); 
-    btn.innerText = "🔑 Ingresar Datos de Cuenta"; btn.style.backgroundColor = "var(--mac-gray)"; btn.style.color = "var(--mac-text-main)"; 
+    const btn = document.getElementById('btnAccountData');
+    btn.innerText = "🔑 Ingresar Datos de Cuenta"; btn.style.backgroundColor = "var(--mac-gray)"; btn.style.color = "var(--mac-text-main)";
 };
 /* --- GUARDAR CLIENTE (CON HERENCIA DE COLOR INTELIGENTE) --- */
 /* --- GUARDAR CLIENTE (CON LÍMITES, HERENCIA DE COLOR Y MATRIZ) --- */
 window.saveClientData = async () => {
-    const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(cb => cb.value); 
+    const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(cb => cb.value);
     const phone = document.getElementById('phone').value.trim();
-    
+
     if (!checked.length) return window.showNotification("Selecciona plataforma");
-    if(!phone.startsWith('+')) return window.showNotification("⚠️ El teléfono DEBE empezar con +");
-    
-    const cost = parseFloat(document.getElementById('clientCost').value) || 0; 
+    if (!phone.startsWith('+')) return window.showNotification("⚠️ El teléfono DEBE empezar con +");
+
+    const cost = parseFloat(document.getElementById('clientCost').value) || 0;
     const price = parseFloat(document.getElementById('clientPrice').value) || 0;
-    
+
     const btn = document.querySelector('#actionButtonsContainer .btn-primary');
     const origBtnText = btn.innerText;
     btn.innerText = "Verificando... ⏳";
@@ -1695,7 +1695,7 @@ window.saveClientData = async () => {
                     color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.mostrarPlanesSuscripcion(); 
+                        window.mostrarPlanesSuscripcion();
                     }
                 });
                 btn.innerText = origBtnText;
@@ -1716,104 +1716,104 @@ window.saveClientData = async () => {
                 finalLinkedMasterId = snapMatriz.docs[0].id;
             }
         }
-        
+
         if (!finalLinkedMasterId && typeof variablesEnlaceMatriz !== 'undefined' && variablesEnlaceMatriz.masterId && !editingClientId) {
             finalLinkedMasterId = variablesEnlaceMatriz.masterId;
         }
 
         let generatedPortalCode = Math.random().toString(36).substring(2, 6).toUpperCase();
-        
+
         // 🔥 MAGIA: Buscar si el teléfono ya tiene un código asignado en tu base de clientes
         const cleanPhoneToSave = phone.replace(/[^\d]/g, '');
         const existingClientWithPhone = clients.find(c => (c.phone ? c.phone.replace(/[^\d]/g, '') : '') === cleanPhoneToSave);
-        
+
         if (existingClientWithPhone && existingClientWithPhone.portalCode) {
             generatedPortalCode = existingClientWithPhone.portalCode; // Recicla el código de su compra anterior
         }
-        
-        const data = { 
-            userId: currentUser.uid, 
-            name: document.getElementById('clientName').value, 
-            platform: checked.join(', '), 
-            phone: phone, 
-            date: document.getElementById('expirationDate').value, 
+
+        const data = {
+            userId: currentUser.uid,
+            name: document.getElementById('clientName').value,
+            platform: checked.join(', '),
+            phone: phone,
+            date: document.getElementById('expirationDate').value,
             cost: cost,
             providerName: document.getElementById('clientProviderName').value,
             price: price,
             multiAccounts: multiAccData, // GUARDADO MULTI-PESTAÑA
             // Legacy fallbacks para que no se rompan las demás vistas
             accountSaleType: primaryData.saleType,
-            accountEmail: primaryData.email, 
-            accountPassword: primaryData.password, 
-            accountProfile: primaryData.profile, 
-            accountPin: primaryData.pin, 
+            accountEmail: primaryData.email,
+            accountPassword: primaryData.password,
+            accountProfile: primaryData.profile,
+            accountPin: primaryData.pin,
             accountUnits: primaryData.units || 1,
             accountMonths: primaryData.months || 1,
-            linkedMasterId: finalLinkedMasterId, 
-            accountDeviceName: primaryData.deviceName, 
+            linkedMasterId: finalLinkedMasterId,
+            accountDeviceName: primaryData.deviceName,
             accountDeviceType: primaryData.deviceType,
             portalCode: generatedPortalCode,
             notes: window.currentClientNote
         };
 
-        if (editingClientId) { 
+        if (editingClientId) {
             const clienteAEditar = clients.find(c => c.id === editingClientId);
             data.color = clienteAEditar.color || macPalette[Math.floor(Math.random() * macPalette.length)];
             if (clienteAEditar.portalCode) {
                 data.portalCode = clienteAEditar.portalCode;
             }
-            
-            await updateDoc(doc(db, "clients", editingClientId), data); 
-            window.showNotification("Actualizado"); 
-        } 
-        else { 
+
+            await updateDoc(doc(db, "clients", editingClientId), data);
+            window.showNotification("Actualizado");
+        }
+        else {
             const clienteExistente = clients.find(c => c.name.trim().toLowerCase() === data.name.trim().toLowerCase() && c.phone === data.phone);
             if (clienteExistente && clienteExistente.color) {
-                data.color = clienteExistente.color; 
+                data.color = clienteExistente.color;
             } else {
-                data.color = macPalette[Math.floor(Math.random() * macPalette.length)]; 
+                data.color = macPalette[Math.floor(Math.random() * macPalette.length)];
             }
-            await addDoc(collection(db, "clients"), data); 
-            window.showNotification("Agregado"); 
+            await addDoc(collection(db, "clients"), data);
+            window.showNotification("Agregado");
         }
 
         // 🗑️ MAGIA AUTOMÁTICA: Eliminamos del stock lo que haya coincidido
         let stock = currentUserData.inventory || [];
         let updatedStock = false;
-        
+
         Object.values(multiAccData).forEach(acc => {
             // Buscamos coincidencia por inventoryId o por coincidencia exacta de datos
-            const matchIndex = stock.findIndex(item => 
-                (acc.inventoryId && item.id === acc.inventoryId) || 
+            const matchIndex = stock.findIndex(item =>
+                (acc.inventoryId && item.id === acc.inventoryId) ||
                 (item.email && item.email.toLowerCase() === acc.email.toLowerCase() && String(item.profile) === String(acc.profile) && item.platform === acc.platform && item.status === 'libre')
             );
-            
+
             if (matchIndex !== -1) {
                 stock.splice(matchIndex, 1); // ELIMINA POR COMPLETO DEL INVENTARIO
                 updatedStock = true;
             }
         });
-        
+
         if (updatedStock) {
             await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
             currentUserData.inventory = stock;
         }
-        
+
         // Limpiamos el puente de enlace de la Matriz para el siguiente registro
-        if(typeof variablesEnlaceMatriz !== 'undefined') {
+        if (typeof variablesEnlaceMatriz !== 'undefined') {
             variablesEnlaceMatriz = { masterId: null, profileNum: null };
         }
         window.currentClientNote = '';
-        editingClientId = null; 
-        document.getElementById('clientForm').reset(); 
-        resetAccountButton(); 
-        document.getElementById('selectText').textContent = 'Plataforma(s)...'; 
-        document.getElementById('selectText').classList.remove('has-selection'); 
-        document.getElementById('actionButtonsContainer').innerHTML = `<button type="button" class="btn-primary" onclick="window.saveClientData()">Agregar Cliente</button>`; 
+        editingClientId = null;
+        document.getElementById('clientForm').reset();
+        resetAccountButton();
+        document.getElementById('selectText').textContent = 'Plataforma(s)...';
+        document.getElementById('selectText').classList.remove('has-selection');
+        document.getElementById('actionButtonsContainer').innerHTML = `<button type="button" class="btn-primary" onclick="window.saveClientData()">Agregar Cliente</button>`;
         loadUserClients();
 
-    } catch(e) { 
-        window.showNotification("Error al guardar: " + e.message); 
+    } catch (e) {
+        window.showNotification("Error al guardar: " + e.message);
     } finally {
         btn.innerText = origBtnText;
         btn.disabled = false;
@@ -1822,7 +1822,7 @@ window.saveClientData = async () => {
     const tipKey = 'portalTipSeen_' + currentUser.uid;
     if (!localStorage.getItem(tipKey)) {
         localStorage.setItem(tipKey, 'true'); // Guardar que ya se le mostró
-        
+
         Swal.fire({
             title: '🌐 ¡Nueva Opción Profesional!',
             html: `
@@ -1849,7 +1849,7 @@ window.saveClientData = async () => {
     }
 };
 
-window.deleteClient = async (id) => { 
+window.deleteClient = async (id) => {
     Swal.fire({
         title: '¿Borrar cliente?',
         text: "Los datos de este cliente se perderán.",
@@ -1863,13 +1863,13 @@ window.deleteClient = async (id) => {
         color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
     }).then(async (result) => {
         if (result.isConfirmed) {
-            await deleteDoc(doc(db, "clients", id)); 
-            loadUserClients(); 
+            await deleteDoc(doc(db, "clients", id));
+            loadUserClients();
             window.showNotification("🗑️ Cliente borrado");
         }
     });
 };
-window.renewClient = async (id) => { 
+window.renewClient = async (id) => {
     const c = clients.find(x => x.id === id);
     if (!c) return;
 
@@ -1884,7 +1884,7 @@ window.renewClient = async (id) => {
     // 1. Función para actualizar los números en tiempo real al escribir
     window.updateRenewDates = () => {
         let meses = parseInt(document.getElementById('swal-renew-months').value) || 1;
-        
+
         // Cálculo Mes a Mes (De fecha a fecha)
         let dMes = new Date(window.currentRenewBaseDate);
         dMes.setMonth(dMes.getMonth() + meses);
@@ -1901,17 +1901,17 @@ window.renewClient = async (id) => {
         window.currentRenewType = type;
         const cardMes = document.getElementById('optMesAMes');
         const card30d = document.getElementById('opt30Dias');
-        
-        if(type === 'mes') {
+
+        if (type === 'mes') {
             cardMes.style.border = '2px solid var(--mac-blue)';
             cardMes.style.background = 'rgba(0, 122, 255, 0.15)';
-            
+
             card30d.style.border = '1px solid var(--mac-border)';
             card30d.style.background = 'var(--mac-bg)';
         } else {
             card30d.style.border = '2px solid var(--mac-blue)';
             card30d.style.background = 'rgba(0, 122, 255, 0.15)';
-            
+
             cardMes.style.border = '1px solid var(--mac-border)';
             cardMes.style.background = 'var(--mac-bg)';
         }
@@ -1966,7 +1966,7 @@ window.renewClient = async (id) => {
             // Evaluamos la selección al presionar Confirmar
             const meses = parseInt(document.getElementById('swal-renew-months').value) || 1;
             let finalDate = new Date(window.currentRenewBaseDate);
-            
+
             if (window.currentRenewType === 'mes') {
                 finalDate.setMonth(finalDate.getMonth() + meses);
             } else {
@@ -1978,7 +1978,7 @@ window.renewClient = async (id) => {
 
     if (confirmacion) {
         let fechaNueva = confirmacion; // Recibimos la fecha exacta calculada
-        const strFirebase = `${fechaNueva.getFullYear()}-${String(fechaNueva.getMonth()+1).padStart(2,'0')}-${String(fechaNueva.getDate()).padStart(2,'0')}`;
+        const strFirebase = `${fechaNueva.getFullYear()}-${String(fechaNueva.getMonth() + 1).padStart(2, '0')}-${String(fechaNueva.getDate()).padStart(2, '0')}`;
         const bonitaNueva = fechaNueva.toLocaleDateString('es-ES');
 
         aplicarRenovacionFirebase(id, strFirebase, bonitaNueva, c);
@@ -1988,22 +1988,22 @@ window.renewClient = async (id) => {
 const aplicarRenovacionFirebase = async (id, strFirebase, nuevaFechaBonita, c) => {
     try {
         const nuevasRenovaciones = (c.renovations || 0) + 1;
-        await updateDoc(doc(db, "clients", id), { 
-            date: strFirebase, 
-            renovations: nuevasRenovaciones 
-        }); 
-        window.showNotification("Servicio renovado ✅"); 
-        loadUserClients(); 
+        await updateDoc(doc(db, "clients", id), {
+            date: strFirebase,
+            renovations: nuevasRenovaciones
+        });
+        window.showNotification("Servicio renovado ✅");
+        loadUserClients();
 
         const plan = currentUserData.plan_actual || 'demo';
         if (plan === 'pro' || plan === 'elite') {
-            
+
             // 👈 AHORA SÍ CONSTRUIMOS TU MENSAJE PERSONALIZADO DE RENOVACIÓN
             let baseMsg = currentUserData.waRenewMessage || "🎉 *¡Renovación Exitosa, {nombre}!*\n\nTu servicio de *{plataforma}* ha sido renovado correctamente.\n📅 Nueva fecha de vencimiento: *{fecha}*\n\n🌐 *Tu Portal:* {link}\n🔑 *Código Web:* {codigo}\n\n¡Gracias por seguir confiando en nosotros! 🚀";
             let uCount = c.accountUnits || 1;
             let precioCalculado = (c.price || 0) * uCount;
             let moneda = currentUserData.currency || "S/";
-            
+
             const baseUrl = window.location.origin + window.location.pathname;
             const portalAlias = currentUserData.storeAlias || currentUser.uid;
             const portalUrl = `${baseUrl}?portal=${portalAlias}`;
@@ -2018,31 +2018,31 @@ const aplicarRenovacionFirebase = async (id, strFirebase, nuevaFechaBonita, c) =
                 .replace(/{numero}/g, c.phone)
                 .replace(/{codigo}/g, c.portalCode || 'N/A');
 
-            const datosRenovacion = { 
-                distribuidorId: currentUser.uid, 
-                numeroCliente: c.phone, 
-                plataforma: c.platform, 
+            const datosRenovacion = {
+                distribuidorId: currentUser.uid,
+                numeroCliente: c.phone,
+                plataforma: c.platform,
                 nuevaFecha: nuevaFechaBonita,
                 mensajeRenovacion: finalMsg // 👈 SE LO PASAMOS AL BOT
             };
             fetch('https://bot.panelagc.com/api/confirmar-renovacion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datosRenovacion) });
         }
-    } catch (error) { 
-        window.showNotification("Error: " + error.message); 
+    } catch (error) {
+        window.showNotification("Error: " + error.message);
     }
 };
 
 window.startEdit = (id) => {
-    editingClientId = id; 
+    editingClientId = id;
     const c = clients.find(x => x.id === id);
     window.currentClientNote = c.notes || '';
-    document.getElementById('clientName').value = c.name; 
-    document.getElementById('phone').value = c.phone; 
+    document.getElementById('clientName').value = c.name;
+    document.getElementById('phone').value = c.phone;
     document.getElementById('expirationDate').value = c.date;
-    document.getElementById('clientCost').value = c.cost || ''; 
-    document.getElementById('clientPrice').value = c.price || ''; 
+    document.getElementById('clientCost').value = c.cost || '';
+    document.getElementById('clientPrice').value = c.price || '';
     document.getElementById('clientProviderName').value = c.providerName || '';
-    
+
     // 🔥 RECONSTRUIR multiAccData DESDE LA BASE DE DATOS
     if (c.multiAccounts) {
         multiAccData = c.multiAccounts;
@@ -2051,36 +2051,36 @@ window.startEdit = (id) => {
         const platforms = c.platform.split(', ');
         multiAccData = {};
         platforms.forEach(p => {
-            multiAccData[p] = { 
-                email: c.accountEmail || '', 
-                password: c.accountPassword || '', 
-                profile: c.accountProfile || '', 
-                pin: c.accountPin || '', 
-                saleType: c.accountSaleType || 'Perfil', 
-                units: c.accountUnits || 1, 
-                deviceName: c.accountDeviceName || '', 
-                deviceType: c.accountDeviceType || '' 
+            multiAccData[p] = {
+                email: c.accountEmail || '',
+                password: c.accountPassword || '',
+                profile: c.accountProfile || '',
+                pin: c.accountPin || '',
+                saleType: c.accountSaleType || 'Perfil',
+                units: c.accountUnits || 1,
+                deviceName: c.accountDeviceName || '',
+                deviceType: c.accountDeviceType || ''
             };
         });
     }
-    
+
     if (typeof variablesEnlaceMatriz !== 'undefined') {
         variablesEnlaceMatriz.masterId = c.linkedMasterId || null;
         variablesEnlaceMatriz.profileNum = c.accountProfile || null;
         variablesEnlaceMatriz.originalEmail = c.accountEmail || '';
         variablesEnlaceMatriz.originalPass = c.accountPassword || '';
     }
-    
+
     const totalUnits = Object.values(multiAccData).reduce((sum, acc) => sum + (parseInt(acc.units) || 1), 0);
-    const btn = document.getElementById('btnAccountData'); 
-    btn.innerText = `✅ Datos de Cuenta (${totalUnits} ud)`; 
-    btn.style.backgroundColor = "var(--mac-green)"; 
+    const btn = document.getElementById('btnAccountData');
+    btn.innerText = `✅ Datos de Cuenta (${totalUnits} ud)`;
+    btn.style.backgroundColor = "var(--mac-green)";
     btn.style.color = "white";
-    
-    const cbs = document.querySelectorAll('#checkboxDropdown input'); 
-    cbs.forEach(cb => cb.checked = false); 
-    c.platform.split(', ').forEach(p => { cbs.forEach(cb => { if(cb.value === p) cb.checked = true; }); });
-    document.getElementById('selectText').textContent = c.platform; 
+
+    const cbs = document.querySelectorAll('#checkboxDropdown input');
+    cbs.forEach(cb => cb.checked = false);
+    c.platform.split(', ').forEach(p => { cbs.forEach(cb => { if (cb.value === p) cb.checked = true; }); });
+    document.getElementById('selectText').textContent = c.platform;
     document.getElementById('selectText').classList.add('has-selection');
     document.getElementById('actionButtonsContainer').innerHTML = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button type="button" class="btn-primary" onclick="window.saveClientData()">Guardar</button><button type="button" class="btn-secondary" onclick="window.cancelEdit()">Cancelar</button></div>`;
     document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
@@ -2088,20 +2088,20 @@ window.startEdit = (id) => {
 
 window.cancelEdit = () => {
     window.currentClientNote = '';
-    editingClientId = null; 
-    document.getElementById('clientForm').reset(); 
-    resetAccountButton(); 
+    editingClientId = null;
+    document.getElementById('clientForm').reset();
+    resetAccountButton();
     if (typeof variablesEnlaceMatriz !== 'undefined') { variablesEnlaceMatriz = { masterId: null, profileNum: null }; }
-    document.getElementById('selectText').textContent = 'Plataforma(s)...'; 
-    document.getElementById('selectText').classList.remove('has-selection'); 
-    document.getElementById('actionButtonsContainer').innerHTML = `<button type="button" class="btn-primary" onclick="window.saveClientData()">Agregar Cliente</button>`; 
+    document.getElementById('selectText').textContent = 'Plataforma(s)...';
+    document.getElementById('selectText').classList.remove('has-selection');
+    document.getElementById('actionButtonsContainer').innerHTML = `<button type="button" class="btn-primary" onclick="window.saveClientData()">Agregar Cliente</button>`;
 };
 /* --- RENDERIZAR TABLA (NOMBRES DE COLORES) --- */
 window.renderTable = () => {
-    const tbody = document.getElementById('tableBody'); tbody.innerHTML = ''; const today = new Date(); today.setHours(0,0,0,0);
+    const tbody = document.getElementById('tableBody'); tbody.innerHTML = ''; const today = new Date(); today.setHours(0, 0, 0, 0);
     const search = document.getElementById('searchInput').value.toLowerCase(); const filter = document.getElementById('filterSelect').value;
-    let proc = clients.map(c => { const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0); const diff = Math.ceil((exp - today) / 86400000); return { ...c, expDate: exp, diffDays: diff, statusCat: diff > 3 ? 'active' : (diff >= 0 ? 'warning' : 'expired') }; }).sort((a, b) => a.diffDays - b.diffDays);
-    
+    let proc = clients.map(c => { const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0); const diff = Math.ceil((exp - today) / 86400000); return { ...c, expDate: exp, diffDays: diff, statusCat: diff > 3 ? 'active' : (diff >= 0 ? 'warning' : 'expired') }; }).sort((a, b) => a.diffDays - b.diffDays);
+
     proc.forEach(c => {
         if (filter !== 'all' && c.statusCat !== filter) return;
         if (search && !c.name.toLowerCase().includes(search) && !c.phone.toLowerCase().includes(search) && !c.platform.toLowerCase().includes(search)) return;
@@ -2111,14 +2111,14 @@ window.renderTable = () => {
         // 1. Creamos la "N" estilo Notion (Clickeable)
         let notionNoteHtml = c.notes ? `<div onclick="window.viewClientNote('${c.id}')" title="Ver Nota" style="display:flex; align-items:center; justify-content:center; width:24px; height:24px; background:#000; color:#fff; border-radius:6px; font-weight:900; font-family:sans-serif; font-size:12px; cursor:pointer; flex-shrink:0; box-shadow:0 2px 5px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2);">N</div>` : '';
         let loyatyHtml = (c.renovations > 0) ? `<span title="${c.renovations} renovaciones continuas" style="font-size: 12px; color: #FFD700; margin-left: 5px;"><i class='bx bxs-star'></i>${c.renovations}</span>` : '';
-// LOGICA DE DISPOSITIVOS CON BOXICONS
+        // LOGICA DE DISPOSITIVOS CON BOXICONS
         let deviceIndicator = '';
         if (c.accountDeviceType) {
             let iconHtml = '';
             if (c.accountDeviceType === 'TV') iconHtml = "<i class='bx bx-tv'></i>";
             if (c.accountDeviceType === 'PC') iconHtml = "<i class='bx bx-laptop'></i>";
             if (c.accountDeviceType === 'Celular') iconHtml = "<i class='bx bx-mobile-alt'></i>";
-            
+
             let tooltip = c.accountDeviceName ? `Dispositivo: ${c.accountDeviceName}` : 'Dispositivo Activo';
             deviceIndicator = `<span title="${tooltip}" style="cursor:help; margin-left:5px; font-size:14px;">${iconHtml}<span class="device-dot-green"></span></span>`;
         } else {
@@ -2163,7 +2163,7 @@ window.renderTable = () => {
         </td>`;
         tbody.appendChild(tr);
     });
-    if(document.getElementById('statsPanel').style.display === 'grid') window.toggleStats(true);
+    if (document.getElementById('statsPanel').style.display === 'grid') window.toggleStats(true);
 };
 
 /* --- SISTEMA MULTI-PLATAFORMA AVANZADO DE ENVÍO POR WHATSAPP --- */
@@ -2345,7 +2345,7 @@ window.confirmSendWa = () => {
 
     if (currentWaType === 'renovacion') {
         let baseMsg = currentUserData.waTemplate || "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*.";
-        
+
         const baseUrl = window.location.origin + window.location.pathname;
         const portalAlias = currentUserData.storeAlias || currentUser.uid;
         const portalUrl = `${baseUrl}?portal=${portalAlias}`;
@@ -2421,16 +2421,16 @@ window.toggleSettingsMenu = (e) => {
 
 window.togglePlatformDropdown = (event) => {
     document.getElementById('checkboxDropdown').classList.toggle('show');
-    event.stopPropagation(); 
+    event.stopPropagation();
 };
 
-document.addEventListener('click', (e) => { 
+document.addEventListener('click', (e) => {
     // Cierra el menú de Plataformas si se hace clic fuera
     const chkDrop = document.getElementById('checkboxDropdown');
     if (chkDrop && !chkDrop.contains(e.target) && e.target.id !== 'selectBox') {
-        chkDrop.classList.remove('show'); 
+        chkDrop.classList.remove('show');
     }
-    
+
     // Cierra el menú de Configuración si se hace clic fuera
     const setDrop = document.getElementById('settingsDropdown');
     if (setDrop && !setDrop.contains(e.target) && e.target.textContent !== '⚙️') {
@@ -2438,30 +2438,30 @@ document.addEventListener('click', (e) => {
     }
 });
 document.addEventListener('click', (e) => { if (!document.getElementById('checkboxDropdown').contains(e.target) && e.target.id !== 'selectBox') document.getElementById('checkboxDropdown').classList.remove('show'); });
-document.querySelectorAll('#checkboxDropdown input').forEach(cb => { cb.addEventListener('change', () => { const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value); const el = document.getElementById('selectText'); if(checked.length) { el.textContent = checked.join(', '); el.classList.add('has-selection'); } else { el.textContent = 'Plataforma(s)...'; el.classList.remove('has-selection'); } }); });
+document.querySelectorAll('#checkboxDropdown input').forEach(cb => { cb.addEventListener('change', () => { const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value); const el = document.getElementById('selectText'); if (checked.length) { el.textContent = checked.join(', '); el.classList.add('has-selection'); } else { el.textContent = 'Plataforma(s)...'; el.classList.remove('has-selection'); } }); });
 
 window.toggleStats = (forceUpdate = false) => {
-    const p = document.getElementById('statsPanel'); 
+    const p = document.getElementById('statsPanel');
     const a = document.getElementById('analyticsSection');
-    
+
     if (!forceUpdate) {
         const isVisible = p.style.display === 'grid';
         p.style.display = isVisible ? 'none' : 'grid';
         a.style.display = isVisible ? 'none' : 'flex';
     }
-    
+
     if (p.style.display === 'grid') {
-        let act=0, w=0, e=0, profit=0, income=0, cost=0; const t = new Date(); t.setHours(0,0,0,0);
+        let act = 0, w = 0, e = 0, profit = 0, income = 0, cost = 0; const t = new Date(); t.setHours(0, 0, 0, 0);
         clients.forEach(c => {
-            const x = new Date(c.date); x.setMinutes(x.getMinutes() + x.getTimezoneOffset()); x.setHours(0,0,0,0);
-            const d = Math.ceil((x-t)/86400000);
-            if(d>=0) { if(d>3) act++; else w++; const uCount = c.accountUnits || 1; profit += ((c.price || 0) - (c.cost || 0)) * uCount; income += (c.price || 0) * uCount; cost += (c.cost || 0) * uCount; } else e++;
+            const x = new Date(c.date); x.setMinutes(x.getMinutes() + x.getTimezoneOffset()); x.setHours(0, 0, 0, 0);
+            const d = Math.ceil((x - t) / 86400000);
+            if (d >= 0) { if (d > 3) act++; else w++; const uCount = c.accountUnits || 1; profit += ((c.price || 0) - (c.cost || 0)) * uCount; income += (c.price || 0) * uCount; cost += (c.cost || 0) * uCount; } else e++;
         });
-        document.getElementById('statActive').innerText=act; document.getElementById('statWarning').innerText=w; document.getElementById('statExpired').innerText=e;
+        document.getElementById('statActive').innerText = act; document.getElementById('statWarning').innerText = w; document.getElementById('statExpired').innerText = e;
         document.getElementById('statProfit').innerText = `${globalCurrency}${profit.toFixed(2)}`; document.getElementById('bdIncome').innerText = `${globalCurrency}${income.toFixed(2)}`; document.getElementById('bdCost').innerText = `${globalCurrency}${cost.toFixed(2)}`; document.getElementById('bdProfit').innerText = `${globalCurrency}${profit.toFixed(2)}`;
-        
+
         // ¡Magia! Renderizamos los gráficos si la librería ya cargó
-        if(typeof ApexCharts !== 'undefined') {
+        if (typeof ApexCharts !== 'undefined') {
             setTimeout(() => {
                 window.renderCharts(income, cost, profit);
             }, 100);
@@ -2469,31 +2469,31 @@ window.toggleStats = (forceUpdate = false) => {
     }
 };
 
-window.exportToExcel = () => { if (!clients.length) return window.showNotification("No hay datos"); let csv = `data:text/csv;charset=utf-8,Cliente,Plataformas,WhatsApp,Unidades,Costo Total(${globalCurrency}),Precio Total(${globalCurrency}),Vencimiento\n`; clients.forEach(c => { const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); const u = c.accountUnits||1; csv += `"${c.name}","${c.platform}",${c.phone},${u},${(c.cost||0)*u},${(c.price||0)*u},${exp.toLocaleDateString('es-ES')}\n`; }); const link = document.createElement("a"); link.setAttribute("href", encodeURI(csv)); link.setAttribute("download", `Clientes_${new Date().toLocaleDateString('es-ES').replace(/\//g, '-')}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); }
-window.copyExpiredList = () => { const t = new Date(); t.setHours(0,0,0,0); let exp = []; clients.forEach(c => { const x = new Date(c.date); x.setMinutes(x.getMinutes() + x.getTimezoneOffset()); x.setHours(0,0,0,0); if (x < t) exp.push(`- ${c.name} | ${c.platform} | ${c.phone}`); }); if (!exp.length) return window.showNotification("Sin vencidos"); navigator.clipboard.writeText("🚨 VENCEDORES:\n\n" + exp.join('\n')).then(() => window.showNotification("Lista copiada")); }
+window.exportToExcel = () => { if (!clients.length) return window.showNotification("No hay datos"); let csv = `data:text/csv;charset=utf-8,Cliente,Plataformas,WhatsApp,Unidades,Costo Total(${globalCurrency}),Precio Total(${globalCurrency}),Vencimiento\n`; clients.forEach(c => { const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); const u = c.accountUnits || 1; csv += `"${c.name}","${c.platform}",${c.phone},${u},${(c.cost || 0) * u},${(c.price || 0) * u},${exp.toLocaleDateString('es-ES')}\n`; }); const link = document.createElement("a"); link.setAttribute("href", encodeURI(csv)); link.setAttribute("download", `Clientes_${new Date().toLocaleDateString('es-ES').replace(/\//g, '-')}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); }
+window.copyExpiredList = () => { const t = new Date(); t.setHours(0, 0, 0, 0); let exp = []; clients.forEach(c => { const x = new Date(c.date); x.setMinutes(x.getMinutes() + x.getTimezoneOffset()); x.setHours(0, 0, 0, 0); if (x < t) exp.push(`- ${c.name} | ${c.platform} | ${c.phone}`); }); if (!exp.length) return window.showNotification("Sin vencidos"); navigator.clipboard.writeText("🚨 VENCEDORES:\n\n" + exp.join('\n')).then(() => window.showNotification("Lista copiada")); }
 
 
 /* --- GENERADOR DE RECIBOS EN IMAGEN (VERSIÓN DEFINITIVA IPHONE + PC) --- */
 window.downloadTicket = async (clientId, event) => {
     // Capturamos el botón correctamente
-    const btn = event.currentTarget || event.target; 
+    const btn = event.currentTarget || event.target;
     const originalText = btn.innerHTML;
     btn.innerHTML = "⏳ Gen...";
     btn.disabled = true;
 
     try {
         const c = clients.find(x => x.id === clientId);
-        if(!c) return window.showNotification("Cliente no encontrado");
+        if (!c) return window.showNotification("Cliente no encontrado");
 
         // 1. Llenar los datos de texto del ticket
         document.getElementById('ticketBrand').innerText = currentUserData.name || 'Mi Panel';
         document.getElementById('ticketClient').innerText = c.name;
         document.getElementById('ticketPlatform').innerText = c.platform;
-        
-        const exp = new Date(c.date); 
-        exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); 
+
+        const exp = new Date(c.date);
+        exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
         document.getElementById('ticketDate').innerText = exp.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
-        
+
         const total = (c.price || 0) * (c.accountUnits || 1);
         document.getElementById('ticketPrice').innerText = `${globalCurrency}${total.toFixed(2)}`;
 
@@ -2503,16 +2503,16 @@ window.downloadTicket = async (clientId, event) => {
             if (currentUserData.logoUrl) {
                 await new Promise((resolve) => {
                     const img = new Image();
-                    img.crossOrigin = 'anonymous'; 
+                    img.crossOrigin = 'anonymous';
                     img.src = currentUserData.logoUrl + (currentUserData.logoUrl.includes('?') ? '&' : '?') + 'cb=' + new Date().getTime();
-                    
+
                     img.onload = () => {
                         const tempCanvas = document.createElement('canvas');
                         tempCanvas.width = img.width;
                         tempCanvas.height = img.height;
                         const ctx = tempCanvas.getContext('2d');
                         ctx.drawImage(img, 0, 0);
-                        
+
                         ticketLogo.src = tempCanvas.toDataURL('image/png');
                         ticketLogo.style.display = 'inline-block';
                         resolve();
@@ -2520,7 +2520,7 @@ window.downloadTicket = async (clientId, event) => {
                     img.onerror = () => {
                         console.error("Firebase bloqueó la lectura de la imagen.");
                         ticketLogo.style.display = 'none';
-                        resolve(); 
+                        resolve();
                     };
                 });
                 await new Promise(r => setTimeout(r, 150));
@@ -2531,16 +2531,16 @@ window.downloadTicket = async (clientId, event) => {
 
         // 2. Tomar la foto
         const ticketEl = document.getElementById('ticketTemplate');
-        ticketEl.style.left = '0px'; 
-        
+        ticketEl.style.left = '0px';
+
         // 🔴 CORRECCIÓN: SIN allowTaint PARA EVITAR SECURITY ERROR
-        const canvas = await html2canvas(ticketEl, { 
+        const canvas = await html2canvas(ticketEl, {
             backgroundColor: '#1c1c1e',
-            scale: 2, 
-            useCORS: true 
+            scale: 2,
+            useCORS: true
         });
-        
-        ticketEl.style.left = '-9999px'; 
+
+        ticketEl.style.left = '-9999px';
 
         // 3. COMPARTIR EN IPHONE / DESCARGAR EN PC (Blob API)
         canvas.toBlob(async (blob) => {
@@ -2580,12 +2580,12 @@ window.downloadTicket = async (clientId, event) => {
             }
         }, 'image/png');
 
-    } catch(e) {
+    } catch (e) {
         console.error("Error completo en Recibo:", e);
         window.showNotification("Error al generar el recibo.");
     } finally {
         // Restaurar el botón original
-        if(btn) {
+        if (btn) {
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
@@ -2595,23 +2595,23 @@ window.downloadTicket = async (clientId, event) => {
 window.openNewsModal = async () => {
     // 1. Apagamos el punto rojo y guardamos el "Visto"
     const badge = document.getElementById('newsBadge');
-    if(badge) badge.style.display = 'none';
+    if (badge) badge.style.display = 'none';
     localStorage.setItem('lastSeenNews', new Date().toISOString());
     document.getElementById('newsModal').style.display = 'flex';
     const sidebar = document.getElementById('newsSidebar');
     const content = document.getElementById('newsContentArea');
-    
+
     // 1. LIMPIEZA INMEDIATA (Evita que se vea el Wrapped fantasma)
     sidebar.innerHTML = '<div style="padding:20px; text-align:center; color: var(--mac-text-secondary);">⏳ Buscando novedades...</div>';
     content.innerHTML = '<div style="display:flex; height:100%; align-items:center; justify-content:center;"><p style="color: var(--mac-text-secondary); text-align: center;">⏳ Cargando información...</p></div>';
-    
-try {
+
+    try {
         const qNews = await getDocs(collection(db, "news"));
         let noticias = [];
         qNews.forEach(d => noticias.push({ id: d.id, ...d.data() }));
-        
+
         // ORDEN INTELIGENTE PARA EL CLIENTE: 1ro Fijados, 2do por fecha
-        noticias.sort((a,b) => {
+        noticias.sort((a, b) => {
             if (a.isPinned && !b.isPinned) return -1;
             if (!a.isPinned && b.isPinned) return 1;
             return new Date(b.fechaIso) - new Date(a.fechaIso);
@@ -2620,24 +2620,24 @@ try {
         sidebar.innerHTML = '';
         content.innerHTML = '<div style="display:flex; height:100%; align-items:center; justify-content:center;"><p style="color: var(--mac-text-secondary); text-align: center;">👈 Selecciona una noticia de la izquierda para ver los detalles.</p></div>';
 
-        if(noticias.length === 0) {
+        if (noticias.length === 0) {
             sidebar.innerHTML = '<div style="padding:15px; text-align:center; color:var(--mac-text-secondary);">No hay noticias nuevas por ahora.</div>';
             return;
         }
 
         noticias.forEach((noticia) => {
             const dateStr = new Date(noticia.fechaIso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
-            
+
             // Etiqueta visual de anclado
             const pinnedLabel = noticia.isPinned ? `<span style="background:var(--mac-orange); color:white; font-size:9px; padding:2px 6px; border-radius:10px; margin-right:5px; font-weight: bold;">FIJADO <i class='bx bxs-pin'></i></span>` : '';
 
             const div = document.createElement('div');
             div.className = 'news-item-title';
             div.innerHTML = `<strong>${noticia.titulo}</strong><br><span style="font-size:11px; font-weight:normal; opacity: 0.8; display:flex; align-items:center; margin-top: 4px;">${pinnedLabel}${dateStr}</span>`;
-            div.onclick = () => window.viewNewsDetail({...noticia, fecha: dateStr}, div);
+            div.onclick = () => window.viewNewsDetail({ ...noticia, fecha: dateStr }, div);
             sidebar.appendChild(div);
         });
-    } catch(e) {
+    } catch (e) {
         sidebar.innerHTML = '<div style="padding:10px; color:var(--mac-red);">Error al cargar las noticias.</div>';
         content.innerHTML = '';
         console.error(e);
@@ -2682,7 +2682,7 @@ window.setFinancialGoal = async () => {
             currentUserData.financialGoal = parseFloat(goal);
             window.showNotification("✅ Proyección financiera actualizada");
             window.loadFinanceData();
-        } catch(e) { window.showNotification("Error: " + e.message); }
+        } catch (e) { window.showNotification("Error: " + e.message); }
     }
 };
 
@@ -2698,18 +2698,18 @@ window.toggleTimeFilter = () => {
 // 2. Al hacer clic en una opción
 window.selectTimeFilter = (value, text, iconClass, event) => {
     event.stopPropagation(); // Evita que el clic lo cierre e inmediatamente lo abra
-    
+
     // Cambiar el texto y el ícono principal
     document.getElementById('timeFilterText').innerText = text;
     document.querySelector('.time-filter-selected i:first-child').className = `bx ${iconClass}`;
-    
+
     // Iluminar la opción seleccionada
     document.querySelectorAll('.time-option').forEach(opt => opt.classList.remove('active'));
     event.currentTarget.classList.add('active');
-    
+
     // Cerrar el menú
     document.getElementById('customTimeFilter').classList.remove('open');
-    
+
     // Ejecutar tu lógica de gráficos existente
     window.changeDashboardFilter(value);
 };
@@ -2728,8 +2728,8 @@ window.changeDashboardFilter = (val) => {
 };
 
 window.loadFinanceData = () => {
-    let act=0, profit=0, income=0, cost=0; 
-    const t = new Date(); t.setHours(0,0,0,0);
+    let act = 0, profit = 0, income = 0, cost = 0;
+    const t = new Date(); t.setHours(0, 0, 0, 0);
     let validAccountsCount = 0;
     const filter = window.currentDashboardFilter;
 
@@ -2739,41 +2739,41 @@ window.loadFinanceData = () => {
     const anioInicio = new Date(t.getFullYear(), 0, 1);
 
     clients.forEach(c => {
-        const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
-        
+        const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0);
+
         // Magia: Extraer fecha de pago aproximada restando los meses contratados
         const mesesContratados = c.accountMonths || 1;
         const fechaPago = new Date(exp);
         fechaPago.setMonth(fechaPago.getMonth() - mesesContratados);
 
-        const d = Math.ceil((exp-t)/86400000); // Días para vencer
+        const d = Math.ceil((exp - t) / 86400000); // Días para vencer
         let entraEnFiltro = false;
 
         // Evaluador de filtros
-        if (filter === 'proyeccion') { if(d >= 0 && d <= 14) entraEnFiltro = true; } 
-        else if (filter === 'hoy') { if(fechaPago.getTime() === t.getTime()) entraEnFiltro = true; } 
-        else if (filter === 'semana') { if(fechaPago >= semanaInicio && fechaPago <= t) entraEnFiltro = true; } 
-        else if (filter === 'mes') { if(fechaPago >= mesInicio && fechaPago <= t) entraEnFiltro = true; } 
-        else if (filter === 'anio') { if(fechaPago >= anioInicio && fechaPago <= t) entraEnFiltro = true; }
+        if (filter === 'proyeccion') { if (d >= 0 && d <= 14) entraEnFiltro = true; }
+        else if (filter === 'hoy') { if (fechaPago.getTime() === t.getTime()) entraEnFiltro = true; }
+        else if (filter === 'semana') { if (fechaPago >= semanaInicio && fechaPago <= t) entraEnFiltro = true; }
+        else if (filter === 'mes') { if (fechaPago >= mesInicio && fechaPago <= t) entraEnFiltro = true; }
+        else if (filter === 'anio') { if (fechaPago >= anioInicio && fechaPago <= t) entraEnFiltro = true; }
 
         // Sumar a tarjetas principales SOLO si pasa el filtro
-        if(entraEnFiltro) {
-            const uCount = c.accountUnits || 1; 
+        if (entraEnFiltro) {
+            const uCount = c.accountUnits || 1;
             profit += ((c.price || 0) - (c.cost || 0)) * uCount;
             income += (c.price || 0) * uCount;
             cost += (c.cost || 0) * uCount;
             validAccountsCount += uCount;
         }
-        
+
         // Las cuentas activas siempre se muestran en global para no asustar al usuario
-        if (d >= 0) act++; 
+        if (d >= 0) act++;
     });
 
-    if(document.getElementById('bdIncomeFin')) document.getElementById('bdIncomeFin').innerText = `${globalCurrency}${income.toFixed(2)}`;
-    if(document.getElementById('bdCostFin')) document.getElementById('bdCostFin').innerText = `${globalCurrency}${cost.toFixed(2)}`;
-    if(document.getElementById('bdProfitFin')) document.getElementById('bdProfitFin').innerText = `${globalCurrency}${profit.toFixed(2)}`;
-    if(document.getElementById('chartHeaderCuentas')) document.getElementById('chartHeaderCuentas').innerText = act;
-    if(document.getElementById('chartHeaderCuentasFin')) document.getElementById('chartHeaderCuentasFin').innerText = act;
+    if (document.getElementById('bdIncomeFin')) document.getElementById('bdIncomeFin').innerText = `${globalCurrency}${income.toFixed(2)}`;
+    if (document.getElementById('bdCostFin')) document.getElementById('bdCostFin').innerText = `${globalCurrency}${cost.toFixed(2)}`;
+    if (document.getElementById('bdProfitFin')) document.getElementById('bdProfitFin').innerText = `${globalCurrency}${profit.toFixed(2)}`;
+    if (document.getElementById('chartHeaderCuentas')) document.getElementById('chartHeaderCuentas').innerText = act;
+    if (document.getElementById('chartHeaderCuentasFin')) document.getElementById('chartHeaderCuentasFin').innerText = act;
 
     // --- LÓGICA DE METAS Y ASESOR FINANCIERO (Se mantiene igual) ---
     const goal = currentUserData.financialGoal || 0;
@@ -2782,36 +2782,36 @@ window.loadFinanceData = () => {
     const progressText = document.getElementById('goalProgressText');
     const advisorBox = document.getElementById('financeAdvisorBox');
 
-    if(displayGoal) displayGoal.innerText = `${globalCurrency}${goal.toFixed(2)}`;
-    
+    if (displayGoal) displayGoal.innerText = `${globalCurrency}${goal.toFixed(2)}`;
+
     if (goal > 0) {
         let pct = (profit / goal) * 100;
-        if (pct < 0) pct = 0; 
-        
-        if(progressBar) progressBar.style.width = `${Math.min(pct, 100)}%`;
-        if(progressText) progressText.innerText = `${pct.toFixed(1)}%`;
+        if (pct < 0) pct = 0;
+
+        if (progressBar) progressBar.style.width = `${Math.min(pct, 100)}%`;
+        if (progressText) progressText.innerText = `${pct.toFixed(1)}%`;
 
         if (profit >= goal) {
-            if(advisorBox) { advisorBox.innerHTML = `<strong>¡Felicidades! 🏆</strong> Has superado tu meta mensual de ganancia. Estás obteniendo una rentabilidad del <strong>${((profit/cost)*100).toFixed(0)}%</strong> sobre tu inversión total.`; advisorBox.style.borderLeftColor = 'var(--mac-green)'; }
+            if (advisorBox) { advisorBox.innerHTML = `<strong>¡Felicidades! 🏆</strong> Has superado tu meta mensual de ganancia. Estás obteniendo una rentabilidad del <strong>${((profit / cost) * 100).toFixed(0)}%</strong> sobre tu inversión total.`; advisorBox.style.borderLeftColor = 'var(--mac-green)'; }
         } else {
             const faltante = goal - profit;
             const avgCost = validAccountsCount > 0 ? (cost / validAccountsCount) : 0;
             const avgProfitPerAccount = validAccountsCount > 0 ? (profit / validAccountsCount) : 0;
-            
+
             let adviceHTML = `Te faltan <strong>${globalCurrency}${faltante.toFixed(2)}</strong> de ganancia para lograr tu meta mensual.<br><br>`;
             if (avgProfitPerAccount > 0) {
                 const accountsNeeded = Math.ceil(faltante / avgProfitPerAccount);
                 const suggestedPriceFor10 = avgCost + (faltante / 10);
                 adviceHTML += `💡 <strong>¿Cómo lograrlo?</strong><br>• Puedes vender <strong>${accountsNeeded} cuentas más</strong> manteniendo tu precio actual.<br>• ⚡ <strong>Vía rápida:</strong> Si prefieres llegar a la meta vendiendo <strong>solo 10 cuentas nuevas</strong>, deberías venderlas a <strong>${globalCurrency}${suggestedPriceFor10.toFixed(2)}</strong> cada una.`;
-            } else if (validAccountsCount > 0) { adviceHTML += `⚠️ Actualmente estás vendiendo a un precio menor o igual a tu inversión.`; } 
+            } else if (validAccountsCount > 0) { adviceHTML += `⚠️ Actualmente estás vendiendo a un precio menor o igual a tu inversión.`; }
             else { adviceHTML += `💡 Registra tus primeras ventas (con Costo y Precio) para que la IA calcule las estrategias necesarias.`; }
 
-            if(advisorBox) { advisorBox.innerHTML = adviceHTML; advisorBox.style.borderLeftColor = 'var(--mac-orange)'; }
+            if (advisorBox) { advisorBox.innerHTML = adviceHTML; advisorBox.style.borderLeftColor = 'var(--mac-orange)'; }
         }
     } else {
-        if(progressBar) progressBar.style.width = '0%';
-        if(progressText) progressText.innerText = '0%';
-        if(advisorBox) { advisorBox.innerHTML = `💡 Aún no has definido una meta. Haz clic en <strong>Fijar Meta</strong> para proyectar tus ganancias.`; advisorBox.style.borderLeftColor = 'var(--mac-blue)'; }
+        if (progressBar) progressBar.style.width = '0%';
+        if (progressText) progressText.innerText = '0%';
+        if (advisorBox) { advisorBox.innerHTML = `💡 Aún no has definido una meta. Haz clic en <strong>Fijar Meta</strong> para proyectar tus ganancias.`; advisorBox.style.borderLeftColor = 'var(--mac-blue)'; }
     }
 
     // --- NUEVO: CÁLCULOS DE RETENCIÓN, CRECIMIENTO Y RENTABILIDAD ---
@@ -2832,11 +2832,11 @@ window.loadFinanceData = () => {
             if (c.renovations > 0) clientesRenovados++;
         }
 
-        const exp = new Date(c.date); 
+        const exp = new Date(c.date);
         exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
-        const fechaPago = new Date(exp); 
+        const fechaPago = new Date(exp);
         fechaPago.setMonth(fechaPago.getMonth() - (c.accountMonths || 1));
-        
+
         const pIncome = (c.price || 0) * (c.accountUnits || 1);
         const pCost = (c.cost || 0) * (c.accountUnits || 1);
 
@@ -2856,9 +2856,9 @@ window.loadFinanceData = () => {
 
     // Pintar Retención
     const tasaRetencion = totalActivos > 0 ? (clientesRenovados / totalActivos) * 100 : 0;
-    if(document.getElementById('retentionRateText')) document.getElementById('retentionRateText').innerText = `${tasaRetencion.toFixed(1)}%`;
-    if(document.getElementById('retentionBar')) document.getElementById('retentionBar').style.width = `${tasaRetencion}%`;
-    if(document.getElementById('retentionDetailsText')) document.getElementById('retentionDetailsText').innerText = `${clientesRenovados} de ${totalActivos} clientes activos renovaron este mes.`;
+    if (document.getElementById('retentionRateText')) document.getElementById('retentionRateText').innerText = `${tasaRetencion.toFixed(1)}%`;
+    if (document.getElementById('retentionBar')) document.getElementById('retentionBar').style.width = `${tasaRetencion}%`;
+    if (document.getElementById('retentionDetailsText')) document.getElementById('retentionDetailsText').innerText = `${clientesRenovados} de ${totalActivos} clientes activos renovaron este mes.`;
 
     // Pintar Crecimiento
     let tasaCrecimiento = 0;
@@ -2867,15 +2867,15 @@ window.loadFinanceData = () => {
     } else if (ingresosMesActual > 0) {
         tasaCrecimiento = 100;
     }
-    if(document.getElementById('growthRateText')) document.getElementById('growthRateText').innerText = `${tasaCrecimiento >= 0 ? '+' : ''}${tasaCrecimiento.toFixed(1)}%`;
-    if(document.getElementById('growthDetailsText')) document.getElementById('growthDetailsText').innerText = `Mes actual: ${globalCurrency}${ingresosMesActual.toFixed(2)} | Mes anterior: ${globalCurrency}${ingresosMesAnterior.toFixed(2)}`;
+    if (document.getElementById('growthRateText')) document.getElementById('growthRateText').innerText = `${tasaCrecimiento >= 0 ? '+' : ''}${tasaCrecimiento.toFixed(1)}%`;
+    if (document.getElementById('growthDetailsText')) document.getElementById('growthDetailsText').innerText = `Mes actual: ${globalCurrency}${ingresosMesActual.toFixed(2)} | Mes anterior: ${globalCurrency}${ingresosMesAnterior.toFixed(2)}`;
 
     // Pintar Top Rentabilidad (Margen)
     let marginArray = Object.keys(margenesPlataforma).map(key => {
         let m = margenesPlataforma[key];
         let marginPct = m.income > 0 ? (m.profit / m.income) * 100 : 0;
         return { platform: key, margin: marginPct, profit: m.profit };
-    }).sort((a,b) => b.margin - a.margin).slice(0, 5);
+    }).sort((a, b) => b.margin - a.margin).slice(0, 5);
 
     const topMarginList = document.getElementById('topMarginStatsList');
     if (topMarginList) {
@@ -2895,7 +2895,7 @@ window.loadFinanceData = () => {
 
     // Pintar Ingresos por Método de Pago
     const pmContainer = document.getElementById('paymentMethodsStatsList');
-    if(pmContainer && currentUserData.paymentMethods && currentUserData.paymentMethods.length > 0) {
+    if (pmContainer && currentUserData.paymentMethods && currentUserData.paymentMethods.length > 0) {
         pmContainer.innerHTML = '';
         const methods = currentUserData.paymentMethods;
         const avg = income / methods.length; // Estimado estadístico visual
@@ -2918,7 +2918,7 @@ window.loadFinanceData = () => {
 
     // Dibujar Gráficos enviando el filtro
     setTimeout(() => {
-        if(typeof ApexCharts !== 'undefined') window.renderCharts(income, cost, profit, filter);
+        if (typeof ApexCharts !== 'undefined') window.renderCharts(income, cost, profit, filter);
     }, 100);
 };
 
@@ -2937,25 +2937,25 @@ window.downloadWrapup = async (acc, platform, day, clientName, clientUnits, fras
         document.getElementById('wrapupTopDay').innerText = day;
         document.getElementById('wrapupTopClient').innerText = clientName;
         document.getElementById('wrapupClientAccounts').innerText = `${clientUnits} cuentas registradas en el mes`;
-        
+
         setTimeout(async () => {
             const wrapupEl = document.getElementById('wrapupTemplate');
-            wrapupEl.style.left = '0px'; 
-            wrapupEl.style.top = '0px'; 
-            
-            const canvas = await html2canvas(wrapupEl, { 
+            wrapupEl.style.left = '0px';
+            wrapupEl.style.top = '0px';
+
+            const canvas = await html2canvas(wrapupEl, {
                 backgroundColor: '#000000',
-                scale: 2 
+                scale: 2
             });
-            
-            wrapupEl.style.left = '-9999px'; 
-            wrapupEl.style.top = '-9999px'; 
+
+            wrapupEl.style.left = '-9999px';
+            wrapupEl.style.top = '-9999px';
 
             const link = document.createElement('a');
             link.download = `AGC_Wrapped_${mes.replace(/\s+/g, '_')}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
-            
+
             window.showNotification("¡Tu tarjeta Wrapped se descargó con éxito! 🏆");
             btn.innerHTML = originalText;
             btn.disabled = false;
@@ -2976,22 +2976,22 @@ window.openMobileClientModal = (id) => {
     // 1. Llenar textos principales
     const mcName = document.getElementById('mcName');
     if (mcName) mcName.innerText = c.name;
-    
+
     const mcPhone = document.getElementById('mcPhone');
     if (mcPhone) mcPhone.innerText = c.phone;
 
-    const uCount = c.accountUnits || 1; 
+    const uCount = c.accountUnits || 1;
     const total = (c.price || 0) * uCount;
     const mcPrice = document.getElementById('mcPrice');
     if (mcPrice) mcPrice.innerText = `${globalCurrency}${total.toFixed(2)}`;
 
     const exp = new Date(c.date);
     exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
-    exp.setHours(0,0,0,0);
-    
+    exp.setHours(0, 0, 0, 0);
+
     const mcDate = document.getElementById('mcDate');
     if (mcDate) mcDate.innerText = exp.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-    
+
     // 🛡️ CORRECCIÓN 1: Validar que el HTML de Novedades exista antes de modificarlo
     const badgesContainer = document.getElementById('mcBadges');
     if (badgesContainer) {
@@ -3010,26 +3010,26 @@ window.openMobileClientModal = (id) => {
             notesContainer.style.display = 'none';
         }
     }
-    
+
     // 2. Calcular estado
-    const today = new Date(); today.setHours(0,0,0,0);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
     const diffDays = Math.ceil((exp - today) / 86400000);
     const statusCat = diffDays > 3 ? 'active' : (diffDays >= 0 ? 'warning' : 'expired');
     const stText = diffDays > 0 ? `Faltan ${diffDays} d` : (diffDays === 0 ? 'Hoy' : 'Vencido');
-    
+
     const statusBadge = document.getElementById('mcStatus');
     if (statusBadge) {
         statusBadge.className = `status ${statusCat}`;
         statusBadge.innerText = stText;
     }
-    
+
     // 🛡️ CORRECCIÓN 2: Limpiar nombres con comillas (Ej: McDonald's) para que no rompan el botón HTML
     const safeName = c.name ? c.name.replace(/'/g, "\\'") : '';
     const safePlatform = c.platform ? c.platform.replace(/'/g, "\\'") : '';
-    
+
     // 3. Inyectar Botones Grandes
     const renewBtn = statusCat !== 'active' ? `<button class="action-btn btn-renew" style="padding:12px; font-size:14px;" onclick="window.closeModals(); window.renewClient('${c.id}')"><i class='bx bx-refresh'></i> Renovar</button>` : '';
-    
+
     const mcActions = document.getElementById('mcActions');
     if (mcActions) {
         mcActions.innerHTML = `
@@ -3042,7 +3042,7 @@ window.openMobileClientModal = (id) => {
             ${renewBtn}
         `;
     }
-    
+
     // 4. Mostrar el modal
     const mobileModal = document.getElementById('mobileClientModal');
     if (mobileModal) {
@@ -3057,16 +3057,16 @@ window.requestNotificationPermission = async () => {
     try {
         console.log("Solicitando permiso de notificaciones...");
         const permission = await Notification.requestPermission();
-        
+
         if (permission === 'granted') {
             console.log("Permiso concedido. Obteniendo token...");
             const currentToken = await getToken(messaging, { vapidKey: 'BKBlbQcgMzLg-oCuFXjhn_2ekkAcrsGRS49RP3mKBvJDB-fPLzovUeYnNfmFi96ib5RtjJzta5nMlm7VsmSJC7k' });
-            
+
             if (currentToken) {
                 // MODIFICACIÓN: En lugar de fcmToken (texto), usamos fcmTokens (Lista/Array)
                 // arrayUnion asegura que si el token ya existe, no lo duplique.
-                await updateDoc(doc(db, "users", currentUser.uid), { 
-                    fcmTokens: arrayUnion(currentToken) 
+                await updateDoc(doc(db, "users", currentUser.uid), {
+                    fcmTokens: arrayUnion(currentToken)
                 });
                 console.log("Token de notificaciones agregado a la lista con éxito.");
             } else {
@@ -3091,7 +3091,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
     deferredPrompt = e;
     // Muestra nuestro botón de instalación
     const installBtn = document.getElementById('btnInstallApp');
-    if(installBtn) installBtn.style.display = 'block';
+    if (installBtn) installBtn.style.display = 'block';
 });
 
 // Función que se ejecuta al darle clic al botón
@@ -3113,7 +3113,7 @@ window.installApp = async () => {
 // Si la app ya se instaló con éxito, nos aseguramos de ocultar el botón
 window.addEventListener('appinstalled', () => {
     const installBtn = document.getElementById('btnInstallApp');
-    if(installBtn) installBtn.style.display = 'none';
+    if (installBtn) installBtn.style.display = 'none';
     window.showNotification("¡App instalada correctamente! 📱");
 });
 
@@ -3122,9 +3122,9 @@ window.vincularBot = async () => {
     // 🔒 Verificamos si es un usuario Demo
     const plan = currentUserData.plan_actual || 'demo';
     if (plan === 'demo' || plan === 'basico') { // Ahora bloqueamos a demo y básico
-        
+
         window.closeModals();
-        
+
         Swal.fire({
             icon: 'lock',
             title: 'Función Premium',
@@ -3140,20 +3140,20 @@ window.vincularBot = async () => {
                 window.mostrarPlanesSuscripcion(); // <-- Aquí llamamos al catálogo
             }
         });
-        return; 
+        return;
     }
 
     const qrContainer = document.getElementById('qrContainer');
     const botStatus = document.getElementById('botStatus');
     const botQrImage = document.getElementById('botQrImage');
-    
+
     qrContainer.style.display = 'block';
-    botQrImage.style.display = 'none'; 
+    botQrImage.style.display = 'none';
     botStatus.innerText = "⏳ Conectando con el servidor...";
 
     try {
         // Reemplaza los números por la IP real de tu servidor en DigitalOcean
-const response = await fetch(`https://bot.panelagc.com/api/conectar/${currentUser.uid}`);
+        const response = await fetch(`https://bot.panelagc.com/api/conectar/${currentUser.uid}`);
         const data = await response.json();
 
         if (data.status === 'qr') {
@@ -3161,7 +3161,7 @@ const response = await fetch(`https://bot.panelagc.com/api/conectar/${currentUse
             botQrImage.style.display = 'inline-block';
             botStatus.innerText = "📱 Escanea este código con tu WhatsApp para activar el bot.";
             botStatus.style.color = "var(--mac-text-main)";
-        } 
+        }
         else if (data.status === 'conectado') {
             botQrImage.style.display = 'none';
             botStatus.innerText = "✅ " + data.message;
@@ -3212,23 +3212,23 @@ window.checkNewNews = async () => {
         // Traemos solo la noticia más reciente para no gastar lecturas en Firebase
         const qNews = query(collection(db, "news"), limit(1));
         const snap = await getDocs(qNews);
-        
+
         if (!snap.empty) {
             let noticias = [];
             snap.forEach(d => noticias.push(d.data()));
             // Ordenamos para asegurar que tenemos la más nueva
-            noticias.sort((a,b) => new Date(b.fechaIso) - new Date(a.fechaIso));
-            
+            noticias.sort((a, b) => new Date(b.fechaIso) - new Date(a.fechaIso));
+
             const latestNewsDate = noticias[0].fechaIso;
             const lastSeen = localStorage.getItem('lastSeenNews');
-            
+
             // Si nunca ha visto las noticias, o si la noticia más nueva es más reciente que su última visita
             if (!lastSeen || new Date(latestNewsDate) > new Date(lastSeen)) {
                 const badge = document.getElementById('newsBadge');
-                if(badge) badge.style.display = 'block';
+                if (badge) badge.style.display = 'block';
             }
         }
-    } catch(e) {
+    } catch (e) {
         console.error("Error revisando noticias:", e);
     }
 };
@@ -3239,9 +3239,9 @@ window.checkNewNews = async () => {
 
 window.openStoreModal = () => {
     const plan = currentUserData.plan_actual || 'demo';
-    
+
     if (plan !== 'basico' && plan !== 'pro' && plan !== 'elite') {
-        window.closeModals(true); 
+        window.closeModals(true);
         Swal.fire({
             icon: 'lock', title: 'Función de Suscripción', text: 'Tener tu propio Catálogo Web para vender en automático requiere el Plan Básico o PRO.',
             confirmButtonText: '💎 Ver Planes', confirmButtonColor: '#007AFF', showCancelButton: true, cancelButtonText: 'Cancelar',
@@ -3250,13 +3250,13 @@ window.openStoreModal = () => {
         return;
     }
 
-    window.closeModals(false); 
+    window.closeModals(false);
     const aliasOrUid = currentUserData.storeAlias || currentUser.uid;
     const linkInput = document.getElementById('storeLinkInput');
     if (linkInput) {
         linkInput.value = window.location.origin + window.location.pathname + "?tienda=" + aliasOrUid;
     }
-    
+
     // 🔥 ACTUALIZAR EL SWITCH DE ESTADO
     const storeToggle = document.getElementById('storeActiveToggle');
     if (storeToggle) storeToggle.checked = currentUserData.storeActive !== false; // true por defecto
@@ -3276,7 +3276,7 @@ window.openStoreModal = () => {
         const vistas = currentUserData.storeViews || 0;
         const ventas = currentUserData.storeSalesCount || 0;
         const ingresos = currentUserData.storeRevenue || 0;
-        
+
         ownerStatsContainer.innerHTML = `
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 20px;">
                 <div style="background: var(--mac-surface); padding: 15px; border-radius: 12px; border: 1px solid var(--mac-border); text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
@@ -3307,8 +3307,8 @@ window.toggleStoreActive = async (checkbox) => {
         await updateDoc(doc(db, "users", currentUser.uid), { storeActive: isActive });
         currentUserData.storeActive = isActive;
         window.showNotification(isActive ? "Tienda Abierta 🟢" : "Tienda Cerrada 🔴");
-    } catch(e) { 
-        window.showNotification("Error guardando el estado: " + e.message); 
+    } catch (e) {
+        window.showNotification("Error guardando el estado: " + e.message);
         checkbox.checked = !checkbox.checked; // Revierte si hay error
     }
 };
@@ -3319,20 +3319,20 @@ window.saveExternalStore = async () => {
     if (!url.startsWith('http')) return window.showNotification("⚠️ El link debe empezar con http:// o https://");
     try {
         await updateDoc(doc(db, "users", currentUser.uid), { externalStoreUrl: url });
-        currentUserData.externalStoreUrl = url; 
+        currentUserData.externalStoreUrl = url;
         document.getElementById('storeExternalInput').value = '';
         window.showNotification("¡Catálogo externo vinculado con éxito! 🔗");
-        window.openStoreModal(); 
-    } catch(e) { window.showNotification("Error: " + e.message); }
+        window.openStoreModal();
+    } catch (e) { window.showNotification("Error: " + e.message); }
 };
 
 window.removeExternalStore = async () => {
     try {
         await updateDoc(doc(db, "users", currentUser.uid), { externalStoreUrl: null });
-        currentUserData.externalStoreUrl = null; 
+        currentUserData.externalStoreUrl = null;
         window.showNotification("Catálogo desvinculado. Tiendita interna reactivada 🏪");
         window.openStoreModal();
-    } catch(e) { window.showNotification("Error: " + e.message); }
+    } catch (e) { window.showNotification("Error: " + e.message); }
 };
 
 window.handleStoreTypeChange = () => {
@@ -3346,11 +3346,11 @@ window.toggleStoreStockFields = () => {
     const type = document.getElementById('storeType') ? document.getElementById('storeType').value : 'Servicio';
     const addComboBtn = document.getElementById('btnAddComboPlatformBtn');
     const label = document.getElementById('storeStockLabel');
-    
+
     if (isChecked) {
         configDiv.style.display = 'flex';
         const listContainer = document.getElementById('storeStockPlatformsList');
-        listContainer.innerHTML = ''; 
+        listContainer.innerHTML = '';
         if (type === 'Combo') {
             label.innerText = 'Selecciona las plataformas del inventario que integran este Combo:';
             if (addComboBtn) addComboBtn.style.display = 'inline-flex';
@@ -3385,7 +3385,7 @@ window.addStoreStockSelectRow = () => {
     });
     selectHTML += `</select>`;
 
-    const removeBtnHTML = listContainer.children.length > 0 ? 
+    const removeBtnHTML = listContainer.children.length > 0 ?
         `<button type="button" class="action-btn btn-del" style="padding: 4px 8px; font-size: 11px;" onclick="this.parentElement.remove(); window.updateStoreStockCount();"><i class='bx bx-trash'></i></button>` : '';
 
     rowDiv.innerHTML = selectHTML + removeBtnHTML;
@@ -3397,7 +3397,7 @@ window.updateStoreStockCount = () => {
     const countText = document.getElementById('storeStockCountText');
     const selects = document.querySelectorAll('.store-stock-select');
     const selectedPlatforms = Array.from(selects).map(s => s.value).filter(val => val !== '');
-    
+
     if (selectedPlatforms.length === 0) {
         countText.innerText = '0 disp.'; countText.style.color = 'var(--mac-text-secondary)'; return;
     }
@@ -3465,12 +3465,12 @@ window.removeStoreCategory = async (index) => {
 window.addStoreItem = async () => {
     const type = document.getElementById('storeType') ? document.getElementById('storeType').value : 'Servicio';
     const plat = document.getElementById('storePlatform').value.trim();
-    
+
     // Leemos el nuevo builder visual
     const storeTabs = window.extractBuilderData('builder-crear');
-    
+
     if (!plat || storeTabs.length === 0) return window.showNotification("Completa la plataforma y al menos una Pestaña con precio");
-    
+
     const p1P = storeTabs[0].options[0].price; // Precio base visual
 
     const cat = document.getElementById('storeCategorySelect').value;
@@ -3501,11 +3501,11 @@ window.addStoreItem = async () => {
         }
 
         let catalog = currentUserData.storeCatalog || [];
-        catalog.push({ 
-            id: 'item_' + Date.now(), platform: plat, price: p1P, 
+        catalog.push({
+            id: 'item_' + Date.now(), platform: plat, price: p1P,
             storeTabs: storeTabs, pricingOptions: storeTabs[0].options, // Guardado Dual (Soporta Legacy)
-            category: cat, desc: desc, imgUrl: imgUrl, type: type, 
-            autoStock: autoStock, stockPlatforms: stockPlatforms, requiresInvite: requiresInvite, badgeOption: badgeOption, status: 'disponible' 
+            category: cat, desc: desc, imgUrl: imgUrl, type: type,
+            autoStock: autoStock, stockPlatforms: stockPlatforms, requiresInvite: requiresInvite, badgeOption: badgeOption, status: 'disponible'
         });
 
         await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
@@ -3516,37 +3516,37 @@ window.addStoreItem = async () => {
         if (document.getElementById('storeDesc')) document.getElementById('storeDesc').value = '';
         if (fileInput) fileInput.value = '';
         document.getElementById('builder-crear').innerHTML = ''; // Resetea el builder
-        window.addTabToBuilder('builder-crear', '1 Mes', [{label: 'Perfil', price: ''}]); // Tab Default
+        window.addTabToBuilder('builder-crear', '1 Mes', [{ label: 'Perfil', price: '' }]); // Tab Default
 
         document.getElementById('storeAutoStock').checked = false;
-        if(document.getElementById('storeRequiresInvite')) document.getElementById('storeRequiresInvite').checked = false;
-        
+        if (document.getElementById('storeRequiresInvite')) document.getElementById('storeRequiresInvite').checked = false;
+
         document.querySelectorAll('.store-toggle-card').forEach(label => {
             label.style.border = '1px solid var(--mac-border)'; label.style.background = 'var(--mac-surface)';
             const icon = label.querySelector('.store-toggle-icon');
-            if(icon) { icon.className = 'bx bx-circle store-toggle-icon'; icon.style.color = 'var(--mac-text-secondary)'; }
+            if (icon) { icon.className = 'bx bx-circle store-toggle-icon'; icon.style.color = 'var(--mac-text-secondary)'; }
         });
 
         document.getElementById('storeBadgeOption').value = '';
         window.toggleStoreStockFields();
         window.renderStoreItems();
         window.showNotification("✅ Producto añadido al catálogo");
-    } catch(e) { window.showNotification("Error: " + e.message); } 
+    } catch (e) { window.showNotification("Error: " + e.message); }
     finally { btn.innerHTML = "<i class='bx bx-plus-circle' style='font-size: 22px;'></i> Añadir al Catálogo"; btn.disabled = false; }
 };
 window.renderStoreItems = () => {
     const list = document.getElementById('storeItemsList');
     list.innerHTML = '';
     const catalog = currentUserData.storeCatalog || [];
-    
-    if(catalog.length === 0) {
+
+    if (catalog.length === 0) {
         list.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); font-size:12px;">Tu catálogo está vacío.</p>';
         return;
     }
 
     catalog.forEach((item, index) => {
         let isAgotado = item.status === 'agotado';
-        
+
         const statusBadge = isAgotado ? `<span style="background:var(--mac-red); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold;">AGOTADO</span>` : `<span style="background:var(--mac-green); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold;">DISPONIBLE</span>`;
         const typeBadge = item.type === 'Combo' ? `<span style="background:var(--mac-orange); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold; margin-right:5px;"><i class='bx bx-gift'></i> COMBO</span>` : '';
 
@@ -3556,7 +3556,7 @@ window.renderStoreItems = () => {
         // 🔥 FIX: Un solo div con el diseño correcto
         const div = document.createElement('div');
         div.style.cssText = `display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; background:var(--mac-surface); padding:15px; border-radius:12px; border:1px solid var(--mac-border); opacity: ${isAgotado ? '0.7' : '1'}; gap: 15px;`;
-        
+
         div.innerHTML = `
             <div style="flex:1; min-width:200px; overflow:hidden;">
                 ${typeBadge}
@@ -3579,7 +3579,7 @@ window.editStoreItem = (index) => {
     const item = currentUserData.storeCatalog[index];
     document.getElementById('editProdIndex').value = index;
     document.getElementById('editProdName').value = item.platform;
-    
+
     // Cargar categorías disponibles
     const catSelect = document.getElementById('editProdCat');
     catSelect.innerHTML = '<option value="">Sin Categoría</option>';
@@ -3590,15 +3590,15 @@ window.editStoreItem = (index) => {
 
     document.getElementById('editProdInvite').checked = item.requiresInvite || false;
     document.getElementById('editProdDesc').value = item.desc || '';
-    document.getElementById('editProdImg').value = ''; 
+    document.getElementById('editProdImg').value = '';
 
     // Llenar el Builder de Pestañas
     const builder = document.getElementById('builder-editar');
     builder.innerHTML = '';
-    
+
     let tabsData = item.storeTabs || [];
     if (tabsData.length === 0) {
-        const opts = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{label: 'Opciones', price: item.price}];
+        const opts = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{ label: 'Opciones', price: item.price }];
         tabsData = [{ name: 'General', options: opts }];
     }
 
@@ -3627,7 +3627,7 @@ window.saveEditedProduct = async () => {
     btn.innerHTML = "Guardando... ⏳"; btn.disabled = true;
 
     try {
-        let newImgUrl = catalog[index].imgUrl || ""; 
+        let newImgUrl = catalog[index].imgUrl || "";
         if (fileInput && fileInput.files.length > 0) {
             const storageRef = ref(storage, `store_images/${currentUser.uid}_${Date.now()}_${fileInput.files[0].name}`);
             const snapshot = await uploadBytes(storageRef, fileInput.files[0]);
@@ -3641,16 +3641,16 @@ window.saveEditedProduct = async () => {
         catalog[index].storeTabs = storeTabs;
         catalog[index].price = storeTabs[0].options[0].price; // Base referencial
         catalog[index].pricingOptions = storeTabs[0].options; // Dual save
-        catalog[index].imgUrl = newImgUrl; 
-        
+        catalog[index].imgUrl = newImgUrl;
+
         await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
         currentUserData.storeCatalog = catalog;
-        
+
         window.renderStoreItems();
         document.getElementById('editProductModal').style.display = 'none';
         window.showNotification("✅ Producto editado y actualizado");
-    } catch(e) { 
-        window.showNotification("Error: " + e.message); 
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
     } finally {
         btn.innerHTML = origTxt; btn.disabled = false;
     }
@@ -3662,7 +3662,7 @@ window.toggleStoreItemStatus = async (index) => {
         await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
         currentUserData.storeCatalog = catalog;
         window.renderStoreItems();
-    } catch(e) { window.showNotification("Error al cambiar estado"); }
+    } catch (e) { window.showNotification("Error al cambiar estado"); }
 };
 
 window.deleteStoreItem = async (index) => {
@@ -3672,7 +3672,7 @@ window.deleteStoreItem = async (index) => {
         await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
         currentUserData.storeCatalog = catalog;
         window.renderStoreItems();
-    } catch(e) { window.showNotification("Error al borrar"); }
+    } catch (e) { window.showNotification("Error al borrar"); }
 };
 
 window.copyStoreLink = () => {
@@ -3698,11 +3698,11 @@ window.shareProduct = async (itemId) => {
     const catalog = window.publicCatalogCache || [];
     const item = catalog.find(i => i.id === itemId);
     if (!item) return;
-    
-    const storeUrl = window.location.origin + window.location.pathname + "?tienda=" + data.storeAlias; 
+
+    const storeUrl = window.location.origin + window.location.pathname + "?tienda=" + data.storeAlias;
     const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
     const text = `🔥 ¡Mira esta oferta de *${item.platform}* a solo *${priceStr}* en la tienda oficial de ${data.name}!`;
-    
+
     if (navigator.share) {
         try {
             await navigator.share({ title: data.name, text: text, url: storeUrl });
@@ -3719,10 +3719,10 @@ window.addToCartConDuracion = (itemId) => {
     // Leemos cuántos meses seleccionó el cliente
     const selectElement = document.getElementById('duracion_' + itemId);
     const meses = parseInt(selectElement.value) || 1;
-    
+
     // Clonamos el producto para no alterar el catálogo original
-    const cartItem = { ...originalItem }; 
-    
+    const cartItem = { ...originalItem };
+
     // Multiplicamos el precio y actualizamos el nombre
     cartItem.price = originalItem.price * meses;
     if (meses > 1) {
@@ -3733,7 +3733,7 @@ window.addToCartConDuracion = (itemId) => {
     window.storeCart.push(cartItem);
     document.getElementById('cartBadge').innerText = window.storeCart.length;
     document.getElementById('floatingCartBtn').style.display = 'flex';
-    
+
     document.getElementById('cartPanelOverlay').classList.add('active');
     document.getElementById('cartPanel').classList.add('active');
     window.renderCartItems();
@@ -3742,11 +3742,11 @@ window.addToCartConDuracion = (itemId) => {
 window.addToCart = (itemId) => {
     const item = window.publicCatalogCache.find(i => i.id === itemId);
     if (!item) return;
-    
+
     window.storeCart.push(item);
     document.getElementById('cartBadge').innerText = window.storeCart.length;
     document.getElementById('floatingCartBtn').style.display = 'flex';
-    
+
     // Abre el panel automáticamente como UX Premium
     document.getElementById('cartPanelOverlay').classList.add('active');
     document.getElementById('cartPanel').classList.add('active');
@@ -3763,21 +3763,21 @@ window.renderCartItems = () => {
     const container = document.getElementById('cartItemsContainer');
     const totalEl = document.getElementById('cartTotalPrice');
     const data = window.publicStoreDataCache;
-    
+
     container.innerHTML = '';
     let total = 0;
-    
+
     if (window.storeCart.length === 0) {
         container.innerHTML = '<div style="text-align: center; color: var(--mac-text-secondary); margin-top: 50px;"><i class="bx bx-shopping-bag" style="font-size: 64px; opacity: 0.3; margin-bottom: 15px;"></i><p style="font-weight: bold; font-size: 16px;">Tu carrito está vacío</p></div>';
         totalEl.innerText = `${data.currency || 'S/'}0.00`;
         document.getElementById('floatingCartBtn').style.display = 'none';
         return;
     }
-    
+
     window.storeCart.forEach((item, index) => {
         total += item.price;
         const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}">` : `<div style="width:65px; height:65px; border-radius:12px; background:var(--mac-gray); display:flex; align-items:center; justify-content:center; border: 1px solid var(--mac-border);"><i class="bx bx-play-circle" style="color:var(--mac-text-secondary); font-size:24px;"></i></div>`;
-        
+
         container.innerHTML += `
             <div class="cart-item">
                 ${imgHTML}
@@ -3800,25 +3800,25 @@ window.removeFromCart = (index) => {
 
 window.openCheckoutFromCart = () => {
     if (window.storeCart.length === 0) return window.showNotification("Tu carrito está vacío.");
-    
+
     window.toggleCartPanel(); // Cerramos el panel lateral
-    
+
     const data = window.publicStoreDataCache;
     let totalPrice = 0;
     let platforms = [];
     let requiresInvite = false;
     let isCombo = false;
-    
+
     window.storeCart.forEach(item => {
         totalPrice += item.price;
         platforms.push(item.platform);
         if (item.requiresInvite) requiresInvite = true;
         if (item.type === 'Combo') isCombo = true;
     });
-    
+
     const joinedPlatforms = platforms.join(' + ');
     const finalType = window.storeCart.length > 1 || isCombo ? 'Paquete' : 'Servicio';
-    
+
     // Preparar el objeto maestro para submitCheckout
     currentCheckoutItem = {
         platform: joinedPlatforms,
@@ -3826,12 +3826,12 @@ window.openCheckoutFromCart = () => {
         requiresInvite: requiresInvite,
         type: finalType
     };
-    
+
     document.getElementById('checkoutItemName').innerText = window.storeCart.length > 1 ? `Paquete (${window.storeCart.length} servicios)` : joinedPlatforms;
     document.getElementById('checkoutItemPrice').innerText = `${data.currency || 'S/'}${totalPrice.toFixed(2)}`;
-    
+
     const emailContainer = document.getElementById('checkoutEmailContainer');
-    if(emailContainer) {
+    if (emailContainer) {
         emailContainer.style.display = requiresInvite ? 'flex' : 'none';
         document.getElementById('checkoutClientEmail').value = '';
     }
@@ -3881,38 +3881,38 @@ window.searchPublicStore = () => {
 window.filterStoreType = (type, event) => {
     window.currentStoreTypeFilter = type;
     document.querySelectorAll('#publicStoreFilters .spotify-type-btn').forEach(btn => btn.classList.remove('active'));
-    if(event) event.currentTarget.classList.add('active');
+    if (event) event.currentTarget.classList.add('active');
     window.renderPublicCatalog();
 };
 
 window.filterStoreCategory = (cat, event) => {
     window.currentStoreCatFilter = cat;
     document.querySelectorAll('#publicStoreCategoryFilters .spotify-chip-btn').forEach(btn => btn.classList.remove('active'));
-    if(event) event.currentTarget.classList.add('active');
+    if (event) event.currentTarget.classList.add('active');
     window.renderPublicCatalog();
 };
 // EL DETECTOR DEL CLIENTE PÚBLICO (MÓDULO DE TIENDITA OPTIMIZADO)
 const checkPublicStore = async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const storeId = urlParams.get('tienda');
-    
+
     if (storeId) {
         document.getElementById('authView').style.display = 'none';
         document.getElementById('appView').style.display = 'none';
         document.getElementById('adminView').style.display = 'none';
-        
+
         const storeView = document.getElementById('publicStoreView');
         storeView.style.display = 'block';
-        
+
         try {
             let data = null;
             const q = query(collection(db, "users"), where("storeAlias", "==", storeId));
             const snap = await getDocs(q);
-            
-            if (!snap.empty) { 
-                data = snap.docs[0].data(); 
+
+            if (!snap.empty) {
+                data = snap.docs[0].data();
                 data.uid = snap.docs[0].id; // 🔥 FIX: Atrapa el ID oculto del vendedor
-            } 
+            }
             else {
                 const docRef = await getDoc(doc(db, "users", storeId));
                 if (docRef.exists()) {
@@ -3925,7 +3925,7 @@ const checkPublicStore = async () => {
                 document.getElementById('publicStoreName').innerText = "Tienda no encontrada";
                 return;
             }
-            
+
             const plan = data.plan_actual || 'demo';
             if ((plan !== 'pro' && plan !== 'basico') || data.active === false) {
                 document.getElementById('publicStoreName').innerText = "Tienda inactiva";
@@ -3937,10 +3937,10 @@ const checkPublicStore = async () => {
             // 🪄 NUEVO: Mostramos el check verificado y el Footer SOLO cuando la tienda cargó con éxito
             const verifiedBadge = document.getElementById('publicStoreVerified');
             if (verifiedBadge) verifiedBadge.style.display = 'inline-flex';
-            
+
             const storeFooter = document.getElementById('publicStoreFooter');
             if (storeFooter) storeFooter.style.display = 'flex';
-            
+
             const logoEl = document.getElementById('publicStoreLogo');
             if (data.logoUrl) {
                 logoEl.src = data.logoUrl;
@@ -3949,7 +3949,7 @@ const checkPublicStore = async () => {
 
             const bannerEl = document.getElementById('publicStoreBanner');
             const headerProfileEl = document.getElementById('publicStoreHeaderProfile');
-            
+
             if (data.bannerUrl) {
                 bannerEl.style.backgroundImage = `url(${data.bannerUrl})`;
                 bannerEl.style.display = 'block';
@@ -3989,7 +3989,7 @@ const checkPublicStore = async () => {
             const storeViewEl = document.getElementById('publicStoreView');
             if (storeViewEl) {
                 storeViewEl.style.justifyContent = 'flex-start';
-                storeViewEl.style.paddingTop = '30px'; 
+                storeViewEl.style.paddingTop = '30px';
             }
             // --- NUEVO: CONTADOR DE VISITAS ÚNICAS ---
             const viewerUid = localStorage.getItem('agc_owner_uid');
@@ -4041,22 +4041,22 @@ window.openCheckoutModal = (itemId) => {
     const data = window.publicStoreDataCache;
     const catalog = window.publicCatalogCache || [];
     currentCheckoutItem = catalog.find(i => i.id === itemId);
-    
+
     if (!currentCheckoutItem) return;
 
     document.getElementById('checkoutItemName').innerText = currentCheckoutItem.platform;
     document.getElementById('checkoutItemPrice').innerText = `${data.currency || 'S/'}${currentCheckoutItem.price.toFixed(2)}`;
-    
+
     // Si requiere invitación, pedimos correo
     const emailContainer = document.getElementById('checkoutEmailContainer');
-    if(emailContainer) {
+    if (emailContainer) {
         emailContainer.style.display = currentCheckoutItem.requiresInvite ? 'flex' : 'none';
         document.getElementById('checkoutClientEmail').value = '';
     }
 
     const pmContainer = document.getElementById('checkoutPaymentMethods');
     pmContainer.innerHTML = '';
-    
+
     const methods = data.paymentMethods || [];
     if (methods.length === 0) {
         pmContainer.innerHTML = '<p style="font-size: 12px; color: var(--mac-red); text-align: center;">El vendedor aún no ha configurado métodos de pago.</p>';
@@ -4081,11 +4081,11 @@ window.showPaymentDetails = (idx) => {
         container.style.display = 'none'; // Si no elige nada, oculta los datos
         return;
     }
-    
+
     // 🔥 FIX: Leer datos tanto de la Tiendita como del Portal
     const data = window.publicStoreDataCache || portalStoreData;
     const m = data.paymentMethods[idx];
-    
+
     let qrBtn = '';
     if (m.qrUrl) {
         // 🔥 BOTÓN DE DESCARGA en lugar de mostrar la imagen
@@ -4125,12 +4125,12 @@ window.descargarQR = async (url, banco) => {
 };
 window.openRenewFromPortal = (clientId, platform, price) => {
     const data = portalStoreData; // Usamos la data pública del portal
-    
+
     document.getElementById('checkoutItemName').innerText = `Renovación: ${platform}`;
     document.getElementById('checkoutItemPrice').innerText = `${data.currency || 'S/'}${parseFloat(price).toFixed(2)}`;
-    
+
     const emailContainer = document.getElementById('checkoutEmailContainer');
-    if(emailContainer) emailContainer.style.display = 'none';
+    if (emailContainer) emailContainer.style.display = 'none';
 
     const pmContainer = document.getElementById('checkoutPaymentMethods');
     pmContainer.innerHTML = '';
@@ -4183,7 +4183,7 @@ window.iniciarPagoAutomatico = async (metodo) => {
 
     try {
         const dataTienda = window.publicStoreDataCache || portalStoreData;
-        const vendedorId = dataTienda.uid; 
+        const vendedorId = dataTienda.uid;
         const pedidoId = `ped_${Date.now()}`;
 
         // 1. Guardar el pedido en Firebase (esperando_pago)
@@ -4205,7 +4205,7 @@ window.iniciarPagoAutomatico = async (metodo) => {
 
         // 2. Hacer fetch a tu VPS en DigitalOcean
         const urlEndpoint = metodo === 'mercadopago' ? 'https://bot.panelagc.com/api/crear-pago-mp' : 'https://bot.panelagc.com/api/crear-pago-binance';
-        
+
         const response = await fetch(urlEndpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -4225,9 +4225,9 @@ window.iniciarPagoAutomatico = async (metodo) => {
             document.getElementById('cartBadge').innerText = '0';
             document.getElementById('floatingCartBtn').style.display = 'none';
             document.getElementById('checkoutModal').style.display = 'none';
-            
+
             // Redirigir a Mercado Pago / Binance
-            window.location.href = dataResp.init_point; 
+            window.location.href = dataResp.init_point;
         } else {
             Swal.fire('Error', dataResp.error || 'El vendedor no tiene configurado este método de pago.', 'error');
         }
@@ -4262,8 +4262,8 @@ window.submitCheckout = async () => {
     try {
         // 🔥 FIX: Leer el ID del vendedor desde la Tiendita o desde el Portal
         const data = window.publicStoreDataCache || portalStoreData;
-        const vendedorId = data.uid; 
-        
+        const vendedorId = data.uid;
+
         const storageRef = ref(storage, `comprobantes/${vendedorId}_${Date.now()}_${file.name}`);
         await uploadBytes(storageRef, file);
         const comprobanteUrl = await getDownloadURL(storageRef);
@@ -4308,7 +4308,7 @@ window.submitCheckout = async () => {
         const vendedorNum = dataTienda.phone ? dataTienda.phone.replace(/[^\d]/g, '') : '';
         const wsText = `Hola, acabo de pagar mi pedido en tu tienda web.\n\n*🛒 Producto:* ${currentCheckoutItem.platform}\n*💰 Total Pagado:* ${dataTienda.currency || 'S/'}${currentCheckoutItem.price.toFixed(2)}\n*👤 A nombre de:* ${name}\n\nPor favor, verifica mi comprobante para entregarme el acceso.`;
         const waUrl = `https://wa.me/${vendedorNum}?text=${encodeURIComponent(wsText)}`;
-        
+
         Swal.fire({
             icon: 'success',
             title: '¡Pago Enviado con Éxito!',
@@ -4326,7 +4326,7 @@ window.submitCheckout = async () => {
             }
         });
 
-    } catch (error) { window.showNotification("Error: " + error.message); } 
+    } catch (error) { window.showNotification("Error: " + error.message); }
     finally { btn.innerHTML = origText; btn.disabled = false; }
 };
 // --- SISTEMA DE REGLAS POR PLATAFORMA ---
@@ -4346,7 +4346,7 @@ window.savePlatformRule = async () => {
     const txt = document.getElementById('ruleText').value.trim();
     let rules = currentUserData.platformRules || {};
     rules[p] = txt;
-    
+
     try {
         const btn = document.querySelector('#rulesModal .btn-primary');
         btn.innerText = "Guardando...";
@@ -4354,7 +4354,7 @@ window.savePlatformRule = async () => {
         currentUserData.platformRules = rules;
         window.showNotification("✅ Regla de " + p + " guardada.");
         btn.innerText = "Guardar Regla";
-    } catch(e) {
+    } catch (e) {
         window.showNotification("Error: " + e.message);
     }
 };
@@ -4363,39 +4363,39 @@ window.savePlatformRule = async () => {
 window.switchMainTab = (tab) => {
     const btnClientes = document.getElementById('btnTabClientes');
     const btnCuentas = document.getElementById('btnTabCuentas');
-    
+
     // FIX: Atrapamos al contenedor general que envuelve a toda la tabla y botones
     const mainTableEl = document.getElementById('mainTable');
-    const tableClientesWrapper = mainTableEl ? mainTableEl.parentElement : null; 
-    
-    const tableCuentas = document.getElementById('accountsTableContainer'); 
-    const subtitle = document.getElementById('userGreeting'); 
+    const tableClientesWrapper = mainTableEl ? mainTableEl.parentElement : null;
+
+    const tableCuentas = document.getElementById('accountsTableContainer');
+    const subtitle = document.getElementById('userGreeting');
     const filterSelect = document.getElementById('filterSelect');
     const searchInput = document.getElementById('searchInput');
 
     if (tab === 'clientes') {
-        if(btnClientes) { btnClientes.style.background = 'var(--mac-blue)'; btnClientes.style.color = 'white'; }
-        if(btnCuentas) { btnCuentas.style.background = 'transparent'; btnCuentas.style.color = 'var(--mac-text-secondary)'; }
-        
-        if(tableClientesWrapper) tableClientesWrapper.style.setProperty('display', 'block', 'important'); 
-        if(tableCuentas) tableCuentas.style.setProperty('display', 'none', 'important');
-        if(subtitle) subtitle.innerText = 'Gestión de clientes';
-        
-        if(filterSelect) filterSelect.style.display = 'block'; 
-        if(searchInput) searchInput.value = '';
+        if (btnClientes) { btnClientes.style.background = 'var(--mac-blue)'; btnClientes.style.color = 'white'; }
+        if (btnCuentas) { btnCuentas.style.background = 'transparent'; btnCuentas.style.color = 'var(--mac-text-secondary)'; }
+
+        if (tableClientesWrapper) tableClientesWrapper.style.setProperty('display', 'block', 'important');
+        if (tableCuentas) tableCuentas.style.setProperty('display', 'none', 'important');
+        if (subtitle) subtitle.innerText = 'Gestión de clientes';
+
+        if (filterSelect) filterSelect.style.display = 'block';
+        if (searchInput) searchInput.value = '';
         window.renderTable();
 
     } else if (tab === 'cuentas') {
-        if(btnCuentas) { btnCuentas.style.background = 'var(--mac-blue)'; btnCuentas.style.color = 'white'; }
-        if(btnClientes) { btnClientes.style.background = 'transparent'; btnClientes.style.color = 'var(--mac-text-secondary)'; }
-        
-        if(tableClientesWrapper) tableClientesWrapper.style.setProperty('display', 'none', 'important');
-        if(tableCuentas) tableCuentas.style.setProperty('display', 'block', 'important');
-        if(subtitle) subtitle.innerText = 'Gestión de cuentas';
-        
-        if(filterSelect) filterSelect.style.display = 'none'; 
-        if(searchInput) searchInput.value = '';
-        if(typeof window.renderMasterAccounts === 'function') window.renderMasterAccounts(); 
+        if (btnCuentas) { btnCuentas.style.background = 'var(--mac-blue)'; btnCuentas.style.color = 'white'; }
+        if (btnClientes) { btnClientes.style.background = 'transparent'; btnClientes.style.color = 'var(--mac-text-secondary)'; }
+
+        if (tableClientesWrapper) tableClientesWrapper.style.setProperty('display', 'none', 'important');
+        if (tableCuentas) tableCuentas.style.setProperty('display', 'block', 'important');
+        if (subtitle) subtitle.innerText = 'Gestión de cuentas';
+
+        if (filterSelect) filterSelect.style.display = 'none';
+        if (searchInput) searchInput.value = '';
+        if (typeof window.renderMasterAccounts === 'function') window.renderMasterAccounts();
     }
 };
 /* ==========================================
@@ -4405,7 +4405,7 @@ window.switchMainTab = (tab) => {
 window.openInventoryModal = () => {
     window.closeModals(false); // 🧹 LIMPIEZA SILENCIOSA ANTES DE ABRIR
     document.getElementById('inventoryModal').style.display = 'flex';
-    document.body.style.overflow = 'hidden'; 
+    document.body.style.overflow = 'hidden';
     window.renderInventory();
 };
 let editingInvId = null; // Variable global para saber si estamos editando
@@ -4415,7 +4415,7 @@ window.addInventoryAccount = async () => {
     const type = document.getElementById('invType').value;
     const email = document.getElementById('invEmail').value.trim();
     const pass = document.getElementById('invPass').value.trim();
-    const profile = document.getElementById('invProfile').value.trim(); 
+    const profile = document.getElementById('invProfile').value.trim();
     const pin = document.getElementById('invPin').value.trim() || 'N/A';
 
     if (!platform || !email || !pass) return window.showNotification("Plataforma, Correo y Contraseña son obligatorios.");
@@ -4426,7 +4426,7 @@ window.addInventoryAccount = async () => {
 
     try {
         let stock = currentUserData.inventory || [];
-        
+
         if (editingInvId) {
             // MODO EDICIÓN: Actualizamos los datos del objeto existente
             stock = stock.map(item => item.id === editingInvId ? { ...item, platform, type, email, pass, profile, pin } : item);
@@ -4453,7 +4453,7 @@ window.addInventoryAccount = async () => {
 window.editInventoryAccount = (id) => {
     const stock = currentUserData.inventory || [];
     const item = stock.find(i => i.id === id);
-    if(!item) return;
+    if (!item) return;
 
     document.getElementById('invPlatform').value = item.platform || '';
     document.getElementById('invType').value = item.type || 'Perfil';
@@ -4463,7 +4463,7 @@ window.editInventoryAccount = (id) => {
     document.getElementById('invPin').value = item.pin || '';
 
     editingInvId = id;
-    
+
     // Cambiamos el aspecto visual del formulario
     document.getElementById('btnSaveInv').innerHTML = "<i class='bx bx-check-double'></i> Actualizar Cuenta";
     document.getElementById('btnSaveInv').style.backgroundColor = "var(--mac-orange)";
@@ -4478,7 +4478,7 @@ window.cancelInventoryEdit = () => {
     document.getElementById('invPass').value = '';
     document.getElementById('invProfile').value = '';
     document.getElementById('invPin').value = '';
-    
+
     document.getElementById('btnSaveInv').innerHTML = "<i class='bx bx-save'></i> Guardar en stock";
     document.getElementById('btnSaveInv').style.backgroundColor = "var(--mac-blue)";
     document.getElementById('btnCancelInv').style.display = "none";
@@ -4486,7 +4486,7 @@ window.cancelInventoryEdit = () => {
 
 window.renderInventory = () => {
     const list = document.getElementById('inventoryList');
-    if (!list) return; 
+    if (!list) return;
     list.innerHTML = '';
     const stock = currentUserData.inventory || [];
     const cuentasLibres = stock.filter(item => item.status === 'libre');
@@ -4523,12 +4523,12 @@ window.renderInventory = () => {
 window.deliverFromInventory = (id) => {
     const stock = currentUserData.inventory || [];
     const item = stock.find(i => i.id === id);
-    if(!item) return;
+    if (!item) return;
 
     // 1. Ir a la vista principal
     window.closeModals(true);
     window.switchMainTab('clientes');
-    
+
     // 🔥 NUEVA LÓGICA DE PESTAÑAS (MULTI-ACC)
     multiAccData = {};
     multiAccData[item.platform] = window.getDefaultAccData();
@@ -4543,7 +4543,7 @@ window.deliverFromInventory = (id) => {
     // 3. Seleccionar la plataforma en el multiselect
     const cbs = document.querySelectorAll('#checkboxDropdown input');
     cbs.forEach(cb => cb.checked = false);
-    cbs.forEach(cb => { if(cb.value === item.platform) cb.checked = true; });
+    cbs.forEach(cb => { if (cb.value === item.platform) cb.checked = true; });
     const selectText = document.getElementById('selectText');
     if (selectText) {
         selectText.textContent = item.platform;
@@ -4566,16 +4566,16 @@ window.deliverFromInventory = (id) => {
 window.copyFromInventory = (id) => {
     const stock = currentUserData.inventory || [];
     const item = stock.find(i => i.id === id);
-    if(!item) return;
+    if (!item) return;
 
     // Obtener formato desde configuración de WhatsApp del usuario
     const baseMsg = currentUserData.waDeliveryMessage || "🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tu nueva cuenta de *{plataforma}*:\n\n📧 *Correo:* {correo}\n🔑 *Clave:* {pass}\n📌 *PIN:* {pin}\n\n📅 *Vence el:* {fecha}\n\n⚠️ *Reglas:* {reglas}\n\n¡Que disfrutes el contenido! 🍿";
-    
+
     // Calcular 1 mes desde hoy
     const h = new Date();
     h.setMonth(h.getMonth() + 1);
     const dateStr = h.toLocaleDateString('es-ES');
-    
+
     // Obtener reglas de la plataforma
     const rulesDB = currentUserData.platformRules || {};
     const itemRules = rulesDB[item.platform] || "Uso personal, no modificar los datos de acceso.";
@@ -4589,7 +4589,7 @@ window.copyFromInventory = (id) => {
         .replace(/{profile}/gi, item.profile || 'N/A')
         .replace(/{fecha}/gi, dateStr)
         .replace(/{reglas}/gi, itemRules);
-    
+
     // Copiar al portapapeles
     navigator.clipboard.writeText(finalMsg).then(() => {
         window.showNotification("📋 Formato de entrega copiado con fecha a 1 mes");
@@ -4616,28 +4616,28 @@ window.deleteInventoryAccount = async (id) => {
 
 // 1. Abrir modal y cargar los pedidos desde Firebase
 window.openPedidosModal = async () => {
-    window.closeModals(false); 
+    window.closeModals(false);
     document.getElementById('pedidosModal').style.display = 'flex';
-    document.body.style.overflow = 'hidden'; 
+    document.body.style.overflow = 'hidden';
     const list = document.getElementById('pedidosList');
     list.innerHTML = '<p style="text-align:center;">Cargando ventas pendientes...</p>';
 
     try {
         const q = query(collection(db, "pedidos"), where("vendedorId", "==", currentUser.uid), where("estado", "==", "pendiente"));
         const snapshot = await getDocs(q);
-        
+
         if (snapshot.empty) {
             list.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); margin-top:20px;">No tienes ventas pendientes.</p>';
             return;
         }
 
         list.innerHTML = '';
-        
+
         // 1. Obtener Cuentas libres (para compras normales)
         const inventarioLimpio = (currentUserData.inventory || []).filter(i => i.status === 'libre');
         window.opcionesCuentasGlobal = `<option value="">-- Selecciona una cuenta para entregar --</option>`;
         inventarioLimpio.forEach(acc => {
-            window.opcionesCuentasGlobal += `<option value="${acc.id}">[${acc.platform} - ${acc.type}] ${acc.email} ${acc.type === 'Perfil' ? '(P: '+acc.profile+')' : ''}</option>`;
+            window.opcionesCuentasGlobal += `<option value="${acc.id}">[${acc.platform} - ${acc.type}] ${acc.email} ${acc.type === 'Perfil' ? '(P: ' + acc.profile + ')' : ''}</option>`;
         });
 
         // 2. Obtener Matrices (para compras por invitación)
@@ -4749,7 +4749,7 @@ window.rechazarPedido = async (pedidoId) => {
     try {
         await deleteDoc(doc(db, "pedidos", pedidoId));
         window.showNotification("🚫 Solicitud rechazada");
-        window.openPedidosModal(); 
+        window.openPedidosModal();
     } catch (e) {
         window.showNotification("Error: " + e.message);
     }
@@ -4851,17 +4851,17 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
 
         let stock = currentUserData.inventory || [];
         let cuentasEntregar = [];
-        
+
         // Calcular fecha
-        const h = new Date(); 
-        h.setDate(h.getDate() + (mesesContratados * 30)); 
-        const dateFirebase = `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}-${String(h.getDate()).padStart(2,'0')}`; 
-        const dateWhatsApp = h.toLocaleDateString('es-ES'); 
-        
+        const h = new Date();
+        h.setDate(h.getDate() + (mesesContratados * 30));
+        const dateFirebase = `${h.getFullYear()}-${String(h.getMonth() + 1).padStart(2, '0')}-${String(h.getDate()).padStart(2, '0')}`;
+        const dateWhatsApp = h.toLocaleDateString('es-ES');
+
         const numeroLimpio = numeroCliente.replace(/[^\d]/g, '');
         const numeroBonito = "+" + numeroLimpio;
         const rulesDB = currentUserData.platformRules || {};
-        
+
         let primerClienteId = null;
         let textoFinal = "";
 
@@ -4875,22 +4875,22 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
             multiAcc[plataforma].months = mesesContratados;
             multiAcc[plataforma].masterAccountId = matrizId;
             multiAcc[plataforma].saleType = 'Perfil';
-            
+
             const docRef = await addDoc(collection(db, "clients"), {
                 userId: currentUser.uid,
-                name: nombreCliente, 
-                phone: numeroBonito, 
+                name: nombreCliente,
+                phone: numeroBonito,
                 platform: plataforma,
-                accountEmail: clienteCorreo,      
-                accountPassword: "",    
-                accountPin: "",          
+                accountEmail: clienteCorreo,
+                accountPassword: "",
+                accountPin: "",
                 accountProfile: perfilMatriz,
                 accountUnits: 1,
                 accountMonths: mesesContratados,
                 cost: 0,
-                price: precioTotal, 
+                price: precioTotal,
                 date: dateFirebase,
-                linkedMasterId: matrizId, 
+                linkedMasterId: matrizId,
                 multiAccounts: multiAcc,
                 color: macPalette[Math.floor(Math.random() * macPalette.length)]
             });
@@ -4917,13 +4917,13 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
                 const docRef = await addDoc(collection(db, "clients"), {
                     userId: currentUser.uid,
                     name: "Cliente Nuevo", phone: numeroBonito, platform: cuenta.platform,
-                    accountEmail: cuenta.email, accountPassword: cuenta.pass,    
+                    accountEmail: cuenta.email, accountPassword: cuenta.pass,
                     accountPin: cuenta.pin, accountProfile: cuenta.profile || "1",
-                    accountUnits: 1, accountMonths: mesesContratados, cost: 0, price: precioDividido, 
-                    date: dateFirebase, linkedMasterId: matrizAsignada, 
+                    accountUnits: 1, accountMonths: mesesContratados, cost: 0, price: precioDividido,
+                    date: dateFirebase, linkedMasterId: matrizAsignada,
                     color: macPalette[Math.floor(Math.random() * macPalette.length)]
                 });
-                
+
                 if (!primerClienteId) primerClienteId = docRef.id;
                 cuenta.rules = rulesDB[cuenta.platform] || "Uso personal, no modificar los datos de acceso.";
                 stock = stock.filter(item => item.id !== cuenta.id);
@@ -4932,13 +4932,13 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
             currentUserData.inventory = stock;
 
             let bloqueCuentas = "";
-            cuentasEntregar.forEach((c, index) => { 
+            cuentasEntregar.forEach((c, index) => {
                 bloqueCuentas += `\n🍿 *CUENTA ${index + 1}: ${c.platform}*\n`;
                 if (opcEnvio.sendCorreo) bloqueCuentas += `📧 *Correo:* ${c.email}\n`;
                 if (opcEnvio.sendPass) bloqueCuentas += `🔑 *Clave:* ${c.pass}\n`;
                 if (opcEnvio.sendPerfil) bloqueCuentas += `👤 *Perfil:* ${c.profile || '1'}\n`;
                 if (opcEnvio.sendPin) bloqueCuentas += `📌 *PIN:* ${c.pin || 'N/A'}\n`;
-                bloqueCuentas += `⚠️ *Reglas:* ${c.rules}\n`; 
+                bloqueCuentas += `⚠️ *Reglas:* ${c.rules}\n`;
             });
 
             let templateMsg = currentUserData.waDeliveryMessage || `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tus cuentas:\n{bloqueCuentas}\n📅 *Vence el:* {fecha}\n\n¡Que disfrutes el contenido! 🍿`;
@@ -4959,25 +4959,25 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
         try {
             const newSalesCount = (currentUserData.storeSalesCount || 0) + 1;
             const newRevenue = (currentUserData.storeRevenue || 0) + precioTotal;
-            await updateDoc(doc(db, "users", currentUser.uid), { 
-                storeSalesCount: newSalesCount, 
-                storeRevenue: newRevenue 
+            await updateDoc(doc(db, "users", currentUser.uid), {
+                storeSalesCount: newSalesCount,
+                storeRevenue: newRevenue
             });
             currentUserData.storeSalesCount = newSalesCount;
             currentUserData.storeRevenue = newRevenue;
         } catch (errStoreStats) {
             console.error("Error actualizando stats de la tienda:", errStoreStats);
         }
-        window.renderInventory(); 
-        loadUserClients(); 
+        window.renderInventory();
+        loadUserClients();
 
         const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
 
         if (plan === 'pro' || plan === 'elite') {
             const payloadEntrega = {
                 distribuidorId: currentUser.uid,
-                numeroCliente: numeroLimpio + '@s.whatsapp.net', 
-                cuentas: requiereInvitacion ? [{platform: plataforma}] : cuentasEntregar, 
+                numeroCliente: numeroLimpio + '@s.whatsapp.net',
+                cuentas: requiereInvitacion ? [{ platform: plataforma }] : cuentasEntregar,
                 fechaVencimiento: dateWhatsApp,
                 mensajeEntrega: textoFinal
             };
@@ -4985,7 +4985,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
             fetch('https://bot.panelagc.com/api/entregar-cuenta', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payloadEntrega)
             }).catch(err => console.error("Error de red al contactar al bot:", err));
-              
+
             Swal.fire({
                 icon: 'success', title: '¡Venta Aprobada!',
                 html: '<p style="color:var(--mac-text-secondary);">El Bot ya le está enviando la información al cliente.</p><p style="margin-top:10px; font-size:14px; font-weight:bold;">¿Deseas completar el nombre del cliente ahora?</p>',
@@ -4999,8 +4999,8 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
 
         } else {
             const waUrl = `https://wa.me/${numeroLimpio}?text=${encodeURIComponent(textoFinal)}`;
-            window.open(waUrl, '_blank'); 
-            
+            window.open(waUrl, '_blank');
+
             Swal.fire({
                 icon: 'success', title: '¡Venta Aprobada!',
                 html: `<div style="margin-bottom:15px;"><a href="${waUrl}" target="_blank" style="display:inline-block; background:#25D366; color:white; padding:10px 15px; border-radius:8px; text-decoration:none; font-weight:bold;"><i class="bx bxl-whatsapp"></i> Reenviar Accesos (Clic Aquí)</a></div><p style="margin-top:10px; font-size:14px; font-weight:bold;">2. ¿Deseas completar el nombre del cliente ahora?</p>`,
@@ -5021,7 +5021,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
 window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVenta) => {
     // 1. Buscamos primero en la memoria rápida (los últimos 30 clientes cargados)
     let c = clients.find(x => x.id === clientId);
-    
+
     // 2. Si no está en la memoria rápida, lo buscamos directo en la Base de Datos
     if (!c) {
         try {
@@ -5040,13 +5040,13 @@ window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVe
     let fechaAntigua = new Date(year, month - 1, day);
     const antiguaFechaBonita = fechaAntigua.toLocaleDateString('es-ES');
 
-    window.currentRenewType = 'mes'; 
+    window.currentRenewType = 'mes';
     window.currentRenewBaseDate = fechaAntigua;
 
     // 🔥 FIX: 1. Función para actualizar los números en tiempo real al escribir
     window.updateRenewDates = () => {
         let meses = parseInt(document.getElementById('swal-renew-months').value) || 1;
-        
+
         let dMes = new Date(window.currentRenewBaseDate);
         dMes.setMonth(dMes.getMonth() + meses);
         document.getElementById('date-mes').innerText = dMes.toLocaleDateString('es-ES');
@@ -5061,8 +5061,8 @@ window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVe
         window.currentRenewType = type;
         const cardMes = document.getElementById('optMesAMes');
         const card30d = document.getElementById('opt30Dias');
-        
-        if(type === 'mes') {
+
+        if (type === 'mes') {
             cardMes.style.border = '2px solid var(--mac-blue)';
             cardMes.style.background = 'rgba(0, 122, 255, 0.15)';
             card30d.style.border = '1px solid var(--mac-border)';
@@ -5122,8 +5122,8 @@ window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVe
     if (confirmacion) {
         try {
             window.showNotification("⏳ Actualizando fecha...");
-            let fechaNueva = confirmacion; 
-            const strFirebase = `${fechaNueva.getFullYear()}-${String(fechaNueva.getMonth()+1).padStart(2,'0')}-${String(fechaNueva.getDate()).padStart(2,'0')}`;
+            let fechaNueva = confirmacion;
+            const strFirebase = `${fechaNueva.getFullYear()}-${String(fechaNueva.getMonth() + 1).padStart(2, '0')}-${String(fechaNueva.getDate()).padStart(2, '0')}`;
             const nuevaFechaBonita = fechaNueva.toLocaleDateString('es-ES');
 
             // 1. Desaparecemos el pedido
@@ -5142,11 +5142,11 @@ window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVe
             // 4. Preparamos el Mensaje
             const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
             let baseMsg = currentUserData.waRenewMessage || "🎉 *¡Renovación Exitosa, {nombre}!*\n\nTu servicio de *{plataforma}* ha sido renovado correctamente.\n📅 Nueva fecha de vencimiento: *{fecha}*\n\n🌐 *Tu Portal:* {link}\n🔑 *Código Web:* {codigo}\n\n¡Gracias por seguir confiando en nosotros! 🚀";
-            
+
             const baseUrl = window.location.origin + window.location.pathname;
             const portalAlias = currentUserData.storeAlias || currentUser.uid;
             const portalUrl = `${baseUrl}?portal=${portalAlias}`;
-            
+
             let finalMsg = baseMsg
                 .replace(/{nombre}/g, c.name)
                 .replace(/{plataforma}/g, plataforma)
@@ -5159,10 +5159,10 @@ window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVe
 
             // 5. Enviar mensaje por bot o WA
             if (plan === 'pro' || plan === 'elite') {
-                fetch('https://bot.panelagc.com/api/confirmar-renovacion', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ distribuidorId: currentUser.uid, numeroCliente: c.phone, plataforma: plataforma, nuevaFecha: nuevaFechaBonita, mensajeRenovacion: finalMsg }) 
+                fetch('https://bot.panelagc.com/api/confirmar-renovacion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ distribuidorId: currentUser.uid, numeroCliente: c.phone, plataforma: plataforma, nuevaFecha: nuevaFechaBonita, mensajeRenovacion: finalMsg })
                 });
                 window.showNotification("✅ Renovación completada. El bot avisará al cliente.");
             } else {
@@ -5179,8 +5179,8 @@ window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVe
 
 /* ========================================== MÓDULO DE CUENTAS MATRICES (ESTILO MATRIZ) ========================================== */
 let variablesEnlaceMatriz = { masterId: null, profileNum: null };
-let editingMasterId = null; 
-window.masterAlertShown = false; 
+let editingMasterId = null;
+window.masterAlertShown = false;
 
 // Ocultar o mostrar campos adicionales según el origen de la cuenta
 window.toggleMatProviderFields = () => {
@@ -5201,7 +5201,7 @@ window.openNewMasterAccountModal = () => {
     document.getElementById('matProvider').value = 'Propia';
     document.getElementById('matExpiryDate').value = '';
     document.getElementById('matProviderName').value = '';
-    
+
     window.toggleMatProviderFields();
     document.querySelector('#masterAccountModal h3').innerHTML = "<i class='bx bx-plus-circle'></i> Nueva Cuenta Matriz";
     document.getElementById('masterAccountModal').style.display = 'flex';
@@ -5210,7 +5210,7 @@ window.openNewMasterAccountModal = () => {
 // 2. ABRIR MODAL PARA EDITAR
 window.editMasterAccount = (id, platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName) => {
     editingMasterId = id;
-    
+
     document.getElementById('matPlatform').value = platform;
     document.getElementById('matEmail').value = email;
     document.getElementById('matPass').value = pass;
@@ -5219,7 +5219,7 @@ window.editMasterAccount = (id, platform, email, pass, maxProfiles, cost, provid
     document.getElementById('matProvider').value = provider;
     document.getElementById('matExpiryDate').value = expiryDate || '';
     document.getElementById('matProviderName').value = providerName || '';
-    
+
     window.toggleMatProviderFields();
     document.querySelector('#masterAccountModal h3').innerHTML = "<i class='bx bx-edit'></i> Editar Cuenta Matriz";
     document.getElementById('masterAccountModal').style.display = 'flex';
@@ -5244,7 +5244,7 @@ window.deleteMasterAccount = async (id) => {
                 await deleteDoc(doc(db, "masterAccounts", id));
                 window.showNotification("🗑️ Cuenta Matriz eliminada");
                 window.renderMasterAccounts();
-            } catch(e) { window.showNotification("Error: " + e.message); }
+            } catch (e) { window.showNotification("Error: " + e.message); }
         }
     });
 };
@@ -5264,7 +5264,7 @@ window.saveMasterAccount = async () => {
 
     try {
         const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
-        
+
         if (!editingMasterId) {
             const qMatCount = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
             const snapMatCount = await getDocs(qMatCount);
@@ -5278,21 +5278,21 @@ window.saveMasterAccount = async () => {
             const qCli = query(collection(db, "clients"), where("userId", "==", currentUser.uid));
             const snapCli = await getDocs(qCli);
             let clientesAfectados = [];
-            
+
             snapCli.forEach(d => {
                 const c = d.data();
                 let isAffected = false;
                 let platName = "";
                 let profileStr = "";
                 let pinStr = "";
-                
+
                 // Buscar en modelo antiguo
                 if (c.linkedMasterId === editingMasterId) {
                     if (c.accountEmail !== email || c.accountPassword !== pass) {
                         isAffected = true; platName = c.platform; profileStr = c.accountProfile; pinStr = c.accountPin;
                     }
                 }
-                
+
                 // Buscar en modelo nuevo (multipestaña)
                 if (c.multiAccounts) {
                     for (let platKey in c.multiAccounts) {
@@ -5303,7 +5303,7 @@ window.saveMasterAccount = async () => {
                         }
                     }
                 }
-                
+
                 if (isAffected) {
                     clientesAfectados.push({ id: d.id, data: c, name: c.name, phone: c.phone, platform: platName, profile: profileStr, pin: pinStr });
                 }
@@ -5311,9 +5311,9 @@ window.saveMasterAccount = async () => {
 
             let clientesParaNotificar = [];
             let opcionesEnvio = { correo: true, clave: true, perfil: true, pin: true };
-            
+
             const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
-            
+
             // 2. Si hay clientes afectados y es PRO, lanzamos el Modal Interactivo
             if (clientesAfectados.length > 0 && (plan === 'pro' || plan === 'elite')) {
                 // Dibujamos las tarjetas de los clientes con el check activo por defecto
@@ -5388,7 +5388,7 @@ window.saveMasterAccount = async () => {
             window.showNotification("⏳ Guardando datos...");
 
             await updateDoc(doc(db, "masterAccounts", editingMasterId), { platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName });
-            
+
             const updatePromises = [];
             clientesAfectados.forEach(clientObj => {
                 const c = clientObj.data;
@@ -5399,7 +5399,7 @@ window.saveMasterAccount = async () => {
                     rootUpdates.accountEmail = email;
                     rootUpdates.accountPassword = pass;
                 }
-                
+
                 if (c.multiAccounts) {
                     for (let platKey in mAccounts) {
                         if (mAccounts[platKey].masterAccountId === editingMasterId) {
@@ -5409,7 +5409,7 @@ window.saveMasterAccount = async () => {
                     }
                     rootUpdates.multiAccounts = mAccounts;
                 }
-                
+
                 updatePromises.push(updateDoc(doc(db, "clients", clientObj.id), rootUpdates));
             });
 
@@ -5422,12 +5422,12 @@ window.saveMasterAccount = async () => {
                 let clientesFormateados = clientesParaNotificar.map(c => {
                     // Armamos el mensaje dinámicamente según los checks de opciones
                     let mensajePersonalizado = `🔄 *¡Actualización de Seguridad!*\n\nHola *${c.name}*, los datos de tu acceso a *${c.platform}* han sido actualizados para garantizar la estabilidad de tu servicio.\n\nAquí tienes tus nuevas credenciales activas:\n`;
-                    
+
                     if (opcionesEnvio.correo) mensajePersonalizado += `\n📧 *Correo:* ${email}`;
                     if (opcionesEnvio.clave) mensajePersonalizado += `\n🔑 *Clave:* ${pass}`;
                     if (opcionesEnvio.perfil) mensajePersonalizado += `\n👤 *Perfil:* ${c.profile || '1'}`;
                     if (opcionesEnvio.pin) mensajePersonalizado += `\n📌 *PIN:* ${c.pin || 'N/A'}`;
-                    
+
                     mensajePersonalizado += `\n\n¡Sigue disfrutando del mejor entretenimiento! 🍿`;
 
                     return {
@@ -5445,7 +5445,7 @@ window.saveMasterAccount = async () => {
                         clientes: clientesFormateados
                     })
                 }).catch(e => console.error("Error al contactar al bot para actualizar:", e));
-                
+
                 setTimeout(() => {
                     window.showNotification(`🤖 Bot avisando a ${clientesFormateados.length} cliente(s) seleccionados.`);
                 }, 1500);
@@ -5456,12 +5456,12 @@ window.saveMasterAccount = async () => {
             await addDoc(collection(db, "masterAccounts"), { userId: currentUser.uid, platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName, timestamp: Date.now() });
             window.showNotification("✅ Cuenta Matriz registrada con éxito");
         }
-        
+
         document.getElementById('masterAccountModal').style.display = 'none';
         editingMasterId = null;
         window.renderMasterAccounts();
-    } catch(e) { 
-        window.showNotification("Error: " + e.message); 
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
     }
 };
 
@@ -5475,7 +5475,7 @@ window.renderMasterAccounts = async () => {
     const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
     let alertsContainer = document.getElementById('masterAccountsAlerts');
-    if(!alertsContainer) {
+    if (!alertsContainer) {
         alertsContainer = document.createElement('div');
         alertsContainer.id = 'masterAccountsAlerts';
         alertsContainer.style.cssText = "display: none; flex-direction: column; gap: 8px; margin-bottom: 15px; width:100%;";
@@ -5487,7 +5487,7 @@ window.renderMasterAccounts = async () => {
     try {
         const qMat = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
         const snapMat = await getDocs(qMat);
-        
+
         const qCli = query(collection(db, "clients"), where("userId", "==", currentUser.uid));
         const snapCli = await getDocs(qCli);
         const listaClientes = snapCli.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -5499,7 +5499,7 @@ window.renderMasterAccounts = async () => {
 
         container.innerHTML = '';
         let alertasVencimiento = [];
-        let alertasUnicas = new Set(); 
+        let alertasUnicas = new Set();
 
         let cuentasEncontradas = 0;
 
@@ -5510,7 +5510,7 @@ window.renderMasterAccounts = async () => {
             if (searchTerm) {
                 const matchPlatform = acc.platform && acc.platform.toLowerCase().includes(searchTerm);
                 const matchEmail = acc.email && acc.email.toLowerCase().includes(searchTerm);
-                if (!matchPlatform && !matchEmail) return; 
+                if (!matchPlatform && !matchEmail) return;
             }
 
             cuentasEncontradas++;
@@ -5531,9 +5531,9 @@ window.renderMasterAccounts = async () => {
             let infoVencimientoHTML = '';
             if (acc.provider === 'Proveedor Externo') {
                 const nombreProv = acc.providerName ? ` (${acc.providerName})` : '';
-                
+
                 if (acc.expiryDate) {
-                    const hoy = new Date(); hoy.setHours(0,0,0,0);
+                    const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
                     const [year, month, day] = acc.expiryDate.split('-');
                     const fechaVenc = new Date(year, month - 1, day);
                     const diffTime = fechaVenc - hoy;
@@ -5597,31 +5597,31 @@ window.renderMasterAccounts = async () => {
 
             for (let i = 1; i <= acc.maxProfiles; i++) {
                 // NUEVA LÓGICA MULTI-PLATAFORMA Y MULTI-PERFIL CORREGIDA
-            const clienteEnPerfil = clientesDeEstaCuenta.find(c => {
-                let pName = null;
-                if (c.multiAccounts) {
-                    // 🔥 Búsqueda exacta: Solo mirar la cuenta vinculada a ESTA matriz
-                    const linkedAcc = Object.values(c.multiAccounts).find(a => a.masterAccountId === accId);
-                    
-                    if (linkedAcc) {
-                        pName = linkedAcc.profile;
-                    } else if (c.linkedMasterId === accId && c.multiAccounts[acc.platform]) {
-                        // Fallback de seguridad para clientes antiguos
-                        pName = c.multiAccounts[acc.platform].profile;
+                const clienteEnPerfil = clientesDeEstaCuenta.find(c => {
+                    let pName = null;
+                    if (c.multiAccounts) {
+                        // 🔥 Búsqueda exacta: Solo mirar la cuenta vinculada a ESTA matriz
+                        const linkedAcc = Object.values(c.multiAccounts).find(a => a.masterAccountId === accId);
+
+                        if (linkedAcc) {
+                            pName = linkedAcc.profile;
+                        } else if (c.linkedMasterId === accId && c.multiAccounts[acc.platform]) {
+                            // Fallback de seguridad para clientes antiguos
+                            pName = c.multiAccounts[acc.platform].profile;
+                        }
+                    } else {
+                        pName = c.accountProfile;
                     }
-                } else {
-                    pName = c.accountProfile;
-                }
-                
-                if (!pName) return false;
-                
-                // Extrae todos los números (Soporta múltiples perfiles separados por comas)
-                const numerosEncontrados = String(pName).match(/\d+/g); 
-                if (!numerosEncontrados) return false;
-                
-                // Verifica si la ranura actual (i) coincide
-                return numerosEncontrados.some(num => parseInt(num) === i);
-            });
+
+                    if (!pName) return false;
+
+                    // Extrae todos los números (Soporta múltiples perfiles separados por comas)
+                    const numerosEncontrados = String(pName).match(/\d+/g);
+                    if (!numerosEncontrados) return false;
+
+                    // Verifica si la ranura actual (i) coincide
+                    return numerosEncontrados.some(num => parseInt(num) === i);
+                });
                 if (clienteEnPerfil) {
                     perfilesHTML += `
                         <div style="background: rgba(255, 159, 10, 0.08); border: 1px solid var(--mac-orange); padding: 10px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; min-height: 85px;">
@@ -5682,7 +5682,7 @@ window.renderMasterAccounts = async () => {
             }
         }
 
-    } catch(e) {
+    } catch (e) {
         container.innerHTML = `<p style="text-align:center; color:var(--mac-orange);">Error cargando matrices: ${e.message}</p>`;
     }
 };
@@ -5695,7 +5695,7 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum, ma
     editingClientId = null;
     document.getElementById('clientForm').reset();
     document.getElementById('clientName').value = "Perfil " + profileNum;
-    
+
     // --- LÓGICA NUEVA: CÁLCULO DE INVERSIÓN AUTOMÁTICA ---
     const costInput = document.getElementById('clientCost');
     if (costInput) {
@@ -5704,16 +5704,16 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum, ma
     }
     // -----------------------------------------------------
 
-    const cbs = document.querySelectorAll('#checkboxDropdown input'); 
-    cbs.forEach(cb => cb.checked = false); 
-    cbs.forEach(cb => { if(cb.value === platform) cb.checked = true; });
+    const cbs = document.querySelectorAll('#checkboxDropdown input');
+    cbs.forEach(cb => cb.checked = false);
+    cbs.forEach(cb => { if (cb.value === platform) cb.checked = true; });
     const selectText = document.getElementById('selectText');
     if (selectText) {
-        selectText.textContent = platform; 
+        selectText.textContent = platform;
         selectText.classList.add('has-selection');
     }
 
-    multiAccData = {}; 
+    multiAccData = {};
     multiAccData[platform] = window.getDefaultAccData();
     multiAccData[platform].email = email;
     multiAccData[platform].password = pass;
@@ -5729,17 +5729,17 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum, ma
     const invMatch = stock.find(i => i.platform === platform && i.email === email && String(i.profile) === String(profileNum) && i.status === 'libre');
     if (invMatch) {
         // Al inyectar el inventoryId, la función de Guardar Cliente lo eliminará del stock automáticamente
-        multiAccData[platform].inventoryId = invMatch.id; 
+        multiAccData[platform].inventoryId = invMatch.id;
     }
     // --- FIN NUEVA LÓGICA ---
 
     const btnAcc = document.getElementById('btnAccountData');
     if (btnAcc) {
-        btnAcc.innerText = `✅ Datos de Cuenta (1 ud)`; 
-        btnAcc.style.backgroundColor = "var(--mac-green)"; 
+        btnAcc.innerText = `✅ Datos de Cuenta (1 ud)`;
+        btnAcc.style.backgroundColor = "var(--mac-green)";
         btnAcc.style.color = "white";
     }
-    
+
     window.switchMainTab('clientes');
     document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
     window.showNotification("Completa el teléfono y el precio de venta para guardar.");
@@ -5754,7 +5754,7 @@ window.openLinkModal = async (clientId, clientPlatform) => {
         // 2. Obtenemos las Cuentas Matrices disponibles
         const qMat = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
         const snapMat = await getDocs(qMat);
-        
+
         let masterDataMap = {};
         let matricesPorPlataforma = {};
 
@@ -5770,19 +5770,19 @@ window.openLinkModal = async (clientId, clientPlatform) => {
         // 3. Crear el HTML dinámico para cada plataforma que tenga el cliente
         const plataformas = clientPlatform.split(',').map(p => p.trim());
         let htmlContenido = `<p style="font-size: 13px; color: var(--mac-text-secondary); text-align: left; margin-bottom: 15px;">Este cliente tiene <b>${plataformas.length}</b> plataforma(s). Puedes vincular cada una a su respectiva Cuenta Matriz.</p>`;
-        
+
         let hasAnyMatrix = false;
 
         plataformas.forEach((plat, index) => {
             const platKey = plat.toLowerCase();
             const matricesDisponibles = matricesPorPlataforma[platKey] || [];
-            
+
             htmlContenido += `<div style="background: var(--mac-gray); padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--mac-border); text-align: left;">`;
             htmlContenido += `<h4 style="margin: 0 0 10px 0; color: var(--mac-blue); font-size: 14px;"><i class='bx bx-tv'></i> ${plat}</h4>`;
 
             if (matricesDisponibles.length > 0) {
                 hasAnyMatrix = true;
-                
+
                 // Buscar si ya estaba vinculado previamente para dejarlo preseleccionado
                 let matrizActual = '';
                 let perfilActual = '';
@@ -5831,7 +5831,7 @@ window.openLinkModal = async (clientId, clientPlatform) => {
                 for (let i = 0; i < plataformas.length; i++) {
                     const matSelect = document.getElementById(`swal-matriz-${i}`);
                     const perfInput = document.getElementById(`swal-perfil-${i}`);
-                    
+
                     if (matSelect) {
                         const matrizId = matSelect.value;
                         const perfil = perfInput ? perfInput.value.trim() : '';
@@ -5840,7 +5840,7 @@ window.openLinkModal = async (clientId, clientPlatform) => {
                             Swal.showValidationMessage(`El perfil para ${plataformas[i]} debe contener al menos un NÚMERO (Ej: 3, J3).`);
                             return false;
                         }
-                        
+
                         resultados.push({
                             plataforma: matSelect.getAttribute('data-plat'),
                             matrizId: matrizId, // 🔥 Ahora reconoce cuando eliges "No vincular" ("")
@@ -5852,9 +5852,9 @@ window.openLinkModal = async (clientId, clientPlatform) => {
             }
         });
 
-        if (formValues && formValues.length > 0) { 
+        if (formValues && formValues.length > 0) {
             let multiAccounts = c.multiAccounts || {};
-            
+
             if (!c.multiAccounts) {
                 plataformas.forEach(p => {
                     multiAccounts[p] = {
@@ -5869,7 +5869,7 @@ window.openLinkModal = async (clientId, clientPlatform) => {
 
             formValues.forEach(vinculo => {
                 if (!multiAccounts[vinculo.plataforma]) multiAccounts[vinculo.plataforma] = window.getDefaultAccData();
-                
+
                 if (vinculo.matrizId === "") {
                     // 🔥 LÓGICA DE DESVINCULACIÓN (Mata al fantasma)
                     multiAccounts[vinculo.plataforma].masterAccountId = null;
@@ -5897,9 +5897,9 @@ window.openLinkModal = async (clientId, clientPlatform) => {
                 multiAccounts: multiAccounts,
                 ...rootUpdates
             });
-            
+
             window.showNotification("✅ Vínculos guardados y datos actualizados.");
-            loadUserClients(); 
+            loadUserClients();
         }
 
     } catch (e) {
@@ -5910,13 +5910,13 @@ window.openLinkModal = async (clientId, clientPlatform) => {
 window.editarClienteDesdeMatriz = (clientId) => {
     // 1. Cambiamos a la vista de "Mis Clientes"
     window.switchMainTab('clientes');
-    
+
     // 2. Ejecutamos tu función original de edición
     window.startEdit(clientId);
-    
+
     // 3. Hacemos scroll suave hacia el formulario
     document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
-    
+
     window.showNotification("✏️ Modo edición activado.");
 };
 
@@ -5934,7 +5934,7 @@ window.abrirModalAdminBot = () => {
 window.generarQrAdmin = async () => {
     const statusEl = document.getElementById('adminBotStatus');
     const qrImgEl = document.getElementById('adminBotQrImage');
-    
+
     statusEl.innerText = "⏳ Generando código QR...";
     statusEl.style.color = "var(--mac-orange)";
     qrImgEl.style.display = 'none';
@@ -5942,11 +5942,11 @@ window.generarQrAdmin = async () => {
     try {
         // 🔥 CORRECCIÓN: Ahora usa tu UID real para que el cron job de cobranza te reconozca
         const response = await fetch(`https://bot.panelagc.com/api/conectar/${currentUser.uid}`);
-        
+
         if (!response.ok) {
             throw new Error(`Error HTTP: ${response.status}`);
         }
-        
+
         const data = await response.json();
 
         if (data.status === 'qr') {
@@ -5959,8 +5959,8 @@ window.generarQrAdmin = async () => {
             statusEl.innerText = "✅ " + data.message;
             statusEl.style.color = "var(--mac-green)";
         } else {
-             statusEl.innerText = "⚠️ Respuesta inesperada del servidor.";
-             statusEl.style.color = "var(--mac-orange)";
+            statusEl.innerText = "⚠️ Respuesta inesperada del servidor.";
+            statusEl.style.color = "var(--mac-orange)";
         }
 
     } catch (error) {
@@ -5976,10 +5976,10 @@ window.sendFreeProfilesToInventory = async (masterId) => {
         const docSnap = await getDoc(doc(db, "masterAccounts", masterId));
         if (!docSnap.exists()) return;
         const mat = docSnap.data();
-        
+
         const qCli = query(collection(db, "clients"), where("userId", "==", currentUser.uid), where("linkedMasterId", "==", masterId));
         const snapCli = await getDocs(qCli);
-        
+
         const occupiedProfiles = snapCli.docs.map(d => {
             const p = d.data().accountProfile;
             const num = p ? String(p).match(/\d+/) : null;
@@ -6027,19 +6027,19 @@ let funnelChartInst = null;
 window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion') => {
     const textColor = '#888888';
     const gridColor = '#222222';
-    
+
     // --- 1. RADAR INTELIGENTE DE SECCIÓN ---
     const isFinance = document.getElementById('financeSection') && document.getElementById('financeSection').classList.contains('active-section');
-    
+
     const revChartId = isFinance ? '#revenueChartFin' : '#revenueChart';
     const platChartId = isFinance ? '#platformChartFin' : '#platformChart';
     const funChartId = isFinance ? '#funnelChartFin' : '#funnelChart';
-    
+
     const lblTitleId = isFinance ? 'chartHeaderLabelFin' : 'chartHeaderLabel';
     const lblTagId = isFinance ? 'chartHeaderTagFin' : 'chartHeaderTag';
     const lblTotalId = isFinance ? 'chartHeaderTotalFin' : 'chartHeaderTotal';
 
-    const today = new Date(); today.setHours(0,0,0,0);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
     let catLabels = [];
     let chartData = [];
     let labelTitle = '';
@@ -6049,12 +6049,12 @@ window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion
     if (filter === 'proyeccion') {
         labelTitle = 'Dinero por cobrar (Próx. 14 Días)';
         tagHtml = `+ Proyección <i class='bx bx-trending-up'></i>`;
-        for(let i=0; i<14; i++) {
+        for (let i = 0; i < 14; i++) {
             let d = new Date(today); d.setDate(today.getDate() + i);
             catLabels.push(d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }));
             let sum = 0;
             clients.forEach(c => {
-                const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+                const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0);
                 if (exp.getTime() === d.getTime()) sum += (c.price || 0) * (c.accountUnits || 1);
             });
             chartData.push(sum);
@@ -6066,7 +6066,7 @@ window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion
         let sumAyer = 0, sumHoy = 0;
         let ayer = new Date(today); ayer.setDate(today.getDate() - 1);
         clients.forEach(c => {
-            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0);
             const fechaPago = new Date(exp); fechaPago.setMonth(fechaPago.getMonth() - (c.accountMonths || 1));
             if (fechaPago.getTime() === today.getTime()) sumHoy += (c.price || 0) * (c.accountUnits || 1);
             if (fechaPago.getTime() === ayer.getTime()) sumAyer += (c.price || 0) * (c.accountUnits || 1);
@@ -6075,12 +6075,12 @@ window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion
     } else if (filter === 'semana') {
         labelTitle = 'Ingresos (Últimos 7 días)';
         tagHtml = `Esta Semana <i class='bx bx-calendar'></i>`;
-        for(let i=6; i>=0; i--) {
+        for (let i = 6; i >= 0; i--) {
             let d = new Date(today); d.setDate(today.getDate() - i);
-            catLabels.push(d.toLocaleDateString('es-ES', { weekday: 'short' })); 
+            catLabels.push(d.toLocaleDateString('es-ES', { weekday: 'short' }));
             let sum = 0;
             clients.forEach(c => {
-                const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+                const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0);
                 const fechaPago = new Date(exp); fechaPago.setMonth(fechaPago.getMonth() - (c.accountMonths || 1));
                 if (fechaPago.getTime() === d.getTime()) sum += (c.price || 0) * (c.accountUnits || 1);
             });
@@ -6092,7 +6092,7 @@ window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion
         catLabels = ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'];
         let weeks = [0, 0, 0, 0];
         clients.forEach(c => {
-            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0);
             const fechaPago = new Date(exp); fechaPago.setMonth(fechaPago.getMonth() - (c.accountMonths || 1));
             if (fechaPago.getMonth() === today.getMonth() && fechaPago.getFullYear() === today.getFullYear()) {
                 let w = Math.floor((fechaPago.getDate() - 1) / 7);
@@ -6107,7 +6107,7 @@ window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion
         catLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
         let months = new Array(12).fill(0);
         clients.forEach(c => {
-            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0);
             const fechaPago = new Date(exp); fechaPago.setMonth(fechaPago.getMonth() - (c.accountMonths || 1));
             if (fechaPago.getFullYear() === today.getFullYear()) {
                 months[fechaPago.getMonth()] += (c.price || 0) * (c.accountUnits || 1);
@@ -6117,38 +6117,38 @@ window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion
     }
 
     // Actualización de textos DOM usando las variables detectadas
-    if(document.getElementById(lblTitleId)) document.getElementById(lblTitleId).innerText = labelTitle;
-    if(document.getElementById(lblTagId)) document.getElementById(lblTagId).innerHTML = tagHtml;
-    let headerTotal = chartData.reduce((a,b) => a+b, 0);
-    if(document.getElementById(lblTotalId)) document.getElementById(lblTotalId).innerText = `${globalCurrency}${headerTotal.toFixed(2)}`;
+    if (document.getElementById(lblTitleId)) document.getElementById(lblTitleId).innerText = labelTitle;
+    if (document.getElementById(lblTagId)) document.getElementById(lblTagId).innerHTML = tagHtml;
+    let headerTotal = chartData.reduce((a, b) => a + b, 0);
+    if (document.getElementById(lblTotalId)) document.getElementById(lblTotalId).innerText = `${globalCurrency}${headerTotal.toFixed(2)}`;
 
     // DONUT PLATAFORMAS DINÁMICO
     let platCounts = {};
     clients.forEach(c => {
-        const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+        const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0);
         const fechaPago = new Date(exp); fechaPago.setMonth(fechaPago.getMonth() - (c.accountMonths || 1));
-        const dVenc = Math.ceil((exp-today)/86400000);
-        
+        const dVenc = Math.ceil((exp - today) / 86400000);
+
         let entra = false;
-        if (filter === 'proyeccion') { if(dVenc >= 0 && dVenc <= 14) entra = true; }
-        else if (filter === 'hoy') { if(fechaPago.getTime() === today.getTime()) entra = true; }
-        else if (filter === 'semana') { let w = new Date(today); w.setDate(w.getDate()-6); if(fechaPago>=w && fechaPago<=today) entra=true; }
-        else if (filter === 'mes') { if(fechaPago.getMonth()===today.getMonth() && fechaPago.getFullYear()===today.getFullYear()) entra=true; }
-        else if (filter === 'anio') { if(fechaPago.getFullYear()===today.getFullYear()) entra=true; }
+        if (filter === 'proyeccion') { if (dVenc >= 0 && dVenc <= 14) entra = true; }
+        else if (filter === 'hoy') { if (fechaPago.getTime() === today.getTime()) entra = true; }
+        else if (filter === 'semana') { let w = new Date(today); w.setDate(w.getDate() - 6); if (fechaPago >= w && fechaPago <= today) entra = true; }
+        else if (filter === 'mes') { if (fechaPago.getMonth() === today.getMonth() && fechaPago.getFullYear() === today.getFullYear()) entra = true; }
+        else if (filter === 'anio') { if (fechaPago.getFullYear() === today.getFullYear()) entra = true; }
 
         if (entra) {
             const u = c.accountUnits || 1;
             c.platform.split(', ').forEach(p => { platCounts[p] = (platCounts[p] || 0) + u; });
         }
     });
-    const sortedPlats = Object.entries(platCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
+    const sortedPlats = Object.entries(platCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
     const platLabels = sortedPlats.length ? sortedPlats.map(x => x[0]) : ['Sin Datos'];
     const platData = sortedPlats.length ? sortedPlats.map(x => x[1]) : [1];
 
     const commonOptions = { theme: { mode: 'dark' }, tooltip: { theme: 'dark' } };
 
     // DIBUJAR CURVA
-    if(revenueChartInst) revenueChartInst.destroy();
+    if (revenueChartInst) revenueChartInst.destroy();
     revenueChartInst = new ApexCharts(document.querySelector(revChartId), {
         ...commonOptions,
         series: [{ name: `Monto (${globalCurrency})`, data: chartData }],
@@ -6161,7 +6161,7 @@ window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion
     revenueChartInst.render();
 
     // DIBUJAR DONUT
-    if(platformChartInst) platformChartInst.destroy();
+    if (platformChartInst) platformChartInst.destroy();
     platformChartInst = new ApexCharts(document.querySelector(platChartId), {
         ...commonOptions, series: platData, labels: platLabels,
         chart: { type: 'donut', height: 260, background: 'transparent', animations: { enabled: true, easing: 'easeinout', speed: 800 } },
@@ -6172,7 +6172,7 @@ window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion
     platformChartInst.render();
 
     // DIBUJAR EMBUDO
-    if(funnelChartInst) funnelChartInst.destroy();
+    if (funnelChartInst) funnelChartInst.destroy();
     funnelChartInst = new ApexCharts(document.querySelector(funChartId), {
         ...commonOptions, series: [{ name: 'Monto', data: [totalIncome, totalCost, totalProfit] }],
         chart: { type: 'bar', height: 180, background: 'transparent', toolbar: { show: false }, animations: { enabled: true, easing: 'easeinout', speed: 800 } },
@@ -6190,17 +6190,17 @@ window.toggleSidebar = () => {
     const sidebar = document.getElementById('mainSidebar');
     if (sidebar) {
         sidebar.classList.toggle('collapsed');
-        
+
         // Guardamos su estado en la memoria local del navegador
         const isCollapsed = sidebar.classList.contains('collapsed');
         localStorage.setItem('agc_sidebar_collapsed', isCollapsed);
-        
+
         // 🪄 MAGIA: Disparamos un evento "falso" de redimensionamiento de ventana
         // Esto obliga a tus gráficos ApexCharts a recalcular su tamaño al instante
         // y adaptarse suavemente al nuevo espacio gigante que se liberó.
-        setTimeout(() => { 
-            window.dispatchEvent(new Event('resize')); 
-        }, 350); 
+        setTimeout(() => {
+            window.dispatchEvent(new Event('resize'));
+        }, 350);
     }
 };
 
@@ -6209,7 +6209,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const isCollapsed = localStorage.getItem('agc_sidebar_collapsed') === 'true';
     if (isCollapsed) {
         const sidebar = document.getElementById('mainSidebar');
-        if(sidebar) sidebar.classList.add('collapsed');
+        if (sidebar) sidebar.classList.add('collapsed');
     }
 });
 /* =========================================================
@@ -6235,9 +6235,9 @@ window.checkClientPortal = async () => {
     try {
         const q = query(collection(db, "users"), where("storeAlias", "==", portalId));
         const snap = await getDocs(q);
-        
-        if (!snap.empty) { 
-            portalStoreData = snap.docs[0].data(); 
+
+        if (!snap.empty) {
+            portalStoreData = snap.docs[0].data();
             portalStoreData.uid = snap.docs[0].id;
         } else {
             const docRef = await getDoc(doc(db, "users", portalId));
@@ -6253,7 +6253,7 @@ window.checkClientPortal = async () => {
         }
 
         document.getElementById('portalStoreName').innerText = portalStoreData.name || "Mi Portal";
-        
+
         const logo = document.getElementById('portalStoreLogo');
         if (logo) {
             if (portalStoreData.logoUrl) {
@@ -6274,21 +6274,21 @@ window.checkClientPortal = async () => {
             const clientDoc = await getDoc(doc(db, "clients", clientId));
             if (clientDoc.exists() && clientDoc.data().userId === portalStoreData.uid) {
                 const baseClient = clientDoc.data();
-                
+
                 // Buscar si tiene otros servicios con el mismo código y teléfono
                 const cleanInputPhone = baseClient.phone ? baseClient.phone.replace(/[^\d]/g, '') : '';
                 const codeInput = baseClient.portalCode;
-                
+
                 const qAll = query(collection(db, "clients"), where("userId", "==", portalStoreData.uid));
                 const snapAll = await getDocs(qAll);
-                
+
                 let matchedClients = [];
                 snapAll.forEach(d => {
                     const c = d.data();
                     c.id = d.id; // <-- FIX: Atrapa el ID secreto del cliente
                     const cleanDbPhone = c.phone ? c.phone.replace(/[^\d]/g, '') : '';
                     if ((cleanDbPhone === cleanInputPhone || cleanDbPhone.endsWith(cleanInputPhone)) && c.portalCode === codeInput) {
-                        matchedClients.push(c); 
+                        matchedClients.push(c);
                     }
                 });
 
@@ -6326,7 +6326,7 @@ window.searchPortalByPhone = async () => {
             const cleanDbPhone = c.phone ? c.phone.replace(/[^\d]/g, '') : '';
             // Validar teléfono y código para apilar todas sus compras
             if ((cleanDbPhone === cleanInputPhone || cleanDbPhone.endsWith(cleanInputPhone)) && c.portalCode === codeInput) {
-                matchedClients.push(c); 
+                matchedClients.push(c);
             }
         });
 
@@ -6336,7 +6336,7 @@ window.searchPortalByPhone = async () => {
         } else {
             window.showNotification("❌ Datos incorrectos. Revisa tu número y código.");
         }
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         window.showNotification("Error: " + e.message);
     } finally {
@@ -6364,7 +6364,7 @@ window.openPortalManagerModal = () => {
     const baseUrl = window.location.origin + window.location.pathname;
     const portalAlias = currentUserData.storeAlias || currentUser.uid;
     const globalUrl = `${baseUrl}?portal=${portalAlias}`;
-    
+
     document.getElementById('globalPortalUrlInput').value = globalUrl;
     document.getElementById('portalManagerModal').style.display = 'flex';
 };
@@ -6383,16 +6383,16 @@ window.sendClientPortalWa = (phone, clientId) => {
     const portalAlias = currentUserData.storeAlias || currentUser.uid;
     const clientUrl = `${baseUrl}?portal=${portalAlias}`;
     const cleanPhone = phone.replace(/[^\d+]/g, '');
-    
+
     const msg = `¡Hola, *${c.name}*! 👋\n\nPuedes consultar el estado de tus servicios y tus contraseñas en tiempo real desde tu portal web personal.\n\n🔗 *Link:* ${clientUrl}\n📱 *Usuario:* ${c.phone}\n🔑 *Código Web:* ${c.portalCode || 'N/A'}\n\n_Guarda este mensaje para ver tus accesos cuando quieras._`;
-    
+
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
 };
 
 window.renderClientPortalData = (clientsArray, storeUserData) => {
     const container = document.getElementById('portalClientResults');
     container.innerHTML = '';
-    
+
     if (!clientsArray || clientsArray.length === 0) return;
 
     let fullHtml = '';
@@ -6402,14 +6402,14 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
         const now = new Date();
         const exp = new Date(clientObj.date);
         exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
-        
+
         const diffTime = exp.getTime() - now.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
+
         let badgeClass = 'active';
         let badgeIcon = 'bx-check-circle';
         let badgeText = `Activo (${diffDays} días restantes)`;
-        
+
         if (diffDays <= 0) {
             badgeClass = 'expired';
             badgeIcon = 'bx-x-circle';
@@ -6429,8 +6429,8 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
 
         let accountsHtml = '';
         platformsList.forEach(platName => {
-            let acc = clientObj.multiAccounts && clientObj.multiAccounts[platName] 
-                ? clientObj.multiAccounts[platName] 
+            let acc = clientObj.multiAccounts && clientObj.multiAccounts[platName]
+                ? clientObj.multiAccounts[platName]
                 : {
                     email: clientObj.accountEmail || '-',
                     password: clientObj.accountPassword || '-',
@@ -6471,7 +6471,7 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
         const renewMsg = encodeURIComponent(`¡Hola! Quisiera renovar mi servicio de ${clientObj.platform}. Nombre: ${clientObj.name}`);
         const renewUrl = `https://wa.me/${vendorPhone}?text=${renewMsg}`;
 
-       fullHtml += `
+        fullHtml += `
             <div class="portal-hero-card" style="margin-bottom: 20px;">
                 <span class="portal-badge ${badgeClass}"><i class='bx ${badgeIcon}'></i> ${badgeText}</span>
                 <h2 style="margin: 0 0 5px 0; font-size: 22px; color: var(--mac-text-main);">${clientObj.name}</h2>
@@ -6492,7 +6492,7 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
 
 document.addEventListener('DOMContentLoaded', () => { window.checkClientPortal(); });
 
-        // 📱 CONTROLADOR DEL MENÚ LATERAL EN MÓVIL ESTILO SPOTIFY
+// 📱 CONTROLADOR DEL MENÚ LATERAL EN MÓVIL ESTILO SPOTIFY
 window.toggleMobileMenu = () => {
     const sidebar = document.getElementById('mainSidebar');
     const overlay = document.getElementById('mobileSidebarOverlay');
@@ -6554,13 +6554,13 @@ window.populateAllServiceSelects = () => {
             label.innerHTML = `<input type="checkbox" value="${s}"> ${s}`;
             chkDropdown.appendChild(label);
         });
-        document.querySelectorAll('#checkboxDropdown input').forEach(cb => { 
-            cb.addEventListener('change', () => { 
-                const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value); 
-                const el = document.getElementById('selectText'); 
-                if(checked.length) { el.textContent = checked.join(', '); el.classList.add('has-selection'); } 
-                else { el.textContent = 'Plataforma(s)...'; el.classList.remove('has-selection'); } 
-            }); 
+        document.querySelectorAll('#checkboxDropdown input').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value);
+                const el = document.getElementById('selectText');
+                if (checked.length) { el.textContent = checked.join(', '); el.classList.add('has-selection'); }
+                else { el.textContent = 'Plataforma(s)...'; el.classList.remove('has-selection'); }
+            });
         });
     }
 
@@ -6659,7 +6659,7 @@ window.checkPlanesView = () => {
 window.startTutorial = () => {
     const driver = window.driver.js.driver;
     const isDark = document.body.classList.contains('dark-mode');
-    
+
     const driverObj = driver({
         showProgress: true,
         nextBtnText: 'Siguiente &rarr;',
@@ -6700,12 +6700,12 @@ window.updateStoreToggleUI = (labelEl, inputId) => {
         const chk = document.getElementById(inputId);
         const icon = labelEl.querySelector('.store-toggle-icon');
         if (!chk || !icon) return;
-        
+
         // Define colores: Azul para Inventario, Naranja para Invitación
         const isStock = inputId === 'storeAutoStock';
         const activeColor = isStock ? 'var(--mac-blue)' : 'var(--mac-orange)';
         const activeBg = isStock ? 'rgba(0, 122, 255, 0.15)' : 'rgba(255, 149, 0, 0.15)';
-        
+
         if (chk.checked) {
             labelEl.style.border = `1px solid ${activeColor}`;
             labelEl.style.background = activeBg;
@@ -6724,7 +6724,7 @@ window.currentClientNote = '';
 // --- VER NOTA DEL CLIENTE (TIPO PAPELITO) ---
 window.viewClientNote = (id) => {
     const c = clients.find(x => x.id === id);
-    if(c && c.notes) {
+    if (c && c.notes) {
         Swal.fire({
             title: '📝 Nota del Cliente',
             html: `
@@ -6752,7 +6752,7 @@ window.openNotesModal = async () => {
         background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
         color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
     });
-    
+
     if (text !== undefined) {
         window.currentClientNote = text;
         window.showNotification("Nota temporal guardada.");
@@ -6761,12 +6761,12 @@ window.openNotesModal = async () => {
 
 window.toggleClientMenu = (e, menuId) => {
     e.stopPropagation();
-    
+
     // 1. Cerramos otros menús y reseteamos la profundidad de TODAS las filas
     document.querySelectorAll('.client-action-menu').forEach(menu => {
-        if(menu.id !== menuId) menu.classList.remove('show');
+        if (menu.id !== menuId) menu.classList.remove('show');
     });
-    
+
     document.querySelectorAll('#tableBody tr').forEach(tr => {
         tr.style.zIndex = '1';
         tr.style.position = 'relative'; // Fundamental para que el z-index haga efecto
@@ -6788,7 +6788,7 @@ window.toggleClientMenu = (e, menuId) => {
 // Cierra el menú de opciones si el usuario hace clic fuera de la tabla
 document.addEventListener('click', () => {
     document.querySelectorAll('.client-action-menu').forEach(menu => menu.classList.remove('show'));
-    
+
     // También devolvemos todas las filas a su lugar normal al hacer clic fuera
     document.querySelectorAll('#tableBody tr').forEach(tr => {
         tr.style.zIndex = '1';
@@ -6801,16 +6801,16 @@ document.addEventListener('click', () => {
 window.openAssistant = () => {
     const panel = document.getElementById('aiAssistantPanel');
     const msgEl = document.getElementById('aiContextMessage');
-    
+
     // 🔥 NUEVO: Si el panel ya está abierto, lo cerramos y detenemos la función
     if (panel.classList.contains('active')) {
         window.closeAssistant();
         return;
     }
-    
+
     // 1. Detectar en qué sección está el usuario
     let activeSection = 'home'; // Por defecto
-    
+
     if (document.getElementById('adminView').style.display === 'block') {
         activeSection = 'admin';
     } else if (document.getElementById('inventoryModal').classList.contains('active-section') || document.getElementById('inventoryModal').style.display === 'flex') {
@@ -6830,17 +6830,17 @@ window.openAssistant = () => {
     // 2. Base de conocimientos (Respuestas predeterminadas por sección)
     const baseConocimientos = {
         'clientes': `<b>📍 Estás en: Mis Clientes</b><br><br>Aquí administras a tus clientes finales.<br><br>💡 <b>Tip de uso:</b> Usa el botón <b>"⚙️ Opciones"</b> para renovar meses, copiar credenciales al instante, o enviarle a tu cliente su Link de Portal Web.`,
-        
+
         'matrices': `<b>📍 Estás en: Cuentas Matrices</b><br><br>Aquí organizas el stock de tus pantallas.<br><br>💡 <b>Tip de uso:</b> Añade una cuenta completa aquí (ej: Netflix de 5 perfiles). El panel te mostrará cuántos espacios te quedan. Usa <b>"Asignar"</b> para vender un perfil libre directamente a un cliente.`,
-        
+
         'inventory': `<b>📍 Estás en: Inventario</b><br><br>Esta es tu "bodega" de cuentas libres.<br><br>💡 <b>Tip de uso:</b> Usa el botón verde <i class="bx bx-send"></i> para entregar una cuenta; esto la enviará automáticamente al formulario de clientes para que solo pongas el nombre del comprador.`,
-        
+
         'store': `<b>📍 Estás en: Mi Tiendita Web</b><br><br>Este es tu catálogo público para vender en automático.<br><br>💡 <b>Tip de uso:</b> Si marcas <b>"Conectar al Inventario"</b> al crear un producto, este se agotará en la tienda cuando te quedes sin stock en tu bodega.`,
-        
+
         'pedidos': `<b>📍 Estás en: Ventas Pendientes</b><br><br>Aquí llegan los pagos que tus clientes hacen en la tiendita.<br><br>💡 <b>Tip de uso:</b> Revisa la captura de pago y presiona <b>"Aprobar"</b>. El sistema sacará una cuenta de tu inventario y se la mandará al WhatsApp del cliente por ti.`,
-        
+
         'profile': `<b>📍 Estás en: Mi Perfil & Bot</b><br><br>Aquí configuras tu identidad visual.<br><br>💡 <b>Tip de uso:</b> Enlaza tu WhatsApp haciendo clic en <b>"Activar Mensajes Automáticos"</b> y escaneando el QR. Esto permitirá que tu teléfono cobre las renovaciones mientras duermes.`,
-        
+
         'admin': `<b>📍 Estás en: Panel Global (Admin)</b><br><br>Control total de tu negocio SaaS.<br><br>💡 <b>Tip de uso:</b> Usa los filtros de arriba para encontrar clientes. Al editar la licencia de alguien, puedes darle una Demo de 3 horas o un plan Mensual. Si su tiempo se acaba, el sistema lo bloqueará automáticamente.`
     };
 
@@ -6863,24 +6863,13 @@ window.switchStoreAdminTab = (tabId, element) => {
     // Cambiar color de pestaña
     document.querySelectorAll('#storeModal .chrome-tab').forEach(tab => tab.classList.remove('active'));
     element.classList.add('active');
-    
+
     // Si entra a ajustes, cargar datos
-    if(tabId === 'tabDescuentos') {
+    if (tabId === 'tabDescuentos') {
         const d = currentUserData.storeDiscounts || { qty2: 0, qty3: 0, qty4: 0 };
         document.getElementById('descCombo2').value = d.qty2 || '';
         document.getElementById('descCombo3').value = d.qty3 || '';
         document.getElementById('descCombo4').value = d.qty4 || '';
-        
-        // --- NUEVO: Cargar productos al desplegable ---
-        const targetSelect = document.getElementById('newCouponTarget');
-        if (targetSelect) {
-            targetSelect.innerHTML = '<option value="global">Todo el Catálogo</option>';
-            const catalog = currentUserData.storeCatalog || [];
-            catalog.forEach(item => {
-                targetSelect.innerHTML += `<option value="${item.id}">${item.platform}</option>`;
-            });
-        }
-        
         window.renderStoreCoupons();
     }
 };
@@ -6890,60 +6879,44 @@ window.saveStoreSettings = async () => {
         const qty2 = parseFloat(document.getElementById('descCombo2').value) || 0;
         const qty3 = parseFloat(document.getElementById('descCombo3').value) || 0;
         const qty4 = parseFloat(document.getElementById('descCombo4').value) || 0;
-        
+
         const storeDiscounts = { qty2, qty3, qty4 };
-        
+
         await updateDoc(doc(db, "users", currentUser.uid), { storeDiscounts });
         currentUserData.storeDiscounts = storeDiscounts;
         window.showNotification("✅ Descuentos guardados correctamente");
-    } catch(e) { window.showNotification("Error: " + e.message); }
+    } catch (e) { window.showNotification("Error: " + e.message); }
 };
 
 window.addStoreCoupon = async () => {
     const code = document.getElementById('newCouponCode').value.trim().toUpperCase();
     const percent = parseFloat(document.getElementById('newCouponPercent').value) || 0;
-    // Capturamos el producto seleccionado
-    const target = document.getElementById('newCouponTarget') ? document.getElementById('newCouponTarget').value : 'global';
-    
+
     if (!code || percent <= 0) return window.showNotification("⚠️ Ingresa un código y un descuento válido.");
-    
+
     let coupons = currentUserData.storeCoupons || [];
     if (coupons.some(c => c.code === code)) return window.showNotification("Ese código ya existe.");
-    
-    // Guardamos con el objetivo (target)
-    coupons.push({ code, percent, target });
+
+    coupons.push({ code, percent });
     try {
         await updateDoc(doc(db, "users", currentUser.uid), { storeCoupons: coupons });
         currentUserData.storeCoupons = coupons;
         document.getElementById('newCouponCode').value = '';
         document.getElementById('newCouponPercent').value = '';
-        if(document.getElementById('newCouponTarget')) document.getElementById('newCouponTarget').value = 'global';
-        
         window.renderStoreCoupons();
         window.showNotification("🎟️ Cupón creado");
-    } catch(e) {}
+    } catch (e) { }
 };
 
 window.renderStoreCoupons = () => {
     const list = document.getElementById('storeCouponsList');
     list.innerHTML = '';
     const coupons = currentUserData.storeCoupons || [];
-    
-    coupons.forEach((c, index) => {
-        // Detectar a qué aplica para mostrarlo visualmente
-        let targetText = "Todo el Catálogo";
-        if (c.target && c.target !== 'global') {
-            const catalog = currentUserData.storeCatalog || [];
-            const prod = catalog.find(item => item.id === c.target);
-            if (prod) targetText = prod.platform;
-        }
 
+    coupons.forEach((c, index) => {
         list.innerHTML += `
-            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mac-surface); border: 1px dashed var(--mac-green); padding: 10px 15px; border-radius: 8px; margin-bottom: 8px;">
-                <div>
-                    <span style="font-weight: 900; color: var(--mac-green); letter-spacing: 1px; display: block;">${c.code} <span style="font-size: 11px; color: var(--mac-text-secondary);">(-${c.percent}%)</span></span>
-                    <span style="font-size: 11px; color: var(--mac-text-main);">Aplica a: <strong>${targetText}</strong></span>
-                </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mac-surface); border: 1px dashed var(--mac-green); padding: 10px 15px; border-radius: 8px;">
+                <span style="font-weight: 900; color: var(--mac-green); letter-spacing: 1px;">${c.code} <span style="font-size: 11px; color: var(--mac-text-secondary);">(-${c.percent}%)</span></span>
                 <button class="action-btn btn-del" style="padding: 4px; font-size: 14px;" onclick="window.deleteStoreCoupon(${index})"><i class='bx bx-trash'></i></button>
             </div>
         `;
@@ -6968,14 +6941,14 @@ window.applyCoupon = () => {
     const code = document.getElementById('cartCouponInput').value.trim().toUpperCase();
     const feedback = document.getElementById('couponFeedbackMessage');
 
-    if(!code) {
+    if (!code) {
         if (feedback) feedback.style.display = 'none';
         return;
     }
-    
+
     const storeCoupons = window.publicStoreDataCache.storeCoupons || [];
     const validCoupon = storeCoupons.find(c => c.code === code);
-    
+
     if (validCoupon) {
         activeCoupon = validCoupon;
         if (feedback) {
@@ -6999,7 +6972,7 @@ window.renderCartItems = () => {
     const container = document.getElementById('cartItemsContainer');
     const data = window.publicStoreDataCache;
     container.innerHTML = '';
-    
+
     if (window.storeCart.length === 0) {
         container.innerHTML = '<div style="text-align: center; color: var(--mac-text-secondary); margin-top: 50px;"><i class="bx bx-shopping-bag" style="font-size: 64px; opacity: 0.3; margin-bottom: 15px;"></i><p style="font-weight: bold; font-size: 16px;">Tu carrito está vacío</p></div>';
         document.getElementById('cartTotalPrice').innerText = `${data.currency || 'S/'}0.00`;
@@ -7008,7 +6981,7 @@ window.renderCartItems = () => {
         document.getElementById('cartCouponRow').style.display = 'none';
         return;
     }
-    
+
     let subtotal = 0;
     window.storeCart.forEach((item, index) => {
         subtotal += item.price;
@@ -7029,37 +7002,25 @@ window.renderCartItems = () => {
     let qty = window.storeCart.length;
     let comboDiscountPercent = 0;
     const dynamicDisc = data.storeDiscounts || { qty2: 0, qty3: 0, qty4: 0 };
-    
+
     if (qty >= 4 && dynamicDisc.qty4) comboDiscountPercent = dynamicDisc.qty4;
     else if (qty === 3 && dynamicDisc.qty3) comboDiscountPercent = dynamicDisc.qty3;
     else if (qty === 2 && dynamicDisc.qty2) comboDiscountPercent = dynamicDisc.qty2;
 
     let comboDiscountAmount = subtotal * (comboDiscountPercent / 100);
     let afterComboPrice = subtotal - comboDiscountAmount;
-    
+
     // CÁLCULO DE CUPÓN
     let couponDiscountAmount = 0;
     if (activeCoupon) {
-        if (!activeCoupon.target || activeCoupon.target === 'global') {
-            // Aplica el descuento a todo el carrito (comportamiento original)
-            couponDiscountAmount = afterComboPrice * (activeCoupon.percent / 100);
-        } else {
-            // Solo aplica el descuento al producto específico
-            let targetItemsTotal = 0;
-            window.storeCart.forEach(item => {
-                if (item.id === activeCoupon.target) {
-                    targetItemsTotal += item.price;
-                }
-            });
-            couponDiscountAmount = targetItemsTotal * (activeCoupon.percent / 100);
-        }
+        couponDiscountAmount = afterComboPrice * (activeCoupon.percent / 100);
     }
-    
+
     let finalTotal = afterComboPrice - couponDiscountAmount;
 
     // ACTUALIZAR INTERFAZ DEL CARRITO
     document.getElementById('cartSubtotalPrice').innerText = `${data.currency || 'S/'}${subtotal.toFixed(2)}`;
-    
+
     if (comboDiscountAmount > 0) {
         document.getElementById('cartComboDiscountRow').style.display = 'flex';
         document.getElementById('cartComboDiscountLabel').innerText = `Combo Armado (-${comboDiscountPercent}%):`;
@@ -7076,7 +7037,7 @@ window.renderCartItems = () => {
     }
 
     document.getElementById('cartTotalPrice').innerText = `${data.currency || 'S/'}${finalTotal.toFixed(2)}`;
-    
+
     // Guardar el total en una variable global para el checkout
     window.currentCartFinalTotal = finalTotal;
 };
@@ -7089,14 +7050,14 @@ window.renderPublicCatalog = () => {
     const catalogBox = document.getElementById('publicStoreCatalog');
     if (!catalogBox) return;
     catalogBox.innerHTML = '';
-    
+
     const catalog = window.publicCatalogCache || [];
     const data = window.publicStoreDataCache;
     if (!data) return;
 
-    const isStoreOpen = data.storeActive !== false; 
+    const isStoreOpen = data.storeActive !== false;
     const searchTerm = document.getElementById('publicStoreSearchInput') ? document.getElementById('publicStoreSearchInput').value.toLowerCase() : '';
-    
+
     // Valores por defecto seguros para evitar que se quede en blanco
     const typeF = window.currentStoreTypeFilter || 'Todos';
     const catF = window.currentStoreCatFilter || 'Todas';
@@ -7104,7 +7065,7 @@ window.renderPublicCatalog = () => {
     // 1. Extraemos las categorías ÚNICAS de todo el catálogo para dibujar los botones
     const allCategories = [...new Set(catalog.map(i => i.category).filter(c => c && c !== ''))];
     const catContainer = document.getElementById('publicStoreCategoryFilters');
-    
+
     if (allCategories.length > 0) {
         catContainer.style.display = 'flex';
         // Solo repintamos los botones si cambió la lista de categorías
@@ -7120,7 +7081,7 @@ window.renderPublicCatalog = () => {
             });
         }
     } else {
-        if(catContainer) catContainer.style.display = 'none';
+        if (catContainer) catContainer.style.display = 'none';
     }
 
     // 2. Generamos el Título Dinámico
@@ -7131,7 +7092,7 @@ window.renderPublicCatalog = () => {
         } else {
             let titlePrefix = typeF === 'Combo' ? 'COMBOS DE' : (typeF === 'Servicio' ? 'SERVICIOS DE' : 'EXPLORAR');
             let rawCat = catF === 'Todas' ? 'TODO EL CATÁLOGO' : catF;
-            
+
             const emojiRegex = /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g;
             let emojiMatch = rawCat.match(emojiRegex);
             let emoji = emojiMatch ? emojiMatch[0] : "<i class='bx bx-category'></i>";
@@ -7164,12 +7125,12 @@ window.renderPublicCatalog = () => {
             return matchCat && matchType && matchSearch;
         });
 
-        if (itemsEnCategoria.length === 0) return; 
+        if (itemsEnCategoria.length === 0) return;
         itemsMostrados += itemsEnCategoria.length;
 
         const sectionDiv = document.createElement('div');
         sectionDiv.style.cssText = "margin-bottom: 40px; background: rgba(255, 255, 255, 0.02); padding: 20px; border-radius: 24px; border: 1px solid var(--mac-border); box-shadow: 0 10px 30px rgba(0,0,0,0.1);";
-        
+
         sectionDiv.innerHTML = `
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px;">
                 <div style="background: var(--mac-blue); padding: 8px; border-radius: 10px; color: white;"><i class='bx bx-category' style="font-size: 20px; margin: 0;"></i></div>
@@ -7177,7 +7138,7 @@ window.renderPublicCatalog = () => {
             </div>
             <div class="category-items-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px;"></div>
         `;
-        
+
         const gridDiv = sectionDiv.querySelector('.category-items-grid');
 
         // Renderizar las tarjetas
@@ -7185,7 +7146,7 @@ window.renderPublicCatalog = () => {
             const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
             let isAgotado = item.status === 'agotado';
             let stockHtml = '';
-            
+
             // Lógica de Etiquetas de Stock
             if (item.badgeOption === 'a_pedido') {
                 stockHtml = `<span style="font-size:10px; color:var(--mac-blue); display:block; margin-top:6px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><i class='bx bx-package'></i> Disponible a pedido</span>`;
@@ -7193,8 +7154,8 @@ window.renderPublicCatalog = () => {
                 const stock = data.inventory || [];
                 if (item.type === 'Combo') {
                     const counts = item.stockPlatforms.map(p => stock.filter(i => i.status === 'libre' && i.platform === p).length);
-                    const comboDisponible = Math.min(...counts); 
-                    if (comboDisponible === 0) isAgotado = true; 
+                    const comboDisponible = Math.min(...counts);
+                    if (comboDisponible === 0) isAgotado = true;
                     const colorStock = comboDisponible > 2 ? 'var(--mac-green)' : (comboDisponible > 0 ? 'var(--mac-orange)' : 'var(--mac-red)');
                     stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><i class='bx bx-box'></i> Stock Combo: <span style="color:${colorStock};">${comboDisponible} disp.</span></span>`;
                 } else {
@@ -7230,13 +7191,13 @@ window.renderPublicCatalog = () => {
             // --- INICIO GENERADOR DE PESTAÑAS PÚBLICAS ---
             let tabsData = item.storeTabs || [];
             if (tabsData.length === 0) { // Retrocompatibilidad para productos viejos
-                const opts = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{label: '1 Mes', price: item.price}];
+                const opts = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{ label: '1 Mes', price: item.price }];
                 tabsData = [{ name: 'General', options: opts }];
             }
 
             const showTabs = tabsData.length > 1 || (tabsData.length === 1 && tabsData[0].name !== 'General' && tabsData[0].name !== 'Opciones' && tabsData[0].name !== '');
             let tabsHtml = '';
-            
+
             if (showTabs) {
                 tabsHtml += `<div style="display:flex; overflow-x:auto; gap:8px; margin-bottom:12px; scrollbar-width:none; padding-bottom:4px;">`;
                 tabsData.forEach((t, i) => {
@@ -7256,7 +7217,7 @@ window.renderPublicCatalog = () => {
                 const borderColor = isSelected ? 'var(--mac-blue)' : 'var(--mac-border)';
                 const bg = isSelected ? 'rgba(0, 122, 255, 0.1)' : 'var(--mac-surface)';
                 optionsHtml += `
-                    <label id="opt_label_${item.id}_${i}" onclick="window.selectPubOption('${item.id}', 0, ${i}, ${opt.price}, '${opt.label.replace(/'/g,"\\'")}')" class="pub-opt-${item.id}" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-radius:12px; border:1px solid ${borderColor}; background:${bg}; cursor:pointer; transition:all 0.2s;">
+                    <label id="opt_label_${item.id}_${i}" onclick="window.selectPubOption('${item.id}', 0, ${i}, ${opt.price}, '${opt.label.replace(/'/g, "\\'")}')" class="pub-opt-${item.id}" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-radius:12px; border:1px solid ${borderColor}; background:${bg}; cursor:pointer; transition:all 0.2s;">
                         <span style="font-size:14px; font-weight:600; color:var(--mac-text-main);">${opt.label}</span>
                         <span style="font-size:15px; font-weight:800; color:var(--mac-text-main);">${data.currency || 'S/'}${opt.price.toFixed(2)}</span>
                     </label>
@@ -7264,7 +7225,7 @@ window.renderPublicCatalog = () => {
             });
             optionsHtml += `</div>`;
 
-            if(!window.storeItemsTabsData) window.storeItemsTabsData = {};
+            if (!window.storeItemsTabsData) window.storeItemsTabsData = {};
             window.storeItemsTabsData[item.id] = tabsData;
             window.storeSelectedOptions[item.id] = { price: tabsData[0].options[0].price, label: (tabsData[0].name !== 'General' && showTabs ? tabsData[0].name + ' - ' : '') + tabsData[0].options[0].label };
 
@@ -7290,7 +7251,7 @@ window.renderPublicCatalog = () => {
 
             const card = document.createElement('div');
             card.className = `store-product-card ${isAgotado || !isStoreOpen ? 'is-agotado' : ''}`;
-            
+
             card.innerHTML = `
                 ${typeBadgeHtml}
                 <button class="store-share-btn" onclick="event.stopPropagation(); window.shareProduct('${item.id}')" title="Compartir Oferta"><i class='bx bx-share-alt'></i></button>
@@ -7324,10 +7285,10 @@ window.openCheckoutFromCart = () => {
     originalOpenCheckout();
     const data = window.publicStoreDataCache;
     // Sobrescribir el precio con el total calculado
-    if(document.getElementById('checkoutItemPrice')) {
+    if (document.getElementById('checkoutItemPrice')) {
         document.getElementById('checkoutItemPrice').innerText = `${data.currency || 'S/'}${window.currentCartFinalTotal.toFixed(2)}`;
     }
-    if(currentCheckoutItem) currentCheckoutItem.price = window.currentCartFinalTotal; // Para que pase a la BD
+    if (currentCheckoutItem) currentCheckoutItem.price = window.currentCartFinalTotal; // Para que pase a la BD
 };
 /* =========================================================
    MÓDULO: EXPORTADOR DE CATÁLOGO A ESTADOS (IMÁGENES HD)
@@ -7382,9 +7343,9 @@ window.generateCatalogImages = async () => {
         // Referencias de la plantilla DOM
         const template = document.getElementById('statusExportTemplate');
         template.style.left = '0px'; // Lo traemos al frente visiblemente invisible (z-index negativo)
-        
+
         document.getElementById('statusBrandName').innerText = currentUserData.name || 'Mi Marca';
-        
+
         const logoEl = document.getElementById('statusLogo');
         if (safeLogoBase64) {
             logoEl.src = safeLogoBase64;
@@ -7422,7 +7383,7 @@ window.generateCatalogImages = async () => {
 
             for (let i = 0; i < items.length; i += itemsPerPage) {
                 const chunk = items.slice(i, i + itemsPerPage);
-                
+
                 // Llenar los productos en el contenedor
                 const itemsContainer = document.getElementById('statusItemsContainer');
                 itemsContainer.innerHTML = '';
@@ -7440,7 +7401,7 @@ window.generateCatalogImages = async () => {
                     // Armar los precios (máximo mostrar 2 para no romper el diseño)
                     let preciosHtml = '';
                     const opciones = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{ label: '1 Mes', price: item.price }];
-                    
+
                     opciones.slice(0, 2).forEach(opt => {
                         preciosHtml += `
                             <div style="background: rgba(255,255,255,0.1); padding: 12px 25px; border-radius: 20px; display: inline-flex; flex-direction: column; justify-content: center; border: 1px solid rgba(255,255,255,0.15);">
@@ -7473,7 +7434,7 @@ window.generateCatalogImages = async () => {
                 await new Promise(r => setTimeout(r, 200));
 
                 // Tomar la foto
-                const canvas = await html2canvas(template, { 
+                const canvas = await html2canvas(template, {
                     backgroundColor: '#1c1c1e',
                     scale: 1, // Escala 1 = 1080x1920 nativo
                     useCORS: true,
@@ -7482,7 +7443,7 @@ window.generateCatalogImages = async () => {
 
                 generatedImagesUrls.push({
                     url: canvas.toDataURL('image/png'),
-                    name: `Estado_${cat.replace(/\s+/g, '_')}_Parte_${(i/itemsPerPage)+1}.png`
+                    name: `Estado_${cat.replace(/\s+/g, '_')}_Parte_${(i / itemsPerPage) + 1}.png`
                 });
             }
         }
@@ -7529,8 +7490,8 @@ window.generateCatalogImages = async () => {
 ========================================================= */
 window.startContextTutorial = () => {
     // 1. Detectamos la sección exacta usando la misma lógica del Asistente
-    let activeSection = 'clientes'; 
-    
+    let activeSection = 'clientes';
+
     if (document.getElementById('adminView').style.display === 'block') {
         activeSection = 'admin';
     } else if (document.getElementById('inventoryModal').classList.contains('active-section') || document.getElementById('inventoryModal').style.display === 'flex') {
@@ -7602,7 +7563,7 @@ window.startContextTutorial = () => {
         // Seleccionamos los pasos de la sección activa (o por defecto, la de clientes)
         steps: tutorialSteps[activeSection] || tutorialSteps['clientes']
     });
-    
+
     driverObj.drive();
 };
 
@@ -7612,7 +7573,7 @@ window.updateCardPrice = (itemId, selectEl) => {
     const option = selectEl.options[selectEl.selectedIndex];
     const price = parseFloat(option.getAttribute('data-price'));
     const displayEl = document.getElementById('price_display_' + itemId);
-    if(displayEl) {
+    if (displayEl) {
         displayEl.innerText = `${window.publicStoreDataCache.currency || 'S/'}${price.toFixed(2)}`;
         // Pequeño efecto de latido para que el cliente note el cambio
         displayEl.style.transform = 'scale(1.1)';
@@ -7630,11 +7591,11 @@ window.addToCartConDuracion = (itemId) => {
     const meses = parseInt(selectElement.value) || 1;
     const option = selectElement.options[selectElement.selectedIndex];
     const finalPrice = parseFloat(option.getAttribute('data-price'));
-    
+
     // Clonamos para no alterar la BD original
-    const cartItem = { ...originalItem }; 
+    const cartItem = { ...originalItem };
     cartItem.price = finalPrice;
-    
+
     // Personalizamos el nombre en el carrito
     if (meses > 1) {
         cartItem.platform = `${originalItem.platform} (${meses} Meses)`;
@@ -7643,7 +7604,7 @@ window.addToCartConDuracion = (itemId) => {
     window.storeCart.push(cartItem);
     document.getElementById('cartBadge').innerText = window.storeCart.length;
     document.getElementById('floatingCartBtn').style.display = 'flex';
-    
+
     document.getElementById('cartPanelOverlay').classList.add('active');
     document.getElementById('cartPanel').classList.add('active');
     window.renderCartItems();
@@ -7671,7 +7632,7 @@ window.openStoreModal = () => {
     originalOpenStoreModal();
     const builder = document.getElementById('builder-crear');
     if (builder && builder.children.length === 0) {
-        window.addTabToBuilder('builder-crear', '1 Mes', [{label: 'Perfil', price: ''}]);
+        window.addTabToBuilder('builder-crear', '1 Mes', [{ label: 'Perfil', price: '' }]);
     }
 };
 
@@ -7682,8 +7643,8 @@ window.addToCartWithOptions = (itemId) => {
 
     // Recupera la opción seleccionada por la función de Pestañas
     const selectedOpt = window.storeSelectedOptions[itemId] || { price: originalItem.price, label: '' };
-    
-    const cartItem = { ...originalItem }; 
+
+    const cartItem = { ...originalItem };
     cartItem.price = selectedOpt.price;
     if (selectedOpt.label && selectedOpt.label !== '1 Mes' && selectedOpt.label !== 'General') {
         cartItem.platform = `${originalItem.platform} (${selectedOpt.label})`;
@@ -7704,7 +7665,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Atrapamos las dos barras horizontales de la tiendita
     const scrollContainers = [
         document.getElementById('publicStoreCategoryFilters'),
-        document.getElementById('publicStoreFilters') 
+        document.getElementById('publicStoreFilters')
     ];
 
     scrollContainers.forEach(container => {
@@ -7757,18 +7718,18 @@ window.switchFinanceTab = (tabId, element) => {
     document.querySelectorAll('.finance-tab').forEach(tab => {
         tab.style.display = 'none';
     });
-    
+
     // 2. Mostrar el contenido seleccionado
     document.getElementById(tabId).style.display = 'block';
-    
+
     // 3. Quitar el color azul a todas las pestañas y ponérselo a la cliqueada
     document.querySelectorAll('#financeSection .chrome-tab').forEach(tab => {
         tab.classList.remove('active');
     });
     element.classList.add('active');
-    
+
     // 4. Parche mágico para ApexCharts (Fuerza a redibujar los gráficos si estaban ocultos)
-    if(tabId === 'tabTendencias') {
+    if (tabId === 'tabTendencias') {
         window.dispatchEvent(new Event('resize'));
     }
 };
@@ -7779,7 +7740,7 @@ window.switchFinanceTab = (tabId, element) => {
 window.isDemoMode = false;
 
 window.checkDemo = () => {
-    if(window.isDemoMode) {
+    if (window.isDemoMode) {
         Swal.fire({
             icon: 'info',
             title: 'Modo Previsualización',
@@ -7791,7 +7752,7 @@ window.checkDemo = () => {
             background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
             color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
         }).then(r => {
-            if(r.isConfirmed) {
+            if (r.isConfirmed) {
                 window.location.reload(); // Quita la demo y lo regresa al registro
             }
         });
@@ -7816,7 +7777,7 @@ window.chooseDemoMode = async () => {
         background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
         color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
     });
-    
+
     if (planElegido) {
         window.startVisualDemo(planElegido);
     }
@@ -7824,7 +7785,7 @@ window.chooseDemoMode = async () => {
 
 window.startVisualDemo = (plan) => {
     window.isDemoMode = true;
-    
+
     // Inyectar datos falsos en memoria local (no toca Firebase)
     currentUser = { uid: 'demo_user' };
     currentUserData = {
@@ -7839,14 +7800,14 @@ window.startVisualDemo = (plan) => {
             { id: 'inv2', platform: 'Disney+', type: 'Completa', email: 'disney@demo.com', pass: 'demo123', profile: '', pin: '', status: 'libre' }
         ],
         storeCatalog: [
-            { id: 'item1', platform: 'Netflix (1 Mes)', price: 15, pricingOptions: [{label:'1 Mes', price:15}], category: 'Streaming', desc: 'Pantalla 4K Demo', imgUrl: '', type: 'Servicio', status: 'disponible', autoStock: false },
-            { id: 'item2', platform: 'Combo Premium', price: 25, pricingOptions: [{label:'1 Mes', price:25}], category: 'Combos', desc: 'Netflix + Disney', imgUrl: '', type: 'Combo', status: 'disponible', autoStock: false }
+            { id: 'item1', platform: 'Netflix (1 Mes)', price: 15, pricingOptions: [{ label: '1 Mes', price: 15 }], category: 'Streaming', desc: 'Pantalla 4K Demo', imgUrl: '', type: 'Servicio', status: 'disponible', autoStock: false },
+            { id: 'item2', platform: 'Combo Premium', price: 25, pricingOptions: [{ label: '1 Mes', price: 25 }], category: 'Combos', desc: 'Netflix + Disney', imgUrl: '', type: 'Combo', status: 'disponible', autoStock: false }
         ],
         storeCategories: ['Streaming', 'Combos'],
         customServices: ['Netflix', 'Disney+', 'HBO Max', 'Spotify Premium'],
         financialGoal: 1500
     };
-    
+
     clients = [
         { id: 'c1', name: 'Juan Pérez', platform: 'Netflix', phone: '+51999888777', date: new Date(Date.now() + 864000000).toISOString(), cost: 10, price: 15, accountUnits: 1, renovations: 2, statusCat: 'active' },
         { id: 'c2', name: 'María Gómez', platform: 'Disney+', phone: '+51999888666', date: new Date(Date.now() - 86400000).toISOString(), cost: 8, price: 12, accountUnits: 1, renovations: 0, statusCat: 'expired' }
@@ -7854,17 +7815,17 @@ window.startVisualDemo = (plan) => {
 
     // Interceptar silenciosamente las funciones de guardado para que no rompan
     const funcToBlock = [
-        'saveClientData', 'deleteClient', 'renewClient', 'saveWaMessage', 
-        'saveProfile', 'addStoreItem', 'deleteStoreItem', 'addInventoryAccount', 
-        'deleteInventoryAccount', 'saveStoreSettings', 'saveMasterAccount', 
+        'saveClientData', 'deleteClient', 'renewClient', 'saveWaMessage',
+        'saveProfile', 'addStoreItem', 'deleteStoreItem', 'addInventoryAccount',
+        'deleteInventoryAccount', 'saveStoreSettings', 'saveMasterAccount',
         'deleteMasterAccount', 'submitCheckout', 'toggleStoreActive'
     ];
-    
+
     funcToBlock.forEach(fn => {
         const originalFn = window[fn];
         if (originalFn) {
             window[fn] = (...args) => {
-                if(window.checkDemo()) return;
+                if (window.checkDemo()) return;
                 return originalFn(...args);
             };
         }
@@ -7872,27 +7833,27 @@ window.startVisualDemo = (plan) => {
 
     // Renderizar la Vista Principal
     showView('appView');
-    
+
     const brandName = document.getElementById('brandNameSidebar');
     if (brandName) brandName.innerText = 'Usuario Demo';
-    
+
     const mobileName = document.getElementById('mobileBrandName');
     if (mobileName) mobileName.innerText = 'Usuario Demo';
-    
+
     const planBadgeSide = document.getElementById('userPlanBadgeSidebar');
     if (planBadgeSide) {
         planBadgeSide.innerText = `Plan ${plan.toUpperCase()}`;
         planBadgeSide.className = plan === 'pro' ? 'badge-pro-animated' : '';
         planBadgeSide.style.display = 'inline-block';
     }
-    
+
     window.renderTable();
     window.renderInventory();
     window.syncStoreCategories();
     window.renderStoreItems();
     window.populateAllServiceSelects();
     if (document.getElementById('statsPanel')) window.toggleStats(true);
-    
+
     window.showNotification("¡Bienvenido al Modo Demo! Explora las herramientas.");
 };
 
@@ -7941,18 +7902,18 @@ window.addEventListener('popstate', (event) => {
     }
 
     // Capa B: Si hay modales emergentes (Opciones de WhatsApp, Checkout, etc.), cerrarlos
-    const openModals = Array.from(document.querySelectorAll('.modal-overlay')).filter(m => 
+    const openModals = Array.from(document.querySelectorAll('.modal-overlay')).filter(m =>
         m.style.display === 'flex' && !m.classList.contains('active-section')
     );
     if (openModals.length > 0) {
-        window.closeModals(false); 
+        window.closeModals(false);
         return;
     }
 
     // Capa C: Si estamos dentro de Tiendita, Inventario o Finanzas -> Volver al Dashboard Central
     const homeSection = document.getElementById('homeSection');
     if (homeSection && !homeSection.classList.contains('active-section')) {
-        window.closeModals(true); 
+        window.closeModals(true);
         return;
     }
 });
@@ -7981,10 +7942,10 @@ window.openReviewModal = (clientId, platform, clientName, clientPhone) => {
     window.currentReviewData = { clientId, platform, clientName, clientPhone };
     document.getElementById('reviewPlatformName').innerText = platform;
     document.getElementById('reviewComment').value = '';
-    
+
     window.currentStarRating = 5;
     document.querySelectorAll('.star-btn').forEach(s => s.style.color = '#FFD700');
-    
+
     document.getElementById('clientReviewModal').style.display = 'flex';
 };
 
@@ -7999,15 +7960,15 @@ window.submitReview = async () => {
         // 1. VALIDACIÓN ANTI-SPAM Y ACTUALIZACIÓN
         // Buscamos si ya existe una reseña de este teléfono para este vendedor
         const qCheck = query(
-            collection(db, "reviews"), 
+            collection(db, "reviews"),
             where("vendedorId", "==", portalStoreData.uid),
             where("clientPhone", "==", window.currentReviewData.clientPhone || '')
         );
         const snapCheck = await getDocs(qCheck);
-        
+
         let yaComento = false;
         let idResenaAnterior = null;
-        
+
         snapCheck.forEach(doc => {
             const data = doc.data();
             // Verificamos si la plataforma original base (ej: "Netflix") coincide
@@ -8031,12 +7992,12 @@ window.submitReview = async () => {
                 vendedorId: portalStoreData.uid,
                 clientId: window.currentReviewData.clientId,
                 clientName: window.currentReviewData.clientName,
-                clientPhone: window.currentReviewData.clientPhone || '', 
-                platform: window.currentReviewData.platform, 
+                clientPhone: window.currentReviewData.clientPhone || '',
+                platform: window.currentReviewData.platform,
                 originalPlatform: window.currentReviewData.platform, // <-- CLAVE: Guarda el nombre original intocable
                 rating: window.currentStarRating,
                 comment: comment,
-                status: 'pendiente', 
+                status: 'pendiente',
                 date: new Date().toISOString()
             });
         }
@@ -8063,31 +8024,31 @@ window.submitReview = async () => {
 window.loadAdminReviews = async () => {
     const list = document.getElementById('adminReviewsList');
     list.innerHTML = '<p style="text-align: center; color: var(--mac-text-secondary); font-size: 13px;">Cargando reseñas...</p>';
-    
+
     try {
         const qRev = query(collection(db, "reviews"), where("vendedorId", "==", currentUser.uid));
         const snap = await getDocs(qRev);
-        
+
         if (snap.empty) {
             list.innerHTML = '<p style="text-align: center; color: var(--mac-text-secondary); font-size: 13px; padding: 20px;">Tus clientes aún no han dejado reseñas.</p>';
             return;
         }
-        
+
         list.innerHTML = '';
         let reviews = [];
-        snap.forEach(d => reviews.push({id: d.id, ...d.data()}));
-        
+        snap.forEach(d => reviews.push({ id: d.id, ...d.data() }));
+
         // Soporte para fecha en inglés (date) o español (fecha)
-        reviews.sort((a,b) => new Date(b.fecha || b.date) - new Date(a.fecha || a.date)); 
+        reviews.sort((a, b) => new Date(b.fecha || b.date) - new Date(a.fecha || a.date));
 
         reviews.forEach(r => {
             let stars = '';
-            for(let i = 0; i < 5; i++) { 
-                stars += `<i class='bx bxs-star' style="color: ${i < r.rating ? '#FFD700' : 'var(--mac-text-secondary)'};"></i>`; 
+            for (let i = 0; i < 5; i++) {
+                stars += `<i class='bx bxs-star' style="color: ${i < r.rating ? '#FFD700' : 'var(--mac-text-secondary)'};"></i>`;
             }
-            
-            let statusBadge = r.status === 'aprobada' 
-                ? `<span style="color: var(--mac-green); font-size: 10px; font-weight: bold; padding: 3px 8px; background: rgba(52, 199, 89, 0.1); border-radius: 6px;">Aprobada (Pública)</span>` 
+
+            let statusBadge = r.status === 'aprobada'
+                ? `<span style="color: var(--mac-green); font-size: 10px; font-weight: bold; padding: 3px 8px; background: rgba(52, 199, 89, 0.1); border-radius: 6px;">Aprobada (Pública)</span>`
                 : `<span style="color: var(--mac-orange); font-size: 10px; font-weight: bold; padding: 3px 8px; background: rgba(255, 149, 0, 0.1); border-radius: 6px;">Pendiente (Oculta)</span>`;
 
             // 🔥 Variables seguras que evitan el error undefined
@@ -8109,16 +8070,16 @@ window.loadAdminReviews = async () => {
                     <p style="margin: 0 0 15px 0; font-size: 13px; color: var(--mac-text-secondary); font-style: italic;">"${comentarioSeguro}"</p>
                     
                     <div style="display: flex; gap: 8px;">
-                        ${r.status === 'pendiente' || r.status === 'oculta' 
-                            ? `<button class="btn-primary" style="width: max-content; padding: 6px 12px; font-size: 12px; background: var(--mac-green); border: none;" onclick="window.changeReviewStatus('${r.id}', 'aprobada', '${plataformaLimpia}')"><i class='bx bx-check'></i> Aprobar</button>` 
-                            : `<button class="btn-secondary" style="width: max-content; padding: 6px 12px; font-size: 12px;" onclick="window.changeReviewStatus('${r.id}', 'oculta', '')"><i class='bx bx-hide'></i> Ocultar</button>`}
+                        ${r.status === 'pendiente' || r.status === 'oculta'
+                    ? `<button class="btn-primary" style="width: max-content; padding: 6px 12px; font-size: 12px; background: var(--mac-green); border: none;" onclick="window.changeReviewStatus('${r.id}', 'aprobada', '${plataformaLimpia}')"><i class='bx bx-check'></i> Aprobar</button>`
+                    : `<button class="btn-secondary" style="width: max-content; padding: 6px 12px; font-size: 12px;" onclick="window.changeReviewStatus('${r.id}', 'oculta', '')"><i class='bx bx-hide'></i> Ocultar</button>`}
                         <button class="action-btn btn-del" style="padding: 6px 10px; font-size: 14px;" onclick="window.deleteReview('${r.id}')"><i class='bx bx-trash'></i></button>
                     </div>
                 </div>
             `;
         });
-    } catch(e) { 
-        console.error(e); 
+    } catch (e) {
+        console.error(e);
         list.innerHTML = '<p style="color: var(--mac-red);">Error al cargar reseñas.</p>';
     }
 };
@@ -8127,7 +8088,7 @@ window.changeReviewStatus = async (id, newStatus, currentPlatform) => {
     if (newStatus === 'aprobada') {
         // 1. Obtenemos el catálogo de la tiendita del usuario
         const catalog = currentUserData.storeCatalog || [];
-        
+
         if (catalog.length === 0) {
             return window.showNotification("⚠️ No tienes productos en tu tienda para asignar esta reseña.");
         }
@@ -8165,13 +8126,13 @@ window.changeReviewStatus = async (id, newStatus, currentPlatform) => {
         // 4. Si confirma, actualizamos el estado y renombramos la plataforma en la reseña
         if (isConfirmed && selectedProduct) {
             try {
-                await updateDoc(doc(db, "reviews", id), { 
+                await updateDoc(doc(db, "reviews", id), {
                     status: newStatus,
                     platform: selectedProduct // <-- AQUÍ SOBREESCRIBIMOS EL NOMBRE PARA QUE HAGA MATCH EXACTO EN LA TIENDITA
                 });
                 window.showNotification("Reseña aprobada y vinculada ✅");
                 window.loadAdminReviews();
-            } catch(e) { window.showNotification("Error cambiando estado."); }
+            } catch (e) { window.showNotification("Error cambiando estado."); }
         }
     } else {
         // Lógica para ocultar (se mantiene igual)
@@ -8179,17 +8140,17 @@ window.changeReviewStatus = async (id, newStatus, currentPlatform) => {
             await updateDoc(doc(db, "reviews", id), { status: newStatus });
             window.showNotification("Reseña ocultada 👁️‍🗨️");
             window.loadAdminReviews();
-        } catch(e) { window.showNotification("Error cambiando estado."); }
+        } catch (e) { window.showNotification("Error cambiando estado."); }
     }
 };
 
 window.deleteReview = async (id) => {
-    if(!confirm("¿Seguro que deseas eliminar esta reseña permanentemente?")) return;
+    if (!confirm("¿Seguro que deseas eliminar esta reseña permanentemente?")) return;
     try {
         await deleteDoc(doc(db, "reviews", id));
         window.showNotification("🗑️ Reseña eliminada.");
         window.loadAdminReviews();
-    } catch(e) { window.showNotification("Error al eliminar."); }
+    } catch (e) { window.showNotification("Error al eliminar."); }
 };
 
 // ---------------------------------------------------------
@@ -8198,24 +8159,24 @@ window.deleteReview = async (id) => {
 window.openProductDesc = (title, desc) => {
     document.getElementById('descModalTitle').innerText = title;
     document.getElementById('descModalText').innerText = desc;
-    
+
     // 1. Obtener el contenedor de reseñas
     const reviewsList = document.getElementById('publicReviewsList');
     if (reviewsList) {
         reviewsList.innerHTML = '';
-        
+
         // 2. Filtrar reseñas por la plataforma seleccionada
-        const productReviews = (window.publicReviewsCache || []).filter(r => 
+        const productReviews = (window.publicReviewsCache || []).filter(r =>
             (r.platform || r.plataforma || '').toLowerCase() === title.toLowerCase()
         );
-        
+
         if (productReviews.length === 0) {
             reviewsList.innerHTML = '<p style="font-size: 13px; color: var(--mac-text-secondary); text-align: center; margin: 0;">Aún no hay reseñas para este servicio.</p>';
         } else {
             productReviews.forEach(r => {
                 // A) Manejo Seguro del Nombre
                 const clientName = r.clienteNombre || r.clientName || r.nombre || 'Cliente';
-                
+
                 // B) Manejo Seguro de la Fecha (Evita "Invalid Date")
                 let dateStr = "Fecha reciente";
                 const dateVal = r.fechaIso || r.fecha || r.date || r.timestamp;
@@ -8228,21 +8189,21 @@ window.openProductDesc = (title, desc) => {
 
                 // C) Manejo Seguro del Comentario
                 const rawComment = r.comentario || r.comment || r.text || '';
-                const reviewText = rawComment.trim() !== '' 
-                    ? `"${rawComment}"` 
+                const reviewText = rawComment.trim() !== ''
+                    ? `"${rawComment}"`
                     : '<span style="font-style: italic; color: var(--mac-text-secondary);">(Dejó una calificación por estrellas)</span>';
 
                 // D) Manejo y Enmascaramiento del Número de Teléfono
                 let hiddenPhoneHtml = '';
                 const phoneRaw = r.clienteNumero || r.clientPhone || r.phone || r.numero || '';
-                
+
                 if (phoneRaw) {
                     // Quitamos espacios en blanco para evaluar
                     let num = phoneRaw.replace(/\s+/g, '');
                     // Separamos el código de país del resto del número (Ej: +51 y 999888777)
                     const match = num.match(/^(\+\d{2,3})(\d+)$/);
                     let maskedPhone = num;
-                    
+
                     if (match) {
                         const countryCode = match[1];
                         const localNum = match[2];
@@ -8259,7 +8220,7 @@ window.openProductDesc = (title, desc) => {
                         const masked = 'X'.repeat(num.length - 7);
                         maskedPhone = `${visibleStart}${masked}${visibleEnd}`;
                     }
-                    
+
                     hiddenPhoneHtml = `<span style="font-size: 11px; color: var(--mac-text-secondary); display: block; margin-top: 2px;"><i class='bx bxl-whatsapp'></i> ${maskedPhone}</span>`;
                 }
 
@@ -8315,11 +8276,11 @@ window.checkUrlRouting = () => {
 window.actualizarCostosAntiguos = async () => {
     const btn = document.getElementById('btnSyncCostos');
     const origText = btn.innerHTML;
-    if(btn) btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Sync...";
-    
+    if (btn) btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Sync...";
+
     try {
         window.showNotification("⏳ Actualizando costos en la base de datos... no cierres la ventana.");
-        
+
         // 1. Obtener todas las matrices del usuario
         const qMat = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
         const snapMat = await getDocs(qMat);
@@ -8331,8 +8292,8 @@ window.actualizarCostosAntiguos = async () => {
         // 2. Revisar todos los clientes actuales en memoria
         for (let i = 0; i < clients.length; i++) {
             let c = clients[i];
-            let masterId = c.linkedMasterId; 
-            
+            let masterId = c.linkedMasterId;
+
             if (!masterId && c.multiAccounts) {
                 for (let platKey in c.multiAccounts) {
                     if (c.multiAccounts[platKey].masterAccountId) {
@@ -8346,17 +8307,17 @@ window.actualizarCostosAntiguos = async () => {
             if (masterId && masterMap[masterId]) {
                 let matriz = masterMap[masterId];
                 let costoCorrecto = matriz.maxProfiles > 0 ? (matriz.cost / matriz.maxProfiles) : 0;
-                
+
                 if (parseFloat(c.cost) !== parseFloat(costoCorrecto)) {
                     await updateDoc(doc(db, "clients", c.id), { cost: costoCorrecto });
-                    c.cost = costoCorrecto; 
+                    c.cost = costoCorrecto;
                     actualizados++;
                 }
             }
         }
-        
+
         window.showNotification(`✅ ¡Listo! Se actualizaron los costos de ${actualizados} clientes.`);
-        
+
         // 4. Forzar el recálculo visual en las tablas y gráficos
         window.renderTable();
         if (document.getElementById('financeSection').classList.contains('active-section')) {
@@ -8364,22 +8325,22 @@ window.actualizarCostosAntiguos = async () => {
         } else if (document.getElementById('statsPanel').style.display === 'grid') {
             window.toggleStats(true);
         }
-        
+
     } catch (e) {
         window.showNotification("Error: " + e.message);
     } finally {
-        if(btn) btn.innerHTML = origText;
+        if (btn) btn.innerHTML = origText;
     }
 };
 
-window.currentReviewRating = 5; 
+window.currentReviewRating = 5;
 window.currentReviewClient = null;
 window.currentReviewPlatform = null;
 
 // Lógica para pintar las estrellas al hacer clic
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.star-btn').forEach(star => {
-        star.addEventListener('click', function() {
+        star.addEventListener('click', function () {
             window.currentReviewRating = parseInt(this.getAttribute('data-val'));
             document.querySelectorAll('.star-btn').forEach(s => {
                 if (parseInt(s.getAttribute('data-val')) <= window.currentReviewRating) {
@@ -8395,12 +8356,12 @@ document.addEventListener('DOMContentLoaded', () => {
 window.openReviewModal = (clientId, platform, clientName, clientPhone) => {
     window.currentReviewClient = { id: clientId, name: clientName, phone: clientPhone };
     window.currentReviewPlatform = platform;
-    window.currentReviewRating = 5; 
-    
+    window.currentReviewRating = 5;
+
     document.getElementById('reviewPlatformName').innerText = platform;
     document.getElementById('reviewComment').value = '';
     document.querySelectorAll('.star-btn').forEach(s => s.style.color = '#FFD700');
-    
+
     document.getElementById('clientReviewModal').style.display = 'flex';
 };
 
@@ -8408,14 +8369,14 @@ window.submitReview = async () => {
     const comment = document.getElementById('reviewComment').value.trim();
     const btn = document.getElementById('btnSubmitReview');
     const origText = btn.innerText;
-    
-    btn.innerText = "Enviando..."; 
+
+    btn.innerText = "Enviando...";
     btn.disabled = true;
 
     try {
         // Se usa la variable global portalStoreData que tu código ya define al abrir el portal
         const vendedorId = typeof portalStoreData !== 'undefined' ? portalStoreData.uid : null;
-        if(!vendedorId) throw new Error("ID del vendedor no encontrado.");
+        if (!vendedorId) throw new Error("ID del vendedor no encontrado.");
 
         // Guardado nativo en Firestore
         await addDoc(collection(db, "reviews"), {
@@ -8434,7 +8395,7 @@ window.submitReview = async () => {
 
     } catch (e) {
         console.error("Error enviando reseña:", e);
-        window.showNotification("Error enviando reseña."); 
+        window.showNotification("Error enviando reseña.");
     } finally {
         btn.innerText = origText;
         btn.disabled = false;
@@ -8464,7 +8425,7 @@ window.selectStoreTabPricing = (itemId, index, price, label) => {
         t.style.color = 'var(--mac-text-secondary)';
         t.style.borderColor = 'var(--mac-border)';
     });
-    
+
     const activeTab = document.getElementById(`tab_${itemId}_${index}`);
     if (activeTab) {
         activeTab.style.background = 'var(--mac-blue)';
@@ -8488,8 +8449,8 @@ window.addToCartWithOptions = (itemId) => {
     if (!originalItem) return;
 
     const selectedOpt = window.storeSelectedOptions[itemId] || (originalItem.pricingOptions && originalItem.pricingOptions.length > 0 ? originalItem.pricingOptions[0] : { price: originalItem.price, label: '' });
-    
-    const cartItem = { ...originalItem }; 
+
+    const cartItem = { ...originalItem };
     cartItem.price = selectedOpt.price;
     if (selectedOpt.label && selectedOpt.label !== '1 Mes') {
         cartItem.platform = `${originalItem.platform} (${selectedOpt.label})`;
@@ -8518,12 +8479,12 @@ window.saveProvider = async () => {
     const name = document.getElementById('newProvName').value.trim();
     const platform = document.getElementById('newProvPlatform').value;
     const cost = parseFloat(document.getElementById('newProvCost').value) || 0;
-    
-    if(!name) return window.showNotification("Escribe el nombre del proveedor.");
-    
+
+    if (!name) return window.showNotification("Escribe el nombre del proveedor.");
+
     let provs = currentUserData.providers || [];
     provs.push({ id: 'prov_' + Date.now(), name, platform, cost });
-    
+
     try {
         await updateDoc(doc(db, "users", currentUser.uid), { providers: provs });
         currentUserData.providers = provs;
@@ -8532,14 +8493,14 @@ window.saveProvider = async () => {
         window.renderProviders();
         window.updateProviderDropdown();
         window.showNotification("✅ Proveedor añadido.");
-    } catch(e) { window.showNotification("Error: " + e.message); }
+    } catch (e) { window.showNotification("Error: " + e.message); }
 };
 
 window.renderProviders = () => {
     const list = document.getElementById('providersListContainer');
     list.innerHTML = '';
     const provs = currentUserData.providers || [];
-    
+
     provs.forEach((p, idx) => {
         list.innerHTML += `
             <div style="background: var(--mac-surface); border: 1px solid var(--mac-border); padding: 10px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
@@ -8565,27 +8526,27 @@ window.deleteProvider = async (idx) => {
 window.updateProviderDropdown = () => {
     const checkedBoxes = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value);
     const select = document.getElementById('clientProviderSelect');
-    if(!select) return;
-    
+    if (!select) return;
+
     select.innerHTML = '<option value="">Seleccionar Proveedor...</option>';
     const provs = currentUserData.providers || [];
-    
+
     // Filtrar los que pertenezcan a la plataforma marcada
     const filtered = provs.filter(p => checkedBoxes.includes(p.platform));
-    
+
     filtered.forEach(p => {
         select.innerHTML += `<option value="${p.id}" data-cost="${p.cost}">${p.name} - ${p.platform} (${globalCurrency}${p.cost.toFixed(2)})</option>`;
     });
-    
+
     select.innerHTML += `<option value="custom">+ Escribir manual...</option>`;
 };
 
 // Escuchar cambios en los checks para disparar actualización del Select
-document.querySelectorAll('#checkboxDropdown input').forEach(cb => { 
-    cb.addEventListener('change', () => { 
+document.querySelectorAll('#checkboxDropdown input').forEach(cb => {
+    cb.addEventListener('change', () => {
         // Tu código anterior ya lo hace...
-        window.updateProviderDropdown(); 
-    }); 
+        window.updateProviderDropdown();
+    });
 });
 
 // Llenar auto-costo al seleccionar
@@ -8593,7 +8554,7 @@ window.onProviderSelected = () => {
     const select = document.getElementById('clientProviderSelect');
     const customInput = document.getElementById('clientProviderName');
     const costInput = document.getElementById('clientCost');
-    
+
     if (select.value === 'custom') {
         customInput.style.display = 'block';
         customInput.value = '';
@@ -8618,7 +8579,7 @@ window.onProviderSelected = () => {
 window.getTabTemplate = (tabName = '', options = []) => {
     let optsHtml = '';
     if (options.length === 0) options = [{ label: '', price: '' }];
-    
+
     options.forEach(o => {
         optsHtml += `
             <div class="builder-option-row" style="display: flex; gap: 8px; align-items: center; margin-top: 8px;">
@@ -8668,7 +8629,7 @@ window.extractBuilderData = (containerId) => {
     const container = document.getElementById(containerId);
     const tabGroups = container.querySelectorAll('.builder-tab-group');
     let result = [];
-    
+
     tabGroups.forEach(group => {
         const tabName = group.querySelector('.b-tab-name').value.trim() || 'General';
         let options = [];
@@ -8707,7 +8668,7 @@ window.selectPubTab = (itemId, tabIndex) => {
         const borderColor = isSelected ? 'var(--mac-blue)' : 'var(--mac-border)';
         const bg = isSelected ? 'rgba(0, 122, 255, 0.1)' : 'var(--mac-surface)';
         optionsHtml += `
-            <label id="opt_label_${itemId}_${i}" onclick="window.selectPubOption('${itemId}', ${tabIndex}, ${i}, ${opt.price}, '${opt.label.replace(/'/g,"\\'")}')" class="pub-opt-${itemId}" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-radius:12px; border:1px solid ${borderColor}; background:${bg}; cursor:pointer; transition:all 0.2s;">
+            <label id="opt_label_${itemId}_${i}" onclick="window.selectPubOption('${itemId}', ${tabIndex}, ${i}, ${opt.price}, '${opt.label.replace(/'/g, "\\'")}')" class="pub-opt-${itemId}" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-radius:12px; border:1px solid ${borderColor}; background:${bg}; cursor:pointer; transition:all 0.2s;">
                 <span style="font-size:14px; font-weight:600; color:var(--mac-text-main);">${opt.label}</span>
                 <span style="font-size:15px; font-weight:800; color:var(--mac-text-main);">${data.currency || 'S/'}${opt.price.toFixed(2)}</span>
             </label>
@@ -8731,7 +8692,7 @@ window.selectPubOption = (itemId, tabIndex, optIndex, price, optLabel) => {
     const tabsData = window.storeItemsTabsData[itemId];
     const tabName = tabsData[tabIndex].name;
     const showTabs = tabsData.length > 1 || (tabsData.length === 1 && tabsData[0].name !== 'General');
-    
+
     // El nombre a mostrar en el carrito será "Pestaña - Opción" (Ej: "1 Mes - Perfil")
     let finalLabel = showTabs && tabName ? `${tabName} - ${optLabel}` : optLabel;
     window.storeSelectedOptions[itemId] = { price: price, label: finalLabel };
@@ -8794,10 +8755,10 @@ window.generateCatalogImages = async () => {
         const safeBannerBase64 = await loadImgToBase64(currentUserData.bannerUrl);
 
         const template = document.getElementById('statusExportTemplate');
-        template.style.left = '0px'; 
-        
+        template.style.left = '0px';
+
         document.getElementById('statusBrandName').innerText = currentUserData.name || 'Mi Marca';
-        
+
         const logoEl = document.getElementById('statusLogo');
         if (safeLogoBase64) {
             logoEl.src = safeLogoBase64;
@@ -8825,7 +8786,7 @@ window.generateCatalogImages = async () => {
         }
 
         let generatedImagesUrls = [];
-        const itemsPerPage = 4; 
+        const itemsPerPage = 4;
 
         for (const cat in categories) {
             const items = categories[cat];
@@ -8833,19 +8794,19 @@ window.generateCatalogImages = async () => {
 
             for (let page = 0; page < totalPages; page++) {
                 document.getElementById('statusCategoryTitle').innerText = cat.toUpperCase() + (totalPages > 1 ? ` (${page + 1}/${totalPages})` : '');
-                
+
                 const container = document.getElementById('statusItemsContainer');
                 container.innerHTML = '';
 
                 const pageItems = items.slice(page * itemsPerPage, (page + 1) * itemsPerPage);
-                
+
                 for (const item of pageItems) {
                     const itemImgB64 = await loadImgToBase64(item.imgUrl);
                     const finalImg = itemImgB64 ? `<img src="${itemImgB64}" style="width: 140px; height: 140px; border-radius: 30px; object-fit: cover; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 10px 20px rgba(0,0,0,0.5); flex-shrink: 0;">` : `<div style="width: 140px; height: 140px; border-radius: 30px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i class='bx bx-play-circle' style="font-size: 50px; color: rgba(255,255,255,0.3);"></i></div>`;
-                    
+
                     let optsHtml = '';
-                    const opts = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{label: 'Mensual', price: item.price}];
-                    
+                    const opts = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{ label: 'Mensual', price: item.price }];
+
                     opts.forEach(opt => {
                         optsHtml += `<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; border-bottom: 1px dashed rgba(255,255,255,0.15); padding-bottom: 8px;">
                             <span style="font-size: 24px; color: rgba(255,255,255,0.7);">${opt.label}</span>
@@ -8866,10 +8827,10 @@ window.generateCatalogImages = async () => {
 
                 await new Promise(r => setTimeout(r, 300));
 
-                const canvas = await html2canvas(template, { 
-                    backgroundColor: '#0a0a0c', scale: 1.5, useCORS: true 
+                const canvas = await html2canvas(template, {
+                    backgroundColor: '#0a0a0c', scale: 1.5, useCORS: true
                 });
-                
+
                 generatedImagesUrls.push({
                     url: canvas.toDataURL('image/jpeg', 0.9),
                     name: `Estado_${cat}_${page + 1}.jpg`
@@ -8877,7 +8838,7 @@ window.generateCatalogImages = async () => {
             }
         }
 
-        template.style.left = '-9999px'; 
+        template.style.left = '-9999px';
 
         if (generatedImagesUrls.length === 1) {
             const link = document.createElement('a');
@@ -8923,17 +8884,17 @@ window.isClientSelectMode = false;
 window.toggleClientInputMode = () => {
     window.isClientSelectMode = !window.isClientSelectMode;
     const input = document.getElementById('clientName');
-    const text = document.getElementById('clientModeText'); 
-    
+    const text = document.getElementById('clientModeText');
+
     if (window.isClientSelectMode) {
         window.updateFrequentClientsList(); // ¡Forzamos que lea la tabla en este instante!
-        
+
         input.setAttribute('list', 'clientsDatalist');
         input.placeholder = "🔍 Escribe para buscar cliente...";
         input.value = '';
         input.oninput = (e) => window.onFrequentClientSelected(e.target.value);
-        
-        if(text) {
+
+        if (text) {
             text.innerHTML = "Nuevo Cliente";
             text.previousElementSibling.className = 'bx bx-user-plus';
         }
@@ -8942,9 +8903,9 @@ window.toggleClientInputMode = () => {
         input.placeholder = "Escribe el nombre...";
         input.value = '';
         input.oninput = null;
-        document.getElementById('phone').value = ''; 
-        
-        if(text) {
+        document.getElementById('phone').value = '';
+
+        if (text) {
             text.innerHTML = "Clientes Frecuentes";
             text.previousElementSibling.className = 'bx bx-search';
         }
@@ -8953,20 +8914,20 @@ window.toggleClientInputMode = () => {
 
 window.updateFrequentClientsList = () => {
     const datalist = document.getElementById('clientsDatalist');
-    if(!datalist) return;
+    if (!datalist) return;
     datalist.innerHTML = '';
-    
+
     const uniqueClients = {};
     clients.forEach(c => {
         if (c.phone && c.name) {
             // EXTRAEMOS SOLO NÚMEROS (Quitamos el "+" temporalmente para limpiar)
-            const cleanPhone = c.phone.replace(/[^\d]/g, ''); 
+            const cleanPhone = c.phone.replace(/[^\d]/g, '');
             if (!uniqueClients[cleanPhone]) {
                 uniqueClients[cleanPhone] = c.name;
             }
         }
     });
-    
+
     Object.keys(uniqueClients).sort((a, b) => uniqueClients[a].localeCompare(uniqueClients[b])).forEach(phone => {
         const name = uniqueClients[phone];
         datalist.innerHTML += `<option value="${name} - +${phone}"></option>`;
@@ -8975,17 +8936,17 @@ window.updateFrequentClientsList = () => {
 
 window.onFrequentClientSelected = (val) => {
     if (!val) return;
-    
+
     const parts = val.split(' - +');
     if (parts.length === 2) {
         const name = parts[0].trim();
         const phone = '+' + parts[1].trim();
-        
+
         document.getElementById('clientName').value = name;
-        
+
         const phoneInput = document.getElementById('phone');
         phoneInput.value = phone;
-        
+
         phoneInput.style.backgroundColor = "rgba(52, 199, 89, 0.1)";
         phoneInput.style.borderColor = "var(--mac-green)";
         setTimeout(() => {
@@ -8999,14 +8960,14 @@ window.onFrequentClientSelected = (val) => {
 window.updateProviderDropdown = () => {
     const checkedBoxes = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value);
     const datalist = document.getElementById('providersDatalist');
-    if(!datalist) return;
-    
+    if (!datalist) return;
+
     datalist.innerHTML = '';
     const provs = currentUserData.providers || [];
-    
+
     // Filtramos solo los proveedores de la plataforma que marcaste arriba
     const filtered = provs.filter(p => checkedBoxes.includes(p.platform));
-    
+
     filtered.forEach(p => {
         // Guardamos el costo oculto en un data-attribute para extraerlo luego
         datalist.innerHTML += `<option value="${p.name}" data-cost="${p.cost}">${p.platform} - ${globalCurrency}${p.cost.toFixed(2)}</option>`;
@@ -9020,12 +8981,12 @@ window.onProviderSelected = (val) => {
 
     // Buscamos si lo que el usuario escribió coincide EXACTAMENTE con algo de la base de datos
     const option = Array.from(datalist.options).find(opt => opt.value === val);
-    
+
     if (option) {
         // ¡Lo encontró! Es un proveedor guardado. Extraemos su costo y lo pegamos.
         const cost = option.getAttribute('data-cost');
         if (cost) costInput.value = cost;
-        
+
         // Efecto visual verde brillante
         costInput.style.backgroundColor = "rgba(52, 199, 89, 0.1)";
         costInput.style.borderColor = "var(--mac-green)";
@@ -9044,14 +9005,14 @@ window.applyCoupon = () => {
     const code = document.getElementById('cartCouponInput').value.trim().toUpperCase();
     const feedback = document.getElementById('couponFeedbackMessage');
 
-    if(!code) {
+    if (!code) {
         if (feedback) feedback.style.display = 'none';
         return;
     }
-    
+
     const storeCoupons = window.publicStoreDataCache.storeCoupons || [];
     const validCoupon = storeCoupons.find(c => c.code === code);
-    
+
     if (validCoupon) {
         // VALIDACIÓN DE CUPÓN ESPECÍFICO
         if (validCoupon.target && validCoupon.target !== 'global') {
@@ -9074,7 +9035,7 @@ window.applyCoupon = () => {
             feedback.style.color = "var(--mac-green)";
             feedback.style.display = "block";
         }
-        window.renderCartItems(); 
+        window.renderCartItems();
     } else {
         activeCoupon = null;
         if (feedback) {
@@ -9090,9 +9051,9 @@ window.renderCartItems = () => {
     const container = document.getElementById('cartItemsContainer');
     const totalEl = document.getElementById('cartTotalPrice');
     const data = window.publicStoreDataCache;
-    
+
     container.innerHTML = '';
-    
+
     if (window.storeCart.length === 0) {
         container.innerHTML = '<div style="text-align: center; color: var(--mac-text-secondary); margin-top: 50px;"><i class="bx bx-shopping-bag" style="font-size: 64px; opacity: 0.3; margin-bottom: 15px;"></i><p style="font-weight: bold; font-size: 16px;">Tu carrito está vacío</p></div>';
         totalEl.innerText = `${data.currency || 'S/'}0.00`;
@@ -9101,7 +9062,7 @@ window.renderCartItems = () => {
         document.getElementById('cartCouponRow').style.display = 'none';
         return;
     }
-    
+
     let subtotal = 0;
     window.storeCart.forEach((item, index) => {
         subtotal += item.price;
@@ -9121,14 +9082,14 @@ window.renderCartItems = () => {
     let qty = window.storeCart.length;
     let comboDiscountPercent = 0;
     const dynamicDisc = data.storeDiscounts || { qty2: 0, qty3: 0, qty4: 0 };
-    
+
     if (qty >= 4 && dynamicDisc.qty4) comboDiscountPercent = dynamicDisc.qty4;
     else if (qty === 3 && dynamicDisc.qty3) comboDiscountPercent = dynamicDisc.qty3;
     else if (qty === 2 && dynamicDisc.qty2) comboDiscountPercent = dynamicDisc.qty2;
 
     let comboDiscountAmount = subtotal * (comboDiscountPercent / 100);
     let afterComboPrice = subtotal - comboDiscountAmount;
-    
+
     // CÁLCULO INTELIGENTE DE CUPÓN
     let couponDiscountAmount = 0;
     if (activeCoupon) {
@@ -9147,12 +9108,12 @@ window.renderCartItems = () => {
             couponDiscountAmount = afterComboPrice * (activeCoupon.percent / 100);
         }
     }
-    
+
     let finalTotal = afterComboPrice - couponDiscountAmount;
 
     // ACTUALIZACIÓN DE LA UI DEL CARRITO
     document.getElementById('cartSubtotalPrice').innerText = `${data.currency || 'S/'}${subtotal.toFixed(2)}`;
-    
+
     if (comboDiscountAmount > 0) {
         document.getElementById('cartComboDiscountRow').style.display = 'flex';
         document.getElementById('cartComboDiscountLabel').innerText = `Combo Armado (-${comboDiscountPercent}%):`;
@@ -9180,8 +9141,8 @@ window.renderCartItems = () => {
 window.updateProviderDropdown = () => {
     const checkedBoxes = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value);
     const container = document.getElementById('dynamicProvidersList');
-    if(!container) return;
-    
+    if (!container) return;
+
     // Si no hay nada marcado, mostramos el cuadro bloqueado
     if (checkedBoxes.length === 0) {
         container.innerHTML = '<input type="text" placeholder="Selecciona plataforma..." disabled style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-secondary); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">';
@@ -9196,7 +9157,7 @@ window.updateProviderDropdown = () => {
 
     container.innerHTML = '';
     const provs = currentUserData.providers || [];
-    
+
     // Creamos un buscador (Datalist) por CADA plataforma marcada
     checkedBoxes.forEach(plat => {
         const platProvs = provs.filter(p => p.platform === plat);
@@ -9224,14 +9185,14 @@ window.onDynamicProviderSelected = (inputEl) => {
     const val = inputEl.value;
     const listId = inputEl.getAttribute('list');
     const datalist = document.getElementById(listId);
-    
+
     let foundCost = 0;
     if (datalist) {
         // Busca si lo que escribiste coincide exactamente con una opción
         const option = Array.from(datalist.options).find(opt => opt.value === val);
         if (option) foundCost = parseFloat(option.getAttribute('data-cost')) || 0;
     }
-    
+
     inputEl.dataset.cost = foundCost;
     window.sumTotalCost();
 };
@@ -9240,13 +9201,13 @@ window.onDynamicProviderSelected = (inputEl) => {
 window.sumTotalCost = () => {
     let total = 0;
     let anyAutoFilled = false;
-    
+
     document.querySelectorAll('.dyn-prov-input').forEach(inp => {
         const cost = parseFloat(inp.dataset.cost) || 0;
         total += cost;
         if (cost > 0) anyAutoFilled = true;
     });
-    
+
     if (anyAutoFilled || total > 0) {
         const costInput = document.getElementById('clientCost');
         costInput.value = total;
@@ -9273,20 +9234,20 @@ window.populateAllServiceSelects = () => {
             label.innerHTML = `<input type="checkbox" value="${s}"> ${s}`;
             chkDropdown.appendChild(label);
         });
-        
+
         // LA MAGIA: Cada vez que tocas un check, reconstruimos los proveedores
-        document.querySelectorAll('#checkboxDropdown input').forEach(cb => { 
-            cb.addEventListener('change', () => { 
-                const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value); 
-                const el = document.getElementById('selectText'); 
-                if(checked.length) { el.textContent = checked.join(', '); el.classList.add('has-selection'); } 
-                else { el.textContent = 'Plataforma(s)...'; el.classList.remove('has-selection'); } 
-                
+        document.querySelectorAll('#checkboxDropdown input').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value);
+                const el = document.getElementById('selectText');
+                if (checked.length) { el.textContent = checked.join(', '); el.classList.add('has-selection'); }
+                else { el.textContent = 'Plataforma(s)...'; el.classList.remove('has-selection'); }
+
                 window.updateProviderDropdown(); // 👈 Llama a nuestro nuevo sistema
-            }); 
+            });
         });
     }
-    
+
     const selectIds = [{ id: 'invPlatform', defaultOpt: 'Plataforma...' }, { id: 'matPlatform', defaultOpt: null }, { id: 'rulePlatformSelect', defaultOpt: null }];
     selectIds.forEach(item => {
         const select = document.getElementById(item.id);
@@ -9299,15 +9260,15 @@ window.populateAllServiceSelects = () => {
 
 // 5. Reescribir StartEdit para que llene múltiples proveedores al editar un cliente
 window.startEdit = (id) => {
-    editingClientId = id; 
+    editingClientId = id;
     const c = clients.find(x => x.id === id);
     window.currentClientNote = c.notes || '';
-    document.getElementById('clientName').value = c.name; 
-    document.getElementById('phone').value = c.phone; 
+    document.getElementById('clientName').value = c.name;
+    document.getElementById('phone').value = c.phone;
     document.getElementById('expirationDate').value = c.date;
-    document.getElementById('clientCost').value = c.cost || ''; 
-    document.getElementById('clientPrice').value = c.price || ''; 
-    
+    document.getElementById('clientCost').value = c.cost || '';
+    document.getElementById('clientPrice').value = c.price || '';
+
     if (c.multiAccounts) {
         multiAccData = c.multiAccounts;
     } else {
@@ -9317,19 +9278,19 @@ window.startEdit = (id) => {
             multiAccData[p] = { email: c.accountEmail || '', password: c.accountPassword || '', profile: c.accountProfile || '', pin: c.accountPin || '', saleType: c.accountSaleType || 'Perfil', units: c.accountUnits || 1, deviceName: c.accountDeviceName || '', deviceType: c.accountDeviceType || '' };
         });
     }
-    
+
     const totalUnits = Object.values(multiAccData).reduce((sum, acc) => sum + (parseInt(acc.units) || 1), 0);
-    const btn = document.getElementById('btnAccountData'); 
-    btn.innerText = `✅ Datos de Cuenta (${totalUnits} ud)`; 
+    const btn = document.getElementById('btnAccountData');
+    btn.innerText = `✅ Datos de Cuenta (${totalUnits} ud)`;
     btn.style.backgroundColor = "var(--mac-green)"; btn.style.color = "white";
-    
-    const cbs = document.querySelectorAll('#checkboxDropdown input'); 
-    cbs.forEach(cb => cb.checked = false); 
-    c.platform.split(', ').forEach(p => { cbs.forEach(cb => { if(cb.value === p) cb.checked = true; }); });
-    document.getElementById('selectText').textContent = c.platform; 
+
+    const cbs = document.querySelectorAll('#checkboxDropdown input');
+    cbs.forEach(cb => cb.checked = false);
+    c.platform.split(', ').forEach(p => { cbs.forEach(cb => { if (cb.value === p) cb.checked = true; }); });
+    document.getElementById('selectText').textContent = c.platform;
     document.getElementById('selectText').classList.add('has-selection');
     document.getElementById('actionButtonsContainer').innerHTML = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button type="button" class="btn-primary" onclick="window.saveClientData()">Guardar</button><button type="button" class="btn-secondary" onclick="window.cancelEdit()">Cancelar</button></div>`;
-    
+
     // --- Llenar los proveedores en las cajitas generadas ---
     window.updateProviderDropdown();
     setTimeout(() => {
@@ -9373,11 +9334,11 @@ window.saveClientData = async () => {
             }
         }
     });
-    
+
     // Inyectamos el string consolidado (Ej: "Netflix: Carlos | Disney+: Maria") en un campo oculto 
     // para que la función original lo recoja de forma invisible
     let hiddenProvider = document.getElementById('clientProviderName');
-    if(!hiddenProvider) {
+    if (!hiddenProvider) {
         hiddenProvider = document.createElement('input');
         hiddenProvider.type = 'hidden';
         hiddenProvider.id = 'clientProviderName';
@@ -9397,9 +9358,13 @@ window.cancelEdit = () => {
 };
 
 window.saveGateways = async () => {
-    const mpToken = document.getElementById('mpAccessToken').value.trim();
-    const binApiKey = document.getElementById('binanceApiKey').value.trim();
-    const binSecret = document.getElementById('binanceSecretKey').value.trim();
+    const mpTokenRaw = document.getElementById('mpAccessTokenInput') ? document.getElementById('mpAccessTokenInput').value.trim() : '';
+    const binApiKeyRaw = document.getElementById('binanceApiKeyInput') ? document.getElementById('binanceApiKeyInput').value.trim() : '';
+    const binSecretRaw = document.getElementById('binanceSecretKeyInput') ? document.getElementById('binanceSecretKeyInput').value.trim() : '';
+
+    const mpToken = mpTokenRaw.includes('***') ? (currentUserData.gateways?.mercadoPago?.accessToken || currentUserData.mpAccessToken || '') : mpTokenRaw;
+    const binApiKey = binApiKeyRaw.includes('***') ? (currentUserData.gateways?.binance?.apiKey || currentUserData.binanceApiKey || '') : binApiKeyRaw;
+    const binSecret = binSecretRaw.includes('***') ? (currentUserData.gateways?.binance?.secretKey || currentUserData.binanceSecretKey || '') : binSecretRaw;
 
     try {
         const gateways = {
@@ -9407,9 +9372,20 @@ window.saveGateways = async () => {
             binance: { apiKey: binApiKey, secretKey: binSecret, active: !!binApiKey }
         };
 
+        const updateData = {
+            gateways: gateways,
+            mpAccessToken: mpToken || null,
+            binanceApiKey: binApiKey || null,
+            binanceSecretKey: binSecret || null
+        };
+
         // ADVERTENCIA DE SEGURIDAD: En producción, estos datos deben ir en una subcolección protegida
-        await updateDoc(doc(db, "users", currentUser.uid), { gateways: gateways });
+        await updateDoc(doc(db, "users", currentUser.uid), updateData);
         currentUserData.gateways = gateways;
+        currentUserData.mpAccessToken = mpToken || null;
+        currentUserData.binanceApiKey = binApiKey || null;
+        currentUserData.binanceSecretKey = binSecret || null;
+        
         window.showNotification("✅ Credenciales de pago guardadas");
     } catch (e) {
         window.showNotification("Error: " + e.message);
