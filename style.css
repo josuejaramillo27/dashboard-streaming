@@ -109,6 +109,7 @@ body {
 /* =========================================================
    MARCA DE AGUA (LOGO DE FONDO MEZCLADO)
 ========================================================= */
+/* ☀️ POR DEFECTO (MODO CLARO) */
 body::after {
     content: "";
     position: fixed;
@@ -118,21 +119,27 @@ body::after {
     width: 100vw;
     height: 100vh;
     
-    /* 👇 PON AQUÍ EL NOMBRE EXACTO DE TU IMAGEN PNG 👇 */
     background-image: url('AGC-LOGO-FONDO.png'); 
-    
     background-repeat: no-repeat;
     background-position: center;
+    background-size: 75vh; 
     
-    /* Tamaño del logo (45vh significa que ocupará el 45% del alto de la pantalla) */
-    background-size: 60vh; 
+    /* 🪄 MAGIA: Invertimos el logo blanco a negro puro para que contraste en fondo claro */
+    filter: invert(1); 
+    opacity: 0.04; /* Opacidad baja porque el negro resalta mucho sobre el blanco */
     
-    /* 🪄 SUBIMOS LA OPACIDAD (0.15 a 0.25 es ideal para modo oscuro) */
-    opacity: 0.23; 
-    
-    /* CRÍTICO: Evita que el logo bloquee los clics en el panel */
     pointer-events: none; 
     z-index: 0;
+    
+    /* Transición suave para cuando el usuario presione el botón de cambiar tema */
+    transition: filter 0.3s ease, opacity 0.3s ease; 
+}
+
+/* 🌙 CUANDO EL USUARIO ACTIVA EL MODO OSCURO */
+body.dark-mode::after {
+    /* Quitamos la inversión para que el logo vuelva a ser blanco original */
+    filter: invert(0); 
+    opacity: 0.15; /* Subimos la opacidad para que brille bien sobre el fondo negro */
 }
 
 /* Aseguramos que el panel principal siempre esté una capa por encima del logo */
