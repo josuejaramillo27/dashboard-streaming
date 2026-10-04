@@ -122,11 +122,11 @@ body::after {
     background-image: url('AGC-LOGO-FONDO.png'); 
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 75vh; 
+    background-size: 60vh; 
     
     /* 🪄 MAGIA: Invertimos el logo blanco a negro puro para que contraste en fondo claro */
     filter: invert(1); 
-    opacity: 0.04; /* Opacidad baja porque el negro resalta mucho sobre el blanco */
+    opacity: 0.20; /* Opacidad baja porque el negro resalta mucho sobre el blanco */
     
     pointer-events: none; 
     z-index: 0;
