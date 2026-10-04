@@ -3744,14 +3744,28 @@ window.openCheckoutFromCart = () => {
     const pmContainer = document.getElementById('checkoutPaymentMethods');
     pmContainer.innerHTML = '';
     const methods = data.paymentMethods || [];
+
+    // --- NUEVO: BOTONES DE PAGO AUTOMÁTICOS ---
+    let botonesAutomaticos = `
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+            <button class="btn-primary" style="background: #009EE3; border: none; padding: 14px; font-weight: 800; font-size: 14px;" onclick="window.iniciarPagoAutomatico('mercadopago')">
+                Pagar con Mercado Pago
+            </button>
+            <button class="btn-primary" style="background: #FCD535; color: #1E2329; border: none; padding: 14px; font-weight: 800; font-size: 14px;" onclick="window.iniciarPagoAutomatico('binance')">
+                Pagar con Binance
+            </button>
+        </div>
+        <p style="text-align: center; color: var(--mac-text-secondary); font-size: 12px; margin-bottom: 15px; font-weight: bold;">--- O PAGO MANUAL ---</p>
+    `;
+
     if (methods.length === 0) {
-        pmContainer.innerHTML = '<p style="font-size: 12px; color: var(--mac-red); text-align: center;">El vendedor aún no ha configurado métodos de pago.</p>';
+        pmContainer.innerHTML = botonesAutomaticos + '<p style="font-size: 12px; color: var(--mac-red); text-align: center;">El vendedor aún no ha configurado métodos de pago manuales.</p>';
     } else {
         let selectHtml = `<select id="pmSelectDropdown" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 14px; font-weight: bold; outline: none; margin-bottom: 10px;" onchange="window.showPaymentDetails(this.value)">`;
-        selectHtml += `<option value="">-- Elige un método de pago --</option>`;
+        selectHtml += `<option value="">-- Elige un pago manual (Yape, Transf) --</option>`;
         methods.forEach((m, idx) => { selectHtml += `<option value="${idx}">🏦 ${m.bank}</option>`; });
         selectHtml += `</select><div id="pmDetailsContainer" style="display:none; background: var(--mac-bg); padding: 15px; border-radius: 10px; border: 1px dashed var(--mac-border);"></div>`;
-        pmContainer.innerHTML = selectHtml;
+        pmContainer.innerHTML = botonesAutomaticos + selectHtml;
     }
 
     document.getElementById('checkoutPhone').value = '';
@@ -4050,6 +4064,85 @@ window.openRenewFromPortal = (clientId, platform, price) => {
     document.getElementById('checkoutReceipt').value = '';
     document.getElementById('checkoutModal').style.display = 'flex';
 };
+
+window.iniciarPagoAutomatico = async (metodo) => {
+    const name = document.getElementById('checkoutClientName').value.trim();
+    const phone = document.getElementById('checkoutPhone').value.trim();
+
+    if (!name) return window.showNotification("⚠️ Por favor, ingresa tu nombre.");
+    if (!phone || !phone.startsWith('+')) return window.showNotification("⚠️ Ingresa tu WhatsApp incluyendo el código de país (Ej: +51...)");
+
+    let clienteCorreo = '';
+    if (currentCheckoutItem.requiresInvite) {
+        clienteCorreo = document.getElementById('checkoutClientEmail').value.trim();
+        if (!clienteCorreo) return window.showNotification("⚠️ Debes ingresar tu correo para recibir la invitación.");
+    }
+
+    // Modal de Carga
+    Swal.fire({
+        title: 'Generando Pago...',
+        html: 'Por favor espera, te estamos redirigiendo a la pasarela segura.',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading() }
+    });
+
+    try {
+        const dataTienda = window.publicStoreDataCache || portalStoreData;
+        const vendedorId = dataTienda.uid; 
+        const pedidoId = `ped_${Date.now()}`;
+
+        // 1. Guardar el pedido en Firebase (esperando_pago)
+        await setDoc(doc(db, "pedidos", pedidoId), {
+            vendedorId: vendedorId,
+            clienteId: currentCheckoutItem.isRenewal ? currentCheckoutItem.clientId : null,
+            clienteNombre: name,
+            clienteNumero: phone,
+            tipo: currentCheckoutItem.isRenewal ? 'renovacion' : (currentCheckoutItem.type || 'Servicio'),
+            plataforma: currentCheckoutItem.platform,
+            precio: currentCheckoutItem.price,
+            comprobanteUrl: 'PAGO_AUTOMATICO', // Indicador de que no hay captura
+            metodoPago: metodo,
+            requiereInvitacion: currentCheckoutItem.requiresInvite || false,
+            clienteCorreo: clienteCorreo,
+            estado: 'esperando_pago', // El Webhook de la VPS lo cambiará a 'aprobado'
+            fecha: new Date().toISOString()
+        });
+
+        // 2. Hacer fetch a tu VPS en DigitalOcean
+        const urlEndpoint = metodo === 'mercadopago' ? 'https://bot.panelagc.com/api/crear-pago-mp' : 'https://bot.panelagc.com/api/crear-pago-binance';
+        
+        const response = await fetch(urlEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                vendedorId: vendedorId,
+                pedidoId: pedidoId,
+                titulo: currentCheckoutItem.platform,
+                precio: currentCheckoutItem.price
+            })
+        });
+
+        const dataResp = await response.json();
+
+        if (dataResp.status === 'ok') {
+            // Vaciar carrito
+            window.storeCart = [];
+            document.getElementById('cartBadge').innerText = '0';
+            document.getElementById('floatingCartBtn').style.display = 'none';
+            document.getElementById('checkoutModal').style.display = 'none';
+            
+            // Redirigir a Mercado Pago / Binance
+            window.location.href = dataResp.init_point; 
+        } else {
+            Swal.fire('Error', dataResp.error || 'El vendedor no tiene configurado este método de pago.', 'error');
+        }
+
+    } catch (error) {
+        console.error(error);
+        Swal.fire('Error', 'Hubo un problema de red al contactar al servidor.', 'error');
+    }
+};
+
 window.submitCheckout = async () => {
     const name = document.getElementById('checkoutClientName').value.trim();
     const phone = document.getElementById('checkoutPhone').value.trim();
