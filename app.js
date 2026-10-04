@@ -583,23 +583,28 @@ window.openUpgradeWa = () => {
 
 // --- ABRIR MODAL DE PERFIL MODIFICADO PARA VERIFICAR PLAN ---
 window.openProfileModal = () => {
-    // 1. Carga los datos de texto del perfil
     document.getElementById('editProfileName').value = currentUserData.name || '';
     document.getElementById('editProfileCountry').value = currentUserData.country || '';
     document.getElementById('editProfilePhone').value = currentUserData.phone || '';
     document.getElementById('editProfileAlias').value = currentUserData.storeAlias || '';
     document.getElementById('editReferencesLink').value = currentUserData.referencesLink || '';
 
-    // --- NUEVO: Cargar Pasarelas (Ocultas por seguridad) ---
+    // Bloquear/Desbloquear Pasarelas según el plan (PRO o Elite)
+    const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
+    const btnPasarelas = document.getElementById('btnTabPasarelas');
+    if (btnPasarelas) {
+        btnPasarelas.style.display = (plan === 'pro' || plan === 'elite') ? 'inline-block' : 'none';
+    }
+
     if (document.getElementById('mpAccessTokenInput')) {
         document.getElementById('mpAccessTokenInput').value = currentUserData.mpAccessToken ? `APP_USR-***${currentUserData.mpAccessToken.slice(-5)}` : '';
     }
-    if (document.getElementById('binanceApiKeyInput')) {
-        document.getElementById('binanceApiKeyInput').value = currentUserData.binanceApiKey ? `***${currentUserData.binanceApiKey.slice(-5)}` : '';
-    }
-    if (document.getElementById('binanceSecretKeyInput')) {
-        document.getElementById('binanceSecretKeyInput').value = currentUserData.binanceSecretKey ? `***${currentUserData.binanceSecretKey.slice(-5)}` : '';
-    }
+    // Carga de nuevos campos de Binance
+    if (document.getElementById('binanceApiKeyInput')) document.getElementById('binanceApiKeyInput').value = currentUserData.binanceApiKey ? `***${currentUserData.binanceApiKey.slice(-5)}` : '';
+    if (document.getElementById('binanceSecretKeyInput')) document.getElementById('binanceSecretKeyInput').value = currentUserData.binanceSecretKey ? `***${currentUserData.binanceSecretKey.slice(-5)}` : '';
+    if (document.getElementById('binancePayIdInput')) document.getElementById('binancePayIdInput').value = currentUserData.binancePayId || '';
+    if (document.getElementById('binanceAliasInput')) document.getElementById('binanceAliasInput').value = currentUserData.binanceAlias || '';
+    if (document.getElementById('binanceExchangeRateInput')) document.getElementById('binanceExchangeRateInput').value = currentUserData.binanceExchangeRate || '';
 
     // 2. Carga los chips de servicios y pagos
     if (typeof window.renderCustomServicesChips === 'function') window.renderCustomServicesChips();
@@ -1111,11 +1116,17 @@ window.saveGateways = async () => {
     const cajaMp = document.getElementById('mpAccessTokenInput');
     const cajaBinApi = document.getElementById('binanceApiKeyInput');
     const cajaBinSec = document.getElementById('binanceSecretKeyInput');
+    const cajaBinPayId = document.getElementById('binancePayIdInput');
+    const cajaBinAlias = document.getElementById('binanceAliasInput');
+    const cajaBinRate = document.getElementById('binanceExchangeRateInput');
 
     // Extraemos los valores SOLO si las cajas existen en el HTML
     if (cajaMp) mpAccessToken = cajaMp.value.trim();
     if (cajaBinApi) binanceApiKey = cajaBinApi.value.trim();
     if (cajaBinSec) binanceSecretKey = cajaBinSec.value.trim();
+    if (cajaBinPayId) updateData.binancePayId = cajaBinPayId.value.trim();
+    if (cajaBinAlias) updateData.binanceAlias = cajaBinAlias.value.trim();
+    if (cajaBinRate) updateData.binanceExchangeRate = parseFloat(cajaBinRate.value) || null;
 
     const btn = document.querySelector('#tabPasarelas .btn-primary');
     const origText = btn ? btn.innerHTML : 'Guardar Pasarelas';
@@ -1144,7 +1155,10 @@ window.saveGateways = async () => {
             if (updateData.mpAccessToken !== undefined) currentUserData.mpAccessToken = updateData.mpAccessToken;
             if (updateData.binanceApiKey !== undefined) currentUserData.binanceApiKey = updateData.binanceApiKey;
             if (updateData.binanceSecretKey !== undefined) currentUserData.binanceSecretKey = updateData.binanceSecretKey;
-        }
+            if (updateData.binancePayId !== undefined) currentUserData.binancePayId = updateData.binancePayId;
+            if (updateData.binanceAlias !== undefined) currentUserData.binanceAlias = updateData.binanceAlias;
+            if (updateData.binanceExchangeRate !== undefined) currentUserData.binanceExchangeRate = updateData.binanceExchangeRate;
+                    }
 
         window.showNotification("✅ Pasarelas de pago guardadas exitosamente.");
         if (typeof window.openProfileModal === 'function') window.openProfileModal();
@@ -3499,13 +3513,14 @@ window.addStoreItem = async () => {
             const snapshot = await uploadBytes(storageRef, file);
             imgUrl = await getDownloadURL(snapshot.ref);
         }
-
+        const autoDeliver = document.getElementById('storeAutoDeliver') ? document.getElementById('storeAutoDeliver').checked : false;
         let catalog = currentUserData.storeCatalog || [];
         catalog.push({
             id: 'item_' + Date.now(), platform: plat, price: p1P,
             storeTabs: storeTabs, pricingOptions: storeTabs[0].options, // Guardado Dual (Soporta Legacy)
             category: cat, desc: desc, imgUrl: imgUrl, type: type,
-            autoStock: autoStock, stockPlatforms: stockPlatforms, requiresInvite: requiresInvite, badgeOption: badgeOption, status: 'disponible'
+            autoStock: autoStock, stockPlatforms: stockPlatforms, requiresInvite: requiresInvite, badgeOption: badgeOption, status: 'disponible',
+            autoDeliver: autoDeliver
         });
 
         await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
@@ -3819,12 +3834,16 @@ window.openCheckoutFromCart = () => {
     const joinedPlatforms = platforms.join(' + ');
     const finalType = window.storeCart.length > 1 || isCombo ? 'Paquete' : 'Servicio';
 
-    // Preparar el objeto maestro para submitCheckout
+let autoDeliver = true;
+window.storeCart.forEach(item => {
+    if (!item.autoDeliver) autoDeliver = false;
+});
     currentCheckoutItem = {
         platform: joinedPlatforms,
         price: totalPrice,
         requiresInvite: requiresInvite,
-        type: finalType
+        type: finalType,
+        autoDeliver: autoDeliver
     };
 
     document.getElementById('checkoutItemName').innerText = window.storeCart.length > 1 ? `Paquete (${window.storeCart.length} servicios)` : joinedPlatforms;
@@ -4124,7 +4143,7 @@ window.descargarQR = async (url, banco) => {
     }
 };
 window.openRenewFromPortal = (clientId, platform, price) => {
-    const data = portalStoreData; // Usamos la data pública del portal
+    const data = portalStoreData; 
 
     document.getElementById('checkoutItemName').innerText = `Renovación: ${platform}`;
     document.getElementById('checkoutItemPrice').innerText = `${data.currency || 'S/'}${parseFloat(price).toFixed(2)}`;
@@ -4135,23 +4154,37 @@ window.openRenewFromPortal = (clientId, platform, price) => {
     const pmContainer = document.getElementById('checkoutPaymentMethods');
     pmContainer.innerHTML = '';
     const methods = data.paymentMethods || [];
+
+    // BOTONES AUTOMÁTICOS
+    let botonesAutomaticos = `
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+            <button class="btn-primary" style="background: #009EE3; border: none; padding: 14px; font-weight: 800; font-size: 14px;" onclick="window.iniciarPagoAutomatico('mercadopago')">
+                Pagar con Mercado Pago
+            </button>
+            <button class="btn-primary" style="background: #FCD535; color: #1E2329; border: none; padding: 14px; font-weight: 800; font-size: 14px;" onclick="window.iniciarPagoAutomatico('binance')">
+                Pagar con Binance
+            </button>
+        </div>
+        <p style="text-align: center; color: var(--mac-text-secondary); font-size: 12px; margin-bottom: 15px; font-weight: bold;">--- O PAGO MANUAL ---</p>
+    `;
+
     if (methods.length === 0) {
-        pmContainer.innerHTML = '<p style="font-size: 12px; color: var(--mac-red); text-align: center;">El administrador no ha configurado métodos de pago.</p>';
+        pmContainer.innerHTML = botonesAutomaticos + '<p style="font-size: 12px; color: var(--mac-red); text-align: center;">El administrador no ha configurado métodos de pago manuales.</p>';
     } else {
         let selectHtml = `<select id="pmSelectDropdown" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 14px; font-weight: bold; outline: none; margin-bottom: 10px;" onchange="window.showPaymentDetails(this.value)">`;
-        selectHtml += `<option value="">-- Elige un método de pago --</option>`;
+        selectHtml += `<option value="">-- Elige un pago manual (Yape, Transf) --</option>`;
         methods.forEach((m, idx) => { selectHtml += `<option value="${idx}">🏦 ${m.bank}</option>`; });
         selectHtml += `</select><div id="pmDetailsContainer" style="display:none; background: var(--mac-bg); padding: 15px; border-radius: 10px; border: 1px dashed var(--mac-border);"></div>`;
-        pmContainer.innerHTML = selectHtml;
+        pmContainer.innerHTML = botonesAutomaticos + selectHtml;
     }
 
-    // Configurar estado global para que submitCheckout sepa qué hacer
     currentCheckoutItem = {
         isRenewal: true,
         clientId: clientId,
         platform: platform,
         price: parseFloat(price),
-        requiresInvite: false
+        requiresInvite: false,
+        autoDeliver: true // Siempre true para renovaciones
     };
 
     document.getElementById('checkoutPhone').value = '';
@@ -4199,31 +4232,52 @@ window.iniciarPagoAutomatico = async (metodo) => {
             metodoPago: metodo,
             requiereInvitacion: currentCheckoutItem.requiresInvite || false,
             clienteCorreo: clienteCorreo,
+            entregaAutomatica: currentCheckoutItem.autoDeliver || false, // Enviar instrucción al Bot
             estado: 'esperando_pago', // El Webhook de la VPS lo cambiará a 'aprobado'
             fecha: new Date().toISOString()
+            
         });
 
         // 2. Hacer fetch a tu VPS en DigitalOcean
-        if (metodo === 'binance') {
-            Swal.close(); // Cerrar modal de carga inicial
-            
-            // Pedir el ID de la transacción al cliente
-            const { value: transactionId } = await Swal.fire({
-                title: 'Pagar con Binance',
-                html: `
-                    <p>Envía exactamente <b>${currentCheckoutItem.price} USDT</b> a nuestro Binance Pay.</p>
-                    <p style="font-size: 0.9em; color: gray;"><i>(Revisa nuestro Pay ID en la sección superior o pregúntanos)</i></p>
-                    <br>
-                    <p>Una vez transferido, pega aquí el <b>Order ID (Número de Orden)</b> de tu pago:</p>
-                `,
-                input: 'text',
-                inputPlaceholder: 'Ej: 1234567890123456',
-                showCancelButton: true,
-                confirmButtonText: 'Verificar Pago',
-                cancelButtonText: 'Cancelar'
-            });
+if (metodo === 'binance') {
+    Swal.close(); 
+    
+    const dataTienda = window.publicStoreDataCache || portalStoreData;
+    // Cálculo Dinámico USDT
+    const rate = parseFloat(dataTienda.binanceExchangeRate) || 1;
+    const priceUSDT = (currentCheckoutItem.price / rate).toFixed(2);
+    
+    const payId = dataTienda.binancePayId || 'No configurado';
+    const alias = dataTienda.binanceAlias || '';
 
-            if (!transactionId) return; // Si cancela o deja vacío
+    const { value: transactionId } = await Swal.fire({
+        title: 'Pagar con Binance',
+        html: `
+            <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <p style="margin-bottom: 15px; font-size: 15px; color: var(--mac-text-main);">
+                    Envía exactamente <b style="color: #FCD535; font-size: 18px;">${priceUSDT} USDT</b> a nuestro Binance Pay.
+                </p>
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; border: 1px dashed #555; margin-bottom: 20px; width: 100%; box-sizing: border-box;">
+                    <p style="margin: 0; font-size: 13px; color: var(--mac-text-secondary);">Binance Pay ID / Correo:</p>
+                    <p style="margin: 5px 0 0 0; font-size: 20px; font-weight: 800; color: #fff; letter-spacing: 1.5px;">${payId}</p>
+                    ${alias ? `<p style="margin: 5px 0 0 0; font-size: 13px; color: #FCD535; font-weight: bold;">${alias}</p>` : ''}
+                </div>
+                <p style="font-size: 14px; color: var(--mac-text-secondary); margin-bottom: 10px;">
+                    Una vez transferido, pega aquí el <b>Order ID (Número de Orden)</b> de tu pago:
+                </p>
+            </div>
+        `,
+        input: 'text',
+        inputPlaceholder: 'Ej: 1234567890123456',
+        inputAttributes: {
+            style: 'text-align: center; font-size: 16px; font-weight: bold; letter-spacing: 1px;'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Verificar Pago',
+        cancelButtonText: 'Cancelar'
+    });
+
+    if (!transactionId) return;
 
             // Mostrar modal de verificación
             Swal.fire({
@@ -4337,6 +4391,7 @@ window.submitCheckout = async () => {
             comprobanteUrl: comprobanteUrl,
             requiereInvitacion: currentCheckoutItem.requiresInvite || false,
             clienteCorreo: clienteCorreo,
+            entregaAutomatica: currentCheckoutItem.autoDeliver || false,
             estado: 'pendiente',
             fecha: new Date().toISOString()
         });
