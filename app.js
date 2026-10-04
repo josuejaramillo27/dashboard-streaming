@@ -1099,6 +1099,54 @@ window.saveProfile = async () => {
     }
 };
 
+// --- NUEVO: GUARDAR PASARELAS DE PAGO (PRO) ---
+window.saveGateways = async () => {
+    const mpAccessToken = document.getElementById('mpAccessTokenInput') ? document.getElementById('mpAccessTokenInput').value.trim() : '';
+    const binanceApiKey = document.getElementById('binanceApiKeyInput') ? document.getElementById('binanceApiKeyInput').value.trim() : '';
+    const binanceSecretKey = document.getElementById('binanceSecretKeyInput') ? document.getElementById('binanceSecretKeyInput').value.trim() : '';
+
+    const btn = document.querySelector('#tabPasarelas .btn-primary');
+    const origText = btn.innerHTML;
+    btn.innerHTML = "Guardando... ⏳"; 
+    btn.disabled = true;
+
+    try {
+        let updateData = {};
+
+        // Solo guardamos si el usuario escribió algo y si NO son los asteriscos de seguridad
+        if (mpAccessToken && !mpAccessToken.includes('***')) updateData.mpAccessToken = mpAccessToken;
+        if (binanceApiKey && !binanceApiKey.includes('***')) updateData.binanceApiKey = binanceApiKey;
+        if (binanceSecretKey && !binanceSecretKey.includes('***')) updateData.binanceSecretKey = binanceSecretKey;
+
+        // Si el usuario vació el campo a propósito, lo borramos de la BD
+        if (mpAccessToken === '') updateData.mpAccessToken = null;
+        if (binanceApiKey === '') updateData.binanceApiKey = null;
+        if (binanceSecretKey === '') updateData.binanceSecretKey = null;
+
+        // Si hay algo que actualizar, lo enviamos a Firebase
+        if (Object.keys(updateData).length > 0) {
+            await updateDoc(doc(db, "users", currentUser.uid), updateData);
+            
+            // Actualizar la memoria local para no tener que recargar
+            if (updateData.mpAccessToken !== undefined) currentUserData.mpAccessToken = updateData.mpAccessToken;
+            if (updateData.binanceApiKey !== undefined) currentUserData.binanceApiKey = updateData.binanceApiKey;
+            if (updateData.binanceSecretKey !== undefined) currentUserData.binanceSecretKey = updateData.binanceSecretKey;
+        }
+
+        window.showNotification("✅ Pasarelas de pago guardadas exitosamente.");
+        
+        // Refrescamos los asteriscos de seguridad
+        window.openProfileModal();
+
+    } catch (e) {
+        window.showNotification("Error al guardar pasarelas: " + e.message);
+        console.error(e);
+    } finally {
+        btn.innerHTML = origText; 
+        btn.disabled = false;
+    }
+};
+
 window.openSuggestionModal = () => { document.getElementById('suggestionText').value = ''; document.getElementById('suggestionModal').style.display = 'flex'; };
 window.sendSuggestion = async () => { const text = document.getElementById('suggestionText').value; if (!text) return window.showNotification("Escribe algo primero."); const btn = document.querySelector('#suggestionModal .btn-primary'); btn.innerText = "Enviando..."; btn.disabled = true; try { await addDoc(collection(db, "suggestions"), { userId: currentUser.uid, userName: currentUserData.name, text: text, date: new Date().toISOString(), approved: false }); window.showNotification("¡Gracias! 🚀"); window.closeModals(); } catch(e) { window.showNotification("Error: " + e.message); } finally { btn.innerText = "Enviar Idea 🚀"; btn.disabled = false; } };
 
