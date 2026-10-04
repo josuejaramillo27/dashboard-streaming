@@ -1101,14 +1101,24 @@ window.saveProfile = async () => {
 
 // --- NUEVO: GUARDAR PASARELAS DE PAGO (PRO) ---
 window.saveGateways = async () => {
-    const mpAccessToken = document.getElementById('mpAccessTokenInput') ? document.getElementById('mpAccessTokenInput').value.trim() : '';
-    const binanceApiKey = document.getElementById('binanceApiKeyInput') ? document.getElementById('binanceApiKeyInput').value.trim() : '';
-    const binanceSecretKey = document.getElementById('binanceSecretKeyInput') ? document.getElementById('binanceSecretKeyInput').value.trim() : '';
+    // 1. Capturamos los elementos HTML primero (protección anti-nulos)
+    const inputMp = document.getElementById('mpAccessTokenInput');
+    const inputBinApi = document.getElementById('binanceApiKeyInput');
+    const inputBinSec = document.getElementById('binanceSecretKeyInput');
 
+    // 2. Solo leemos '.value' si el elemento realmente existe en la pantalla
+    const mpAccessToken = inputMp ? inputMp.value.trim() : '';
+    const binanceApiKey = inputBinApi ? inputBinApi.value.trim() : '';
+    const binanceSecretKey = inputBinSec ? inputBinSec.value.trim() : '';
+
+    // 3. Capturamos el botón con protección
     const btn = document.querySelector('#tabPasarelas .btn-primary');
-    const origText = btn.innerHTML;
-    btn.innerHTML = "Guardando... ⏳"; 
-    btn.disabled = true;
+    const origText = btn ? btn.innerHTML : 'Guardar Pasarelas';
+    
+    if (btn) {
+        btn.innerHTML = "Guardando... ⏳"; 
+        btn.disabled = true;
+    }
 
     try {
         let updateData = {};
@@ -1136,14 +1146,18 @@ window.saveGateways = async () => {
         window.showNotification("✅ Pasarelas de pago guardadas exitosamente.");
         
         // Refrescamos los asteriscos de seguridad
-        window.openProfileModal();
+        if (typeof window.openProfileModal === 'function') {
+            window.openProfileModal();
+        }
 
     } catch (e) {
         window.showNotification("Error al guardar pasarelas: " + e.message);
         console.error(e);
     } finally {
-        btn.innerHTML = origText; 
-        btn.disabled = false;
+        if (btn) {
+            btn.innerHTML = origText; 
+            btn.disabled = false;
+        }
     }
 };
 
