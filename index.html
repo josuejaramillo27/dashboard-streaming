@@ -677,7 +677,17 @@
             </div>
 
             <form id="clientForm" class="form-grid" style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border); box-shadow: var(--glass-shadow);">
-                <input type="text" id="clientName" placeholder="Nombre del Cliente" required>
+                <div style="display:flex; flex-direction:column; gap:4px; grid-column: span 1; justify-content: flex-end;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label style="font-size:11px; color:var(--mac-text-secondary); font-weight: bold; padding-left: 2px;">Nombre del Cliente:</label>
+                        <button type="button" onclick="window.toggleClientInputMode()" style="background: transparent; border: none; color: var(--mac-blue); font-size: 11px; cursor: pointer; font-weight: bold;"><i class='bx bx-search'></i> <span id="clientModeText">Buscar Existente</span></button>
+                    </div>
+                    <input type="text" id="clientName" placeholder="Escribe el nombre..." required style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none;">
+                    
+                    <select id="clientNameSelect" style="display:none; width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none;" onchange="window.onFrequentClientSelected()">
+                        <option value="">Selecciona un cliente frecuente...</option>
+                    </select>
+                </div>
                 <div class="custom-select" id="customSelect">
                     <div class="select-box" id="selectBox" onclick="window.togglePlatformDropdown(event)">
                         <span id="selectText">Plataforma(s)...</span><span>▼</span>
@@ -1024,18 +1034,23 @@
                     <h4 style="margin: 0 0 10px 0; color: var(--mac-green);"><i class='bx bxs-coupon'></i> Creador de Cupones Promocionales</h4>
                     <p style="font-size: 12px; color: var(--mac-text-secondary); margin-bottom: 15px;">Dales un código a tus clientes para que tengan un descuento exclusivo en el carrito.</p>
                     
-                    <div style="display: flex; gap: 10px; align-items: flex-end; margin-bottom: 15px;">
-    <div style="flex: 2;">
-        <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Código del Cupón (Sin espacios):</label>
-        <input type="text" id="newCouponCode" placeholder="Ej: VERANO20" style="width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); text-transform: uppercase;">
-    </div>
-    <div style="flex: 1;">
-        <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Descuento (%):</label>
-        <input type="number" id="newCouponPercent" placeholder="20" style="width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main);">
-    </div>
-    <!-- 🔥 FIX: Botón ajustado a su contenido -->
-    <button class="btn-primary" style="width: auto; white-space: nowrap; padding: 10px 15px; background: var(--mac-green); border: none;" onclick="window.addStoreCoupon()">Crear Cupón</button>
-</div>
+                    <div style="display: flex; gap: 10px; align-items: flex-end; margin-bottom: 15px; flex-wrap: wrap;">
+                        <div style="flex: 1.5; min-width: 140px;">
+                            <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Código (Sin espacios):</label>
+                            <input type="text" id="newCouponCode" placeholder="Ej: VERANO20" style="width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); text-transform: uppercase;">
+                        </div>
+                        <div style="flex: 1; min-width: 80px;">
+                            <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Desc. (%):</label>
+                            <input type="number" id="newCouponPercent" placeholder="20" style="width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main);">
+                        </div>
+                        <div style="flex: 2; min-width: 160px;">
+                            <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Aplica a:</label>
+                            <select id="newCouponTarget" style="width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main);">
+                                <option value="global">Todo el Catálogo</option>
+                            </select>
+                        </div>
+                        <button class="btn-primary" style="width: auto; white-space: nowrap; padding: 10px 15px; background: var(--mac-green); border: none; height: 41px;" onclick="window.addStoreCoupon()">Crear</button>
+                    </div>
 
                     <div id="storeCouponsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
                 </div>
