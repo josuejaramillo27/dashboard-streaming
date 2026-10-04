@@ -2630,42 +2630,41 @@
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div id="tabPasarelas" class="profile-tab-content" style="display: none;">
-                <div
-                    style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border);">
-                    <h4 style="color: var(--mac-blue); margin-top: 0;"><i class='bx bx-money'></i> Mercado Pago</h4>
-                    <input type="text" id="mpAccessTokenInput" placeholder="Access Token (APP_USR-...)"
-                        style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 20px; box-sizing: border-box;">
+                <div id="tabPasarelas" class="profile-tab-content" style="display: none;">
+                    <div
+                        style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border);">
+                        <h4 style="color: var(--mac-blue); margin-top: 0;"><i class='bx bx-money'></i> Mercado Pago</h4>
+                        <input type="text" id="mpAccessTokenInput" placeholder="Access Token (APP_USR-...)"
+                            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 20px; box-sizing: border-box;">
 
-                    <h4 style="color: #F3BA2F; margin-top: 10px;"><i class='bx bxl-bitcoin'></i> Binance Pay</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                        <input type="text" id="binancePayIdInput" placeholder="Binance Pay ID (Ej: 123456789)"
-                            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
-                        <input type="text" id="binanceAliasInput" placeholder="Alias en Binance"
-                            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
+                        <h4 style="color: #F3BA2F; margin-top: 10px;"><i class='bx bxl-bitcoin'></i> Binance Pay</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <input type="text" id="binancePayIdInput" placeholder="Binance Pay ID (Ej: 123456789)"
+                                style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
+                            <input type="text" id="binanceAliasInput" placeholder="Alias en Binance"
+                                style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Tipo de
+                                Cambio (Tu moneda local a 1 USDT):</label>
+                            <input type="number" id="binanceExchangeRateInput" placeholder="Ej: 3.80" step="0.01"
+                                style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box; margin-top: 5px;">
+                        </div>
+                        <input type="text" id="binanceApiKeyInput" placeholder="API Key"
+                            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 10px; box-sizing: border-box;">
+                        <input type="text" id="binanceSecretKeyInput" placeholder="Secret Key"
+                            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 20px; box-sizing: border-box;">
+
+                        <button class="btn-primary" style="width: 100%; padding: 14px;"
+                            onclick="window.saveGateways()">Guardar Pasarelas</button>
                     </div>
-                    <div style="margin-bottom: 10px;">
-                        <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Tipo de
-                            Cambio (Tu moneda local a 1 USDT):</label>
-                        <input type="number" id="binanceExchangeRateInput" placeholder="Ej: 3.80" step="0.01"
-                            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box; margin-top: 5px;">
-                    </div>
-                    <input type="text" id="binanceApiKeyInput" placeholder="API Key"
-                        style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 10px; box-sizing: border-box;">
-                    <input type="text" id="binanceSecretKeyInput" placeholder="Secret Key"
-                        style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 20px; box-sizing: border-box;">
-
-                    <button class="btn-primary" style="width: 100%; padding: 14px;"
-                        onclick="window.saveGateways()">Guardar Pasarelas</button>
                 </div>
-            </div>
 
-            <!-- BOTÓN CERRAR PERFIL MOVIDO AQUÍ AFUERA -->
-            <button class="btn-secondary mobile-only-btn"
-                style="width: 100%; padding: 14px; font-size: 15px; margin-top: 15px;"
-                onclick="window.closeModals()">Cerrar Perfil</button>
+                <!-- BOTÓN CERRAR PERFIL MOVIDO AQUÍ AFUERA -->
+                <button class="btn-secondary mobile-only-btn"
+                    style="width: 100%; padding: 14px; font-size: 15px; margin-top: 15px;"
+                    onclick="window.closeModals()">Cerrar Perfil</button>
 
             </div> <!-- ESTE ES EL DIV QUE FALTABA, CIERRA EL profileSection COMPLETO -->
         </div> <!-- Fin del dashboard-main -->
