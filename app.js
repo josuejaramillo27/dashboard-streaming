@@ -8696,26 +8696,26 @@ window.isClientSelectMode = false;
 window.toggleClientInputMode = () => {
     window.isClientSelectMode = !window.isClientSelectMode;
     const input = document.getElementById('clientName');
-    const text = document.getElementById('clientModeText'); // El texto del botón superior
+    const text = document.getElementById('clientModeText'); 
     
     if (window.isClientSelectMode) {
-        // Modo Búsqueda: Le acoplamos la lista desplegable al input
+        window.updateFrequentClientsList(); // ¡Forzamos que lea la tabla en este instante!
+        
         input.setAttribute('list', 'clientsDatalist');
         input.placeholder = "🔍 Escribe para buscar cliente...";
         input.value = '';
-        input.oninput = function() { window.onFrequentClientSelected(this.value); };
+        input.oninput = (e) => window.onFrequentClientSelected(e.target.value);
         
         if(text) {
             text.innerHTML = "Nuevo Cliente";
             text.previousElementSibling.className = 'bx bx-user-plus';
         }
     } else {
-        // Modo Normal: Quitamos la lista desplegable
         input.removeAttribute('list');
         input.placeholder = "Escribe el nombre...";
         input.value = '';
         input.oninput = null;
-        document.getElementById('phone').value = ''; // Limpiamos el teléfono
+        document.getElementById('phone').value = ''; 
         
         if(text) {
             text.innerHTML = "Clientes Frecuentes";
@@ -8732,17 +8732,16 @@ window.updateFrequentClientsList = () => {
     const uniqueClients = {};
     clients.forEach(c => {
         if (c.phone && c.name) {
-            const cleanPhone = c.phone.replace(/[^\d+]/g, ''); // Quitamos espacios del celular
+            // EXTRAEMOS SOLO NÚMEROS (Quitamos el "+" temporalmente para limpiar)
+            const cleanPhone = c.phone.replace(/[^\d]/g, ''); 
             if (!uniqueClients[cleanPhone]) {
                 uniqueClients[cleanPhone] = c.name;
             }
         }
     });
     
-    // Rellenamos la lista oculta alfabéticamente
     Object.keys(uniqueClients).sort((a, b) => uniqueClients[a].localeCompare(uniqueClients[b])).forEach(phone => {
         const name = uniqueClients[phone];
-        // El formato será: "Juan Perez - +51999888777"
         datalist.innerHTML += `<option value="${name} - +${phone}"></option>`;
     });
 };
@@ -8750,20 +8749,16 @@ window.updateFrequentClientsList = () => {
 window.onFrequentClientSelected = (val) => {
     if (!val) return;
     
-    // Si el usuario hace clic en una opción de la lista, la cortamos para separar nombre de número
     const parts = val.split(' - +');
     if (parts.length === 2) {
         const name = parts[0].trim();
         const phone = '+' + parts[1].trim();
         
-        // Dejamos solo el nombre limpio en la caja de texto
         document.getElementById('clientName').value = name;
         
-        // Auto-llenamos el teléfono
         const phoneInput = document.getElementById('phone');
         phoneInput.value = phone;
         
-        // Efecto visual verde brillante para que sepas que se autocompletó
         phoneInput.style.backgroundColor = "rgba(52, 199, 89, 0.1)";
         phoneInput.style.borderColor = "var(--mac-green)";
         setTimeout(() => {
