@@ -8685,3 +8685,286 @@ window.generateCatalogImages = async () => {
         Swal.fire({ icon: 'error', title: 'Oops...', text: 'Ocurrió un error al generar las imágenes. Revisa tu conexión a internet.' });
     }
 };
+
+/* ==========================================================================
+   NUEVAS FUNCIONES: CLIENTES FRECUENTES Y CUPONES ESPECÍFICOS
+   ========================================================================== */
+
+// --- 1. Lógica de Clientes Frecuentes ---
+window.isClientSelectMode = false;
+
+window.toggleClientInputMode = () => {
+    window.isClientSelectMode = !window.isClientSelectMode;
+    const input = document.getElementById('clientName');
+    const select = document.getElementById('clientNameSelect');
+    const text = document.getElementById('clientModeText');
+    
+    if (window.isClientSelectMode) {
+        input.style.display = 'none';
+        select.style.display = 'block';
+        input.removeAttribute('required');
+        text.innerHTML = "Nuevo Cliente";
+        text.previousElementSibling.className = 'bx bx-plus';
+    } else {
+        input.style.display = 'block';
+        select.style.display = 'none';
+        input.setAttribute('required', 'true');
+        text.innerHTML = "Buscar Existente";
+        text.previousElementSibling.className = 'bx bx-search';
+        input.value = '';
+        document.getElementById('phone').value = '';
+    }
+};
+
+window.onFrequentClientSelected = () => {
+    const select = document.getElementById('clientNameSelect');
+    const phoneInput = document.getElementById('phone');
+    const nameInput = document.getElementById('clientName');
+    
+    if (select.value) {
+        const data = JSON.parse(select.value);
+        nameInput.value = data.name;
+        phoneInput.value = data.phone;
+        // Efecto visual de que se autocompletó
+        phoneInput.style.backgroundColor = "rgba(52, 199, 89, 0.1)";
+        setTimeout(() => phoneInput.style.backgroundColor = "var(--mac-bg)", 800);
+    } else {
+        nameInput.value = '';
+        phoneInput.value = '';
+    }
+};
+
+window.updateFrequentClientsList = () => {
+    const select = document.getElementById('clientNameSelect');
+    if(!select) return;
+    select.innerHTML = '<option value="">Selecciona un cliente frecuente...</option>';
+    
+    const uniqueClients = {};
+    clients.forEach(c => {
+        if (c.phone && c.name) {
+            const cleanPhone = c.phone.replace(/[^\d+]/g, '');
+            if (!uniqueClients[cleanPhone]) {
+                uniqueClients[cleanPhone] = c.name;
+            }
+        }
+    });
+    
+    // Rellenamos alfabéticamente
+    Object.keys(uniqueClients).sort((a, b) => uniqueClients[a].localeCompare(uniqueClients[b])).forEach(phone => {
+        const name = uniqueClients[phone];
+        const valObj = JSON.stringify({name: name, phone: phone});
+        select.innerHTML += `<option value='${valObj}'>${name} (${phone})</option>`;
+    });
+};
+
+// Inyectamos la actualización de la lista justo cuando la tabla de clientes se recarga
+const originalRenderTable = window.renderTable;
+window.renderTable = () => {
+    originalRenderTable();
+    window.updateFrequentClientsList();
+};
+
+
+// --- 2. Lógica de Cupones Específicos ---
+
+// Actualiza el menú desplegable al abrir el modal de crear cupones
+window.updateCouponTargets = () => {
+    const select = document.getElementById('newCouponTarget');
+    if (!select) return;
+    select.innerHTML = '<option value="global">Todo el Catálogo</option>';
+    const catalog = currentUserData.storeCatalog || [];
+    
+    // Obtenemos nombres únicos de productos para no repetir
+    const uniquePlatforms = [...new Set(catalog.map(item => item.platform))];
+    uniquePlatforms.forEach(plat => {
+        select.innerHTML += `<option value="${plat}">${plat}</option>`;
+    });
+};
+
+// Sobrescribimos la apertura de la tienda para que siempre actualice la lista de objetivos
+const openStoreHook = window.openStoreModal;
+window.openStoreModal = () => {
+    if(typeof openStoreHook === 'function') openStoreHook();
+    setTimeout(() => window.updateCouponTargets(), 100);
+};
+
+// Sobrescribimos el guardado del cupón
+window.addStoreCoupon = async () => {
+    const code = document.getElementById('newCouponCode').value.trim().toUpperCase();
+    const percent = parseFloat(document.getElementById('newCouponPercent').value) || 0;
+    const target = document.getElementById('newCouponTarget').value;
+    
+    if (!code || percent <= 0) return window.showNotification("⚠️ Ingresa un código y un descuento válido.");
+    
+    let coupons = currentUserData.storeCoupons || [];
+    if (coupons.some(c => c.code === code)) return window.showNotification("Ese código ya existe.");
+    
+    coupons.push({ code, percent, target });
+    try {
+        await updateDoc(doc(db, "users", currentUser.uid), { storeCoupons: coupons });
+        currentUserData.storeCoupons = coupons;
+        document.getElementById('newCouponCode').value = '';
+        document.getElementById('newCouponPercent').value = '';
+        document.getElementById('newCouponTarget').value = 'global';
+        window.renderStoreCoupons();
+        window.showNotification("🎟️ Cupón creado exitosamente");
+    } catch(e) { window.showNotification("Error: " + e.message); }
+};
+
+// Sobrescribimos la renderización para mostrar la insignia del objetivo (Target)
+window.renderStoreCoupons = () => {
+    const list = document.getElementById('storeCouponsList');
+    list.innerHTML = '';
+    const coupons = currentUserData.storeCoupons || [];
+    
+    coupons.forEach((c, index) => {
+        const isGlobal = c.target === 'global' || !c.target;
+        const targetBadge = isGlobal ? 
+            `<span style="background:var(--mac-blue); color:white; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:bold;">TODA LA TIENDA</span>` : 
+            `<span style="background:var(--mac-orange); color:white; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:bold;">SOLO ${c.target}</span>`;
+
+        list.innerHTML += `
+            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mac-surface); border: 1px dashed var(--mac-border); padding: 12px 15px; border-radius: 8px;">
+                <div>
+                    <span style="font-weight: 900; color: var(--mac-text-main); font-size: 15px; display:block; margin-bottom: 4px;">${c.code} <span style="font-size: 12px; color: var(--mac-green);">(-${c.percent}%)</span></span>
+                    ${targetBadge}
+                </div>
+                <button class="action-btn btn-del" style="padding: 6px; font-size: 15px;" onclick="window.deleteStoreCoupon(${index})"><i class='bx bx-trash'></i></button>
+            </div>
+        `;
+    });
+};
+
+// --- 3. Lógica del Carrito (El Cerebro Matemático) ---
+
+window.applyCoupon = () => {
+    const code = document.getElementById('cartCouponInput').value.trim().toUpperCase();
+    const feedback = document.getElementById('couponFeedbackMessage');
+
+    if(!code) {
+        if (feedback) feedback.style.display = 'none';
+        return;
+    }
+    
+    const storeCoupons = window.publicStoreDataCache.storeCoupons || [];
+    const validCoupon = storeCoupons.find(c => c.code === code);
+    
+    if (validCoupon) {
+        // VALIDACIÓN DE CUPÓN ESPECÍFICO
+        if (validCoupon.target && validCoupon.target !== 'global') {
+            const hasTargetItem = window.storeCart.some(item => item.platform.startsWith(validCoupon.target));
+            if (!hasTargetItem) {
+                activeCoupon = null;
+                if (feedback) {
+                    feedback.innerHTML = `❌ El cupón aplica solo para: ${validCoupon.target}`;
+                    feedback.style.color = "var(--mac-orange)";
+                    feedback.style.display = "block";
+                }
+                window.renderCartItems();
+                return;
+            }
+        }
+
+        activeCoupon = validCoupon;
+        if (feedback) {
+            feedback.innerHTML = "✅ ¡Cupón aplicado!";
+            feedback.style.color = "var(--mac-green)";
+            feedback.style.display = "block";
+        }
+        window.renderCartItems(); 
+    } else {
+        activeCoupon = null;
+        if (feedback) {
+            feedback.innerHTML = "❌ Cupón inválido o expirado";
+            feedback.style.color = "var(--mac-red)";
+            feedback.style.display = "block";
+        }
+        window.renderCartItems();
+    }
+};
+
+window.renderCartItems = () => {
+    const container = document.getElementById('cartItemsContainer');
+    const totalEl = document.getElementById('cartTotalPrice');
+    const data = window.publicStoreDataCache;
+    
+    container.innerHTML = '';
+    
+    if (window.storeCart.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: var(--mac-text-secondary); margin-top: 50px;"><i class="bx bx-shopping-bag" style="font-size: 64px; opacity: 0.3; margin-bottom: 15px;"></i><p style="font-weight: bold; font-size: 16px;">Tu carrito está vacío</p></div>';
+        totalEl.innerText = `${data.currency || 'S/'}0.00`;
+        document.getElementById('floatingCartBtn').style.display = 'none';
+        document.getElementById('cartComboDiscountRow').style.display = 'none';
+        document.getElementById('cartCouponRow').style.display = 'none';
+        return;
+    }
+    
+    let subtotal = 0;
+    window.storeCart.forEach((item, index) => {
+        subtotal += item.price;
+        const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}">` : `<div style="width:65px; height:65px; border-radius:12px; background:var(--mac-gray); display:flex; align-items:center; justify-content:center; border: 1px solid var(--mac-border);"><i class="bx bx-play-circle" style="color:var(--mac-text-secondary); font-size:24px;"></i></div>`;
+        container.innerHTML += `
+            <div class="cart-item">
+                ${imgHTML}
+                <div class="cart-item-info">
+                    <div class="cart-item-title">${item.platform}</div>
+                    <div class="cart-item-price">${data.currency || 'S/'}${item.price.toFixed(2)}</div>
+                </div>
+                <button class="cart-item-remove" onclick="window.removeFromCart(${index})" title="Quitar"><i class='bx bx-trash'></i></button>
+            </div>
+        `;
+    });
+
+    let qty = window.storeCart.length;
+    let comboDiscountPercent = 0;
+    const dynamicDisc = data.storeDiscounts || { qty2: 0, qty3: 0, qty4: 0 };
+    
+    if (qty >= 4 && dynamicDisc.qty4) comboDiscountPercent = dynamicDisc.qty4;
+    else if (qty === 3 && dynamicDisc.qty3) comboDiscountPercent = dynamicDisc.qty3;
+    else if (qty === 2 && dynamicDisc.qty2) comboDiscountPercent = dynamicDisc.qty2;
+
+    let comboDiscountAmount = subtotal * (comboDiscountPercent / 100);
+    let afterComboPrice = subtotal - comboDiscountAmount;
+    
+    // CÁLCULO INTELIGENTE DE CUPÓN
+    let couponDiscountAmount = 0;
+    if (activeCoupon) {
+        if (activeCoupon.target && activeCoupon.target !== 'global') {
+            // Buscamos los productos en el carrito que coinciden con la promoción
+            let targetItemsTotal = 0;
+            window.storeCart.forEach(item => {
+                if (item.platform.startsWith(activeCoupon.target)) {
+                    targetItemsTotal += item.price;
+                }
+            });
+            // El descuento aplica SOLO a la suma de los productos afectados
+            couponDiscountAmount = targetItemsTotal * (activeCoupon.percent / 100);
+        } else {
+            // El descuento es global, aplica a todo el carrito
+            couponDiscountAmount = afterComboPrice * (activeCoupon.percent / 100);
+        }
+    }
+    
+    let finalTotal = afterComboPrice - couponDiscountAmount;
+
+    // ACTUALIZACIÓN DE LA UI DEL CARRITO
+    document.getElementById('cartSubtotalPrice').innerText = `${data.currency || 'S/'}${subtotal.toFixed(2)}`;
+    
+    if (comboDiscountAmount > 0) {
+        document.getElementById('cartComboDiscountRow').style.display = 'flex';
+        document.getElementById('cartComboDiscountLabel').innerText = `Combo Armado (-${comboDiscountPercent}%):`;
+        document.getElementById('cartComboDiscountAmount').innerText = `- ${data.currency || 'S/'}${comboDiscountAmount.toFixed(2)}`;
+    } else {
+        document.getElementById('cartComboDiscountRow').style.display = 'none';
+    }
+
+    if (couponDiscountAmount > 0) {
+        document.getElementById('cartCouponRow').style.display = 'flex';
+        document.getElementById('cartCouponAmount').innerText = `- ${data.currency || 'S/'}${couponDiscountAmount.toFixed(2)} (-${activeCoupon.percent}%)`;
+    } else {
+        document.getElementById('cartCouponRow').style.display = 'none';
+    }
+
+    document.getElementById('cartTotalPrice').innerText = `${data.currency || 'S/'}${finalTotal.toFixed(2)}`;
+    window.currentCartFinalTotal = finalTotal;
+};
