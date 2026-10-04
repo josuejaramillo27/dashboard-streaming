@@ -8703,14 +8703,18 @@ window.toggleClientInputMode = () => {
         input.style.display = 'none';
         select.style.display = 'block';
         input.removeAttribute('required');
-        text.innerHTML = "Nuevo Cliente";
-        text.previousElementSibling.className = 'bx bx-plus';
+        if(text) {
+            text.innerHTML = "Nuevo Cliente";
+            text.previousElementSibling.className = 'bx bx-user-plus';
+        }
     } else {
         input.style.display = 'block';
         select.style.display = 'none';
         input.setAttribute('required', 'true');
-        text.innerHTML = "Buscar Existente";
-        text.previousElementSibling.className = 'bx bx-search';
+        if(text) {
+            text.innerHTML = "Clientes Frecuentes";
+            text.previousElementSibling.className = 'bx bx-search';
+        }
         input.value = '';
         document.getElementById('phone').value = '';
     }
