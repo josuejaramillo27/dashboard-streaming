@@ -590,7 +590,7 @@ window.openProfileModal = () => {
     document.getElementById('editProfileAlias').value = currentUserData.storeAlias || ''; 
     document.getElementById('editReferencesLink').value = currentUserData.referencesLink || '';
     
-    / --- NUEVO: Cargar Pasarelas (Ocultas por seguridad) ---
+    // --- NUEVO: Cargar Pasarelas (Ocultas por seguridad) ---
     if (document.getElementById('mpAccessTokenInput')) {
         document.getElementById('mpAccessTokenInput').value = currentUserData.mpAccessToken ? `APP_USR-***${currentUserData.mpAccessToken.slice(-5)}` : '';
     }
@@ -600,7 +600,7 @@ window.openProfileModal = () => {
     if (document.getElementById('binanceSecretKeyInput')) {
         document.getElementById('binanceSecretKeyInput').value = currentUserData.binanceSecretKey ? `***${currentUserData.binanceSecretKey.slice(-5)}` : '';
     }
-    
+
     // 2. Carga los chips de servicios y pagos
     if (typeof window.renderCustomServicesChips === 'function') window.renderCustomServicesChips();
     tempPaymentMethods = (currentUserData.paymentMethods || []).map(m => ({ ...m, isEditing: false }));
@@ -615,6 +615,7 @@ window.openProfileModal = () => {
         document.getElementById('botBasicWarning').style.display = 'block';
         document.getElementById('botProContent').style.display = 'none';
     }
+
     if (typeof window.renderBotSlots === 'function') {
         window.renderBotSlots();
     }
