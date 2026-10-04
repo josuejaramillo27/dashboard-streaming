@@ -1773,33 +1773,31 @@
                                 <div
                                     style="background: rgba(0, 122, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed var(--mac-blue); display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
                                     <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
-                                        <div style="flex: 1; min-width: 200px;">
-                                            <label
-                                                style="font-size: 10px; color: var(--mac-text-secondary); display: block; margin-bottom: 6px;">Control
-                                                de Stock:</label>
-                                            <label class="store-toggle-card"
-                                                onclick="window.updateStoreToggleUI(this, 'storeAutoStock')"
-                                                style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-blue); font-weight: bold; font-size: 12px; transition: all 0.2s; box-sizing: border-box;">
-                                                <span><i class='bx bx-box'></i> Conectar al Inventario</span>
-                                                <input type="checkbox" id="storeAutoStock"
-                                                    onchange="window.toggleStoreStockFields()" style="display:none;">
-                                                <i class='bx bx-circle store-toggle-icon'
-                                                    style="color: var(--mac-text-secondary); font-size: 18px;"></i>
-                                            </label>
-                                        </div>
-                                        <div style="flex: 1; min-width: 200px;">
-                                            <label
-                                                style="font-size: 10px; color: var(--mac-text-secondary); display: block; margin-bottom: 6px;">Modo
-                                                de Venta:</label>
-                                            <label class="store-toggle-card"
-                                                onclick="window.updateStoreToggleUI(this, 'storeRequiresInvite')"
-                                                style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-orange); font-weight: bold; font-size: 12px; transition: all 0.2s; box-sizing: border-box;">
-                                                <span><i class='bx bx-envelope'></i> Venta por Invitación</span>
-                                                <input type="checkbox" id="storeRequiresInvite" style="display:none;">
-                                                <i class='bx bx-circle store-toggle-icon'
-                                                    style="color: var(--mac-text-secondary); font-size: 18px;"></i>
-                                            </label>
-                                        </div>
+    <div style="flex: 1; min-width: 150px;">
+        <label style="font-size: 10px; color: var(--mac-text-secondary); display: block; margin-bottom: 6px;">Control de Stock:</label>
+        <label class="store-toggle-card" onclick="window.updateStoreToggleUI(this, 'storeAutoStock')" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-blue); font-weight: bold; font-size: 12px; transition: all 0.2s; box-sizing: border-box;">
+            <span><i class='bx bx-box'></i> Conectar a Inventario</span>
+            <input type="checkbox" id="storeAutoStock" onchange="window.toggleStoreStockFields()" style="display:none;">
+            <i class='bx bx-circle store-toggle-icon' style="color: var(--mac-text-secondary); font-size: 18px;"></i>
+        </label>
+    </div>
+    <div style="flex: 1; min-width: 150px;">
+        <label style="font-size: 10px; color: var(--mac-text-secondary); display: block; margin-bottom: 6px;">Automatización:</label>
+        <label class="store-toggle-card" onclick="window.updateStoreToggleUI(this, 'storeAutoDeliver')" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-green); font-weight: bold; font-size: 12px; transition: all 0.2s; box-sizing: border-box;">
+            <span><i class='bx bx-bot'></i> Entrega Auto (Bot)</span>
+            <input type="checkbox" id="storeAutoDeliver" style="display:none;">
+            <i class='bx bx-circle store-toggle-icon' style="color: var(--mac-text-secondary); font-size: 18px;"></i>
+        </label>
+    </div>
+    <div style="flex: 1; min-width: 150px;">
+        <label style="font-size: 10px; color: var(--mac-text-secondary); display: block; margin-bottom: 6px;">Modo de Venta:</label>
+        <label class="store-toggle-card" onclick="window.updateStoreToggleUI(this, 'storeRequiresInvite')" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-orange); font-weight: bold; font-size: 12px; transition: all 0.2s; box-sizing: border-box;">
+            <span><i class='bx bx-envelope'></i> Invitación</span>
+            <input type="checkbox" id="storeRequiresInvite" style="display:none;">
+            <i class='bx bx-circle store-toggle-icon' style="color: var(--mac-text-secondary); font-size: 18px;"></i>
+        </label>
+    </div>
+</div>
                                         <div style="flex: 1; min-width: 150px;">
                                             <label
                                                 style="font-size: 10px; color: var(--mac-text-secondary); display: block; margin-bottom: 6px;">Etiqueta
@@ -2292,9 +2290,9 @@
                         Marca</div>
                     <div class="chrome-tab profile-tab-btn" onclick="window.switchProfileTab('tabPerfilBot', this)"><i
                             class='bx bx-bot'></i> Bot WhatsApp</div>
-                    <div class="chrome-tab profile-tab-btn" onclick="window.switchProfileTab('tabPasarelas', this)">
-                        <i class='bx bx-credit-card'></i> Pasarelas (PRO)
-                    </div>
+                    <div class="chrome-tab profile-tab-btn" id="btnTabPasarelas" onclick="window.switchProfileTab('tabPasarelas', this)">
+    <i class='bx bx-credit-card'></i> Pasarelas (PRO)
+</div>
                 </div>
 
                 <button id="btnInstallApp" class="btn-primary"
@@ -2630,6 +2628,14 @@
                         style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 20px; box-sizing: border-box;">
 
                     <h4 style="color: #F3BA2F; margin-top: 10px;"><i class='bx bxl-bitcoin'></i> Binance Pay</h4>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+    <input type="text" id="binancePayIdInput" placeholder="Binance Pay ID (Ej: 123456789)" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
+    <input type="text" id="binanceAliasInput" placeholder="Alias en Binance" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
+</div>
+<div style="margin-bottom: 10px;">
+    <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Tipo de Cambio (Tu moneda local a 1 USDT):</label>
+    <input type="number" id="binanceExchangeRateInput" placeholder="Ej: 3.80" step="0.01" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box; margin-top: 5px;">
+</div>
                     <input type="text" id="binanceApiKeyInput" placeholder="API Key"
                         style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 10px; box-sizing: border-box;">
                     <input type="text" id="binanceSecretKeyInput" placeholder="Secret Key"
@@ -4045,6 +4051,7 @@
                     <span style="font-size: 13px; color: var(--mac-text-main); font-weight: bold;"><i
                             class='bx bx-envelope' style="color: var(--mac-orange);"></i> Venta por Invitación</span>
                     <input type="checkbox" id="editProdInvite" style="width: 18px; height: 18px; cursor: pointer;">
+                    <input type="checkbox" id="editProdAutoDeliver">
                 </label>
 
                 <div>
