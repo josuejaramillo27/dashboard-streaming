@@ -686,65 +686,87 @@
                 </div>
             </div>
 
-            <form id="clientForm" class="form-grid" style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border); box-shadow: var(--glass-shadow);">
-                <div style="display:flex; flex-direction:column; gap:4px; grid-column: span 1; justify-content: flex-end;">
-                    <div style="display:flex; flex-direction:column; gap:4px; grid-column: span 1; justify-content: flex-end;">
+            <form id="clientForm" class="form-grid" style="background: var(--mac-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--mac-border); box-shadow: var(--glass-shadow); align-items: flex-end;">
+                
+                <!-- 1. Nombre -->
+                <div style="display:flex; flex-direction:column; gap:4px;">
                     <label style="font-size:11px; color:var(--mac-text-secondary); font-weight: bold; padding-left: 2px;">Nombre del Cliente:</label>
                     <input type="text" id="clientName" placeholder="Escribe el nombre..." required style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none;">
-                    
                     <select id="clientNameSelect" style="display:none; width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none;" onchange="window.onFrequentClientSelected()">
                         <option value="">Selecciona un cliente frecuente...</option>
                     </select>
                 </div>
-                <div class="custom-select" id="customSelect">
-                    <div class="select-box" id="selectBox" onclick="window.togglePlatformDropdown(event)">
-                        <span id="selectText">Plataforma(s)...</span><span>▼</span>
-                    </div>
-                    <div class="checkbox-dropdown" id="checkboxDropdown">
-                        <label><input type="checkbox" value="Netflix"> Netflix</label>
-                        <label><input type="checkbox" value="Disney+"> Disney+</label>
-                        <label><input type="checkbox" value="Spotify Premium"> Spotify Premium</label>
-                        <label><input type="checkbox" value="HBO Max"> HBO Max</label>
-                        <label><input type="checkbox" value="Paramount"> Paramount</label>
-                        <label><input type="checkbox" value="Amazon Prime"> Amazon Prime</label>
-                        <label><input type="checkbox" value="YouTube Premium"> YouTube Premium</label>
-                        <label><input type="checkbox" value="Crunchyroll"> Crunchyroll</label>
-                        <label><input type="checkbox" value="IPTV"> IPTV</label>
-                        <label><input type="checkbox" value="Flujo TV"> Flujo TV</label>
-                        <label><input type="checkbox" value="Apple TV"> Apple TV</label>
-                        <label><input type="checkbox" value="Gemini Pro"> Gemini Pro</label>
-                        <label><input type="checkbox" value="ChatGPT"> ChatGPT</label>
-                        <label><input type="checkbox" value="Canva Pro"> Canva Pro</label>
-                        <label><input type="checkbox" value="CapCut Pro"> CapCut Pro</label>
-                        <label><input type="checkbox" value="Directv GO"> Directv GO</label>
-                        <label><input type="checkbox" value="Movistar"> Movistar</label>
+
+                <!-- 2. Plataforma -->
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                    <label style="font-size:11px; color:var(--mac-text-secondary); font-weight: bold; padding-left: 2px;">Plataforma:</label>
+                    <div class="custom-select" id="customSelect" style="width: 100%;">
+                        <div class="select-box" id="selectBox" onclick="window.togglePlatformDropdown(event)" style="padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; height: 46px;">
+                            <span id="selectText" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; max-width: 85%;">Plataforma(s)...</span><span>▼</span>
+                        </div>
+                        <div class="checkbox-dropdown" id="checkboxDropdown">
+                            <label><input type="checkbox" value="Netflix"> Netflix</label>
+                            <label><input type="checkbox" value="Disney+"> Disney+</label>
+                            <label><input type="checkbox" value="Spotify Premium"> Spotify Premium</label>
+                            <label><input type="checkbox" value="HBO Max"> HBO Max</label>
+                            <label><input type="checkbox" value="Paramount"> Paramount</label>
+                            <label><input type="checkbox" value="Amazon Prime"> Amazon Prime</label>
+                            <label><input type="checkbox" value="YouTube Premium"> YouTube Premium</label>
+                            <label><input type="checkbox" value="Crunchyroll"> Crunchyroll</label>
+                            <label><input type="checkbox" value="IPTV"> IPTV</label>
+                            <label><input type="checkbox" value="Flujo TV"> Flujo TV</label>
+                            <label><input type="checkbox" value="Apple TV"> Apple TV</label>
+                            <label><input type="checkbox" value="Gemini Pro"> Gemini Pro</label>
+                            <label><input type="checkbox" value="ChatGPT"> ChatGPT</label>
+                            <label><input type="checkbox" value="Canva Pro"> Canva Pro</label>
+                            <label><input type="checkbox" value="CapCut Pro"> CapCut Pro</label>
+                            <label><input type="checkbox" value="Directv GO"> Directv GO</label>
+                            <label><input type="checkbox" value="Movistar"> Movistar</label>
+                        </div>
                     </div>
                 </div>
-                <button type="button" id="btnAccountData" class="btn-secondary" onclick="window.openAccountModal()"><i class='bx bx-key'></i> Datos de Cuenta</button>
-                <input type="text" id="phone" placeholder="WhatsApp (Ej: +51...)" required>
-                <input type="number" id="clientCost" placeholder="Costo" step="0.1" required>
-                
-                <!-- INICIO FILA 2 PERFECTAMENTE ALINEADA -->
-                <div style="display:flex; flex-direction:column; gap:4px; grid-column: span 1; justify-content: flex-end;">
+
+                <!-- 3. Datos de Cuenta -->
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                    <label style="font-size:11px; color:transparent; pointer-events:none;">-</label>
+                    <button type="button" id="btnAccountData" class="btn-secondary" style="width: 100%; padding: 13px; font-size: 14px; border-radius: 8px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px; height: 46px;" onclick="window.openAccountModal()"><i class='bx bx-key'></i> Datos de Cuenta</button>
+                </div>
+
+                <!-- 4. WhatsApp -->
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                    <label style="font-size:11px; color:var(--mac-text-secondary); font-weight: bold; padding-left: 2px;">WhatsApp:</label>
+                    <input type="text" id="phone" placeholder="Ej: +51..." required style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">
+                </div>
+
+                <!-- 5. Costo -->
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                    <label style="font-size:11px; color:var(--mac-text-secondary); font-weight: bold; padding-left: 2px;">Costo Proveedor:</label>
+                    <input type="number" id="clientCost" placeholder="Monto (S/)" step="0.1" required style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">
+                </div>
+
+                <!-- 6. Proveedor -->
+                <div style="display:flex; flex-direction:column; gap:4px;">
                     <label style="font-size:11px; color:var(--mac-text-secondary); font-weight: bold; padding-left: 2px;">Proveedor:</label>
-                    <select id="clientProviderSelect" style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); outline: none;" onchange="window.onProviderSelected()">
-                        <option value="">Selecciona plataforma primero...</option>
+                    <select id="clientProviderSelect" style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); outline: none; height: 46px; box-sizing: border-box;" onchange="window.onProviderSelected()">
+                        <option value="">Selecciona plataforma...</option>
                     </select>
-                    <input type="text" id="clientProviderName" placeholder="O escribe manual..." style="display:none; width: 100%; padding: 13px; margin-top: 5px; border-radius: 8px; border: 1px dashed var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none;">
+                    <input type="text" id="clientProviderName" placeholder="O escribe manual..." style="display:none; width: 100%; padding: 13px; margin-top: 5px; border-radius: 8px; border: 1px dashed var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">
                 </div>
 
-                <div style="display:flex; flex-direction:column; gap:4px; grid-column: span 1; justify-content: flex-end;">
+                <!-- 7. Precio -->
+                <div style="display:flex; flex-direction:column; gap:4px;">
                     <label style="font-size:11px; color:var(--mac-text-secondary); font-weight: bold; padding-left: 2px;">Precio de Venta:</label>
-                    <input type="number" id="clientPrice" placeholder="Monto (S/)" step="0.1" required style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none;">
+                    <input type="number" id="clientPrice" placeholder="Monto (S/)" step="0.1" required style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">
                 </div>
 
-                <div class="date-wrapper" style="display: flex; flex-direction: column; gap: 4px; grid-column: span 1; justify-content: flex-end;">
+                <!-- 8. Fecha -->
+                <div class="date-wrapper" style="display: flex; flex-direction: column; gap: 4px;">
                     <label class="mobile-date-label" style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary); padding-left: 2px;">Fecha de Vencimiento:</label>
-                    <input type="date" id="expirationDate" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none; height: 45px;">
+                    <input type="date" id="expirationDate" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">
                 </div>
-                <!-- FIN FILA 2 ALINEADA -->
-                <div id="actionButtonsContainer" style="grid-column: 1 / -1;">
-                    <button type="button" class="btn-primary" style="padding: 12px; font-size: 15px;" onclick="window.saveClientData()">Guardar Cliente</button>
+
+                <div id="actionButtonsContainer" style="grid-column: 1 / -1; margin-top: 10px;">
+                    <button type="button" class="btn-primary" style="width: 100%; padding: 15px; font-size: 16px; border-radius: 12px; font-weight: bold;" onclick="window.saveClientData()">Guardar Cliente</button>
                 </div>
             </form>
 
