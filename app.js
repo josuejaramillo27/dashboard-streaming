@@ -7188,11 +7188,6 @@ window.generateCatalogImages = async () => {
         // 3. Crear imágenes página por página
         let generatedImagesUrls = [];
         const itemsPerPage = 4; // Máximo 4 productos por estado para que se vea legible
-        window.showNotification("✅ Proceso completado internamente.");
-    } catch (e) {
-        window.showNotification("Error: " + e.message);
-    }
-};
 
         for (const cat in categories) {
             const items = categories[cat];
