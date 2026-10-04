@@ -583,28 +583,41 @@ window.openUpgradeWa = () => {
 
 // --- ABRIR MODAL DE PERFIL MODIFICADO PARA VERIFICAR PLAN ---
 window.openProfileModal = () => {
+    // 1. Carga los datos de texto del perfil
     document.getElementById('editProfileName').value = currentUserData.name || '';
     document.getElementById('editProfileCountry').value = currentUserData.country || '';
     document.getElementById('editProfilePhone').value = currentUserData.phone || '';
     document.getElementById('editProfileAlias').value = currentUserData.storeAlias || '';
     document.getElementById('editReferencesLink').value = currentUserData.referencesLink || '';
 
-    // Bloquear/Desbloquear Pasarelas según el plan (PRO o Elite)
-    const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
+    // Bloquear/Desbloquear Pasarelas según el plan
+    const planActual = (currentUserData.plan_actual || 'demo').toLowerCase();
     const btnPasarelas = document.getElementById('btnTabPasarelas');
     if (btnPasarelas) {
-        btnPasarelas.style.display = (plan === 'pro' || plan === 'elite') ? 'inline-block' : 'none';
+        btnPasarelas.style.display = (planActual === 'pro' || planActual === 'elite') ? 'inline-block' : 'none';
     }
 
+    // --- Cargar Pasarelas Antiguas ---
     if (document.getElementById('mpAccessTokenInput')) {
         document.getElementById('mpAccessTokenInput').value = currentUserData.mpAccessToken ? `APP_USR-***${currentUserData.mpAccessToken.slice(-5)}` : '';
     }
-    // Carga de nuevos campos de Binance
-    if (document.getElementById('binanceApiKeyInput')) document.getElementById('binanceApiKeyInput').value = currentUserData.binanceApiKey ? `***${currentUserData.binanceApiKey.slice(-5)}` : '';
-    if (document.getElementById('binanceSecretKeyInput')) document.getElementById('binanceSecretKeyInput').value = currentUserData.binanceSecretKey ? `***${currentUserData.binanceSecretKey.slice(-5)}` : '';
-    if (document.getElementById('binancePayIdInput')) document.getElementById('binancePayIdInput').value = currentUserData.binancePayId || '';
-    if (document.getElementById('binanceAliasInput')) document.getElementById('binanceAliasInput').value = currentUserData.binanceAlias || '';
-    if (document.getElementById('binanceExchangeRateInput')) document.getElementById('binanceExchangeRateInput').value = currentUserData.binanceExchangeRate || '';
+    if (document.getElementById('binanceApiKeyInput')) {
+        document.getElementById('binanceApiKeyInput').value = currentUserData.binanceApiKey ? `***${currentUserData.binanceApiKey.slice(-5)}` : '';
+    }
+    if (document.getElementById('binanceSecretKeyInput')) {
+        document.getElementById('binanceSecretKeyInput').value = currentUserData.binanceSecretKey ? `***${currentUserData.binanceSecretKey.slice(-5)}` : '';
+    }
+    
+    // --- NUEVO: Cargar Pasarelas de Binance Pay ---
+    if (document.getElementById('binancePayIdInput')) {
+        document.getElementById('binancePayIdInput').value = currentUserData.binancePayId || '';
+    }
+    if (document.getElementById('binanceAliasInput')) {
+        document.getElementById('binanceAliasInput').value = currentUserData.binanceAlias || '';
+    }
+    if (document.getElementById('binanceExchangeRateInput')) {
+        document.getElementById('binanceExchangeRateInput').value = currentUserData.binanceExchangeRate || '';
+    }
 
     // 2. Carga los chips de servicios y pagos
     if (typeof window.renderCustomServicesChips === 'function') window.renderCustomServicesChips();
@@ -612,7 +625,7 @@ window.openProfileModal = () => {
     window.renderPaymentMethodsList();
 
     // 3. VERIFICADOR DE PLAN PARA LA PESTAÑA DEL BOT
-    if (plan === 'pro' || plan === 'elite') {
+    if (planActual === 'pro' || planActual === 'elite') {
         document.getElementById('botBasicWarning').style.display = 'none';
         document.getElementById('botProContent').style.display = 'block';
     } else {
