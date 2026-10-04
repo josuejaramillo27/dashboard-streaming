@@ -8509,3 +8509,179 @@ window.selectPubOption = (itemId, tabIndex, optIndex, price, optLabel) => {
     let finalLabel = showTabs && tabName ? `${tabName} - ${optLabel}` : optLabel;
     window.storeSelectedOptions[itemId] = { price: price, label: finalLabel };
 };
+
+/* =========================================================
+   FUNCIONES REPARADAS DE FINANZAS Y EXPORTACIÓN
+========================================================= */
+
+window.switchFinanceTab = (tabId, element) => {
+    document.querySelectorAll('.finance-tab').forEach(tab => tab.style.display = 'none');
+    document.getElementById(tabId).style.display = 'block';
+    document.querySelectorAll('#financeSection .chrome-tab').forEach(btn => btn.classList.remove('active'));
+    element.classList.add('active');
+};
+
+window.generateCatalogImages = async () => {
+    const catalog = currentUserData.storeCatalog || [];
+    const availableItems = catalog.filter(i => i.status !== 'agotado');
+
+    if (availableItems.length === 0) {
+        return window.showNotification("⚠️ No tienes productos disponibles en el catálogo para exportar.");
+    }
+
+    // Modal de espera
+    Swal.fire({
+        title: '📸 Preparando Estudio Fotográfico',
+        html: '<p style="color:var(--mac-text-secondary); font-size:14px;">Estamos agrupando tus productos y generando las imágenes en alta calidad (1080x1920). Esto puede tomar unos segundos.</p>',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); },
+        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+    });
+
+    try {
+        const categories = {};
+        availableItems.forEach(item => {
+            const cat = item.category || 'VARIOS';
+            if (!categories[cat]) categories[cat] = [];
+            categories[cat].push(item);
+        });
+
+        const loadImgToBase64 = async (url) => {
+            if (!url) return null;
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.src = url + (url.includes('?') ? '&' : '?') + 'cb=' + new Date().getTime();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width; canvas.height = img.height;
+                    canvas.getContext('2d').drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                img.onerror = () => resolve(null);
+            });
+        };
+
+        const safeLogoBase64 = await loadImgToBase64(currentUserData.logoUrl);
+        const safeBannerBase64 = await loadImgToBase64(currentUserData.bannerUrl);
+
+        const template = document.getElementById('statusExportTemplate');
+        template.style.left = '0px'; 
+        
+        document.getElementById('statusBrandName').innerText = currentUserData.name || 'Mi Marca';
+        
+        const logoEl = document.getElementById('statusLogo');
+        if (safeLogoBase64) {
+            logoEl.src = safeLogoBase64;
+            logoEl.style.display = 'block';
+        } else {
+            logoEl.style.display = 'none';
+        }
+
+        const bannerEl = document.getElementById('statusBannerBg');
+        if (safeBannerBase64) {
+            bannerEl.style.backgroundImage = `url(${safeBannerBase64})`;
+        } else {
+            bannerEl.style.backgroundImage = 'none';
+        }
+
+        const pmContainer = document.getElementById('statusPaymentMethods');
+        pmContainer.innerHTML = '';
+        const methods = currentUserData.paymentMethods || [];
+        if (methods.length > 0) {
+            methods.forEach(m => {
+                pmContainer.innerHTML += `<span style="background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 15px; font-size: 20px; font-weight: bold;">🏦 ${m.bank}</span>`;
+            });
+        } else {
+            pmContainer.innerHTML = `<span style="background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 15px; font-size: 20px; font-weight: bold;">💳 Pregunta por nuestros medios de pago</span>`;
+        }
+
+        let generatedImagesUrls = [];
+        const itemsPerPage = 4; 
+
+        for (const cat in categories) {
+            const items = categories[cat];
+            const totalPages = Math.ceil(items.length / itemsPerPage);
+
+            for (let page = 0; page < totalPages; page++) {
+                document.getElementById('statusCategoryTitle').innerText = cat.toUpperCase() + (totalPages > 1 ? ` (${page + 1}/${totalPages})` : '');
+                
+                const container = document.getElementById('statusItemsContainer');
+                container.innerHTML = '';
+
+                const pageItems = items.slice(page * itemsPerPage, (page + 1) * itemsPerPage);
+                
+                for (const item of pageItems) {
+                    const itemImgB64 = await loadImgToBase64(item.imgUrl);
+                    const finalImg = itemImgB64 ? `<img src="${itemImgB64}" style="width: 140px; height: 140px; border-radius: 30px; object-fit: cover; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 10px 20px rgba(0,0,0,0.5); flex-shrink: 0;">` : `<div style="width: 140px; height: 140px; border-radius: 30px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i class='bx bx-play-circle' style="font-size: 50px; color: rgba(255,255,255,0.3);"></i></div>`;
+                    
+                    let optsHtml = '';
+                    const opts = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{label: 'Mensual', price: item.price}];
+                    
+                    opts.forEach(opt => {
+                        optsHtml += `<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; border-bottom: 1px dashed rgba(255,255,255,0.15); padding-bottom: 8px;">
+                            <span style="font-size: 24px; color: rgba(255,255,255,0.7);">${opt.label}</span>
+                            <span style="font-size: 28px; font-weight: 900; color: #30d158;">${globalCurrency}${opt.price.toFixed(2)}</span>
+                        </div>`;
+                    });
+
+                    container.innerHTML += `
+                        <div style="background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 35px; padding: 30px; display: flex; gap: 30px; align-items: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2);">
+                            ${finalImg}
+                            <div style="flex: 1;">
+                                <h3 style="margin: 0 0 15px 0; font-size: 38px; color: #ffffff; font-weight: 900; letter-spacing: 1px;">${item.platform}</h3>
+                                ${optsHtml}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                await new Promise(r => setTimeout(r, 300));
+
+                const canvas = await html2canvas(template, { 
+                    backgroundColor: '#0a0a0c', scale: 1.5, useCORS: true 
+                });
+                
+                generatedImagesUrls.push({
+                    url: canvas.toDataURL('image/jpeg', 0.9),
+                    name: `Estado_${cat}_${page + 1}.jpg`
+                });
+            }
+        }
+
+        template.style.left = '-9999px'; 
+
+        if (generatedImagesUrls.length === 1) {
+            const link = document.createElement('a');
+            link.download = generatedImagesUrls[0].name;
+            link.href = generatedImagesUrls[0].url;
+            link.click();
+            Swal.fire({ icon: 'success', title: '¡Listo!', text: 'La imagen de tu estado se ha descargado.', background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff', color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000' });
+        } else {
+            let imagesHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 400px; overflow-y: auto;">';
+            generatedImagesUrls.forEach((img, idx) => {
+                imagesHtml += `
+                    <div style="background: rgba(0,0,0,0.05); padding: 10px; border-radius: 12px; text-align: center;">
+                        <img src="${img.url}" style="width: 100%; border-radius: 8px; margin-bottom: 8px;">
+                        <a href="${img.url}" download="${img.name}" style="background: var(--mac-blue); color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; text-decoration: none; font-weight: bold; display: inline-block;">Descargar</a>
+                    </div>
+                `;
+            });
+            imagesHtml += '</div>';
+
+            Swal.fire({
+                title: '📸 ¡Tus Estados están listos!',
+                html: imagesHtml,
+                width: 600,
+                confirmButtonText: 'Cerrar',
+                background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+                color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+            });
+        }
+
+    } catch (error) {
+        console.error("Error completo:", error);
+        Swal.fire({ icon: 'error', title: 'Oops...', text: 'Ocurrió un error al generar las imágenes. Revisa tu conexión a internet.' });
+    }
+};
