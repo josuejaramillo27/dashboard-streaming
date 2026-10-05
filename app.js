@@ -9322,7 +9322,7 @@ window.renderCartItems = () => {
         document.getElementById('cartCouponRow').style.display = 'none';
     }
 
-    document.getElementById('cartTotalPrice').innerText = `${data.currency || 'S/'}${finalTotal.toFixed(2)}`;
+    document.getElementById('cartTotalPrice').innerText = window.formatStorePrice(finalTotal);
     window.currentCartFinalTotal = finalTotal;
 };
 
