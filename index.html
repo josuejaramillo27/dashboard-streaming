@@ -3285,21 +3285,21 @@
                 </div>
 
                 <!-- DERECHA: Controles (Buscador + Cambio Moneda) -->
-                <div style="display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
-                    
-                    <div class="spotify-search-container" style="margin: 0; min-width: 150px; flex-shrink: 1;">
-                        <i class='bx bx-search'></i>
-                        <input type="text" id="publicStoreSearchInput" placeholder="Buscar en tienda..."
-                            oninput="window.searchPublicStore()">
-                    </div>
+<div style="display: flex; gap: 10px; align-items: center; justify-content: flex-end; flex-wrap: wrap;">
+    
+    <div class="spotify-search-container" style="margin: 0; flex: 1; min-width: 150px; max-width: 300px;">
+        <i class='bx bx-search'></i>
+        <input type="text" id="publicStoreSearchInput" placeholder="Buscar en tienda..."
+            oninput="window.searchPublicStore()">
+    </div>
 
-                    <button id="storeCurrencyToggleBtn" onclick="window.toggleStoreCurrency()"
-                        style="background: transparent; color: #FCD535; font-size: 11px; padding: 10px 14px; border-radius: 20px; font-weight: bold; border: 1px solid rgba(253, 213, 53, 0.5); cursor: pointer; transition: 0.3s; display: none; white-space: nowrap; height: fit-content; flex-shrink: 0;">
-                        <i class='bx bx-transfer-alt'></i> USDT
-                    </button>
+    <!-- 🟢 AQUÍ ESTÁ EL BOTÓN BLINDADO PARA QUE NO SE ESTIRE -->
+    <button id="storeCurrencyToggleBtn" onclick="window.toggleStoreCurrency()"
+        style="width: max-content !important; flex-shrink: 0; background: transparent; color: #FCD535; font-size: 12px; padding: 10px 18px; border-radius: 20px; font-weight: bold; border: 1px solid rgba(253, 213, 53, 0.5); cursor: pointer; display: none;">
+        <i class='bx bx-transfer-alt'></i> Mostrar en USDT
+    </button>
 
-                </div>
-
+</div>
             </div>
 
             <!-- FILA INFERIOR: Categorías -->
