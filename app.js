@@ -4006,7 +4006,16 @@ const checkPublicStore = async () => {
             // Guardamos la información en memoria caché global para agilizar los filtros instantáneos
             window.publicCatalogCache = data.storeCatalog || [];
             window.publicStoreDataCache = data;
-
+            const currencyBtn = document.getElementById('storeCurrencyToggleBtn');
+            if (currencyBtn) {
+                if (data.binanceExchangeRate && parseFloat(data.binanceExchangeRate) > 0) {
+                    currencyBtn.style.display = 'block';
+                    currencyBtn.innerHTML = `<i class='bx bx-transfer-alt'></i> Mostrar en USDT`;
+                    window.storeDisplayCurrency = 'local'; // Reset por seguridad
+                } else {
+                    currencyBtn.style.display = 'none';
+                }
+            }
             // Activamos Filtros y Buscador estilo Spotify
             const filtersWrapper = document.getElementById('storeAppFiltersWrapper');
             if (window.publicCatalogCache.length > 0) {
@@ -7181,6 +7190,51 @@ window.renderCartItems = () => {
     window.currentCartFinalTotal = finalTotal;
 };
 
+// ==========================================
+// 🚀 MOTOR DE CONVERSIÓN DE MONEDA (LOCAL / USDT)
+// ==========================================
+window.storeDisplayCurrency = 'local'; // Por defecto muestra moneda local
+
+window.formatStorePrice = (priceLocal) => {
+    // Lee la data de la tienda o del portal
+    const data = window.publicStoreDataCache || (typeof portalStoreData !== 'undefined' ? portalStoreData : null);
+    if (!data) return `${priceLocal.toFixed(2)}`;
+    
+    // Si el interruptor está en USDT y el vendedor configuró la tasa
+    if (window.storeDisplayCurrency === 'USDT' && data.binanceExchangeRate) {
+        const rate = parseFloat(data.binanceExchangeRate);
+        if (rate > 0) {
+            return `USDT ${(priceLocal / rate).toFixed(2)}`;
+        }
+    }
+    // Si no, muestra la moneda local normal
+    return `${data.currency \vert{}\vert{} 'S/'}${priceLocal.toFixed(2)}`;
+};
+
+window.toggleStoreCurrency = () => {
+    const btn = document.getElementById('storeCurrencyToggleBtn');
+    const data = window.publicStoreDataCache || portalStoreData;
+    
+    if (!data.binanceExchangeRate || parseFloat(data.binanceExchangeRate) <= 0) {
+        return window.showNotification("⚠️ El vendedor no ha configurado el tipo de cambio para USDT.");
+    }
+
+    // Intercambia el estado y cambia el texto del botón
+    if (window.storeDisplayCurrency === 'local') {
+        window.storeDisplayCurrency = 'USDT';
+        if(btn) btn.innerHTML = `<i class='bx bx-transfer-alt'></i> Mostrar en ${data.currency || 'S/'}`;
+    } else {
+        window.storeDisplayCurrency = 'local';
+        if(btn) btn.innerHTML = `<i class='bx bx-transfer-alt'></i> Mostrar en USDT`;
+    }
+    
+    // Recarga las pantallas al instante para que se vea la magia
+    if (document.getElementById('publicStoreView').style.display === 'block') window.renderPublicCatalog();
+    if (document.getElementById('cartPanel').classList.contains('active')) window.renderCartItems();
+    if (document.getElementById('checkoutModal').style.display === 'flex' && typeof currentCheckoutItem !== 'undefined') {
+         document.getElementById('checkoutItemPrice').innerText = window.formatStorePrice(currentCheckoutItem.price);
+    }
+};
 
 /* =========================================================
    MÓDULO: RENDERIZADO DE TIENDA POR "VENTANAS" (SECCIONES)
