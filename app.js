@@ -3762,6 +3762,10 @@ window.addToCartConDuracion = (itemId) => {
 
     // Clonamos el producto para no alterar el catálogo original
     const cartItem = { ...originalItem };
+    
+    cartItem.basePlatform = originalItem.platform;
+    cartItem.saleType = cartItem.type === 'Completa' ? 'Completa' : 'Perfil';
+    cartItem.months = meses;
 
     // Multiplicamos el precio y actualizamos el nombre
     cartItem.price = originalItem.price * meses;
@@ -3783,7 +3787,12 @@ window.addToCart = (itemId) => {
     const item = window.publicCatalogCache.find(i => i.id === itemId);
     if (!item) return;
 
-    window.storeCart.push(item);
+    const cartItem = { ...item };
+    cartItem.basePlatform = item.platform;
+    cartItem.saleType = cartItem.type === 'Completa' ? 'Completa' : 'Perfil';
+    cartItem.months = 1;
+
+    window.storeCart.push(cartItem);
     document.getElementById('cartBadge').innerText = window.storeCart.length;
     document.getElementById('floatingCartBtn').style.display = 'flex';
 
@@ -4261,6 +4270,9 @@ window.iniciarPagoAutomatico = async (metodo) => {
             clienteNumero: phone,
             tipo: currentCheckoutItem.isRenewal ? 'renovacion' : (currentCheckoutItem.type || 'Servicio'),
             plataforma: currentCheckoutItem.platform,
+            basePlatform: currentCheckoutItem.basePlatform || currentCheckoutItem.platform,
+            saleType: currentCheckoutItem.saleType || 'Perfil',
+            months: currentCheckoutItem.months || 1,
             precio: currentCheckoutItem.price,
             comprobanteUrl: 'PAGO_AUTOMATICO', // Indicador de que no hay captura
             metodoPago: metodo,
@@ -4561,6 +4573,7 @@ let editingInvId = null; // Variable global para saber si estamos editando
 window.addInventoryAccount = async () => {
     const platform = document.getElementById('invPlatform').value;
     const type = document.getElementById('invType').value;
+    const months = parseInt(document.getElementById('invMonths').value) || 1;
     const email = document.getElementById('invEmail').value.trim();
     const pass = document.getElementById('invPass').value.trim();
     const profile = document.getElementById('invProfile').value.trim();
@@ -4577,12 +4590,12 @@ window.addInventoryAccount = async () => {
 
         if (editingInvId) {
             // MODO EDICIÓN: Actualizamos los datos del objeto existente
-            stock = stock.map(item => item.id === editingInvId ? { ...item, platform, type, email, pass, profile, pin } : item);
+            stock = stock.map(item => item.id === editingInvId ? { ...item, platform, type, months, email, pass, profile, pin } : item);
             window.showNotification("✅ Cuenta actualizada");
         } else {
             // MODO CREACIÓN
             const accountId = 'acc_' + Date.now();
-            stock.push({ id: accountId, platform, type, email, pass, profile, pin, status: 'libre' });
+            stock.push({ id: accountId, platform, type, months, email, pass, profile, pin, status: 'libre' });
             window.showNotification("✅ Cuenta añadida al stock");
         }
 
@@ -4605,6 +4618,7 @@ window.editInventoryAccount = (id) => {
 
     document.getElementById('invPlatform').value = item.platform || '';
     document.getElementById('invType').value = item.type || 'Perfil';
+    document.getElementById('invMonths').value = item.months || 1;
     document.getElementById('invEmail').value = item.email || '';
     document.getElementById('invPass').value = item.pass || '';
     document.getElementById('invProfile').value = item.profile || '';
@@ -4622,6 +4636,7 @@ window.cancelInventoryEdit = () => {
     editingInvId = null;
     document.getElementById('invPlatform').value = '';
     document.getElementById('invType').value = 'Perfil';
+    document.getElementById('invMonths').value = 1;
     document.getElementById('invEmail').value = '';
     document.getElementById('invPass').value = '';
     document.getElementById('invProfile').value = '';
@@ -7788,6 +7803,9 @@ window.addToCartConDuracion = (itemId) => {
     // Clonamos para no alterar la BD original
     const cartItem = { ...originalItem };
     cartItem.price = finalPrice;
+    cartItem.basePlatform = originalItem.platform;
+    cartItem.saleType = cartItem.type === 'Completa' ? 'Completa' : 'Perfil';
+    cartItem.months = meses;
 
     // Personalizamos el nombre en el carrito
     if (meses > 1) {
@@ -8645,6 +8663,16 @@ window.addToCartWithOptions = (itemId) => {
 
     const cartItem = { ...originalItem };
     cartItem.price = selectedOpt.price;
+    
+    cartItem.basePlatform = originalItem.platform;
+    let t = 'Perfil';
+    if (cartItem.type === 'Completa' || cartItem.platform.toLowerCase().includes('completa') || (selectedOpt.label && selectedOpt.label.toLowerCase().includes('completa'))) t = 'Completa';
+    let m = 1;
+    const match = (selectedOpt.label || '').match(/(\d+)\s*mes/i);
+    if (match) m = parseInt(match[1]);
+    cartItem.saleType = t;
+    cartItem.months = m;
+
     if (selectedOpt.label && selectedOpt.label !== '1 Mes') {
         cartItem.platform = `${originalItem.platform} (${selectedOpt.label})`;
     }
