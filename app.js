@@ -3740,7 +3740,7 @@ window.shareProduct = async (itemId) => {
     if (!item) return;
 
     const storeUrl = window.location.origin + window.location.pathname + "?tienda=" + data.storeAlias;
-    const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
+    const priceStr = window.formatStorePrice(item.price);
     const text = `🔥 ¡Mira esta oferta de *${item.platform}* a solo *${priceStr}* en la tienda oficial de ${data.name}!`;
 
     if (navigator.share) {
@@ -3823,7 +3823,7 @@ window.renderCartItems = () => {
                 ${imgHTML}
                 <div class="cart-item-info">
                     <div class="cart-item-title">${item.platform}</div>
-                    <div class="cart-item-price">${data.currency || 'S/'}${item.price.toFixed(2)}</div>
+                    <div class="cart-item-price">${window.formatStorePrice(item.price)}</div>
                 </div>
                 <button class="cart-item-remove" onclick="window.removeFromCart(${index})" title="Quitar"><i class='bx bx-trash'></i></button>
             </div>
@@ -3872,7 +3872,7 @@ window.storeCart.forEach(item => {
     };
 
     document.getElementById('checkoutItemName').innerText = window.storeCart.length > 1 ? `Paquete (${window.storeCart.length} servicios)` : joinedPlatforms;
-    document.getElementById('checkoutItemPrice').innerText = `${data.currency || 'S/'}${totalPrice.toFixed(2)}`;
+    document.getElementById('cartTotalPrice').innerText = window.formatStorePrice(finalTotal);
 
     const emailContainer = document.getElementById('checkoutEmailContainer');
     if (emailContainer) {
@@ -4180,7 +4180,7 @@ window.openRenewFromPortal = (clientId, platform, price) => {
     const data = portalStoreData; 
 
     document.getElementById('checkoutItemName').innerText = `Renovación: ${platform}`;
-    document.getElementById('checkoutItemPrice').innerText = `${data.currency || 'S/'}${parseFloat(price).toFixed(2)}`;
+    document.getElementById('checkoutItemPrice').innerText = window.formatStorePrice(currentCheckoutItem.price);
 
     const emailContainer = document.getElementById('checkoutEmailContainer');
     if (emailContainer) emailContainer.style.display = 'none';
@@ -4454,7 +4454,7 @@ window.submitCheckout = async () => {
         // --- NUEVO: REDIRECCIÓN AL WHATSAPP DEL VENDEDOR ---
         const dataTienda = window.publicStoreDataCache || portalStoreData;
         const vendedorNum = dataTienda.phone ? dataTienda.phone.replace(/[^\d]/g, '') : '';
-        const wsText = `Hola, acabo de pagar mi pedido en tu tienda web.\n\n*🛒 Producto:* ${currentCheckoutItem.platform}\n*💰 Total Pagado:* ${dataTienda.currency || 'S/'}${currentCheckoutItem.price.toFixed(2)}\n*👤 A nombre de:* ${name}\n\nPor favor, verifica mi comprobante para entregarme el acceso.`;
+        const wsText = `Hola, acabo de pagar mi pedido en tu tienda web.\n\n*🛒 Producto:* ${currentCheckoutItem.platform}\n*💰 Total Pagado:* ${window.formatStorePrice(currentCheckoutItem.price)}\n*👤 A nombre de:* ${name}\n\nPor favor, verifica mi comprobante para entregarme el acceso.`;
         const waUrl = `https://wa.me/${vendedorNum}?text=${encodeURIComponent(wsText)}`;
 
         Swal.fire({
@@ -7123,7 +7123,7 @@ window.renderCartItems = () => {
 
     if (window.storeCart.length === 0) {
         container.innerHTML = '<div style="text-align: center; color: var(--mac-text-secondary); margin-top: 50px;"><i class="bx bx-shopping-bag" style="font-size: 64px; opacity: 0.3; margin-bottom: 15px;"></i><p style="font-weight: bold; font-size: 16px;">Tu carrito está vacío</p></div>';
-        document.getElementById('cartTotalPrice').innerText = `${data.currency || 'S/'}0.00`;
+        document.getElementById('cartTotalPrice').innerText = window.formatStorePrice(0);
         document.getElementById('floatingCartBtn').style.display = 'none';
         document.getElementById('cartComboDiscountRow').style.display = 'none';
         document.getElementById('cartCouponRow').style.display = 'none';
@@ -7139,7 +7139,7 @@ window.renderCartItems = () => {
                 ${imgHTML}
                 <div class="cart-item-info">
                     <div class="cart-item-title">${item.platform}</div>
-                    <div class="cart-item-price">${data.currency || 'S/'}${item.price.toFixed(2)}</div>
+                    <div class="cart-item-price">${window.formatStorePrice(item.price)}</div>
                 </div>
                 <button class="cart-item-remove" onclick="window.removeFromCart(${index})" title="Quitar"><i class='bx bx-trash'></i></button>
             </div>
@@ -7167,19 +7167,19 @@ window.renderCartItems = () => {
     let finalTotal = afterComboPrice - couponDiscountAmount;
 
     // ACTUALIZAR INTERFAZ DEL CARRITO
-    document.getElementById('cartSubtotalPrice').innerText = `${data.currency || 'S/'}${subtotal.toFixed(2)}`;
+    document.getElementById('cartSubtotalPrice').innerText = window.formatStorePrice(subtotal);
 
     if (comboDiscountAmount > 0) {
         document.getElementById('cartComboDiscountRow').style.display = 'flex';
         document.getElementById('cartComboDiscountLabel').innerText = `Combo Armado (-${comboDiscountPercent}%):`;
-        document.getElementById('cartComboDiscountAmount').innerText = `- ${data.currency || 'S/'}${comboDiscountAmount.toFixed(2)}`;
+        document.getElementById('cartComboDiscountAmount').innerText = `- ${window.formatStorePrice(comboDiscountAmount)}`;
     } else {
         document.getElementById('cartComboDiscountRow').style.display = 'none';
     }
 
     if (couponDiscountAmount > 0) {
         document.getElementById('cartCouponRow').style.display = 'flex';
-        document.getElementById('cartCouponAmount').innerText = `- ${data.currency || 'S/'}${couponDiscountAmount.toFixed(2)} (-${activeCoupon.percent}%)`;
+        document.getElementById('cartCouponAmount').innerText = `- ${window.formatStorePrice(couponDiscountAmount)} (-${activeCoupon.percent}%)`;
     } else {
         document.getElementById('cartCouponRow').style.display = 'none';
     }
@@ -7336,7 +7336,7 @@ window.renderPublicCatalog = () => {
 
         // Renderizar las tarjetas
         itemsEnCategoria.forEach(item => {
-            const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
+            const priceStr = window.formatStorePrice(item.price);
             let isAgotado = item.status === 'agotado';
             let stockHtml = '';
 
@@ -9265,7 +9265,7 @@ window.renderCartItems = () => {
                 ${imgHTML}
                 <div class="cart-item-info">
                     <div class="cart-item-title">${item.platform}</div>
-                    <div class="cart-item-price">${data.currency || 'S/'}${item.price.toFixed(2)}</div>
+                    <div class="cart-item-price">${window.formatStorePrice(item.price)}</div>
                 </div>
                 <button class="cart-item-remove" onclick="window.removeFromCart(${index})" title="Quitar"><i class='bx bx-trash'></i></button>
             </div>
@@ -9305,19 +9305,19 @@ window.renderCartItems = () => {
     let finalTotal = afterComboPrice - couponDiscountAmount;
 
     // ACTUALIZACIÓN DE LA UI DEL CARRITO
-    document.getElementById('cartSubtotalPrice').innerText = `${data.currency || 'S/'}${subtotal.toFixed(2)}`;
+    document.getElementById('cartSubtotalPrice').innerText = window.formatStorePrice(subtotal);
 
     if (comboDiscountAmount > 0) {
         document.getElementById('cartComboDiscountRow').style.display = 'flex';
         document.getElementById('cartComboDiscountLabel').innerText = `Combo Armado (-${comboDiscountPercent}%):`;
-        document.getElementById('cartComboDiscountAmount').innerText = `- ${data.currency || 'S/'}${comboDiscountAmount.toFixed(2)}`;
+        document.getElementById('cartComboDiscountAmount').innerText = `- ${window.formatStorePrice(comboDiscountAmount)}`;
     } else {
         document.getElementById('cartComboDiscountRow').style.display = 'none';
     }
 
     if (couponDiscountAmount > 0) {
         document.getElementById('cartCouponRow').style.display = 'flex';
-        document.getElementById('cartCouponAmount').innerText = `- ${data.currency || 'S/'}${couponDiscountAmount.toFixed(2)} (-${activeCoupon.percent}%)`;
+        document.getElementById('cartCouponAmount').innerText = `- ${window.formatStorePrice(couponDiscountAmount)} (-${activeCoupon.percent}%)`;
     } else {
         document.getElementById('cartCouponRow').style.display = 'none';
     }
