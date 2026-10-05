@@ -4281,7 +4281,7 @@ window.iniciarPagoAutomatico = async (metodo) => {
                 if (rule && rule.productId === pId) {
                     const tabMatch = (!rule.tabName || rule.tabName === 'General') ? true : (rule.tabName === tName);
                     const varMatch = (!rule.variantName) ? true : (rule.variantName === vName);
-                    
+
                     if (tabMatch && varMatch) {
                         const parts = key.split('_');
                         if (parts.length >= 3) {
@@ -4480,7 +4480,7 @@ window.submitCheckout = async () => {
                 if (rule && rule.productId === pId) {
                     const tabMatch = (!rule.tabName || rule.tabName === 'General') ? true : (rule.tabName === tName);
                     const varMatch = (!rule.variantName) ? true : (rule.variantName === vName);
-                    
+
                     if (tabMatch && varMatch) {
                         const parts = key.split('_');
                         if (parts.length >= 3) {
@@ -9756,6 +9756,7 @@ window.checkAndLinkStockRules = async (stockItemsArray) => {
             // Pausar ejecución y resolver el modal
             const ruleObj = await window.promptStockLinkModal(config, catalog);
             if (!ruleObj) return false; // Usuario canceló o cerró forzosamente
+            if (ruleObj === 'skip') continue; // El usuario saltó la configuración actual
 
             // Guardar regla en Firebase y memoria
             rules[config.key] = ruleObj;
@@ -9768,6 +9769,7 @@ window.checkAndLinkStockRules = async (stockItemsArray) => {
 // Promesa que controla el Modal UI
 window.promptStockLinkModal = (config, catalog) => {
     return new Promise((resolve) => {
+        window.stockLinkResolve = resolve;
         const modal = document.getElementById('stockLinkModal');
         const msg = document.getElementById('stockLinkMessage');
         const prodSelect = document.getElementById('linkProductSelect');
