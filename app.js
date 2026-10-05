@@ -4285,7 +4285,7 @@ if (metodo === 'binance') {
                 <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; border: 1px dashed #555; margin-bottom: 20px; width: 100%; box-sizing: border-box;">
                     <p style="margin: 0; font-size: 13px; color: var(--mac-text-secondary);">Binance Pay ID:</p>
                     <p style="margin: 5px 0 0 0; font-size: 20px; font-weight: 800; color: #fff; letter-spacing: 1.5px;">${payId}</p>
-                    ${alias ? `<p style="margin: 5px 0 0 0; font-size: 13px; color: #FCD535; font-weight: bold;">${alias}</p>` : ''}
+                    ${alias ? `<p style="margin: 5px 0 0 0; font-size: 13px; color: #FCD535; font-weight: bold;">Alias: ${alias}</p>` : ''}
                 </div>
                 <p style="font-size: 14px; color: var(--mac-text-secondary); margin-bottom: 10px;">
                     Una vez transferido, pega aquí el <b>Order ID (Número de Orden)</b> de tu pago:
@@ -4295,7 +4295,8 @@ if (metodo === 'binance') {
         input: 'text',
         inputPlaceholder: 'Ej: 1234567890123456',
         inputAttributes: {
-            style: 'text-align: center; font-size: 16px; font-weight: bold; letter-spacing: 1px;'
+            // 🟢 AQUÍ CENTRAMOS EL RECUADRO Y LE DAMOS UN ANCHO MÁS PEQUEÑO
+            style: 'text-align: center; font-size: 16px; font-weight: bold; letter-spacing: 1px; max-width: 80%; margin: 0 auto; display: block;'
         },
         showCancelButton: true,
         confirmButtonText: 'Verificar Pago',
