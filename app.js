@@ -7472,7 +7472,7 @@ window.renderPublicCatalog = () => {
 
             if (!window.storeItemsTabsData) window.storeItemsTabsData = {};
             window.storeItemsTabsData[item.id] = tabsData;
-            window.storeSelectedOptions[item.id] = { price: tabsData[0].options[0].price, label: (tabsData[0].name !== 'General' && showTabs ? tabsData[0].name + ' - ' : '') + tabsData[0].options[0].label };
+            window.storeSelectedOptions[item.id] = { price: tabsData[0].options[0].price, label: (tabsData[0].name !== 'General' && showTabs ? tabsData[0].name + ' - ' : '') + tabsData[0].options[0].label, tabName: tabsData[0].name, variantName: tabsData[0].options[0].label };
 
             let pricingHtml = `
                 ${tabsHtml}
@@ -8696,7 +8696,10 @@ window.addToCartWithOptions = (itemId) => {
     const originalItem = catalog.find(i => i.id === itemId);
     if (!originalItem) return;
 
-    const selectedOpt = window.storeSelectedOptions[itemId] || (originalItem.pricingOptions && originalItem.pricingOptions.length > 0 ? originalItem.pricingOptions[0] : { price: originalItem.price, label: '' });
+    const selectedOpt = window.storeSelectedOptions[itemId] || (originalItem.pricingOptions && originalItem.pricingOptions.length > 0 ? { price: originalItem.pricingOptions[0].price, label: originalItem.pricingOptions[0].label, tabName: 'General', variantName: originalItem.pricingOptions[0].label } : { price: originalItem.price, label: '', tabName: 'General', variantName: '' });
+
+    const tabName = selectedOpt.tabName || 'General';
+    const variantName = selectedOpt.variantName || selectedOpt.label || '';
 
     const cartItem = { ...originalItem };
     cartItem.price = selectedOpt.price;
@@ -8966,7 +8969,7 @@ window.selectPubOption = (itemId, tabIndex, optIndex, price, optLabel) => {
 
     // El nombre a mostrar en el carrito será "Pestaña - Opción" (Ej: "1 Mes - Perfil")
     let finalLabel = showTabs && tabName ? `${tabName} - ${optLabel}` : optLabel;
-    window.storeSelectedOptions[itemId] = { price: price, label: finalLabel };
+    window.storeSelectedOptions[itemId] = { price: price, label: finalLabel, tabName: tabName, variantName: optLabel };
 };
 
 /* =========================================================
