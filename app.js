@@ -4262,6 +4262,40 @@ window.iniciarPagoAutomatico = async (metodo) => {
         const vendedorId = dataTienda.uid;
         const pedidoId = `ped_${Date.now()}`;
 
+        // -- REVERSE LOOKUP AQUÍ --
+        let bp = currentCheckoutItem.basePlatform || currentCheckoutItem.platform;
+        let st = currentCheckoutItem.saleType || 'Perfil';
+        let mo = currentCheckoutItem.months || 1;
+
+        const rules = (window.currentUserData && window.currentUserData.storeStockRules) || (window.publicStoreDataCache && window.publicStoreDataCache.storeStockRules) || {};
+        const itemsToProcess = (window.storeCart && window.storeCart.length > 0) ? window.storeCart : [currentCheckoutItem];
+
+        if (itemsToProcess.length > 0) {
+            const firstItem = itemsToProcess[0];
+            const pId = firstItem.id;
+            const sOpt = window.storeSelectedOptions?.[pId] || {};
+            const tName = firstItem.tabName || sOpt.tabName || 'General';
+            const vName = firstItem.variantName || sOpt.variantName || sOpt.label || firstItem.label || '';
+
+            for (const [key, rule] of Object.entries(rules)) {
+                if (rule && rule.productId === pId) {
+                    const tabMatch = (!rule.tabName || rule.tabName === 'General') ? true : (rule.tabName === tName);
+                    const varMatch = (!rule.variantName) ? true : (rule.variantName === vName);
+                    
+                    if (tabMatch && varMatch) {
+                        const parts = key.split('_');
+                        if (parts.length >= 3) {
+                            bp = parts[0];
+                            st = parts[1];
+                            mo = parseInt(parts[2]) || 1;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        // -- FIN REVERSE LOOKUP --
+
         // 1. Guardar el pedido en Firebase (esperando_pago)
         await setDoc(doc(db, "pedidos", pedidoId), {
             vendedorId: vendedorId,
@@ -4270,9 +4304,9 @@ window.iniciarPagoAutomatico = async (metodo) => {
             clienteNumero: phone,
             tipo: currentCheckoutItem.isRenewal ? 'renovacion' : (currentCheckoutItem.type || 'Servicio'),
             plataforma: currentCheckoutItem.platform,
-            basePlatform: currentCheckoutItem.basePlatform || currentCheckoutItem.platform,
-            saleType: currentCheckoutItem.saleType || 'Perfil',
-            months: currentCheckoutItem.months || 1,
+            basePlatform: bp,
+            saleType: st,
+            months: mo,
             precio: currentCheckoutItem.price,
             comprobanteUrl: 'PAGO_AUTOMATICO', // Indicador de que no hay captura
             metodoPago: metodo,
@@ -4427,6 +4461,40 @@ window.submitCheckout = async () => {
         await uploadBytes(storageRef, file);
         const comprobanteUrl = await getDownloadURL(storageRef);
 
+        // -- REVERSE LOOKUP AQUÍ --
+        let bp = currentCheckoutItem.basePlatform || currentCheckoutItem.platform;
+        let st = currentCheckoutItem.saleType || 'Perfil';
+        let mo = currentCheckoutItem.months || 1;
+
+        const rules = (window.currentUserData && window.currentUserData.storeStockRules) || (window.publicStoreDataCache && window.publicStoreDataCache.storeStockRules) || {};
+        const itemsToProcess = (window.storeCart && window.storeCart.length > 0) ? window.storeCart : [currentCheckoutItem];
+
+        if (itemsToProcess.length > 0) {
+            const firstItem = itemsToProcess[0];
+            const pId = firstItem.id;
+            const sOpt = window.storeSelectedOptions?.[pId] || {};
+            const tName = firstItem.tabName || sOpt.tabName || 'General';
+            const vName = firstItem.variantName || sOpt.variantName || sOpt.label || firstItem.label || '';
+
+            for (const [key, rule] of Object.entries(rules)) {
+                if (rule && rule.productId === pId) {
+                    const tabMatch = (!rule.tabName || rule.tabName === 'General') ? true : (rule.tabName === tName);
+                    const varMatch = (!rule.variantName) ? true : (rule.variantName === vName);
+                    
+                    if (tabMatch && varMatch) {
+                        const parts = key.split('_');
+                        if (parts.length >= 3) {
+                            bp = parts[0];
+                            st = parts[1];
+                            mo = parseInt(parts[2]) || 1;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        // -- FIN REVERSE LOOKUP --
+
         await addDoc(collection(db, "pedidos"), {
             vendedorId: vendedorId,
             clienteId: currentCheckoutItem.isRenewal ? currentCheckoutItem.clientId : null,
@@ -4434,9 +4502,9 @@ window.submitCheckout = async () => {
             clienteNumero: phone,
             tipo: currentCheckoutItem.isRenewal ? 'renovacion' : (currentCheckoutItem.type || 'Servicio'),
             plataforma: currentCheckoutItem.platform,
-            basePlatform: currentCheckoutItem.basePlatform || currentCheckoutItem.platform,
-            saleType: currentCheckoutItem.saleType || 'Perfil',
-            months: currentCheckoutItem.months || 1,
+            basePlatform: bp,
+            saleType: st,
+            months: mo,
             precio: currentCheckoutItem.price,
             comprobanteUrl: comprobanteUrl,
             requiereInvitacion: currentCheckoutItem.requiresInvite || false,
