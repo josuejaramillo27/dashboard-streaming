@@ -4588,14 +4588,29 @@ window.addInventoryAccount = async () => {
     try {
         let stock = currentUserData.inventory || [];
 
+        let newItemConfig = [];
         if (editingInvId) {
             // MODO EDICIÓN: Actualizamos los datos del objeto existente
             stock = stock.map(item => item.id === editingInvId ? { ...item, platform, type, months, email, pass, profile, pin } : item);
-            window.showNotification("✅ Cuenta actualizada");
+            newItemConfig = [stock.find(i => i.id === editingInvId)];
         } else {
             // MODO CREACIÓN
             const accountId = 'acc_' + Date.now();
-            stock.push({ id: accountId, platform, type, months, email, pass, profile, pin, status: 'libre' });
+            const newAcc = { id: accountId, platform, type, months, email, pass, profile, pin, status: 'libre' };
+            stock.push(newAcc);
+            newItemConfig = [newAcc];
+        }
+
+        // 🛑 INTERCEPCIÓN DEL MOTOR DE MAPPING ANTES DE GUARDAR
+        const canSave = await window.checkAndLinkStockRules(newItemConfig);
+        if (!canSave) {
+            btn.innerHTML = "<i class='bx bx-save'></i> Guardar en stock"; btn.disabled = false;
+            return; 
+        }
+
+        if (editingInvId) {
+            window.showNotification("✅ Cuenta actualizada");
+        } else {
             window.showNotification("✅ Cuenta añadida al stock");
         }
 
@@ -6151,24 +6166,35 @@ window.sendFreeProfilesToInventory = async (masterId) => {
 
         let stock = currentUserData.inventory || [];
         let added = 0;
+        let profilesToMove = [];
 
         for (let i = 1; i <= mat.maxProfiles; i++) {
             if (!occupiedProfiles.includes(i)) {
-                stock.push({
+                const newAcc = {
                     id: 'acc_' + Date.now() + '_' + i,
                     platform: mat.platform,
                     type: 'Perfil',
+                    months: 1, // Asumimos 1 mes por defecto para matrices
                     email: mat.email,
                     pass: mat.pass,
                     profile: String(i),
                     pin: 'N/A',
                     status: 'libre'
-                });
+                };
+                stock.push(newAcc);
+                profilesToMove.push(newAcc);
                 added++;
             }
         }
 
         if (added > 0) {
+            // 🛑 INTERCEPCIÓN MASIVA DEL MOTOR DE MAPPING
+            const canSave = await window.checkAndLinkStockRules(profilesToMove);
+            if (!canSave) {
+                window.showNotification("Operación cancelada. Debes vincular el stock.");
+                return; 
+            }
+
             await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
             currentUserData.inventory = stock;
             window.showNotification(`📦 ${added} perfiles enviados al inventario.`);
@@ -9611,4 +9637,124 @@ window.saveGateways = async () => {
     } catch (e) {
         window.showNotification("Error: " + e.message);
     }
+};
+
+/* =========================================================
+   MOTOR DE VINCULACIÓN INTELIGENTE (STOCK MAPPING)
+========================================================= */
+window.checkAndLinkStockRules = async (stockItemsArray) => {
+    if (!currentUserData.storeStockRules) currentUserData.storeStockRules = {};
+    const rules = currentUserData.storeStockRules;
+    const catalog = currentUserData.storeCatalog || [];
+
+    // Extraer configuraciones únicas del array entrante
+    const uniqueConfigs = [];
+    stockItemsArray.forEach(item => {
+        const key = `${item.platform}_${item.type}_${item.months}`;
+        if (!uniqueConfigs.find(c => c.key === key)) {
+            uniqueConfigs.push({ key, platform: item.platform, type: item.type, months: item.months });
+        }
+    });
+
+    for (const config of uniqueConfigs) {
+        if (!rules[config.key]) {
+            // Pausar ejecución y resolver el modal
+            const ruleObj = await window.promptStockLinkModal(config, catalog);
+            if (!ruleObj) return false; // Usuario canceló o cerró forzosamente
+
+            // Guardar regla en Firebase y memoria
+            rules[config.key] = ruleObj;
+            await updateDoc(doc(db, "users", currentUser.uid), { storeStockRules: rules });
+        }
+    }
+    return true;
+};
+
+// Promesa que controla el Modal UI
+window.promptStockLinkModal = (config, catalog) => {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('stockLinkModal');
+        const msg = document.getElementById('stockLinkMessage');
+        const prodSelect = document.getElementById('linkProductSelect');
+        const tabSelect = document.getElementById('linkTabSelect');
+        const varSelect = document.getElementById('linkVariantSelect');
+        const btnSave = document.getElementById('btnSaveStockLink');
+
+        msg.innerHTML = `Detectamos una nueva configuración: <b>${config.platform} - ${config.type} - ${config.months || 1} Mes(es)</b>.<br>¿A qué producto de tu tienda corresponde?`;
+        
+        // Llenar Productos
+        prodSelect.innerHTML = '<option value="">Selecciona un Producto...</option>';
+        catalog.forEach(p => {
+            if (p.status !== 'agotado') prodSelect.innerHTML += `<option value="${p.id}">${p.platform}</option>`;
+        });
+        
+        tabSelect.innerHTML = '<option value="">Selecciona una Pestaña...</option>';
+        varSelect.innerHTML = '<option value="">Selecciona una Variante...</option>';
+        tabSelect.disabled = true;
+        varSelect.disabled = true;
+
+        // Limpiar eventos previos
+        btnSave.replaceWith(btnSave.cloneNode(true));
+        const newBtnSave = document.getElementById('btnSaveStockLink');
+
+        // Eventos UI dinámicos
+        window.onLinkProductChange = () => {
+            const selectedProd = catalog.find(p => p.id === prodSelect.value);
+            tabSelect.innerHTML = '<option value="">Selecciona una Pestaña...</option>';
+            varSelect.innerHTML = '<option value="">Selecciona una Variante...</option>';
+            varSelect.disabled = true;
+            if (selectedProd && selectedProd.storeTabs) {
+                selectedProd.storeTabs.forEach((tab, index) => {
+                    tabSelect.innerHTML += `<option value="${index}">${tab.name}</option>`;
+                });
+                tabSelect.disabled = false;
+            } else {
+                tabSelect.disabled = true;
+            }
+        };
+
+        window.onLinkTabChange = () => {
+            const selectedProd = catalog.find(p => p.id === prodSelect.value);
+            const tabIndex = tabSelect.value;
+            varSelect.innerHTML = '<option value="">Selecciona una Variante...</option>';
+            if (selectedProd && tabIndex !== '') {
+                const options = selectedProd.storeTabs[tabIndex].options || [];
+                options.forEach((opt, index) => {
+                    varSelect.innerHTML += `<option value="${index}">${opt.label} - ${window.publicStoreDataCache?.currency || 'S/'}${opt.price}</option>`;
+                });
+                varSelect.disabled = false;
+            } else {
+                varSelect.disabled = true;
+            }
+        };
+
+        // Resolución del Modal
+        newBtnSave.onclick = () => {
+            if (!prodSelect.value || tabSelect.value === '' || varSelect.value === '') {
+                return window.showNotification("⚠️ Debes seleccionar Producto, Pestaña y Variante.");
+            }
+            const selectedProd = catalog.find(p => p.id === prodSelect.value);
+            const tabName = selectedProd.storeTabs[tabSelect.value].name;
+            const variantName = selectedProd.storeTabs[tabSelect.value].options[varSelect.value].label;
+
+            modal.style.display = 'none';
+            resolve({
+                productId: selectedProd.id,
+                tabName: tabName,
+                variantName: variantName
+            });
+        };
+
+        modal.style.display = 'flex';
+    });
+};
+
+// Herramienta de Migración Manual
+window.syncOldStockRules = async () => {
+    const stock = currentUserData.inventory || [];
+    if (stock.length === 0) return window.showNotification("Tu inventario está vacío.");
+    
+    window.showNotification("🔄 Analizando configuraciones huérfanas...");
+    const success = await window.checkAndLinkStockRules(stock);
+    if (success) window.showNotification("✅ Todo tu stock está correctamente vinculado a la tienda.");
 };
