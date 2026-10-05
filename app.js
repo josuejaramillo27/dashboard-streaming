@@ -4329,7 +4329,7 @@ window.iniciarPagoAutomatico = async (metodo) => {
                     vendedorId: vendedorId,
                     pedidoId: pedidoId,
                     transactionId: transactionId.trim(),
-                    precio: currentCheckoutItem.price
+                    precio: parseFloat(priceUSDT)
                 })
             });
 
@@ -9322,7 +9322,7 @@ window.renderCartItems = () => {
         document.getElementById('cartCouponRow').style.display = 'none';
     }
 
-    document.getElementById('cartTotalPrice').innerText = window.formatStorePrice(finalTotal);
+    document.getElementById('cartTotalPrice').innerText = `${data.currency || 'S/'}${finalTotal.toFixed(2)}`;
     window.currentCartFinalTotal = finalTotal;
 };
 
