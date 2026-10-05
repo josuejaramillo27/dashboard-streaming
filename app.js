@@ -3602,7 +3602,7 @@ window.renderStoreItems = () => {
                 ${typeBadge}
                 <strong style="color:var(--mac-text-main); font-size:15px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.platform}</strong>
                 <span style="color:var(--mac-text-secondary); font-size:12px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; white-space:pre-wrap; margin:4px 0;">${item.desc || ''}</span>
-                <span style="color:var(--mac-green); font-size:14px; font-weight:bold; display:block; margin-top:2px;">${globalCurrency}${item.price.toFixed(2)}</span>
+                <span style="color:var(--mac-green); font-size:14px; font-weight:bold; display:block; margin-top:2px;">${globalCurrency}${window.formatStorePrice(item.price)}</span>
                 <div style="margin-top: 8px;">${statusBadge}</div>
             </div>
             <div style="display:flex; flex-direction:row; gap:8px; flex-shrink: 0; flex-wrap:wrap; justify-content:flex-end;">
