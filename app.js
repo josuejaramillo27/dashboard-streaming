@@ -4434,6 +4434,9 @@ window.submitCheckout = async () => {
             clienteNumero: phone,
             tipo: currentCheckoutItem.isRenewal ? 'renovacion' : (currentCheckoutItem.type || 'Servicio'),
             plataforma: currentCheckoutItem.platform,
+            basePlatform: currentCheckoutItem.basePlatform || currentCheckoutItem.platform,
+            saleType: currentCheckoutItem.saleType || 'Perfil',
+            months: currentCheckoutItem.months || 1,
             precio: currentCheckoutItem.price,
             comprobanteUrl: comprobanteUrl,
             requiereInvitacion: currentCheckoutItem.requiresInvite || false,
@@ -8706,6 +8709,19 @@ window.addToCartWithOptions = (itemId) => {
     if (match) m = parseInt(match[1]);
     cartItem.saleType = t;
     cartItem.months = m;
+
+    const rules = (window.currentUserData && window.currentUserData.storeStockRules) || (window.publicStoreDataCache && window.publicStoreDataCache.storeStockRules) || {};
+    for (const [key, rule] of Object.entries(rules)) {
+        if (rule && rule.productId === itemId && rule.tabName === tabName && rule.variantName === variantName) {
+            const parts = key.split('_');
+            if (parts.length >= 3) {
+                cartItem.basePlatform = parts[0];
+                cartItem.saleType = parts[1];
+                cartItem.months = parseInt(parts[2]) || 1;
+            }
+            break;
+        }
+    }
 
     if (selectedOpt.label && selectedOpt.label !== '1 Mes') {
         cartItem.platform = `${originalItem.platform} (${selectedOpt.label})`;
