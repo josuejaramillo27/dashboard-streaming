@@ -9686,7 +9686,12 @@ window.promptStockLinkModal = (config, catalog) => {
         const prodSelect = document.getElementById('linkProductSelect');
         const tabSelect = document.getElementById('linkTabSelect');
         const varSelect = document.getElementById('linkVariantSelect');
-        const btnSave = document.getElementById('btnSaveStockLink');
+        let btnSave = document.getElementById('btnSaveStockLink');
+
+        if (!modal || !msg || !prodSelect || !tabSelect || !varSelect || !btnSave) {
+            console.error("Missing stockLinkModal elements in DOM.");
+            return resolve(null);
+        }
 
         msg.innerHTML = `Detectamos una nueva configuración: <b>${config.platform} - ${config.type} - ${config.months || 1} Mes(es)</b>.<br>¿A qué producto de tu tienda corresponde?`;
 
