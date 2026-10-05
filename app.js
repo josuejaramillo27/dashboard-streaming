@@ -7392,7 +7392,7 @@ window.renderPublicCatalog = () => {
             let tabsHtml = '';
 
             if (showTabs) {
-                tabsHtml += `<div style="display:flex; overflow-x:auto; gap:8px; margin-bottom:12px; scrollbar-width:none; padding-bottom:4px;">`;
+                tabsHtml += `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; padding-bottom:4px;">`;
                 tabsData.forEach((t, i) => {
                     const isSelected = i === 0;
                     const bg = isSelected ? 'var(--mac-blue)' : 'var(--mac-surface)';
@@ -7454,7 +7454,7 @@ window.renderPublicCatalog = () => {
                 </div>
                 <div class="store-product-glass-footer" style="padding: 15px; display: flex; flex-direction: column;">
                 ${ratingHtml}
-                    <strong class="store-product-title" style="display:block; font-size:18px; line-height:1.3; color: var(--mac-text-main); word-break: break-word; text-align: center;">${item.platform}</strong>
+                    <strong class="store-product-title" style="display:block; font-size:18px; line-height:1.3; color: var(--mac-text-main); word-break: break-word; text-align: center; margin-bottom: 15px;">${item.platform}</strong>
                     ${stockHtml ? `<div style="text-align:center; margin-top:5px;">${stockHtml}</div>` : ''}
                     
                     ${pricingHtml}
