@@ -3251,10 +3251,6 @@
             style="position: absolute; top: 15px; left: 15px; z-index: 100; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: white; font-size: 11px; padding: 6px 14px; border-radius: 20px; font-weight: bold; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer; transition: 0.3s;">
             <i class='bx bx-moon'></i> Modo oscuro
         </button>
-        <button id="storeCurrencyToggleBtn" onclick="window.toggleStoreCurrency()"
-            style="position: absolute; top: 55px; left: 15px; z-index: 100; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #FCD535; font-size: 11px; padding: 6px 14px; border-radius: 20px; font-weight: bold; border: 1px solid rgba(253, 213, 53, 0.3); box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer; transition: 0.3s; display: none;">
-            <i class='bx bx-transfer-alt'></i> Mostrar en USDT
-        </button>
         <div class="store-cover-banner" id="publicStoreBanner" style="display: none;"></div>
         <div id="publicStoreHeaderProfile"
             style="text-align: center; margin-bottom: 20px; padding: 0 20px; position: relative; transition: all 0.3s;">
@@ -3288,11 +3284,20 @@
                         onclick="window.filterStoreType('Servicio', event)">Servicios</button>
                 </div>
 
-                <!-- DERECHA: Buscador Minimalista -->
-                <div class="spotify-search-container">
-                    <i class='bx bx-search'></i>
-                    <input type="text" id="publicStoreSearchInput" placeholder="Buscar en tienda..."
-                        oninput="window.searchPublicStore()">
+                <!-- DERECHA: Controles (Buscador + Cambio Moneda) -->
+                <div style="display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
+                    
+                    <div class="spotify-search-container" style="margin: 0; min-width: 150px; flex-shrink: 1;">
+                        <i class='bx bx-search'></i>
+                        <input type="text" id="publicStoreSearchInput" placeholder="Buscar en tienda..."
+                            oninput="window.searchPublicStore()">
+                    </div>
+
+                    <button id="storeCurrencyToggleBtn" onclick="window.toggleStoreCurrency()"
+                        style="background: transparent; color: #FCD535; font-size: 11px; padding: 10px 14px; border-radius: 20px; font-weight: bold; border: 1px solid rgba(253, 213, 53, 0.5); cursor: pointer; transition: 0.3s; display: none; white-space: nowrap; height: fit-content; flex-shrink: 0;">
+                        <i class='bx bx-transfer-alt'></i> USDT
+                    </button>
+
                 </div>
 
             </div>
