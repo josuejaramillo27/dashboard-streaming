@@ -3762,7 +3762,7 @@ window.addToCartConDuracion = (itemId) => {
 
     // Clonamos el producto para no alterar el catálogo original
     const cartItem = { ...originalItem };
-    
+
     cartItem.basePlatform = originalItem.platform;
     cartItem.saleType = cartItem.type === 'Completa' ? 'Completa' : 'Perfil';
     cartItem.months = meses;
@@ -4583,7 +4583,7 @@ window.addInventoryAccount = async () => {
     if (type === 'Perfil' && (!profile || !/\d/.test(profile))) return window.showNotification("⚠️ En 'N° Perfil' debes incluir al menos un NÚMERO (Ej: 3, J3).");
 
     const btn = document.getElementById('btnSaveInv');
-    btn.innerHTML = "⏳ Procesando..."; btn.disabled = true;
+    if (btn) { btn.innerHTML = "⏳ Procesando..."; btn.disabled = true; }
 
     try {
         let stock = currentUserData.inventory || [];
@@ -4604,8 +4604,8 @@ window.addInventoryAccount = async () => {
         // 🛑 INTERCEPCIÓN DEL MOTOR DE MAPPING ANTES DE GUARDAR
         const canSave = await window.checkAndLinkStockRules(newItemConfig);
         if (!canSave) {
-            btn.innerHTML = "<i class='bx bx-save'></i> Guardar en stock"; btn.disabled = false;
-            return; 
+            if (btn) { btn.innerHTML = "<i class='bx bx-save'></i> Guardar en stock"; btn.disabled = false; }
+            return;
         }
 
         if (editingInvId) {
@@ -4622,7 +4622,7 @@ window.addInventoryAccount = async () => {
     } catch (e) {
         window.showNotification("Error: " + e.message);
     } finally {
-        btn.innerHTML = "<i class='bx bx-save'></i> Guardar en stock"; btn.disabled = false;
+        if (btn) { btn.innerHTML = "<i class='bx bx-save'></i> Guardar en stock"; btn.disabled = false; }
     }
 };
 
@@ -4642,9 +4642,13 @@ window.editInventoryAccount = (id) => {
     editingInvId = id;
 
     // Cambiamos el aspecto visual del formulario
-    document.getElementById('btnSaveInv').innerHTML = "<i class='bx bx-check-double'></i> Actualizar Cuenta";
-    document.getElementById('btnSaveInv').style.backgroundColor = "var(--mac-orange)";
-    document.getElementById('btnCancelInv').style.display = "block";
+    const btnSaveInv = document.getElementById('btnSaveInv');
+    if (btnSaveInv) {
+        btnSaveInv.innerHTML = "<i class='bx bx-check-double'></i> Actualizar Cuenta";
+        btnSaveInv.style.backgroundColor = "var(--mac-orange)";
+    }
+    const btnCancelInv = document.getElementById('btnCancelInv');
+    if (btnCancelInv) btnCancelInv.style.display = "block";
 };
 
 window.cancelInventoryEdit = () => {
@@ -4657,9 +4661,13 @@ window.cancelInventoryEdit = () => {
     document.getElementById('invProfile').value = '';
     document.getElementById('invPin').value = '';
 
-    document.getElementById('btnSaveInv').innerHTML = "<i class='bx bx-save'></i> Guardar en stock";
-    document.getElementById('btnSaveInv').style.backgroundColor = "var(--mac-blue)";
-    document.getElementById('btnCancelInv').style.display = "none";
+    const btnSaveInv = document.getElementById('btnSaveInv');
+    if (btnSaveInv) {
+        btnSaveInv.innerHTML = "<i class='bx bx-save'></i> Guardar en stock";
+        btnSaveInv.style.backgroundColor = "var(--mac-blue)";
+    }
+    const btnCancelInv = document.getElementById('btnCancelInv');
+    if (btnCancelInv) btnCancelInv.style.display = "none";
 };
 
 window.renderInventory = () => {
@@ -6192,7 +6200,7 @@ window.sendFreeProfilesToInventory = async (masterId) => {
             const canSave = await window.checkAndLinkStockRules(profilesToMove);
             if (!canSave) {
                 window.showNotification("Operación cancelada. Debes vincular el stock.");
-                return; 
+                return;
             }
 
             await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
@@ -8689,7 +8697,7 @@ window.addToCartWithOptions = (itemId) => {
 
     const cartItem = { ...originalItem };
     cartItem.price = selectedOpt.price;
-    
+
     cartItem.basePlatform = originalItem.platform;
     let t = 'Perfil';
     if (cartItem.type === 'Completa' || cartItem.platform.toLowerCase().includes('completa') || (selectedOpt.label && selectedOpt.label.toLowerCase().includes('completa'))) t = 'Completa';
@@ -9681,13 +9689,13 @@ window.promptStockLinkModal = (config, catalog) => {
         const btnSave = document.getElementById('btnSaveStockLink');
 
         msg.innerHTML = `Detectamos una nueva configuración: <b>${config.platform} - ${config.type} - ${config.months || 1} Mes(es)</b>.<br>¿A qué producto de tu tienda corresponde?`;
-        
+
         // Llenar Productos
         prodSelect.innerHTML = '<option value="">Selecciona un Producto...</option>';
         catalog.forEach(p => {
             if (p.status !== 'agotado') prodSelect.innerHTML += `<option value="${p.id}">${p.platform}</option>`;
         });
-        
+
         tabSelect.innerHTML = '<option value="">Selecciona una Pestaña...</option>';
         varSelect.innerHTML = '<option value="">Selecciona una Variante...</option>';
         tabSelect.disabled = true;
@@ -9753,7 +9761,7 @@ window.promptStockLinkModal = (config, catalog) => {
 window.syncOldStockRules = async () => {
     const stock = currentUserData.inventory || [];
     if (stock.length === 0) return window.showNotification("Tu inventario está vacío.");
-    
+
     window.showNotification("🔄 Analizando configuraciones huérfanas...");
     const success = await window.checkAndLinkStockRules(stock);
     if (success) window.showNotification("✅ Todo tu stock está correctamente vinculado a la tienda.");
