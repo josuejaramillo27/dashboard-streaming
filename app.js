@@ -7208,7 +7208,7 @@ window.formatStorePrice = (priceLocal) => {
         }
     }
     // Si no, muestra la moneda local normal
-    return `${data.currency \vert{}\vert{} 'S/'}${priceLocal.toFixed(2)}`;
+    return `${data.currency || 'S/'}${priceLocal.toFixed(2)}`;
 };
 
 window.toggleStoreCurrency = () => {
