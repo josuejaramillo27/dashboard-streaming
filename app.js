@@ -9756,7 +9756,7 @@ window.checkAndLinkStockRules = async (stockItemsArray) => {
             // Pausar ejecución y resolver el modal
             const ruleObj = await window.promptStockLinkModal(config, catalog);
             if (!ruleObj) return false; // Usuario canceló o cerró forzosamente
-            if (ruleObj === 'skip') continue; // El usuario saltó la configuración actual
+            if (ruleObj === 'skip' || ruleObj === true) continue; // El usuario saltó la configuración actual
 
             // Guardar regla en Firebase y memoria
             rules[config.key] = ruleObj;
@@ -9849,6 +9849,16 @@ window.promptStockLinkModal = (config, catalog) => {
 
         modal.style.display = 'flex';
     });
+};
+
+window.skipStockLink = () => {
+    const modal = document.getElementById('stockLinkModal');
+    if (modal) modal.style.display = 'none';
+    
+    // Libera la promesa para que el inventario se guarde sin reglas
+    if (typeof window.stockLinkResolve === 'function') {
+        window.stockLinkResolve(true); 
+    }
 };
 
 // Herramienta de Migración Manual
