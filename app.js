@@ -607,7 +607,7 @@ window.openProfileModal = () => {
     if (document.getElementById('binanceSecretKeyInput')) {
         document.getElementById('binanceSecretKeyInput').value = currentUserData.binanceSecretKey ? `***${currentUserData.binanceSecretKey.slice(-5)}` : '';
     }
-    
+
     // --- NUEVO: Cargar Pasarelas de Binance Pay ---
     if (document.getElementById('binancePayIdInput')) {
         document.getElementById('binancePayIdInput').value = currentUserData.binancePayId || '';
@@ -951,8 +951,8 @@ window.saveProfile = async () => {
     const binanceApiKey = document.getElementById('binanceApiKeyInput') ? document.getElementById('binanceApiKeyInput').value.trim() : '';
     const binanceSecretKey = document.getElementById('binanceSecretKeyInput') ? document.getElementById('binanceSecretKeyInput').value.trim() : '';
     const binancePayId = document.getElementById('binancePayIdInput') ? document.getElementById('binancePayIdInput').value.trim() : '';
-const binanceAlias = document.getElementById('binanceAliasInput') ? document.getElementById('binanceAliasInput').value.trim() : '';
-const binanceExchangeRate = document.getElementById('binanceExchangeRateInput') ? parseFloat(document.getElementById('binanceExchangeRateInput').value) || null : null;
+    const binanceAlias = document.getElementById('binanceAliasInput') ? document.getElementById('binanceAliasInput').value.trim() : '';
+    const binanceExchangeRate = document.getElementById('binanceExchangeRateInput') ? parseFloat(document.getElementById('binanceExchangeRateInput').value) || null : null;
 
     if (!phone.startsWith('+')) return window.showNotification("⚠️ El teléfono DEBE incluir el código de país");
 
@@ -1181,7 +1181,7 @@ window.saveGateways = async () => {
             if (updateData.mpAccessToken !== undefined) currentUserData.mpAccessToken = updateData.mpAccessToken;
             if (updateData.binanceApiKey !== undefined) currentUserData.binanceApiKey = updateData.binanceApiKey;
             if (updateData.binanceSecretKey !== undefined) currentUserData.binanceSecretKey = updateData.binanceSecretKey;
-            
+
             currentUserData.binancePayId = updateData.binancePayId;
             currentUserData.binanceAlias = updateData.binanceAlias;
             currentUserData.binanceExchangeRate = updateData.binanceExchangeRate;
@@ -3859,10 +3859,10 @@ window.openCheckoutFromCart = () => {
     const joinedPlatforms = platforms.join(' + ');
     const finalType = window.storeCart.length > 1 || isCombo ? 'Paquete' : 'Servicio';
 
-let autoDeliver = true;
-window.storeCart.forEach(item => {
-    if (!item.autoDeliver) autoDeliver = false;
-});
+    let autoDeliver = true;
+    window.storeCart.forEach(item => {
+        if (!item.autoDeliver) autoDeliver = false;
+    });
     currentCheckoutItem = {
         platform: joinedPlatforms,
         price: totalPrice,
@@ -4177,7 +4177,7 @@ window.descargarQR = async (url, banco) => {
     }
 };
 window.openRenewFromPortal = (clientId, platform, price) => {
-    const data = portalStoreData; 
+    const data = portalStoreData;
 
     document.getElementById('checkoutItemName').innerText = `Renovación: ${platform}`;
     document.getElementById('checkoutItemPrice').innerText = window.formatStorePrice(currentCheckoutItem.price);
@@ -4269,24 +4269,24 @@ window.iniciarPagoAutomatico = async (metodo) => {
             entregaAutomatica: currentCheckoutItem.autoDeliver || false, // Enviar instrucción al Bot
             estado: 'esperando_pago', // El Webhook de la VPS lo cambiará a 'aprobado'
             fecha: new Date().toISOString()
-            
+
         });
 
         // 2. Hacer fetch a tu VPS en DigitalOcean
-if (metodo === 'binance') {
-    Swal.close(); 
-    
-    const dataTienda = window.publicStoreDataCache || portalStoreData;
-    // Cálculo Dinámico USDT
-    const rate = parseFloat(dataTienda.binanceExchangeRate) || 1;
-    const priceUSDT = (currentCheckoutItem.price / rate).toFixed(2);
-    
-    const payId = dataTienda.binancePayId || 'No configurado';
-    const alias = dataTienda.binanceAlias || '';
+        if (metodo === 'binance') {
+            Swal.close();
 
-    const { value: transactionId } = await Swal.fire({
-        title: 'Pagar con Binance',
-        html: `
+            const dataTienda = window.publicStoreDataCache || portalStoreData;
+            // Cálculo Dinámico USDT
+            const rate = parseFloat(dataTienda.binanceExchangeRate) || 1;
+            const priceUSDT = (currentCheckoutItem.price / rate).toFixed(2);
+
+            const payId = dataTienda.binancePayId || 'No configurado';
+            const alias = dataTienda.binanceAlias || '';
+
+            const { value: transactionId } = await Swal.fire({
+                title: 'Pagar con Binance',
+                html: `
             <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                 <p style="margin-bottom: 15px; font-size: 15px; color: var(--mac-text-main);">
                     Envía exactamente <b style="color: #FCD535; font-size: 18px;">${priceUSDT} USDT</b> a nuestro Binance Pay.
@@ -4301,18 +4301,18 @@ if (metodo === 'binance') {
                 </p>
             </div>
         `,
-        input: 'text',
-        inputPlaceholder: 'Ej: 1234567890123456',
-        inputAttributes: {
-            // 🟢 AQUÍ CENTRAMOS EL RECUADRO Y LE DAMOS UN ANCHO MÁS PEQUEÑO
-            style: 'text-align: center; font-size: 16px; font-weight: bold; letter-spacing: 1px; max-width: 80%; margin: 0 auto; display: block;'
-        },
-        showCancelButton: true,
-        confirmButtonText: 'Verificar Pago',
-        cancelButtonText: 'Cancelar'
-    });
+                input: 'text',
+                inputPlaceholder: 'Ej: 1234567890123456',
+                inputAttributes: {
+                    // 🟢 AQUÍ CENTRAMOS EL RECUADRO Y LE DAMOS UN ANCHO MÁS PEQUEÑO
+                    style: 'text-align: center; font-size: 16px; font-weight: bold; letter-spacing: 1px; max-width: 80%; margin: 0 auto; display: block;'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Verificar Pago',
+                cancelButtonText: 'Cancelar'
+            });
 
-    if (!transactionId) return;
+            if (!transactionId) return;
 
             // Mostrar modal de verificación
             Swal.fire({
@@ -7199,7 +7199,7 @@ window.formatStorePrice = (priceLocal) => {
     // Lee la data de la tienda o del portal
     const data = window.publicStoreDataCache || (typeof portalStoreData !== 'undefined' ? portalStoreData : null);
     if (!data) return `${priceLocal.toFixed(2)}`;
-    
+
     // Si el interruptor está en USDT y el vendedor configuró la tasa
     if (window.storeDisplayCurrency === 'USDT' && data.binanceExchangeRate) {
         const rate = parseFloat(data.binanceExchangeRate);
@@ -7214,7 +7214,7 @@ window.formatStorePrice = (priceLocal) => {
 window.toggleStoreCurrency = () => {
     const btn = document.getElementById('storeCurrencyToggleBtn');
     const data = window.publicStoreDataCache || portalStoreData;
-    
+
     if (!data.binanceExchangeRate || parseFloat(data.binanceExchangeRate) <= 0) {
         return window.showNotification("⚠️ El vendedor no ha configurado el tipo de cambio para USDT.");
     }
@@ -7222,17 +7222,17 @@ window.toggleStoreCurrency = () => {
     // Intercambia el estado y cambia el texto del botón
     if (window.storeDisplayCurrency === 'local') {
         window.storeDisplayCurrency = 'USDT';
-        if(btn) btn.innerHTML = `<i class='bx bx-transfer-alt'></i> Mostrar en ${data.currency || 'S/'}`;
+        if (btn) btn.innerHTML = `<i class='bx bx-transfer-alt'></i> Mostrar en ${data.currency || 'S/'}`;
     } else {
         window.storeDisplayCurrency = 'local';
-        if(btn) btn.innerHTML = `<i class='bx bx-transfer-alt'></i> Mostrar en USDT`;
+        if (btn) btn.innerHTML = `<i class='bx bx-transfer-alt'></i> Mostrar en USDT`;
     }
-    
+
     // Recarga las pantallas al instante para que se vea la magia
     if (document.getElementById('publicStoreView').style.display === 'block') window.renderPublicCatalog();
     if (document.getElementById('cartPanel').classList.contains('active')) window.renderCartItems();
     if (document.getElementById('checkoutModal').style.display === 'flex' && typeof currentCheckoutItem !== 'undefined') {
-         document.getElementById('checkoutItemPrice').innerText = window.formatStorePrice(currentCheckoutItem.price);
+        document.getElementById('checkoutItemPrice').innerText = window.formatStorePrice(currentCheckoutItem.price);
     }
 };
 
@@ -7412,7 +7412,7 @@ window.renderPublicCatalog = () => {
                 optionsHtml += `
                     <label id="opt_label_${item.id}_${i}" onclick="window.selectPubOption('${item.id}', 0, ${i}, ${opt.price}, '${opt.label.replace(/'/g, "\\'")}')" class="pub-opt-${item.id}" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-radius:12px; border:1px solid ${borderColor}; background:${bg}; cursor:pointer; transition:all 0.2s;">
                         <span style="font-size:14px; font-weight:600; color:var(--mac-text-main);">${opt.label}</span>
-                        <span style="font-size:15px; font-weight:800; color:var(--mac-text-main);">${data.currency || 'S/'}${opt.price.toFixed(2)}</span>
+                        <span style="font-size:15px; font-weight:800; color:var(--mac-text-main);">${window.formatStorePrice(opt.price)}</span>
                     </label>
                 `;
             });
@@ -7426,7 +7426,7 @@ window.renderPublicCatalog = () => {
                 ${tabsHtml}
                 ${optionsHtml}
                 <div style="text-align: center; margin-top: 5px; margin-bottom: 15px; font-size: 24px; font-weight: 900; color: var(--mac-green);" id="priceDisplay_${item.id}">
-                    ${data.currency || 'S/'}${tabsData[0].options[0].price.toFixed(2)}
+                    ${window.formatStorePrice(tabsData[0].options[0].price)}
                 </div>
             `;
             // --- FIN GENERADOR DE PESTAÑAS PÚBLICAS ---
@@ -8863,7 +8863,7 @@ window.selectPubTab = (itemId, tabIndex) => {
         optionsHtml += `
             <label id="opt_label_${itemId}_${i}" onclick="window.selectPubOption('${itemId}', ${tabIndex}, ${i}, ${opt.price}, '${opt.label.replace(/'/g, "\\'")}')" class="pub-opt-${itemId}" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-radius:12px; border:1px solid ${borderColor}; background:${bg}; cursor:pointer; transition:all 0.2s;">
                 <span style="font-size:14px; font-weight:600; color:var(--mac-text-main);">${opt.label}</span>
-                <span style="font-size:15px; font-weight:800; color:var(--mac-text-main);">${data.currency || 'S/'}${opt.price.toFixed(2)}</span>
+                <span style="font-size:15px; font-weight:800; color:var(--mac-text-main);">${window.formatStorePrice(opt.price)}</span>
             </label>
         `;
     });
@@ -8880,7 +8880,7 @@ window.selectPubOption = (itemId, tabIndex, optIndex, price, optLabel) => {
     });
 
     const data = window.publicStoreDataCache;
-    document.getElementById(`priceDisplay_${itemId}`).innerText = `${data.currency || 'S/'}${price.toFixed(2)}`;
+    document.getElementById(`priceDisplay_${itemId}`).innerText = window.formatStorePrice(price);
 
     const tabsData = window.storeItemsTabsData[itemId];
     const tabName = tabsData[tabIndex].name;
@@ -9322,7 +9322,7 @@ window.renderCartItems = () => {
         document.getElementById('cartCouponRow').style.display = 'none';
     }
 
-    document.getElementById('cartTotalPrice').innerText = window.formatStorePrice(finalTotal);
+    document.getElementById('cartTotalPrice').innerText = `${data.currency || 'S/'}${finalTotal.toFixed(2)}`;
     window.currentCartFinalTotal = finalTotal;
 };
 
@@ -9578,7 +9578,7 @@ window.saveGateways = async () => {
         currentUserData.mpAccessToken = mpToken || null;
         currentUserData.binanceApiKey = binApiKey || null;
         currentUserData.binanceSecretKey = binSecret || null;
-        
+
         window.showNotification("✅ Credenciales de pago guardadas");
     } catch (e) {
         window.showNotification("Error: " + e.message);
