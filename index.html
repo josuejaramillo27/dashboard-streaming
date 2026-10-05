@@ -1624,9 +1624,15 @@
                             <p style="color:var(--mac-text-secondary); font-size:14px; margin:5px 0 0 0;">Cuentas listas
                                 para ser entregadas.</p>
                         </div>
-                        <button class="action-btn"
-                            style="background: rgba(0, 122, 255, 0.1); color: var(--mac-blue); border: 1px solid var(--mac-blue); padding: 8px 15px; border-radius: 8px; font-weight: bold; font-size: 14px;"
-                            onclick="window.openRulesModal()"><i class='bx bx-list-check'></i> Reglas Bot</button>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="action-btn"
+                                style="background: rgba(255, 149, 0, 0.1); color: var(--mac-orange); border: 1px solid var(--mac-orange); padding: 8px 15px; border-radius: 8px; font-weight: bold; font-size: 14px;"
+                                onclick="window.syncOldStockRules()"><i class='bx bx-link'></i> Vincular Stock
+                                Antiguo</button>
+                            <button class="action-btn"
+                                style="background: rgba(0, 122, 255, 0.1); color: var(--mac-blue); border: 1px solid var(--mac-blue); padding: 8px 15px; border-radius: 8px; font-weight: bold; font-size: 14px;"
+                                onclick="window.openRulesModal()"><i class='bx bx-list-check'></i> Reglas Bot</button>
+                        </div>
                     </div>
 
                     <div style="display: flex; gap: 20px; flex-wrap: wrap;">
@@ -1659,7 +1665,8 @@
                                         <option value="Perfil">👤 Perfil</option>
                                         <option value="Completa">⭐ Completa</option>
                                     </select>
-                                    <input type="number" id="invMonths" value="1" min="1" placeholder="Meses" style="flex: 1; padding: 10px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                                    <input type="number" id="invMonths" value="1" min="1" placeholder="Meses"
+                                        style="flex: 1; padding: 10px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
                                 </div>
                                 <div style="display: flex; gap: 10px;">
                                     <input type="email" id="invEmail" placeholder="Correo" style="flex: 2;">
@@ -4115,6 +4122,57 @@
             <div style="margin-top: 15px; border-top: 1px solid var(--mac-border); padding-top: 15px;">
                 <button class="btn-primary" style="width: 100%; padding: 14px; font-size: 15px; font-weight: bold;"
                     onclick="window.saveEditedProduct()"><i class='bx bx-save'></i> Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+    <!-- MODAL VINCULACIÓN INTELIGENTE DE STOCK -->
+    <div id="stockLinkModal" class="modal-overlay" style="display: none; z-index: 9999;">
+        <div class="modal-card" style="max-width: 500px; margin: auto; padding: 25px; text-align: center;">
+            <h3 style="margin-top: 0; color: var(--mac-text-main);">
+                <i class='bx bx-link' style="color: var(--mac-orange);"></i> Vincular Nuevo Stock
+            </h3>
+            <p id="stockLinkMessage" style="color: var(--mac-text-secondary); font-size: 14px; margin-bottom: 20px;">
+                Hemos detectado una nueva configuración. ¿A qué producto de tu tienda corresponde?
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
+                <div>
+                    <label
+                        style="font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 5px; display: block;">1.
+                        Producto en Catálogo</label>
+                    <select id="linkProductSelect"
+                        style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border);"
+                        onchange="window.onLinkProductChange()">
+                        <option value="">Selecciona un Producto...</option>
+                    </select>
+                </div>
+                <div>
+                    <label
+                        style="font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 5px; display: block;">2.
+                        Pestaña de Duración</label>
+                    <select id="linkTabSelect"
+                        style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border);"
+                        onchange="window.onLinkTabChange()" disabled>
+                        <option value="">Selecciona una Pestaña...</option>
+                    </select>
+                </div>
+                <div>
+                    <label
+                        style="font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 5px; display: block;">3.
+                        Variante (Tipo)</label>
+                    <select id="linkVariantSelect"
+                        style="width: 100%; padding: 10px; border-radius: 8px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-border);"
+                        disabled>
+                        <option value="">Selecciona una Variante...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-top: 25px; display: flex; gap: 10px;">
+                <button id="btnSaveStockLink" class="btn-primary"
+                    style="flex: 1; padding: 12px; font-weight: bold; background: var(--mac-orange); border: none;">
+                    Guardar Regla y Continuar
+                </button>
             </div>
         </div>
     </div>
