@@ -3449,3 +3449,30 @@ body.dark-mode .portal-platforms-grid>div {
         opacity: 1;
     }
 }
+
+/* Blindaje de tarjetas de la tienda pública */
+#publicStoreCatalog .store-item-card, 
+#publicStoreCatalog > div {
+    background: var(--mac-surface) !important; /* Fondo sólido obligatorio */
+    position: relative !important;
+    z-index: 10 !important; /* Por encima del canvas */
+    opacity: 1 !important; /* Anular cualquier opacidad previa */
+    backdrop-filter: none !important; /* Quitar efecto vidrio si lo hay */
+}
+
+/* Evitar que el hover vuelva transparente el producto en PC */
+#publicStoreCatalog .store-item-card:hover,
+#publicStoreCatalog > div:hover {
+    opacity: 1 !important;
+    background: var(--mac-surface) !important;
+    transform: translateY(-3px); /* Mantener solo la elevación, no la transparencia */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4) !important;
+}
+
+/* Asegurar que el canvas animado (partículas/araña) se quede al fondo */
+#particles-js, 
+.particles-network, 
+canvas {
+    z-index: 0 !important;
+    pointer-events: none !important; /* Para que no bloquee clics en los productos */
+}
