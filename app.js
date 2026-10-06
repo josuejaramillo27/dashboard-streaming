@@ -584,11 +584,11 @@ window.openUpgradeWa = () => {
 // --- ABRIR MODAL DE PERFIL MODIFICADO PARA VERIFICAR PLAN ---
 window.openProfileModal = () => {
     // 1. Carga los datos de texto del perfil
-    document.getElementById('editProfileName').value = currentUserData.name || '';
-    document.getElementById('editProfileCountry').value = currentUserData.country || '';
-    document.getElementById('editProfilePhone').value = currentUserData.phone || '';
-    document.getElementById('editProfileAlias').value = currentUserData.storeAlias || '';
-    document.getElementById('editReferencesLink').value = currentUserData.referencesLink || '';
+    if (document.getElementById('editProfileName')) document.getElementById('editProfileName').value = currentUserData.name || '';
+    if (document.getElementById('editProfileCountry')) document.getElementById('editProfileCountry').value = currentUserData.country || '';
+    if (document.getElementById('editProfilePhone')) document.getElementById('editProfilePhone').value = currentUserData.phone || '';
+    if (document.getElementById('editProfileAlias')) document.getElementById('editProfileAlias').value = currentUserData.storeAlias || '';
+    if (document.getElementById('editReferencesLink')) document.getElementById('editReferencesLink').value = currentUserData.referencesLink || '';
 
     // Bloquear/Desbloquear Pasarelas según el plan
     const planActual = (currentUserData.plan_actual || 'demo').toLowerCase();
@@ -4341,7 +4341,7 @@ window.iniciarPagoAutomatico = async (metodo) => {
             const payId = dataTienda.binancePayId || 'No configurado';
             const alias = dataTienda.binanceAlias || '';
 
-            const qrHtml = dataTienda.binanceQrUrl ? 
+            const qrHtml = dataTienda.binanceQrUrl ?
                 `<div style="flex: 1; min-width: 200px; display: flex; justify-content: center;">
                     <img src="${dataTienda.binanceQrUrl}" alt="QR Binance" style="width: 100%; max-width: 220px; height: 220px; object-fit: contain; border-radius: 12px; border: 1px solid #444; box-shadow: 0 4px 10px rgba(0,0,0,0.3); margin: 0 auto;">
                 </div>` : '';
@@ -9884,10 +9884,10 @@ window.promptStockLinkModal = (config, catalog) => {
 window.skipStockLink = () => {
     const modal = document.getElementById('stockLinkModal');
     if (modal) modal.style.display = 'none';
-    
+
     // Libera la promesa para que el inventario se guarde sin reglas
     if (typeof window.stockLinkResolve === 'function') {
-        window.stockLinkResolve(true); 
+        window.stockLinkResolve(true);
     }
 };
 
@@ -9918,7 +9918,7 @@ window.promptStoreReference = (plataformaPrevia = "") => {
             setTimeout(() => {
                 const tabBtn = document.querySelector('.chrome-tab[onclick*="tabGaleriaRef"]');
                 if (tabBtn) tabBtn.click();
-                
+
                 // Cargar plataformas disponibles
                 const selectPlat = document.getElementById('refPlatformSelect');
                 if (selectPlat) {
@@ -9929,8 +9929,8 @@ window.promptStoreReference = (plataformaPrevia = "") => {
                     });
 
                     if (plataformaPrevia) {
-                        for(let i=0; i<selectPlat.options.length; i++){
-                            if(selectPlat.options[i].text.toLowerCase().includes(plataformaPrevia.toLowerCase())) {
+                        for (let i = 0; i < selectPlat.options.length; i++) {
+                            if (selectPlat.options[i].text.toLowerCase().includes(plataformaPrevia.toLowerCase())) {
                                 selectPlat.selectedIndex = i;
                                 break;
                             }
@@ -9953,7 +9953,7 @@ window.uploadStoreReference = async () => {
 
     const file = fileInput.files[0];
     const reader = new FileReader();
-    
+
     reader.onload = (e) => {
         const img = new Image();
         img.onload = async () => {
@@ -9981,7 +9981,7 @@ window.uploadStoreReference = async () => {
             ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            
+
             ctx.translate(width / 2, height / 2);
             ctx.rotate(-Math.PI / 4);
             ctx.fillText(watermarkText, 0, 0);
@@ -10005,7 +10005,7 @@ window.uploadStoreReference = async () => {
 
                     await updateDoc(doc(db, "users", currentUser.uid), { storeReferences: refs });
                     currentUserData.storeReferences = refs;
-                    
+
                     window.showNotification("✅ Referencia subida con éxito.");
                     document.getElementById('refDescInput').value = '';
                     document.getElementById('refImageInput').value = '';
@@ -10069,7 +10069,7 @@ window.openPublicReferences = () => {
     const refs = window.publicStoreDataCache.storeReferences || [];
     const filterSelect = document.getElementById('publicRefFilter');
     const uniquePlats = [...new Set(refs.map(r => r.platform))];
-    
+
     filterSelect.innerHTML = '<option value="all">Todas las plataformas</option>';
     uniquePlats.forEach(p => {
         filterSelect.innerHTML += `<option value="${p}">${p}</option>`;
@@ -10078,7 +10078,7 @@ window.openPublicReferences = () => {
     // Ocultar tienda y mostrar referencias
     document.getElementById('publicStoreView').style.display = 'none';
     document.getElementById('publicReferencesSection').style.display = 'block';
-    
+
     window.scrollTo(0, 0); // Subir al inicio de la página
     window.filterPublicReferences('all');
 };
@@ -10099,7 +10099,7 @@ window.filterPublicReferences = (platform) => {
 
     let filtered = [];
     const pElement = document.querySelector('#publicReferencesSection p');
-    
+
     if (platform === 'all') {
         filtered = refs;
         if (pElement) {
@@ -10129,10 +10129,10 @@ window.filterPublicReferences = (platform) => {
 window.populateCouponTargets = () => {
     const select = document.getElementById('newCouponTarget');
     if (!select) return;
-    
+
     select.innerHTML = '<option value="global">Todo el Catálogo</option>';
     const catalog = currentUserData.storeCatalog || [];
-    
+
     catalog.forEach(item => {
         select.innerHTML += `<option value="${item.id}">Solo: ${item.platform}</option>`;
     });
