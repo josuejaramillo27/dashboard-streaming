@@ -10108,7 +10108,7 @@ window.filterPublicReferences = (platform) => {
     filtered.forEach(r => {
         grid.innerHTML += `
             <div style="background: var(--mac-surface); border-radius: 12px; border: 1px solid var(--mac-border); overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <img src="${r.url}" style="width: 100%; height: 200px; object-fit: cover;">
+                <img src="${r.url}" style="width: 100%; height: 180px; object-fit: cover; border-radius: 12px 12px 0 0; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'" onclick="window.viewFullReference('${r.url}')">
                 <div style="padding: 15px;">
                     <span style="background: var(--mac-blue); color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">${r.platform}</span>
                     <p style="margin: 10px 0 0 0; font-size: 13px; color: var(--mac-text-main); font-weight: bold;">${r.description}</p>
@@ -10127,5 +10127,17 @@ window.populateCouponTargets = () => {
     
     catalog.forEach(item => {
         select.innerHTML += `<option value="${item.id}">Solo: ${item.platform}</option>`;
+    });
+};
+
+window.viewFullReference = (imgUrl) => {
+    Swal.fire({
+        imageUrl: imgUrl,
+        imageAlt: 'Referencia de Cliente',
+        width: 'auto',
+        background: 'transparent',
+        showConfirmButton: false,
+        showCloseButton: true,
+        backdrop: 'rgba(0,0,0,0.9)'
     });
 };
