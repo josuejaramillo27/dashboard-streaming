@@ -10098,7 +10098,7 @@ window.filterPublicReferences = (platform) => {
     const totalSales = publicStoreDataCache.storeSalesCount || 0;
 
     let filtered = [];
-    const pElement = document.querySelector('#publicReferencesModal p');
+    const pElement = document.querySelector('#publicReferencesSection p');
     
     if (platform === 'all') {
         filtered = refs;
