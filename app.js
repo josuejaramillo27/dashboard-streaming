@@ -4188,6 +4188,15 @@ window.descargarQR = async (url, banco) => {
 window.openRenewFromPortal = (clientId, platform, price) => {
     const data = portalStoreData;
 
+    currentCheckoutItem = {
+        isRenewal: true,
+        clientId: clientId,
+        platform: platform,
+        price: parseFloat(price),
+        requiresInvite: false,
+        autoDeliver: true // Siempre true para renovaciones
+    };
+
     document.getElementById('checkoutItemName').innerText = `Renovación: ${platform}`;
     document.getElementById('checkoutItemPrice').innerText = window.formatStorePrice(currentCheckoutItem.price);
 
@@ -4220,15 +4229,6 @@ window.openRenewFromPortal = (clientId, platform, price) => {
         selectHtml += `</select><div id="pmDetailsContainer" style="display:none; background: var(--mac-bg); padding: 15px; border-radius: 10px; border: 1px dashed var(--mac-border);"></div>`;
         pmContainer.innerHTML = botonesAutomaticos + selectHtml;
     }
-
-    currentCheckoutItem = {
-        isRenewal: true,
-        clientId: clientId,
-        platform: platform,
-        price: parseFloat(price),
-        requiresInvite: false,
-        autoDeliver: true // Siempre true para renovaciones
-    };
 
     document.getElementById('checkoutPhone').value = '';
     document.getElementById('checkoutClientName').value = '';
