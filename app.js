@@ -1012,9 +1012,6 @@ window.saveProfile = async () => {
         let rawAlias = document.getElementById('editProfileAlias').value;
         let finalAlias = rawAlias.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
-        let refInput = document.getElementById('editReferencesLink');
-        let referencesLink = refInput ? refInput.value.trim() : '';
-
         // Guardado de botConfig
         let estadosArray = [];
         let gruposArray = [];
@@ -1050,7 +1047,6 @@ window.saveProfile = async () => {
         let updateData = {
             name: name, country: country, currency: getCurrencyForCountry(country),
             phone: phone, logoUrl: logoUrl, bannerUrl: bannerUrl, storeAlias: finalAlias,
-            referencesLink: referencesLink,
             paymentMethods: finalPaymentMethods,
             botConfig: botConfig,
             binancePayId: binancePayId,
@@ -1091,7 +1087,6 @@ window.saveProfile = async () => {
         currentUserData.phone = phone;
         currentUserData.logoUrl = logoUrl;
         currentUserData.bannerUrl = bannerUrl;
-        currentUserData.referencesLink = referencesLink;
         currentUserData.paymentMethods = finalPaymentMethods;
         // Actualizamos en memoria local las pasarelas
         if (updateData.mpAccessToken !== undefined) currentUserData.mpAccessToken = updateData.mpAccessToken;
@@ -1723,6 +1718,7 @@ window.saveClientData = async () => {
     btn.disabled = true;
 
     try {
+        const isNewClient = !editingClientId;
         // 🔒 EL CANDADO DE LÍMITES
         if (!editingClientId) {
             const plan = currentUserData.plan_actual || 'demo';
@@ -1861,6 +1857,10 @@ window.saveClientData = async () => {
         document.getElementById('selectText').classList.remove('has-selection');
         document.getElementById('actionButtonsContainer').innerHTML = `<button type="button" class="btn-primary" onclick="window.saveClientData()">Agregar Cliente</button>`;
         loadUserClients();
+
+        if (isNewClient) {
+            window.promptStoreReference(checked[0]);
+        }
 
     } catch (e) {
         window.showNotification("Error al guardar: " + e.message);
@@ -4048,14 +4048,13 @@ const checkPublicStore = async () => {
                 supportBtn.href = `https://wa.me/${numLimpio}?text=${encodeURIComponent('¡Hola! Estoy visitando tu catálogo virtual y me gustaría hacerte una consulta.')}`;
                 supportBtn.style.display = 'inline-flex';
             }
-            // Activamos el botón de Referencias si el usuario configuró su link
+            // Activamos el botón de Referencias si el usuario subió alguna
             const refBtn = document.getElementById('publicStoreReferencesBtn');
             if (refBtn) {
-                if (data.referencesLink && data.referencesLink !== '') {
-                    refBtn.href = data.referencesLink;
+                if (data.storeReferences && data.storeReferences.length > 0) {
                     refBtn.style.display = 'inline-flex';
                 } else {
-                    refBtn.style.display = 'none'; // Se oculta si no hay link
+                    refBtn.style.display = 'none'; // Se oculta si no hay referencias
                 }
             }
             // 🔥 Cuando el catálogo carga con éxito, movemos todo hacia arriba
@@ -5281,7 +5280,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
             }).then((result) => {
                 if (result.isConfirmed && primerClienteId) {
                     window.closeModals(true); window.switchMainTab('clientes'); window.startEdit(primerClienteId);
-                } else { window.openPedidosModal(); }
+                } else { window.openPedidosModal(); window.promptStoreReference(plataforma); }
             });
 
         } else {
@@ -5296,7 +5295,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
             }).then((result) => {
                 if (result.isConfirmed && primerClienteId) {
                     window.closeModals(true); window.switchMainTab('clientes'); window.startEdit(primerClienteId);
-                } else { window.openPedidosModal(); }
+                } else { window.openPedidosModal(); window.promptStoreReference(plataforma); }
             });
         }
 
@@ -9899,4 +9898,204 @@ window.syncOldStockRules = async () => {
     window.showNotification("🔄 Analizando configuraciones huérfanas...");
     const success = await window.checkAndLinkStockRules(stock);
     if (success) window.showNotification("✅ Todo tu stock está correctamente vinculado a la tienda.");
+};
+
+window.promptStoreReference = (plataformaPrevia = "") => {
+    Swal.fire({
+        title: '¡Venta Exitosa!',
+        text: '¿Tu cliente te confirmó la entrega? Sube la captura de pantalla para que sirva de referencia en tu Tiendita Web.',
+        icon: 'success',
+        showCancelButton: true,
+        confirmButtonColor: '#34C759',
+        cancelButtonColor: '#555',
+        confirmButtonText: '📸 Subir Referencia',
+        cancelButtonText: 'Lo haré después'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.closeModals(true);
+            window.openStoreAdmin();
+            setTimeout(() => {
+                const tabBtn = document.querySelector('.chrome-tab[onclick*="tabGaleriaRef"]');
+                if (tabBtn) tabBtn.click();
+                
+                // Cargar plataformas disponibles
+                const selectPlat = document.getElementById('refPlatformSelect');
+                if (selectPlat) {
+                    selectPlat.innerHTML = '<option value="">Selecciona Plataforma...</option>';
+                    const uniquePlats = [...new Set(clients.map(c => c.platform.split(',')[0].trim()).filter(Boolean))];
+                    uniquePlats.forEach(p => {
+                        selectPlat.innerHTML += `<option value="${p}">${p}</option>`;
+                    });
+
+                    if (plataformaPrevia) {
+                        for(let i=0; i<selectPlat.options.length; i++){
+                            if(selectPlat.options[i].text.toLowerCase().includes(plataformaPrevia.toLowerCase())) {
+                                selectPlat.selectedIndex = i;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }, 500);
+        }
+    });
+};
+
+window.uploadStoreReference = async () => {
+    const platform = document.getElementById('refPlatformSelect').value;
+    const desc = document.getElementById('refDescInput').value.trim();
+    const fileInput = document.getElementById('refImageInput');
+
+    if (!platform || !fileInput.files.length) {
+        return window.showNotification("⚠️ Selecciona una plataforma y una imagen.");
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = async () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Resize max width 800
+            const MAX_WIDTH = 800;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > MAX_WIDTH) {
+                height = Math.round((height * MAX_WIDTH) / width);
+                width = MAX_WIDTH;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Watermark
+            const watermarkText = currentUserData.storeAlias || currentUserData.name || 'A.G.C.';
+            ctx.font = `bold ${Math.max(20, width / 15)}px Arial`;
+            ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            
+            ctx.translate(width / 2, height / 2);
+            ctx.rotate(-Math.PI / 4);
+            ctx.fillText(watermarkText, 0, 0);
+            ctx.rotate(Math.PI / 4);
+            ctx.translate(-width / 2, -height / 2);
+
+            canvas.toBlob(async (blob) => {
+                try {
+                    window.showNotification("⏳ Subiendo referencia...");
+                    const storageRefObj = ref(storage, `references/${currentUser.uid}_${Date.now()}.webp`);
+                    await uploadBytes(storageRefObj, blob);
+                    const downloadUrl = await getDownloadURL(storageRefObj);
+
+                    const refs = currentUserData.storeReferences || [];
+                    refs.push({
+                        url: downloadUrl,
+                        platform: platform,
+                        description: desc,
+                        date: new Date().toISOString()
+                    });
+
+                    await updateDoc(doc(db, "users", currentUser.uid), { storeReferences: refs });
+                    currentUserData.storeReferences = refs;
+                    
+                    window.showNotification("✅ Referencia subida con éxito.");
+                    document.getElementById('refDescInput').value = '';
+                    document.getElementById('refImageInput').value = '';
+                    window.renderStoreReferences();
+                } catch (err) {
+                    console.error(err);
+                    window.showNotification("Error al subir la imagen.");
+                }
+            }, 'image/webp', 0.7);
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+};
+
+window.renderStoreReferences = () => {
+    const list = document.getElementById('storeReferencesList');
+    if (!list) return;
+
+    const refs = currentUserData.storeReferences || [];
+    if (refs.length === 0) {
+        list.innerHTML = '<p style="color: var(--mac-text-secondary); grid-column: 1 / -1;">No has subido referencias aún.</p>';
+        return;
+    }
+
+    // Llenar select si está vacío en este momento (al abrir tab manualmente)
+    const selectPlat = document.getElementById('refPlatformSelect');
+    if (selectPlat && selectPlat.options.length <= 1) {
+        const uniquePlats = [...new Set(clients.map(c => c.platform.split(',')[0].trim()).filter(Boolean))];
+        uniquePlats.forEach(p => {
+            selectPlat.innerHTML += `<option value="${p}">${p}</option>`;
+        });
+    }
+
+    list.innerHTML = '';
+    refs.forEach((r, index) => {
+        list.innerHTML += `
+            <div style="background: var(--mac-surface); border-radius: 12px; border: 1px solid var(--mac-border); overflow: hidden; position: relative;">
+                <img src="${r.url}" style="width: 100%; height: 150px; object-fit: cover;">
+                <div style="padding: 10px;">
+                    <p style="margin: 0; font-weight: bold; font-size: 13px; color: var(--mac-blue);">${r.platform}</p>
+                    <p style="margin: 5px 0 0 0; font-size: 11px; color: var(--mac-text-secondary);">${r.description}</p>
+                </div>
+                <button onclick="window.deleteStoreReference(${index})" style="position: absolute; top: 5px; right: 5px; background: rgba(255,0,0,0.8); color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center;"><i class='bx bx-trash'></i></button>
+            </div>
+        `;
+    });
+};
+
+window.deleteStoreReference = async (index) => {
+    if (!confirm("¿Eliminar esta referencia?")) return;
+    const refs = currentUserData.storeReferences || [];
+    refs.splice(index, 1);
+    await updateDoc(doc(db, "users", currentUser.uid), { storeReferences: refs });
+    currentUserData.storeReferences = refs;
+    window.renderStoreReferences();
+};
+
+window.openPublicReferences = () => {
+    const refs = publicStoreDataCache.storeReferences || [];
+    if (refs.length === 0) return window.showNotification("Aún no hay referencias disponibles.");
+
+    document.getElementById('publicRefSalesCount').innerText = publicStoreDataCache.storeSalesCount || 0;
+    
+    const filterSelect = document.getElementById('publicRefFilter');
+    const uniquePlats = [...new Set(refs.map(r => r.platform))];
+    filterSelect.innerHTML = '<option value="all">Todas las plataformas</option>';
+    uniquePlats.forEach(p => {
+        filterSelect.innerHTML += `<option value="${p}">${p}</option>`;
+    });
+
+    window.filterPublicReferences('all');
+    document.getElementById('publicReferencesModal').style.display = 'block';
+};
+
+window.filterPublicReferences = (platform) => {
+    const grid = document.getElementById('publicRefGrid');
+    const refs = publicStoreDataCache.storeReferences || [];
+    grid.innerHTML = '';
+
+    const filtered = platform === 'all' ? refs : refs.filter(r => r.platform === platform);
+
+    filtered.forEach(r => {
+        grid.innerHTML += `
+            <div style="background: var(--mac-surface); border-radius: 12px; border: 1px solid var(--mac-border); overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <img src="${r.url}" style="width: 100%; height: 200px; object-fit: cover;">
+                <div style="padding: 15px;">
+                    <span style="background: var(--mac-blue); color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">${r.platform}</span>
+                    <p style="margin: 10px 0 0 0; font-size: 13px; color: var(--mac-text-main); font-weight: bold;">${r.description}</p>
+                </div>
+            </div>
+        `;
+    });
 };
