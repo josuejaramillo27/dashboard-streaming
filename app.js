@@ -4342,37 +4342,46 @@ window.iniciarPagoAutomatico = async (metodo) => {
             const alias = dataTienda.binanceAlias || '';
 
             const qrHtml = dataTienda.binanceQrUrl ? 
-                `<img src="${dataTienda.binanceQrUrl}" alt="QR Binance" style="width: 100%; max-width: 240px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #444; box-shadow: 0 4px 10px rgba(0,0,0,0.3); object-fit: contain;">` : '';
+                `<div style="flex: 1; min-width: 200px; display: flex; justify-content: center;">
+                    <img src="${dataTienda.binanceQrUrl}" alt="QR Binance" style="width: 100%; max-width: 220px; height: 220px; object-fit: contain; border-radius: 12px; border: 1px solid #444; box-shadow: 0 4px 10px rgba(0,0,0,0.3); margin: 0 auto;">
+                </div>` : '';
 
             const { value: transactionId } = await Swal.fire({
                 title: 'Pagar con Binance',
+                width: '650px', // Ensancha el modal en PC
                 html: `
                     <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                         <p style="margin-bottom: 15px; font-size: 15px; color: var(--mac-text-main);">
                             Envía exactamente <b style="color: #FCD535; font-size: 18px;">${priceUSDT} USDT</b>
                         </p>
                         
-                        ${qrHtml}
+                        <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; align-items: center; width: 100%; margin-bottom: 15px;">
+                            
+                            ${qrHtml}
 
-                        <div style="background: rgba(255, 255, 255, 0.05); padding: 20px 15px; border-radius: 12px; border: 1px solid #555; margin-bottom: 20px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; position: relative; overflow: hidden;">
-                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #FCD535;"></div>
-                            <p style="margin: 0 0 8px 0; font-size: 13px; color: var(--mac-text-secondary);">Binance Pay ID (Copia este número):</p>
-                            <div style="display: flex; align-items: center; gap: 10px; background: #000; padding: 10px 15px; border-radius: 8px; border: 1px dashed #FCD535;">
-                                <span style="font-size: 22px; font-weight: 900; color: #fff; letter-spacing: 2px;">${payId}</span>
-                                <button class="action-btn" style="background: #FCD535; border: none; color: #000; padding: 6px 12px; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s;" onclick="window.copyToClipboard('${payId}', 'Binance Pay ID')">Copiar</button>
+                            <div style="flex: 1.5; min-width: 260px; display: flex; flex-direction: column; align-items: center; width: 100%;">
+                                <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; border: 1px solid #555; margin-bottom: 15px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; position: relative; overflow: hidden;">
+                                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #FCD535;"></div>
+                                    <p style="margin: 0 0 8px 0; font-size: 12px; color: var(--mac-text-secondary);">Binance Pay ID (Copia este número):</p>
+                                    
+                                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #000; padding: 10px; border-radius: 8px; border: 1px dashed #FCD535; width: 100%; box-sizing: border-box;">
+                                        <span style="font-size: clamp(16px, 5vw, 22px); font-weight: 900; color: #fff; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${payId}</span>
+                                        <button class="action-btn" style="background: #FCD535; border: none; color: #000; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; flex-shrink: 0;" onclick="window.copyToClipboard('${payId}', 'Binance Pay ID')">Copiar</button>
+                                    </div>
+                                    ${alias ? `<p style="margin: 10px 0 0 0; font-size: 12px; color: #FCD535; font-weight: bold;">Verifica el Alias: ${alias}</p>` : ''}
+                                </div>
+
+                                <p style="font-size: 12px; color: var(--mac-text-secondary); margin-bottom: 8px;">
+                                    Pega aquí el <b>Order ID (Número de Orden)</b>:
+                                </p>
                             </div>
-                            ${alias ? `<p style="margin: 10px 0 0 0; font-size: 13px; color: #FCD535; font-weight: bold;">Verifica el Alias: ${alias}</p>` : ''}
                         </div>
-
-                        <p style="font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 10px;">
-                            Una vez transferido, pega aquí el <b>Order ID (Número de Orden)</b> de tu pago:
-                        </p>
                     </div>
                 `,
                 input: 'text',
                 inputPlaceholder: 'Ej: 1234567890123456',
                 inputAttributes: {
-                    style: 'text-align: center; font-size: 16px; font-weight: bold; letter-spacing: 1px; max-width: 80%; margin: 0 auto; display: block;'
+                    style: 'text-align: center; font-size: 15px; font-weight: bold; letter-spacing: 1px; width: 100%; max-width: 320px; margin: 0 auto; display: block;'
                 },
                 showCancelButton: true,
                 confirmButtonText: 'Verificar Pago',
