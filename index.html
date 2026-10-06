@@ -1749,7 +1749,8 @@
                             <div class="chrome-tab"
                                 onclick="window.switchStoreAdminTab('tabResenas', this); window.loadAdminReviews();"><i
                                     class='bx bxs-star'></i> Reseñas</div>
-                            <div class="chrome-tab" onclick="window.switchStoreAdminTab('tabGaleriaRef', this)"><i class='bx bx-images'></i> Referencias</div>
+                            <div class="chrome-tab" onclick="window.switchStoreAdminTab('tabGaleriaRef', this)"><i
+                                    class='bx bx-images'></i> Referencias</div>
                         </div>
                     </div>
 
@@ -1757,20 +1758,30 @@
 
                         <!-- VENTANA: REFERENCIAS -->
                         <div id="tabGaleriaRef" class="store-admin-tab" style="display: none;">
-                            <div style="background: var(--mac-surface); padding: 20px; border-radius: 12px; border: 1px solid var(--mac-border); margin-bottom: 20px;">
-                                <h3 style="margin-top: 0; color: var(--mac-text-main);"><i class='bx bx-image-add'></i> Subir Nueva Referencia</h3>
-                                <p style="color: var(--mac-text-secondary); font-size: 13px;">Comprobantes de pago o chats de clientes felices.</p>
+                            <div
+                                style="background: var(--mac-surface); padding: 20px; border-radius: 12px; border: 1px solid var(--mac-border); margin-bottom: 20px;">
+                                <h3 style="margin-top: 0; color: var(--mac-text-main);"><i class='bx bx-image-add'></i>
+                                    Subir Nueva Referencia</h3>
+                                <p style="color: var(--mac-text-secondary); font-size: 13px;">Comprobantes de pago o
+                                    chats de clientes felices.</p>
                                 <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
-                                    <select id="refPlatformSelect" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                                    <select id="refPlatformSelect"
+                                        style="flex: 1; min-width: 150px; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
                                         <option value="">Selecciona Plataforma...</option>
                                     </select>
-                                    <input type="text" id="refDescInput" placeholder="Descripción (Ej: Netflix 1 Mes)" style="flex: 2; min-width: 200px; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
-                                    <input type="file" id="refImageInput" accept="image/*" style="flex: 1; min-width: 200px; padding: 8px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                                    <input type="text" id="refDescInput" placeholder="Descripción (Ej: Netflix 1 Mes)"
+                                        style="flex: 2; min-width: 200px; padding: 10px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
+                                    <input type="file" id="refImageInput" accept="image/*"
+                                        style="flex: 1; min-width: 200px; padding: 8px; border-radius: 8px; background: var(--mac-bg); color: var(--mac-text-main); border: 1px solid var(--mac-border);">
                                 </div>
-                                <button onclick="window.uploadStoreReference()" class="btn-primary" style="margin-top: 15px; background: #007AFF; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold;"><i class='bx bx-cloud-upload'></i> Subir Referencia con Marca de Agua</button>
+                                <button onclick="window.uploadStoreReference()" class="btn-primary"
+                                    style="margin-top: 15px; background: #007AFF; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold;"><i
+                                        class='bx bx-cloud-upload'></i> Subir Referencia con Marca de Agua</button>
                             </div>
                             <h3 style="color: var(--mac-text-main); margin-bottom: 15px;">Muro de Referencias</h3>
-                            <div id="storeReferencesList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;"></div>
+                            <div id="storeReferencesList"
+                                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;">
+                            </div>
                         </div>
 
                         <!-- VENTANA 1: CATÁLOGO (Lo que ya tenías) -->
@@ -2669,8 +2680,10 @@
                                 style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
                         </div>
                         <div style="margin-bottom: 10px;">
-                            <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Sube la imagen de tu QR de Binance (Opcional):</label>
-                            <input type="file" id="binanceQrUpload" accept="image/*" style="width: 100%; padding: 8px; border-radius: 8px; background: var(--mac-bg); border: 1px solid var(--mac-border); color: var(--mac-text-main); margin-top: 5px;">
+                            <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Sube la
+                                imagen de tu QR de Binance (Opcional):</label>
+                            <input type="file" id="binanceQrUpload" accept="image/*"
+                                style="width: 100%; padding: 8px; border-radius: 8px; background: var(--mac-bg); border: 1px solid var(--mac-border); color: var(--mac-text-main); margin-top: 5px;">
                         </div>
                         <div style="margin-bottom: 10px;">
                             <label style="font-size: 11px; font-weight: bold; color: var(--mac-text-secondary);">Tipo de
@@ -3293,6 +3306,9 @@
             </h1>
             <p style="color: var(--mac-text-secondary); margin-top: 5px; font-weight: 500;">Catálogo Oficial de
                 Servicios</p>
+            <a id="publicStoreReferencesBtn" onclick="window.openPublicReferences()" style="cursor:pointer; display: none; margin: 15px auto 0 auto; background: rgba(255, 149, 0, 0.1); border: 1px solid var(--mac-orange); color: var(--mac-orange); padding: 8px 20px; border-radius: 20px; font-size: 13px; font-weight: 800; align-items: center; justify-content: center; gap: 8px; width: max-content; transition: 0.2s; box-shadow: 0 4px 12px rgba(255, 149, 0, 0.15);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                <i class='bx bxs-star bx-tada' style="font-size: 16px;"></i> Ver Referencias de Clientes
+            </a>
         </div>
 
         <!-- 🔥 FILTROS Y BUSCADOR (ORDEN SPOTIFY PERFECTO) -->
@@ -3343,9 +3359,6 @@
         <div id="publicStoreCatalog"></div>
 
         <div class="store-trust-footer" id="publicStoreFooter" style="display: none;">
-            <a id="publicStoreReferencesBtn" onclick="window.openPublicReferences()" style="cursor:pointer; display: none;" class="references-btn">
-                <i class='bx bxs-star'></i> Ver Referencias de Clientes
-            </a>
             <p style="font-size: 12px; color: var(--mac-text-secondary); margin: 20px 0 10px 0; font-weight: 700;">
                 MÉTODOS DE PAGO ACEPTADOS</p>
             <div class="payment-methods">
@@ -4198,30 +4211,36 @@
         </div>
     </div>
 
-        <!-- VISTA DEL MURO DE REFERENCIAS (FULL PAGE) -->
-        <div id="publicReferencesSection" style="display: none; width: 100%; max-width: 1000px; margin: 0 auto; padding: 20px 20px 80px 20px; position: relative; min-height: 100vh;">
-            
-            <button onclick="window.closePublicReferences()" style="background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-weight: bold; padding: 10px 20px; border-radius: 20px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: auto; max-width: max-content;">
-                <i class='bx bx-arrow-back'></i> Volver a la Tienda
-            </button>
+    <!-- VISTA DEL MURO DE REFERENCIAS (FULL PAGE) -->
+    <div id="publicReferencesSection"
+        style="display: none; width: 100%; max-width: 1000px; margin: 0 auto; padding: 20px 20px 80px 20px; position: relative; min-height: 100vh;">
 
-            <div style="text-align: center; margin-bottom: 35px;">
-                <h2 style="margin: 0; color: var(--mac-text-main); font-size: 28px; font-weight: 900;"><i class='bx bxs-star' style="color: var(--mac-orange);"></i> Referencias Reales</h2>
-                <p style="color: var(--mac-text-secondary); margin-top: 8px; font-size: 15px;">
-                    <b id="publicRefSalesCount" style="color: var(--mac-green); font-size: 18px;">0</b> clientes satisfechos garantizan nuestro servicio.
-                </p>
-                <select id="publicRefFilter" onchange="window.filterPublicReferences(this.value)" style="margin-top: 20px; padding: 12px 25px; border-radius: 20px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-blue); font-weight: bold; font-size: 14px; outline: none; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.1); width: auto; max-width: 100%; display: inline-block;">
-                    <option value="all">Todas las plataformas</option>
-                </select>
-            </div>
+        <button onclick="window.closePublicReferences()"
+            style="background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-weight: bold; padding: 10px 20px; border-radius: 20px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: auto; max-width: max-content;">
+            <i class='bx bx-arrow-back'></i> Volver a la Tienda
+        </button>
 
-            <!-- Grid sin límite de altura para scroll natural -->
-            <div id="publicRefGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;"></div>
-            
-            <div style="text-align: center; margin-top: 40px;">
-                <p style="font-size: 11px; color: var(--mac-text-secondary); opacity: 0.6;">POTENCIADO POR PANEL A.G.C.</p>
-            </div>
+        <div style="text-align: center; margin-bottom: 35px;">
+            <h2 style="margin: 0; color: var(--mac-text-main); font-size: 28px; font-weight: 900;"><i
+                    class='bx bxs-star' style="color: var(--mac-orange);"></i> Referencias Reales</h2>
+            <p style="color: var(--mac-text-secondary); margin-top: 8px; font-size: 15px;">
+                <b id="publicRefSalesCount" style="color: var(--mac-green); font-size: 18px;">0</b> clientes satisfechos
+                garantizan nuestro servicio.
+            </p>
+            <select id="publicRefFilter" onchange="window.filterPublicReferences(this.value)"
+                style="margin-top: 20px; padding: 12px 25px; border-radius: 20px; background: var(--mac-surface); color: var(--mac-text-main); border: 1px solid var(--mac-blue); font-weight: bold; font-size: 14px; outline: none; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.1); width: auto; max-width: 100%; display: inline-block;">
+                <option value="all">Todas las plataformas</option>
+            </select>
         </div>
+
+        <!-- Grid sin límite de altura para scroll natural -->
+        <div id="publicRefGrid"
+            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;"></div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <p style="font-size: 11px; color: var(--mac-text-secondary); opacity: 0.6;">POTENCIADO POR PANEL A.G.C.</p>
+        </div>
+    </div>
 </body>
 
 </html>
