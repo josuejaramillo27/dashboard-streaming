@@ -10065,20 +10065,28 @@ window.deleteStoreReference = async (index) => {
 };
 
 window.openPublicReferences = () => {
-    const refs = publicStoreDataCache.storeReferences || [];
-    if (refs.length === 0) return window.showNotification("Aún no hay referencias disponibles.");
-
-    document.getElementById('publicRefSalesCount').innerText = publicStoreDataCache.storeSalesCount || 0;
-    
+    // Llenar el select dinámicamente
+    const refs = window.publicStoreDataCache.storeReferences || [];
     const filterSelect = document.getElementById('publicRefFilter');
     const uniquePlats = [...new Set(refs.map(r => r.platform))];
+    
     filterSelect.innerHTML = '<option value="all">Todas las plataformas</option>';
     uniquePlats.forEach(p => {
         filterSelect.innerHTML += `<option value="${p}">${p}</option>`;
     });
 
+    // Ocultar tienda y mostrar referencias
+    document.getElementById('publicStoreView').style.display = 'none';
+    document.getElementById('publicReferencesSection').style.display = 'block';
+    
+    window.scrollTo(0, 0); // Subir al inicio de la página
     window.filterPublicReferences('all');
-    document.getElementById('publicReferencesModal').style.display = 'block';
+};
+
+window.closePublicReferences = () => {
+    document.getElementById('publicReferencesSection').style.display = 'none';
+    document.getElementById('publicStoreView').style.display = 'block';
+    window.scrollTo(0, 0);
 };
 
 window.filterPublicReferences = (platform) => {
@@ -10132,12 +10140,12 @@ window.populateCouponTargets = () => {
 
 window.viewFullReference = (imgUrl) => {
     Swal.fire({
-        imageUrl: imgUrl,
-        imageAlt: 'Referencia de Cliente',
+        html: `<img src="${imgUrl}" style="max-width: 100%; max-height: 85vh; width: auto; object-fit: contain; border-radius: 8px; display: block; margin: 0 auto;">`,
         width: 'auto',
         background: 'transparent',
         showConfirmButton: false,
         showCloseButton: true,
-        backdrop: 'rgba(0,0,0,0.9)'
+        backdrop: 'rgba(0,0,0,0.95)',
+        customClass: { popup: 'swal-fullscreen-popup' } // Clase opcional para quitar padding interno de Swal
     });
 };
