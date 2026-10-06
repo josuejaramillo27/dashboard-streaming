@@ -4330,27 +4330,41 @@ window.iniciarPagoAutomatico = async (metodo) => {
             const payId = dataTienda.binancePayId || 'No configurado';
             const alias = dataTienda.binanceAlias || '';
 
+            // Generador de Deep Link y QR
+            const binanceDeepLink = `https://app.binance.com/qr/dplk/?action=pay&payId=${payId}`;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(binanceDeepLink)}`;
+
             const { value: transactionId } = await Swal.fire({
                 title: 'Pagar con Binance',
                 html: `
-            <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                <p style="margin-bottom: 15px; font-size: 15px; color: var(--mac-text-main);">
-                    Envía exactamente <b style="color: #FCD535; font-size: 18px;">${priceUSDT} USDT</b> a nuestro Binance Pay.
-                </p>
-                <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; border: 1px dashed #555; margin-bottom: 20px; width: 100%; box-sizing: border-box;">
-                    <p style="margin: 0; font-size: 13px; color: var(--mac-text-secondary);">Binance Pay ID:</p>
-                    <p style="margin: 5px 0 0 0; font-size: 20px; font-weight: 800; color: #fff; letter-spacing: 1.5px;">${payId}</p>
-                    ${alias ? `<p style="margin: 5px 0 0 0; font-size: 13px; color: #FCD535; font-weight: bold;">Alias: ${alias}</p>` : ''}
-                </div>
-                <p style="font-size: 14px; color: var(--mac-text-secondary); margin-bottom: 10px;">
-                    Una vez transferido, pega aquí el <b>Order ID (Número de Orden)</b> de tu pago:
-                </p>
-            </div>
-        `,
+                    <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <p style="margin-bottom: 10px; font-size: 15px; color: var(--mac-text-main);">
+                            Envía exactamente <b style="color: #FCD535; font-size: 18px;">${priceUSDT} USDT</b>
+                        </p>
+                        
+                        <img src="${qrUrl}" alt="QR Binance" style="width: 130px; height: 130px; border-radius: 12px; margin-bottom: 15px; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+
+                        <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; border: 1px dashed #555; margin-bottom: 15px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;">
+                            <p style="margin: 0 0 5px 0; font-size: 13px; color: var(--mac-text-secondary);">Binance Pay ID:</p>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 20px; font-weight: 800; color: #fff; letter-spacing: 1.5px;">${payId}</span>
+                                <button class="action-btn" style="background: transparent; border: 1px solid var(--mac-border); color: var(--mac-text-main); padding: 4px 8px; border-radius: 6px; font-size: 12px; cursor: pointer;" onclick="window.copyToClipboard('${payId}', 'Binance Pay ID')"><i class='bx bx-copy'></i></button>
+                            </div>
+                            ${alias ? `<p style="margin: 5px 0 0 0; font-size: 13px; color: #FCD535; font-weight: bold;">Alias: ${alias}</p>` : ''}
+                        </div>
+
+                        <a href="${binanceDeepLink}" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: #FCD535; color: #1E2329; font-weight: 800; border-radius: 8px; text-decoration: none; margin-bottom: 20px; transition: 0.2s;">
+                            <i class='bx bxl-bitcoin' style="font-size: 18px;"></i> Abrir App de Binance
+                        </a>
+
+                        <p style="font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 10px;">
+                            Pega aquí el <b>Order ID (Número de Orden)</b> de tu pago:
+                        </p>
+                    </div>
+                `,
                 input: 'text',
                 inputPlaceholder: 'Ej: 1234567890123456',
                 inputAttributes: {
-                    // 🟢 AQUÍ CENTRAMOS EL RECUADRO Y LE DAMOS UN ANCHO MÁS PEQUEÑO
                     style: 'text-align: center; font-size: 16px; font-weight: bold; letter-spacing: 1px; max-width: 80%; margin: 0 auto; display: block;'
                 },
                 showCancelButton: true,
