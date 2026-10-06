@@ -3314,6 +3314,7 @@ window.openStoreModal = () => {
     // 🔥 Renderizamos los productos y categorías directamente
     window.renderStoreItems();
     window.syncStoreCategories();
+    window.populateCouponTargets();
 
     // 🪄 MAGIA EXTRA: Resetea el modal a la primera pestaña (Catálogo) siempre que se abra
     const tabBtn = document.querySelector('#storeModal .chrome-tab');
@@ -6862,7 +6863,7 @@ window.populateAllServiceSelects = () => {
     }
 
     // B) Selects Simples (Inventario, Matrices, Reglas)
-    const selectIds = [{ id: 'invPlatform', defaultOpt: 'Plataforma...' }, { id: 'matPlatform', defaultOpt: null }, { id: 'rulePlatformSelect', defaultOpt: null }];
+    const selectIds = [{ id: 'invPlatform', defaultOpt: 'Plataforma...' }, { id: 'matPlatform', defaultOpt: null }, { id: 'rulePlatformSelect', defaultOpt: null }, { id: 'refPlatformSelect', defaultOpt: 'Selecciona Plataforma...' }];
     selectIds.forEach(item => {
         const select = document.getElementById(item.id);
         if (select) {
@@ -9619,7 +9620,7 @@ window.populateAllServiceSelects = () => {
         });
     }
 
-    const selectIds = [{ id: 'invPlatform', defaultOpt: 'Plataforma...' }, { id: 'matPlatform', defaultOpt: null }, { id: 'rulePlatformSelect', defaultOpt: null }];
+    const selectIds = [{ id: 'invPlatform', defaultOpt: 'Plataforma...' }, { id: 'matPlatform', defaultOpt: null }, { id: 'rulePlatformSelect', defaultOpt: null }, { id: 'refPlatformSelect', defaultOpt: 'Selecciona Plataforma...' }];
     selectIds.forEach(item => {
         const select = document.getElementById(item.id);
         if (select) {
@@ -10097,5 +10098,17 @@ window.filterPublicReferences = (platform) => {
                 </div>
             </div>
         `;
+    });
+};
+
+window.populateCouponTargets = () => {
+    const select = document.getElementById('newCouponTarget');
+    if (!select) return;
+    
+    select.innerHTML = '<option value="global">Todo el Catálogo</option>';
+    const catalog = currentUserData.storeCatalog || [];
+    
+    catalog.forEach(item => {
+        select.innerHTML += `<option value="${item.id}">Solo: ${item.platform}</option>`;
     });
 };
