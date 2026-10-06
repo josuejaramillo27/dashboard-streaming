@@ -10086,7 +10086,24 @@ window.filterPublicReferences = (platform) => {
     const refs = publicStoreDataCache.storeReferences || [];
     grid.innerHTML = '';
 
-    const filtered = platform === 'all' ? refs : refs.filter(r => r.platform === platform);
+    const platformSalesObj = publicStoreDataCache.platformSalesCount || {};
+    const totalSales = publicStoreDataCache.storeSalesCount || 0;
+
+    let filtered = [];
+    const pElement = document.querySelector('#publicReferencesModal p');
+    
+    if (platform === 'all') {
+        filtered = refs;
+        if (pElement) {
+            pElement.innerHTML = `Total: <b style="color: var(--mac-orange);">${refs.length}</b> referencias respaldadas por <b style="color: var(--mac-green);">${totalSales}</b> ventas totales.`;
+        }
+    } else {
+        filtered = refs.filter(r => r.platform === platform);
+        const pSales = platformSalesObj[platform] || 0;
+        if (pElement) {
+            pElement.innerHTML = `Plataforma: <b style="color: var(--mac-orange);">${filtered.length}</b> referencias respaldadas por <b style="color: var(--mac-green);">${pSales}</b> ventas históricas de esta plataforma.`;
+        }
+    }
 
     filtered.forEach(r => {
         grid.innerHTML += `
