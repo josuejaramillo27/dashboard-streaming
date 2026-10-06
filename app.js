@@ -1070,6 +1070,17 @@ window.saveProfile = async () => {
             if (!binanceSecretKey.includes('***')) updateData.binanceSecretKey = binanceSecretKey;
         }
 
+        let binanceQrUrl = currentUserData.binanceQrUrl || null;
+        const binanceQrInput = document.getElementById('binanceQrUpload');
+        if (binanceQrInput && binanceQrInput.files.length > 0) {
+            const fileQr = binanceQrInput.files[0];
+            const storageRefQr = ref(storage, `qrs/${currentUser.uid}_binance_qr`);
+            await uploadBytes(storageRefQr, fileQr);
+            binanceQrUrl = await getDownloadURL(storageRefQr);
+            updateData.binanceQrUrl = binanceQrUrl;
+            currentUserData.binanceQrUrl = binanceQrUrl;
+        }
+
         await updateDoc(doc(db, "users", currentUser.uid), updateData);
 
         // Actualizar la memoria global
@@ -4330,35 +4341,31 @@ window.iniciarPagoAutomatico = async (metodo) => {
             const payId = dataTienda.binancePayId || 'No configurado';
             const alias = dataTienda.binanceAlias || '';
 
-            // Generador de Deep Link y QR
-            const binanceDeepLink = `https://app.binance.com/qr/dplk/?action=pay&payId=${payId}`;
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(binanceDeepLink)}`;
+            const qrHtml = dataTienda.binanceQrUrl ? 
+                `<img src="${dataTienda.binanceQrUrl}" alt="QR Binance" style="width: 100%; max-width: 240px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #444; box-shadow: 0 4px 10px rgba(0,0,0,0.3); object-fit: contain;">` : '';
 
             const { value: transactionId } = await Swal.fire({
                 title: 'Pagar con Binance',
                 html: `
                     <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                        <p style="margin-bottom: 10px; font-size: 15px; color: var(--mac-text-main);">
+                        <p style="margin-bottom: 15px; font-size: 15px; color: var(--mac-text-main);">
                             Envía exactamente <b style="color: #FCD535; font-size: 18px;">${priceUSDT} USDT</b>
                         </p>
                         
-                        <img src="${qrUrl}" alt="QR Binance" style="width: 130px; height: 130px; border-radius: 12px; margin-bottom: 15px; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                        ${qrHtml}
 
-                        <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; border: 1px dashed #555; margin-bottom: 15px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;">
-                            <p style="margin: 0 0 5px 0; font-size: 13px; color: var(--mac-text-secondary);">Binance Pay ID:</p>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="font-size: 20px; font-weight: 800; color: #fff; letter-spacing: 1.5px;">${payId}</span>
-                                <button class="action-btn" style="background: transparent; border: 1px solid var(--mac-border); color: var(--mac-text-main); padding: 4px 8px; border-radius: 6px; font-size: 12px; cursor: pointer;" onclick="window.copyToClipboard('${payId}', 'Binance Pay ID')"><i class='bx bx-copy'></i></button>
+                        <div style="background: rgba(255, 255, 255, 0.05); padding: 20px 15px; border-radius: 12px; border: 1px solid #555; margin-bottom: 20px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; position: relative; overflow: hidden;">
+                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #FCD535;"></div>
+                            <p style="margin: 0 0 8px 0; font-size: 13px; color: var(--mac-text-secondary);">Binance Pay ID (Copia este número):</p>
+                            <div style="display: flex; align-items: center; gap: 10px; background: #000; padding: 10px 15px; border-radius: 8px; border: 1px dashed #FCD535;">
+                                <span style="font-size: 22px; font-weight: 900; color: #fff; letter-spacing: 2px;">${payId}</span>
+                                <button class="action-btn" style="background: #FCD535; border: none; color: #000; padding: 6px 12px; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s;" onclick="window.copyToClipboard('${payId}', 'Binance Pay ID')">Copiar</button>
                             </div>
-                            ${alias ? `<p style="margin: 5px 0 0 0; font-size: 13px; color: #FCD535; font-weight: bold;">Alias: ${alias}</p>` : ''}
+                            ${alias ? `<p style="margin: 10px 0 0 0; font-size: 13px; color: #FCD535; font-weight: bold;">Verifica el Alias: ${alias}</p>` : ''}
                         </div>
 
-                        <a href="${binanceDeepLink}" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: #FCD535; color: #1E2329; font-weight: 800; border-radius: 8px; text-decoration: none; margin-bottom: 20px; transition: 0.2s;">
-                            <i class='bx bxl-bitcoin' style="font-size: 18px;"></i> Abrir App de Binance
-                        </a>
-
                         <p style="font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 10px;">
-                            Pega aquí el <b>Order ID (Número de Orden)</b> de tu pago:
+                            Una vez transferido, pega aquí el <b>Order ID (Número de Orden)</b> de tu pago:
                         </p>
                     </div>
                 `,
