@@ -3650,6 +3650,26 @@ window.editStoreItem = (index) => {
     });
 
     document.getElementById('editProdInvite').checked = item.requiresInvite || false;
+    
+    const autoDeliverEl = document.getElementById('editProdAutoDeliver');
+    if (autoDeliverEl) autoDeliverEl.checked = item.autoDeliver || false;
+
+    const autoStockEl = document.getElementById('editProdAutoStock');
+    if (autoStockEl) {
+        autoStockEl.checked = item.autoStock || false;
+        if (item.autoStock) {
+            document.getElementById('editStoreStockConfig').style.display = 'flex';
+            document.getElementById('editStoreStockPlatformsList').innerHTML = '';
+            if (item.stockPlatforms && item.stockPlatforms.length > 0) {
+                item.stockPlatforms.forEach(p => window.addEditStoreStockSelectRow(p));
+            } else {
+                window.toggleEditStoreStockFields();
+            }
+        } else {
+            document.getElementById('editStoreStockConfig').style.display = 'none';
+            document.getElementById('editStoreStockPlatformsList').innerHTML = '';
+        }
+    }
     document.getElementById('editProdDesc').value = item.desc || '';
     document.getElementById('editProdImg').value = '';
 
@@ -3677,6 +3697,22 @@ window.saveEditedProduct = async () => {
     const plat = document.getElementById('editProdName').value.trim();
     const cat = document.getElementById('editProdCat').value;
     const invite = document.getElementById('editProdInvite').checked;
+    
+    const autoDeliverEl = document.getElementById('editProdAutoDeliver');
+    const autoDeliver = autoDeliverEl ? autoDeliverEl.checked : false;
+
+    const autoStockEl = document.getElementById('editProdAutoStock');
+    const autoStock = autoStockEl ? autoStockEl.checked : false;
+
+    let stockPlatforms = [];
+    if (autoStock) {
+        const selects = document.querySelectorAll('.edit-store-stock-select');
+        stockPlatforms = Array.from(selects).map(s => s.value).filter(val => val !== '');
+        if (stockPlatforms.length === 0 && document.getElementById('storeBadgeOption')?.value !== 'a_pedido') {
+            return window.showNotification("⚠️ Selecciona una plataforma del inventario para conectar el stock.");
+        }
+    }
+
     const desc = document.getElementById('editProdDesc').value.trim();
     const fileInput = document.getElementById('editProdImg');
 
@@ -3698,6 +3734,11 @@ window.saveEditedProduct = async () => {
         catalog[index].platform = plat;
         catalog[index].category = cat;
         catalog[index].requiresInvite = invite;
+        if (autoDeliverEl) catalog[index].autoDeliver = autoDeliver;
+        if (autoStockEl) {
+            catalog[index].autoStock = autoStock;
+            catalog[index].stockPlatforms = stockPlatforms;
+        }
         catalog[index].desc = desc;
         catalog[index].storeTabs = storeTabs;
         catalog[index].price = storeTabs[0].options[0].price; // Base referencial
@@ -10173,4 +10214,81 @@ window.unarchiveAndEdit = (id) => {
     window.startEdit(id);
     document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
     window.showNotification("Modifica los datos y presiona Guardar para reactivarlo.");
+};
+
+window.toggleEditStoreStockFields = () => {
+    const isChecked = document.getElementById('editProdAutoStock').checked;
+    const configDiv = document.getElementById('editStoreStockConfig');
+    const index = document.getElementById('editProdIndex').value;
+    const item = currentUserData.storeCatalog[index];
+    const type = item ? (item.type || 'Servicio') : 'Servicio';
+    const label = document.getElementById('editStoreStockLabel');
+
+    if (isChecked) {
+        configDiv.style.display = 'flex';
+        const listContainer = document.getElementById('editStoreStockPlatformsList');
+        listContainer.innerHTML = '';
+        if (type === 'Combo') {
+            label.innerText = 'Selecciona las plataformas del inventario que integran este Combo:';
+            window.addEditStoreStockSelectRow();
+            window.addEditStoreStockSelectRow();
+        } else {
+            label.innerText = 'Selecciona la plataforma del inventario vinculada a este servicio:';
+            window.addEditStoreStockSelectRow();
+        }
+    } else {
+        configDiv.style.display = 'none';
+        document.getElementById('editStoreStockPlatformsList').innerHTML = '';
+        window.updateEditStoreStockCount();
+    }
+};
+
+window.addEditStoreStockSelectRow = (preselectedValue = "") => {
+    const listContainer = document.getElementById('editStoreStockPlatformsList');
+    const stock = currentUserData.inventory || [];
+    const platformsEnStock = [...new Set(stock.filter(i => i.status === 'libre').map(i => i.platform))];
+
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'edit-store-stock-row';
+    rowDiv.style.cssText = 'display: flex; gap: 8px; align-items: center;';
+
+    let selectHTML = `<select class="edit-store-stock-select" onchange="window.updateEditStoreStockCount()" style="flex: 1; padding: 6px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); font-size: 12px; color: var(--mac-text-main);">`;
+    selectHTML += `<option value="">Selecciona plataforma...</option>`;
+    platformsEnStock.forEach(p => {
+        const countLibres = stock.filter(i => i.status === 'libre' && i.platform === p).length;
+        const selected = preselectedValue === p ? 'selected' : '';
+        selectHTML += `<option value="${p}" ${selected}>${p} (${countLibres} en stock)</option>`;
+    });
+    selectHTML += `</select>`;
+
+    const removeBtnHTML = listContainer.children.length > 0 ?
+        `<button type="button" class="action-btn btn-del" style="padding: 4px 8px; font-size: 11px;" onclick="this.parentElement.remove(); window.updateEditStoreStockCount();"><i class='bx bx-trash'></i></button>` : '';
+
+    rowDiv.innerHTML = selectHTML + removeBtnHTML;
+    listContainer.appendChild(rowDiv);
+    window.updateEditStoreStockCount();
+};
+
+window.updateEditStoreStockCount = () => {
+    const countText = document.getElementById('editStoreStockCountText');
+    const selects = document.querySelectorAll('.edit-store-stock-select');
+    const selectedPlatforms = Array.from(selects).map(s => s.value).filter(val => val !== '');
+
+    if (selectedPlatforms.length === 0) {
+        countText.innerText = '0 disp.'; countText.style.color = 'var(--mac-text-secondary)'; return;
+    }
+
+    const stock = currentUserData.inventory || [];
+    const index = document.getElementById('editProdIndex').value;
+    const item = currentUserData.storeCatalog[index];
+    const type = item ? (item.type || 'Servicio') : 'Servicio';
+
+    if (type === 'Combo') {
+        const counts = selectedPlatforms.map(plat => stock.filter(i => i.status === 'libre' && i.platform === plat).length);
+        const minStock = Math.min(...counts);
+        countText.innerText = `${minStock} Combos disp.`; countText.style.color = minStock > 0 ? 'var(--mac-green)' : 'var(--mac-red)';
+    } else {
+        const count = stock.filter(i => i.status === 'libre' && i.platform === selectedPlatforms[0]).length;
+        countText.innerText = `${count} disp.`; countText.style.color = count > 0 ? 'var(--mac-green)' : 'var(--mac-red)';
+    }
 };
