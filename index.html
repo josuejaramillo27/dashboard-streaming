@@ -2546,16 +2546,18 @@
                                             style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-top: 5px; box-sizing: border-box;">
                                     </div>
                                     <div style="margin-top: 10px;">
-                                        <label
-                                            style="font-size: 12px; font-weight: bold; color: var(--mac-text-main); display: block; margin-bottom: 5px;">¿A
-                                            quiénes enviamos?</label>
-                                        <select id="campaignDbClients"
-                                            style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
-                                            <option value="none">-- No enviar a mi lista de clientes --</option>
-                                            <option value="all">A todos mis clientes registrados</option>
-                                            <option value="expired">Solo a clientes vencidos (Win-Back)</option>
-                                            <option value="active">Solo a clientes activos</option>
-                                        </select>
+                                        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main); display: block; margin-bottom: 5px;">¿A quiénes enviamos?</label>
+                                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                            <select id="campaignDbClients" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
+                                                <option value="none">-- No enviar a base de datos --</option>
+                                                <option value="all">A todos mis clientes</option>
+                                                <option value="expired">Solo a vencidos (Win-Back)</option>
+                                                <option value="active">Solo a activos</option>
+                                            </select>
+                                            <select id="campaignPlatformFilter" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
+                                                <option value="">Cualquier Plataforma</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -2586,12 +2588,10 @@
                                     <div style="display: flex; align-items: center; gap: 5px;">
                                         <label
                                             style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Frecuencia:</label>
-                                        <select id="autoStatusInterval"
-                                            style="padding: 6px 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px; outline: none;">
-                                            <option value="1">Cada 1 Hora</option>
-                                            <option value="2">Cada 2 Horas</option>
-                                            <option value="3">Cada 3 Horas</option>
-                                            <option value="6">Cada 6 Horas</option>
+                                        <select id="autoStatusInterval" style="padding: 6px 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px; outline: none;">
+                                            <option value="24">Cada 1 Día</option>
+                                            <option value="48">Cada 2 Días</option>
+                                            <option value="72">Cada 3 Días</option>
                                         </select>
                                     </div>
                                     <div style="display: flex; align-items: center;">
