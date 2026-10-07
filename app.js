@@ -648,6 +648,7 @@ window.sendMassCampaign = async () => {
     const imgUrl = document.getElementById('campaignImage').value.trim();
     const dbFilter = document.getElementById('campaignDbClients').value;
     const externalRaw = document.getElementById('campaignExternal').value.trim();
+    const platFilter = document.getElementById('campaignPlatformFilter').value;
 
     if (!msg) return window.showNotification("⚠️ Escribe un mensaje para tu campaña.");
 
@@ -664,6 +665,10 @@ window.sendMassCampaign = async () => {
             if (dbFilter === 'all') apply = true;
             if (dbFilter === 'expired' && diffDays < 0) apply = true;
             if (dbFilter === 'active' && diffDays >= 0) apply = true;
+
+            if (platFilter && platFilter !== "" && (!c.platform || !c.platform.toLowerCase().includes(platFilter.toLowerCase()))) {
+                apply = false;
+            }
 
             if (apply && c.phone) {
                 finalRecipients.push({ phone: c.phone, name: c.name || "amigo" });
@@ -728,6 +733,7 @@ window.sendMassCampaign = async () => {
             document.getElementById('campaignImage').value = '';
             document.getElementById('campaignExternal').value = '';
             document.getElementById('campaignDbClients').value = 'none';
+            document.getElementById('campaignPlatformFilter').value = '';
         } catch (e) {
             console.error("Error en campaña:", e);
         }
@@ -772,7 +778,7 @@ window.renderBotSlots = () => {
 
     // Cargar Checkboxes y Selects guardados
     document.getElementById('autoStatusActive').checked = config.estadosActivos || false;
-    document.getElementById('autoStatusInterval').value = config.estadosIntervaloHoras || 2;
+    document.getElementById('autoStatusInterval').value = config.estadosIntervaloHoras || 24;
     document.getElementById('autoGroupActive').checked = config.gruposActivos || false;
     document.getElementById('autoGroupInterval').value = config.gruposIntervaloHoras || 2;
 };
@@ -1030,7 +1036,7 @@ window.saveProfile = async () => {
 
         const botConfig = {
             estadosActivos: document.getElementById('autoStatusActive').checked,
-            estadosIntervaloHoras: parseInt(document.getElementById('autoStatusInterval').value) || 2,
+            estadosIntervaloHoras: parseInt(document.getElementById('autoStatusInterval').value) || 24,
             estados: estadosArray,
             estadosLastRun: (currentUserData.botConfig && currentUserData.botConfig.estadosLastRun) ? currentUserData.botConfig.estadosLastRun : null,
             estadosCurrentIndex: (currentUserData.botConfig && currentUserData.botConfig.estadosCurrentIndex) ? currentUserData.botConfig.estadosCurrentIndex : 0,
@@ -6863,7 +6869,7 @@ window.populateAllServiceSelects = () => {
     }
 
     // B) Selects Simples (Inventario, Matrices, Reglas)
-    const selectIds = [{ id: 'invPlatform', defaultOpt: 'Plataforma...' }, { id: 'matPlatform', defaultOpt: null }, { id: 'rulePlatformSelect', defaultOpt: null }, { id: 'refPlatformSelect', defaultOpt: 'Selecciona Plataforma...' }];
+    const selectIds = [{ id: 'invPlatform', defaultOpt: 'Plataforma...' }, { id: 'matPlatform', defaultOpt: null }, { id: 'rulePlatformSelect', defaultOpt: null }, { id: 'refPlatformSelect', defaultOpt: 'Selecciona Plataforma...' }, { id: 'campaignPlatformFilter', defaultOpt: 'Cualquier Plataforma' }];
     selectIds.forEach(item => {
         const select = document.getElementById(item.id);
         if (select) {
