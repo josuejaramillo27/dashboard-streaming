@@ -3476,3 +3476,21 @@ canvas {
     z-index: 0 !important;
     pointer-events: none !important; /* Para que no bloquee clics en los productos */
 }
+
+/* Optimización de 4 columnas para el catálogo público */
+#publicStoreCatalog {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+    gap: 20px !important;
+    justify-content: center !important;
+    align-items: stretch !important;
+    width: 100% !important;
+}
+
+/* Evitar que la tarjeta se encoja o desborde de su nueva columna */
+#publicStoreCatalog > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
