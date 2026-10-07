@@ -1805,7 +1805,8 @@ window.saveClientData = async () => {
             accountDeviceName: primaryData.deviceName,
             accountDeviceType: primaryData.deviceType,
             portalCode: generatedPortalCode,
-            notes: window.currentClientNote
+            notes: window.currentClientNote,
+            archived: false
         };
 
         if (editingClientId) {
@@ -2156,12 +2157,12 @@ window.cancelEdit = () => {
 window.renderTable = () => {
     const tbody = document.getElementById('tableBody'); tbody.innerHTML = ''; const today = new Date(); today.setHours(0, 0, 0, 0);
     const search = document.getElementById('searchInput').value.toLowerCase(); const filter = document.getElementById('filterSelect').value;
-    let proc = clients.map(c => { const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0); const diff = Math.ceil((exp - today) / 86400000); return { ...c, expDate: exp, diffDays: diff, statusCat: diff > 3 ? 'active' : (diff >= 0 ? 'warning' : 'expired') }; }).sort((a, b) => a.diffDays - b.diffDays);
+    let proc = clients.map(c => { const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0); const diff = Math.ceil((exp - today) / 86400000); return { ...c, expDate: exp, diffDays: diff, statusCat: c.archived ? 'archived' : (diff > 3 ? 'active' : (diff >= 0 ? 'warning' : 'expired')) }; }).sort((a, b) => a.diffDays - b.diffDays);
 
     proc.forEach(c => {
         if (filter !== 'all' && c.statusCat !== filter) return;
         if (search && !c.name.toLowerCase().includes(search) && !c.phone.toLowerCase().includes(search) && !c.platform.toLowerCase().includes(search)) return;
-        const stText = c.diffDays > 0 ? `Faltan ${c.diffDays} d` : (c.diffDays === 0 ? 'Hoy' : 'Vencido');
+        const stText = c.archived ? 'Archivado' : (c.diffDays > 0 ? `Faltan ${c.diffDays} d` : (c.diffDays === 0 ? 'Hoy' : 'Vencido'));
         const uCount = c.accountUnits || 1; const prof = ((c.price || 0) - (c.cost || 0)) * uCount; const dispUnits = uCount > 1 ? `<span style="font-size:11px;color:var(--mac-text-secondary);display:block;">(${uCount} unidades)</span>` : ''; // UI de Etiquetas, Notas y Lealtad
         let tagHtml = c.tag ? `<span style="background: ${c.tagColor}15; color: ${c.tagColor}; font-size: 10px; padding: 2px 6px; border-radius: 6px; border: 1px solid ${c.tagColor}50; display:inline-block; margin-top:4px; font-weight:bold;">${c.tag}</span>` : '';
         // 1. Creamos la "N" estilo Notion (Clickeable)
@@ -2211,7 +2212,9 @@ window.renderTable = () => {
                     <button class="dropdown-item" onclick="window.openWaSendModal('${c.id}')" style="color: var(--mac-green);"><i class='bx bxl-whatsapp'></i> WhatsApp</button>
                     <button class="dropdown-item" onclick="window.downloadTicket('${c.id}', event)" style="color: #AF52DE;"><i class='bx bx-receipt'></i> Recibo</button>
                     <button class="dropdown-item" onclick="window.openLinkModal('${c.id}', '${c.platform}')" style="color: #007AFF;"><i class='bx bx-link'></i> Vincular a Matriz</button>
-                    ${c.statusCat !== 'active' ? `<button class="dropdown-item" onclick="window.renewClient('${c.id}')"><i class='bx bx-refresh'></i> Renovar</button>` : ''}
+                    ${!c.archived ? `<button class="dropdown-item" onclick="window.toggleArchiveClient('${c.id}', true)"><i class='bx bx-archive-in'></i> Archivar</button>` : ''}
+                    ${c.archived ? `<button class="dropdown-item" onclick="window.unarchiveAndEdit('${c.id}')"><i class='bx bx-archive-out'></i> Reactivar Cliente</button>` : ''}
+                    ${c.statusCat !== 'active' && !c.archived ? `<button class="dropdown-item" onclick="window.renewClient('${c.id}')"><i class='bx bx-refresh'></i> Renovar</button>` : ''}
                     <button class="dropdown-item" onclick="window.startEdit('${c.id}')"><i class='bx bx-edit-alt'></i> Editar</button>
                     <button class="dropdown-item text-danger" onclick="window.deleteClient('${c.id}')"><i class='bx bx-trash'></i> Borrar</button>
                 </div>
@@ -10154,4 +10157,20 @@ window.viewFullReference = (imgUrl) => {
         backdrop: 'rgba(0,0,0,0.95)',
         customClass: { popup: 'swal-fullscreen-popup' } // Clase opcional para quitar padding interno de Swal
     });
+};
+
+window.toggleArchiveClient = async (id, isArchived) => {
+    try {
+        await updateDoc(doc(db, "clients", id), { archived: isArchived });
+        window.showNotification("📁 Cliente archivado correctamente");
+        loadUserClients();
+    } catch (e) {
+        window.showNotification("Error al archivar: " + e.message);
+    }
+};
+
+window.unarchiveAndEdit = (id) => {
+    window.startEdit(id);
+    document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
+    window.showNotification("Modifica los datos y presiona Guardar para reactivarlo.");
 };
