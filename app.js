@@ -4140,9 +4140,10 @@ const checkPublicStore = async () => {
             }
             // --- NUEVO: OBTENER RESEÑAS APROBADAS PARA LA TIENDA ---
             try {
-                const qRev = query(collection(db, "reviews"), where("vendedorId", "==", data.uid), where("status", "==", "aprobada"));
+                // Fetch using only vendedorId to avoid requiring a composite index, then filter locally
+                const qRev = query(collection(db, "reviews"), where("vendedorId", "==", data.uid));
                 const snapRev = await getDocs(qRev);
-                window.publicReviewsCache = snapRev.docs.map(d => d.data());
+                window.publicReviewsCache = snapRev.docs.map(d => d.data()).filter(r => r.status === 'aprobada');
             } catch (errRev) {
                 console.error("Error cargando reseñas:", errRev);
                 window.publicReviewsCache = [];
@@ -7570,9 +7571,9 @@ window.renderPublicCatalog = () => {
             }
             // --- INICIO NUEVO BADGE DE RESEÑAS ---
             let ratingHtml = '';
-            const productReviews = (window.publicReviewsCache || []).filter(r => r.platform === item.platform);
+            const productReviews = (window.publicReviewsCache || []).filter(r => (r.platform || r.plataforma || r.originalPlatform) === item.platform);
             if (productReviews.length > 0) {
-                const sum = productReviews.reduce((acc, r) => acc + r.rating, 0);
+                const sum = productReviews.reduce((acc, r) => acc + (r.rating || 5), 0);
                 const avg = (sum / productReviews.length).toFixed(1);
                 ratingHtml = `<div style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 13px; color: #FFD700; font-weight: bold; margin-bottom: 8px;"><i class='bx bxs-star'></i> ${avg} <span style="color: var(--mac-text-secondary); font-size: 11px;">(${productReviews.length})</span></div>`;
             }
@@ -8729,74 +8730,6 @@ window.actualizarCostosAntiguos = async () => {
     }
 };
 
-window.currentReviewRating = 5;
-window.currentReviewClient = null;
-window.currentReviewPlatform = null;
-
-// Lógica para pintar las estrellas al hacer clic
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.star-btn').forEach(star => {
-        star.addEventListener('click', function () {
-            window.currentReviewRating = parseInt(this.getAttribute('data-val'));
-            document.querySelectorAll('.star-btn').forEach(s => {
-                if (parseInt(s.getAttribute('data-val')) <= window.currentReviewRating) {
-                    s.style.color = '#FFD700'; // Estrella encendida
-                } else {
-                    s.style.color = 'var(--mac-gray)'; // Estrella apagada
-                }
-            });
-        });
-    });
-});
-
-window.openReviewModal = (clientId, platform, clientName, clientPhone) => {
-    window.currentReviewClient = { id: clientId, name: clientName, phone: clientPhone };
-    window.currentReviewPlatform = platform;
-    window.currentReviewRating = 5;
-
-    document.getElementById('reviewPlatformName').innerText = platform;
-    document.getElementById('reviewComment').value = '';
-    document.querySelectorAll('.star-btn').forEach(s => s.style.color = '#FFD700');
-
-    document.getElementById('clientReviewModal').style.display = 'flex';
-};
-
-window.submitReview = async () => {
-    const comment = document.getElementById('reviewComment').value.trim();
-    const btn = document.getElementById('btnSubmitReview');
-    const origText = btn.innerText;
-
-    btn.innerText = "Enviando...";
-    btn.disabled = true;
-
-    try {
-        // Se usa la variable global portalStoreData que tu código ya define al abrir el portal
-        const vendedorId = typeof portalStoreData !== 'undefined' ? portalStoreData.uid : null;
-        if (!vendedorId) throw new Error("ID del vendedor no encontrado.");
-
-        // Guardado nativo en Firestore
-        await addDoc(collection(db, "reviews"), {
-            vendedorId: vendedorId,
-            clienteId: window.currentReviewClient.id,
-            clienteNombre: window.currentReviewClient.name,
-            plataforma: window.currentReviewPlatform,
-            rating: window.currentReviewRating,
-            comentario: comment,
-            status: 'pendiente', // Para que la apruebes manualmente luego
-            fecha: new Date().toISOString()
-        });
-
-        window.showNotification("¡Reseña enviada con éxito! 🎉");
-        document.getElementById('clientReviewModal').style.display = 'none';
-
-    } catch (e) {
-        console.error("Error enviando reseña:", e);
-        window.showNotification("Error enviando reseña.");
-    } finally {
-        btn.innerText = origText;
-        btn.disabled = false;
-    }
-};
 
 window.addPricingOptionField = (label = '', price = '') => {
     const container = document.getElementById('dynamicPricingOptionsContainer');
