@@ -9626,7 +9626,7 @@ window.populateAllServiceSelects = () => {
         });
     }
 
-    const selectIds = [{ id: 'invPlatform', defaultOpt: 'Plataforma...' }, { id: 'matPlatform', defaultOpt: null }, { id: 'rulePlatformSelect', defaultOpt: null }, { id: 'refPlatformSelect', defaultOpt: 'Selecciona Plataforma...' }];
+    const selectIds = [{ id: 'invPlatform', defaultOpt: 'Plataforma...' }, { id: 'matPlatform', defaultOpt: null }, { id: 'rulePlatformSelect', defaultOpt: null }, { id: 'refPlatformSelect', defaultOpt: 'Selecciona Plataforma...' }, { id: 'campaignPlatformFilter', defaultOpt: 'Cualquier Plataforma' }];
     selectIds.forEach(item => {
         const select = document.getElementById(item.id);
         if (select) {
