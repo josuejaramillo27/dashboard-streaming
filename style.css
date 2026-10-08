@@ -3191,17 +3191,21 @@ body.dark-mode .segmented-btn.active {
 .spotify-search-container input {
     width: 100% !important;
     background: rgba(255, 255, 255, 0.08) !important;
-    border: 1px solid transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
     color: var(--mac-text-main) !important;
     padding: 10px 15px 10px 42px !important;
     border-radius: 20px !important;
     font-size: 14px !important;
     transition: all 0.3s ease !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
 }
 
 body:not(.dark-mode) .spotify-search-container input {
-    background: rgba(0, 0, 0, 0.05) !important;
-    /* Para modo claro */
+    background: rgba(255, 255, 255, 0.6) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    /* Para modo claro mantiene el glassmorphism */
 }
 
 .spotify-search-container input:focus {
