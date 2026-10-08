@@ -2547,15 +2547,19 @@
                                             style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-top: 5px; box-sizing: border-box;">
                                     </div>
                                     <div style="margin-top: 10px;">
-                                        <label style="font-size: 12px; font-weight: bold; color: var(--mac-text-main); display: block; margin-bottom: 5px;">¿A quiénes enviamos?</label>
+                                        <label
+                                            style="font-size: 12px; font-weight: bold; color: var(--mac-text-main); display: block; margin-bottom: 5px;">¿A
+                                            quiénes enviamos?</label>
                                         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                            <select id="campaignDbClients" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
+                                            <select id="campaignDbClients"
+                                                style="flex: 1; min-width: 150px; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
                                                 <option value="none">-- No enviar a base de datos --</option>
                                                 <option value="all">A todos mis clientes</option>
                                                 <option value="expired">Solo a vencidos (Win-Back)</option>
                                                 <option value="active">Solo a activos</option>
                                             </select>
-                                            <select id="campaignPlatformFilter" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
+                                            <select id="campaignPlatformFilter"
+                                                style="flex: 1; min-width: 150px; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
                                                 <option value="">Cualquier Plataforma</option>
                                             </select>
                                         </div>
@@ -2589,7 +2593,8 @@
                                     <div style="display: flex; align-items: center; gap: 5px;">
                                         <label
                                             style="font-size: 12px; font-weight: bold; color: var(--mac-text-main);">Frecuencia:</label>
-                                        <select id="autoStatusInterval" style="padding: 6px 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px; outline: none;">
+                                        <select id="autoStatusInterval"
+                                            style="padding: 6px 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 12px; outline: none;">
                                             <option value="24">Cada 1 Día</option>
                                             <option value="48">Cada 2 Días</option>
                                             <option value="72">Cada 3 Días</option>
@@ -2696,9 +2701,13 @@
                             style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 10px; box-sizing: border-box;">
                         <input type="text" id="binanceSecretKeyInput" placeholder="Secret Key"
                             style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 20px; box-sizing: border-box;">
-                        <h4 style="color: var(--mac-blue); margin-top: 10px;"><i class='bx bx-envelope'></i> Lector IMAP de Códigos</h4>
-<input type="email" id="imapEmailInput" placeholder="Correo Gmail Matriz" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 10px; box-sizing: border-box;">
-<input type="password" id="imapPasswordInput" placeholder="Contraseña de Aplicación de 16 letras" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 20px; box-sizing: border-box;">
+                        <h4 style="color: var(--mac-blue); margin-top: 10px;"><i class='bx bx-envelope'></i> Lector IMAP
+                            de Códigos</h4>
+                        <input type="email" id="imapEmailInput" placeholder="Correo Gmail Matriz"
+                            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 10px; box-sizing: border-box;">
+                        <input type="password" id="imapPasswordInput"
+                            placeholder="Contraseña de Aplicación de 16 letras"
+                            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 20px; box-sizing: border-box;">
                         <button class="btn-primary" style="width: 100%; padding: 14px;"
                             onclick="window.saveGateways()">Guardar Pasarelas</button>
                     </div>
@@ -3300,17 +3309,19 @@
             <img id="publicStoreLogo" src=""
                 style="width: 100px; height: 100px; border-radius: 24px; object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.3); display: none; margin: 0 auto 15px auto; border: 4px solid var(--mac-surface); position: relative; z-index: 2; background: var(--mac-bg);">
             <h1
-                style="margin: 0; font-size: 28px; color: var(--mac-text-main); display: flex; align-items: center; justify-content: center; gap: 8px;">
+                style="margin: 0; font-size: 28px; color: var(--mac-text-main); display: flex; align-items: center; justify-content: center; gap: 8px; text-shadow: 1px 2px 5px rgba(0,0,0,0.8);">
                 <span id="publicStoreName">Cargando...</span>
                 <div class="premium-verified-badge" id="publicStoreVerified" style="display: none;"
                     title="Tienda Oficial Verificada"><i class='bx bxs-badge-check'></i>
                     <div class="shimmer"></div>
                 </div>
             </h1>
-            <p style="color: var(--mac-text-secondary); margin-top: 5px; font-weight: 500;">Catálogo Oficial de
+            <p style="color: var(--mac-text-secondary); margin-top: 5px; font-weight: 500; text-shadow: 1px 2px 4px rgba(0,0,0,0.8);">Catálogo Oficial de
                 Servicios</p>
-            <a id="publicStoreReferencesBtn" onclick="window.openPublicReferences()" style="cursor:pointer; display: none; margin: 15px auto 0 auto; background: rgba(255, 149, 0, 0.1); border: 1px solid var(--mac-orange); color: var(--mac-orange); padding: 8px 20px; border-radius: 20px; font-size: 13px; font-weight: 800; align-items: center; justify-content: center; gap: 8px; width: max-content; transition: 0.2s; box-shadow: 0 4px 12px rgba(255, 149, 0, 0.15);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                <i class='bx bxs-star bx-tada' style="font-size: 16px;"></i> Ver Referencias de Clientes
+            <a id="publicStoreReferencesBtn" onclick="window.openPublicReferences()"
+                style="cursor:pointer; display: none; margin: 15px auto 0 auto; background: #FFD700; color: #000; padding: 8px 20px; border-radius: 20px; font-size: 13px; font-weight: 900; align-items: center; justify-content: center; gap: 8px; width: max-content; transition: 0.3s; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3); border: 1px solid rgba(0,0,0,0.1);"
+                onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                <i class='bx bxs-star bx-tada' style="font-size: 16px; color: #000;"></i> Ver Referencias de Clientes
             </a>
         </div>
 
@@ -3342,7 +3353,7 @@
 
                     <!-- 🟢 AQUÍ ESTÁ EL BOTÓN BLINDADO PARA QUE NO SE ESTIRE -->
                     <button id="storeCurrencyToggleBtn" onclick="window.toggleStoreCurrency()"
-                        style="width: max-content !important; flex-shrink: 0; background: transparent; color: #FCD535; font-size: 12px; padding: 10px 18px; border-radius: 20px; font-weight: bold; border: 1px solid rgba(253, 213, 53, 0.5); cursor: pointer; display: none;">
+                        style="width: max-content !important; flex-shrink: 0; background: rgba(253, 213, 53, 0.15); color: #FCD535; font-size: 12px; padding: 10px 18px; border-radius: 20px; font-weight: bold; border: 1px solid rgba(253, 213, 53, 0.3); cursor: pointer; display: none; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                         <i class='bx bx-transfer-alt'></i> Mostrar en USDT
                     </button>
 
@@ -3489,19 +3500,33 @@
                         style="font-size: 11px; font-weight: 800; color: var(--mac-text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Beneficios
                         Incluidos:</span>
                     <ul class="tg-feature-list">
-                        <li><i class='bx bx-store-alt' style="color: var(--mac-blue);"></i> Tienda Web de ventas con tu logo y link único.</li>
-                        <li><i class='bx bx-globe' style="color: var(--mac-blue);"></i> Portal Web de Autogestión para Clientes.</li>
-                        <li><i class='bx bxs-star' style="color: var(--mac-orange);"></i> Muro de Referencias Nativo para generar confianza.</li>
-                        <li><i class='bx bx-box' style="color: var(--mac-blue);"></i> Gestión de Inventario (Perfiles y cuentas completas).</li>
-                        <li><i class='bx bx-pie-chart-alt-2' style="color: var(--mac-blue);"></i> Dashboard de Estadísticas y Control de Metas.</li>
-                        <li><i class='bx bx-receipt' style="color: var(--mac-blue);"></i> Generador de recibos gráficos interactivos.</li>
-                        <li><i class='bx bxl-whatsapp' style="color: var(--mac-green);"></i> Plantillas de mensajes de WhatsApp personalizables.</li>
-                        <li><i class='bx bx-mobile-alt' style="color: var(--mac-blue);"></i> App Descargable (PWA) para PC y Celular.</li>
-                        <li style="margin-top: 12px; border-top: 1px solid var(--mac-border); padding-top: 12px;"><i class='bx bx-group' style="color: var(--mac-text-main);"></i> Hasta 100 clientes activos.</li>
-                        <li><i class='bx bx-user-circle' style="color: var(--mac-text-main);"></i> Hasta 20 cuentas matrices completas.</li>
-                        <li><i class='bx bx-bell' style="color: var(--mac-blue);"></i> Alertas PUSH de nuevas ventas y vencimientos.</li>
-                        <li style="margin-top: 12px;"><i class='bx bx-gift' style="color: var(--mac-orange);"></i> A.G.C. Wrapped Mensual de Rendimiento.</li>
-                        <li><i class='bx bx-moon' style="color: var(--mac-text-secondary);"></i> Modo Oscuro 🌙 y Claro ☀️.</li>
+                        <li><i class='bx bx-store-alt' style="color: var(--mac-blue);"></i> Tienda Web de ventas con tu
+                            logo y link único.</li>
+                        <li><i class='bx bx-globe' style="color: var(--mac-blue);"></i> Portal Web de Autogestión para
+                            Clientes.</li>
+                        <li><i class='bx bxs-star' style="color: var(--mac-orange);"></i> Muro de Referencias Nativo
+                            para generar confianza.</li>
+                        <li><i class='bx bx-box' style="color: var(--mac-blue);"></i> Gestión de Inventario (Perfiles y
+                            cuentas completas).</li>
+                        <li><i class='bx bx-pie-chart-alt-2' style="color: var(--mac-blue);"></i> Dashboard de
+                            Estadísticas y Control de Metas.</li>
+                        <li><i class='bx bx-receipt' style="color: var(--mac-blue);"></i> Generador de recibos gráficos
+                            interactivos.</li>
+                        <li><i class='bx bxl-whatsapp' style="color: var(--mac-green);"></i> Plantillas de mensajes de
+                            WhatsApp personalizables.</li>
+                        <li><i class='bx bx-mobile-alt' style="color: var(--mac-blue);"></i> App Descargable (PWA) para
+                            PC y Celular.</li>
+                        <li style="margin-top: 12px; border-top: 1px solid var(--mac-border); padding-top: 12px;"><i
+                                class='bx bx-group' style="color: var(--mac-text-main);"></i> Hasta 100 clientes
+                            activos.</li>
+                        <li><i class='bx bx-user-circle' style="color: var(--mac-text-main);"></i> Hasta 20 cuentas
+                            matrices completas.</li>
+                        <li><i class='bx bx-bell' style="color: var(--mac-blue);"></i> Alertas PUSH de nuevas ventas y
+                            vencimientos.</li>
+                        <li style="margin-top: 12px;"><i class='bx bx-gift' style="color: var(--mac-orange);"></i>
+                            A.G.C. Wrapped Mensual de Rendimiento.</li>
+                        <li><i class='bx bx-moon' style="color: var(--mac-text-secondary);"></i> Modo Oscuro 🌙 y Claro
+                            ☀️.</li>
                     </ul>
                 </div>
 
@@ -3545,40 +3570,66 @@
                         style="font-size: 11px; font-weight: 800; color: var(--mac-blue); text-transform: uppercase; letter-spacing: 0.5px;">TODO
                         LO DEL BÁSICO, Y ADEMÁS:</span>
                     <ul class="tg-feature-list pro-list" style="margin-top: 15px;">
-                        <li style="font-size: 14px; color: var(--mac-text-main); align-items: flex-start; display: flex; margin-bottom: 15px;">
-                            <i class='bx bx-bot bx-flashing' style="color: var(--mac-green); font-size: 24px; margin-top: 2px; margin-right: 8px;"></i>
+                        <li
+                            style="font-size: 14px; color: var(--mac-text-main); align-items: flex-start; display: flex; margin-bottom: 15px;">
+                            <i class='bx bx-bot bx-flashing'
+                                style="color: var(--mac-green); font-size: 24px; margin-top: 2px; margin-right: 8px;"></i>
                             <div style="display: flex; flex-direction: column;">
                                 <span style="font-size: 15px;"><b>BOT Inteligente de WhatsApp:</b></span>
-                                <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 5px; font-size: 13px; color: var(--mac-text-secondary);">
-                                    <span style="display: flex; align-items: center;"><i class='bx bx-subdirectory-right' style="color: var(--mac-green); font-size: 18px; margin-right: 4px;"></i> Despacho automático de ventas 24/7.</span>
-                                    <span style="display: flex; align-items: center;"><i class='bx bx-subdirectory-right' style="color: var(--mac-green); font-size: 18px; margin-right: 4px;"></i> Recordatorios de cobranza Anti-Ban.</span>
-                                    <span style="display: flex; align-items: center;"><i class='bx bx-subdirectory-right' style="color: var(--mac-green); font-size: 18px; margin-right: 4px;"></i> Alertas por cambio de claves.</span>
+                                <div
+                                    style="margin-top: 6px; display: flex; flex-direction: column; gap: 5px; font-size: 13px; color: var(--mac-text-secondary);">
+                                    <span style="display: flex; align-items: center;"><i
+                                            class='bx bx-subdirectory-right'
+                                            style="color: var(--mac-green); font-size: 18px; margin-right: 4px;"></i>
+                                        Despacho automático de ventas 24/7.</span>
+                                    <span style="display: flex; align-items: center;"><i
+                                            class='bx bx-subdirectory-right'
+                                            style="color: var(--mac-green); font-size: 18px; margin-right: 4px;"></i>
+                                        Recordatorios de cobranza Anti-Ban.</span>
+                                    <span style="display: flex; align-items: center;"><i
+                                            class='bx bx-subdirectory-right'
+                                            style="color: var(--mac-green); font-size: 18px; margin-right: 4px;"></i>
+                                        Alertas por cambio de claves.</span>
                                 </div>
                             </div>
                         </li>
-                        <li style="font-size: 14px; color: var(--mac-text-main); align-items: flex-start; display: flex; margin-bottom: 12px;">
-                            <i class='bx bx-money' style="color: #009EE3; font-size: 22px; margin-top: 2px; margin-right: 8px;"></i>
+                        <li
+                            style="font-size: 14px; color: var(--mac-text-main); align-items: flex-start; display: flex; margin-bottom: 12px;">
+                            <i class='bx bx-money'
+                                style="color: #009EE3; font-size: 22px; margin-top: 2px; margin-right: 8px;"></i>
                             <div style="display: flex; flex-direction: column;">
                                 <span><b>Pasarelas de Pago Automáticas:</b></span>
-                                <span style="font-size: 12px; color: var(--mac-text-secondary); margin-top: 2px;">Integración nativa con Mercado Pago y Binance Pay (P2P).</span>
+                                <span
+                                    style="font-size: 12px; color: var(--mac-text-secondary); margin-top: 2px;">Integración
+                                    nativa con Mercado Pago y Binance Pay (P2P).</span>
                             </div>
                         </li>
-                        <li style="font-size: 14px; color: var(--mac-text-main); align-items: flex-start; display: flex; margin-bottom: 12px;">
-                            <i class='bx bxs-megaphone' style="color: var(--mac-orange); font-size: 22px; margin-top: 2px; margin-right: 8px;"></i>
+                        <li
+                            style="font-size: 14px; color: var(--mac-text-main); align-items: flex-start; display: flex; margin-bottom: 12px;">
+                            <i class='bx bxs-megaphone'
+                                style="color: var(--mac-orange); font-size: 22px; margin-top: 2px; margin-right: 8px;"></i>
                             <div style="display: flex; flex-direction: column;">
                                 <span><b>Marketing y Retención:</b></span>
-                                <span style="font-size: 12px; color: var(--mac-text-secondary); margin-top: 2px;">Campañas Masivas segmentadas, Rotación de Estados y Difusión en Grupos.</span>
+                                <span
+                                    style="font-size: 12px; color: var(--mac-text-secondary); margin-top: 2px;">Campañas
+                                    Masivas segmentadas, Rotación de Estados y Difusión en Grupos.</span>
                             </div>
                         </li>
-                        <li style="font-size: 14px; color: var(--mac-text-main); align-items: flex-start; display: flex; margin-bottom: 12px;">
-                            <i class='bx bxs-coupon' style="color: var(--mac-green); font-size: 22px; margin-top: 2px; margin-right: 8px;"></i>
+                        <li
+                            style="font-size: 14px; color: var(--mac-text-main); align-items: flex-start; display: flex; margin-bottom: 12px;">
+                            <i class='bx bxs-coupon'
+                                style="color: var(--mac-green); font-size: 22px; margin-top: 2px; margin-right: 8px;"></i>
                             <div style="display: flex; flex-direction: column;">
                                 <span><b>Promociones Avanzadas:</b></span>
-                                <span style="font-size: 12px; color: var(--mac-text-secondary); margin-top: 2px;">Creador de Cupones y Descuentos dinámicos por combos.</span>
+                                <span
+                                    style="font-size: 12px; color: var(--mac-text-secondary); margin-top: 2px;">Creador
+                                    de Cupones y Descuentos dinámicos por combos.</span>
                             </div>
                         </li>
-                        <li style="font-size: 15px; color: var(--mac-text-main); margin-top: 15px; display: flex; border-top: 1px dashed var(--mac-blue); padding-top: 15px;">
-                            <i class='bx bx-infinity' style="color: var(--mac-blue); font-size: 24px; margin-right: 8px;"></i>
+                        <li
+                            style="font-size: 15px; color: var(--mac-text-main); margin-top: 15px; display: flex; border-top: 1px dashed var(--mac-blue); padding-top: 15px;">
+                            <i class='bx bx-infinity'
+                                style="color: var(--mac-blue); font-size: 24px; margin-right: 8px;"></i>
                             <span><b>Cero Límites:</b> Añade clientes y cuentas completas de forma ilimitada.</span>
                         </li>
                     </ul>
@@ -4110,29 +4161,45 @@
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 5px;">
-                    <label style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface);">
-                        <span style="font-size: 11px; color: var(--mac-text-main); font-weight: bold;"><i class='bx bx-box' style="color: var(--mac-blue);"></i> Inventario</span>
-                        <input type="checkbox" id="editProdAutoStock" style="width: 14px; height: 14px; cursor: pointer;" onchange="window.toggleEditStoreStockFields()">
+                    <label
+                        style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface);">
+                        <span style="font-size: 11px; color: var(--mac-text-main); font-weight: bold;"><i
+                                class='bx bx-box' style="color: var(--mac-blue);"></i> Inventario</span>
+                        <input type="checkbox" id="editProdAutoStock"
+                            style="width: 14px; height: 14px; cursor: pointer;"
+                            onchange="window.toggleEditStoreStockFields()">
                     </label>
 
-                    <label style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface);">
-                        <span style="font-size: 11px; color: var(--mac-text-main); font-weight: bold;"><i class='bx bx-envelope' style="color: var(--mac-orange);"></i> Invitación</span>
+                    <label
+                        style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface);">
+                        <span style="font-size: 11px; color: var(--mac-text-main); font-weight: bold;"><i
+                                class='bx bx-envelope' style="color: var(--mac-orange);"></i> Invitación</span>
                         <input type="checkbox" id="editProdInvite" style="width: 14px; height: 14px; cursor: pointer;">
                     </label>
 
-                    <label style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface);">
-                        <span style="font-size: 11px; color: var(--mac-text-main); font-weight: bold;"><i class='bx bx-bot' style="color: var(--mac-green);"></i> Bot Auto</span>
-                        <input type="checkbox" id="editProdAutoDeliver" style="width: 14px; height: 14px; cursor: pointer;">
+                    <label
+                        style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface);">
+                        <span style="font-size: 11px; color: var(--mac-text-main); font-weight: bold;"><i
+                                class='bx bx-bot' style="color: var(--mac-green);"></i> Bot Auto</span>
+                        <input type="checkbox" id="editProdAutoDeliver"
+                            style="width: 14px; height: 14px; cursor: pointer;">
                     </label>
                 </div>
 
-                <div id="editStoreStockConfig" style="display: none; flex-direction: column; gap: 8px; border-top: 1px dashed rgba(0, 122, 255, 0.3); padding-top: 10px; margin-top: 5px;">
-                    <label id="editStoreStockLabel" style="font-size: 11px; color: var(--mac-text-secondary);">Selecciona la plataforma del inventario:</label>
-                    <div id="editStoreStockPlatformsList" style="display: flex; flex-direction: column; gap: 6px;"></div>
-                    <div style="text-align: right; background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 6px; padding: 6px 12px; margin-left: auto;">
-                        <span id="editStoreStockCountText" style="font-size: 12px; font-weight: bold; color: var(--mac-blue);">0 disp.</span>
+                <div id="editStoreStockConfig"
+                    style="display: none; flex-direction: column; gap: 8px; border-top: 1px dashed rgba(0, 122, 255, 0.3); padding-top: 10px; margin-top: 5px;">
+                    <label id="editStoreStockLabel"
+                        style="font-size: 11px; color: var(--mac-text-secondary);">Selecciona la plataforma del
+                        inventario:</label>
+                    <div id="editStoreStockPlatformsList" style="display: flex; flex-direction: column; gap: 6px;">
                     </div>
-                </div>                <div>
+                    <div
+                        style="text-align: right; background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 6px; padding: 6px 12px; margin-left: auto;">
+                        <span id="editStoreStockCountText"
+                            style="font-size: 12px; font-weight: bold; color: var(--mac-blue);">0 disp.</span>
+                    </div>
+                </div>
+                <div>
                     <label
                         style="font-size: 12px; font-weight: bold; color: var(--mac-text-secondary);">Descripción:</label>
                     <textarea id="editProdDesc"
