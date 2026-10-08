@@ -34,7 +34,7 @@
 body.dark-mode {
     /* --- FONDO Y SUPERFICIES (Modo Oscuro - Onyx & Oro Blanco) --- */
     --mac-bg: #050505; /* Negro puro casi absoluto. Máximo contraste minimalista. */
-    --mac-surface: #121212; /* Tarjetas muy oscuras, apenas separadas del fondo. */
+    --mac-surface: #0A0A0A; /* Tarjetas muy oscuras, apenas separadas del fondo. */
     --mac-border: #2A2A2A; /* Bordes sutiles oscuros. */
     --mac-border-solid: #333333;
 
@@ -50,7 +50,7 @@ body.dark-mode {
     --mac-red: #FF453A; /* Rojo elegante para alertas. */
 
     /* --- CAJAS, FONDOS INTERNOS Y SOMBRAS --- */
-    --mac-gray: rgba(255, 255, 255, 0.05); /* Fondos internos (Inputs, notas) */
+    --mac-gray: rgba(255, 255, 255, 0.02); /* Fondos internos (Inputs, notas) */
     --mac-table-hover: rgba(255, 255, 255, 0.08); /* Hover sutil en blanco */
     --mac-dropdown-bg: rgba(18, 18, 18, 0.95);
 
