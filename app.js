@@ -618,7 +618,12 @@ window.openProfileModal = () => {
     if (document.getElementById('binanceExchangeRateInput')) {
         document.getElementById('binanceExchangeRateInput').value = currentUserData.binanceExchangeRate || '';
     }
-
+    if (document.getElementById('imapEmailInput')) {
+    document.getElementById('imapEmailInput').value = currentUserData.imapEmail || '';
+}
+if (document.getElementById('imapPasswordInput')) {
+    document.getElementById('imapPasswordInput').value = currentUserData.imapPassword || '';
+}
     // 2. Carga los chips de servicios y pagos
     if (typeof window.renderCustomServicesChips === 'function') window.renderCustomServicesChips();
     tempPaymentMethods = (currentUserData.paymentMethods || []).map(m => ({ ...m, isEditing: false }));
@@ -1150,6 +1155,8 @@ window.saveGateways = async () => {
     const cajaBinPayId = document.getElementById('binancePayIdInput');
     const cajaBinAlias = document.getElementById('binanceAliasInput');
     const cajaBinRate = document.getElementById('binanceExchangeRateInput');
+    const cajaImapEmail = document.getElementById('imapEmailInput');
+const cajaImapPass = document.getElementById('imapPasswordInput');
 
     // Extraemos sus valores
     if (cajaMp) mpAccessToken = cajaMp.value.trim();
@@ -1172,7 +1179,9 @@ window.saveGateways = async () => {
         let updateData = {
             binancePayId: binancePayId,
             binanceAlias: binanceAlias,
-            binanceExchangeRate: binanceExchangeRate
+            binanceExchangeRate: binanceExchangeRate,
+            imapEmail: cajaImapEmail ? cajaImapEmail.value.trim() : '',
+            imapPassword: cajaImapPass ? cajaImapPass.value.trim() : ''
         };
 
         // Solo guardamos claves si hay texto y NO son asteriscos
@@ -6811,6 +6820,10 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
                             <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.pin || ''}', 'PIN')"><i class='bx bx-copy'></i></button>
                         </div>
                     </div>
+                    ${storeUserData.imapEmail && storeUserData.imapPassword ? `
+<button onclick="window.requestAccessCode('${storeUserData.imapEmail}', '${storeUserData.imapPassword}', '${acc.saleType || 'Perfil'}')" class="btn-primary" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; background: var(--mac-blue); border: none;">
+    <i class='bx bx-mobile-landscape'></i> Solicitar Código de Acceso
+</button>` : ''}
                     <button onclick="window.openReviewModal('${clientObj.id}', '${platName}', '${clientObj.name.replace(/'/g, "\\'")}', '${clientObj.phone || ''}')" class="btn-secondary" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; border: 1px solid var(--mac-orange); color: var(--mac-orange); background: rgba(255, 149, 0, 0.1); transition: 0.2s;"><i class='bx bxs-star'></i> Calificar Servicio</button>
                 </div>
             `;
@@ -10224,4 +10237,48 @@ window.updateEditStoreStockCount = () => {
         const count = stock.filter(i => i.status === 'libre' && i.platform === selectedPlatforms[0]).length;
         countText.innerText = `${count} disp.`; countText.style.color = count > 0 ? 'var(--mac-green)' : 'var(--mac-red)';
     }
+};
+
+// --- SOLICITAR CÓDIGO AL VPS DESDE EL PORTAL ---
+window.requestAccessCode = async (sellerEmail, sellerAppPassword, currentSaleType) => {
+    Swal.fire({
+        title: 'Revisando bandeja matriz...',
+        text: 'Esto puede tomar unos segundos',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    try {
+        const response = await fetch('https://bot.panelagc.com/api/get-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: sellerEmail, appPassword: sellerAppPassword, saleType: currentSaleType })
+        });
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            Swal.fire({ title: 'Código de Acceso', text: data.code, icon: 'success', confirmButtonText: 'Listo' });
+        } else {
+            Swal.fire('Atención', data.message, 'warning');
+        }
+    } catch (error) {
+        Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
+    }
+};
+
+// --- FUNCIONES CRM: ARCHIVAR / REACTIVAR (Faltantes) ---
+window.toggleArchiveClient = async (id, isArchived) => {
+    try {
+        await updateDoc(doc(db, "clients", id), { archived: isArchived });
+        window.showNotification(isArchived ? "📁 Cliente archivado" : "📁 Cliente reactivado");
+        loadUserClients();
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
+    }
+};
+
+window.unarchiveAndEdit = (id) => {
+    window.startEdit(id);
+    document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
+    window.showNotification("Modifica los datos y presiona Guardar para reactivarlo.");
 };
