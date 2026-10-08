@@ -9917,7 +9917,8 @@ window.promptStoreReference = (plataformaPrevia = "") => {
     }).then((result) => {
         if (result.isConfirmed) {
             window.closeModals(true);
-            window.openStoreAdmin();
+            window.openStoreModal();
+            window.switchDashboardSection('storeModal');
             setTimeout(() => {
                 const tabBtn = document.querySelector('.chrome-tab[onclick*="tabGaleriaRef"]');
                 if (tabBtn) tabBtn.click();
