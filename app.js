@@ -7595,7 +7595,7 @@ window.renderPublicCatalog = () => {
             if (productReviews.length > 0) {
                 const sum = productReviews.reduce((acc, r) => acc + (r.rating || 5), 0);
                 const avg = (sum / productReviews.length).toFixed(1);
-                ratingHtml = `<div style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 13px; color: #FFD700; font-weight: bold; margin-bottom: 8px;"><i class='bx bxs-star'></i> ${avg} <span style="color: var(--mac-text-secondary); font-size: 11px;">(${productReviews.length})</span></div>`;
+                ratingHtml = `<div style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 13px; color: #FFD700; font-weight: bold; margin-bottom: 12px;"><i class='bx bxs-star'></i> ${avg} <span style="color: var(--mac-text-secondary); font-size: 11px;">(${productReviews.length})</span></div>`;
             }
 
             const titleSafe = item.platform.replace(/'/g, "\\'").replace(/"/g, '&quot;');
@@ -7613,7 +7613,7 @@ window.renderPublicCatalog = () => {
             let tabsHtml = '';
 
             if (showTabs) {
-                tabsHtml += `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; padding-bottom:4px;">`;
+                tabsHtml += `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; padding-bottom:4px;">`;
                 tabsData.forEach((t, i) => {
                     const isSelected = i === 0;
                     const bg = isSelected ? 'var(--mac-blue)' : 'var(--mac-surface)';
@@ -7624,7 +7624,7 @@ window.renderPublicCatalog = () => {
                 tabsHtml += `</div>`;
             }
 
-            let optionsHtml = `<div id="pub_options_${item.id}" style="display:flex; flex-direction:column; gap:8px; width:100%; margin-bottom:15px;">`;
+            let optionsHtml = `<div id="pub_options_${item.id}" style="display:flex; flex-direction:column; gap:8px; width:100%; margin-bottom:20px;">`;
             // Dibujamos las opciones de la Primera Pestaña por defecto
             tabsData[0].options.forEach((opt, i) => {
                 const isSelected = i === 0;
@@ -7646,7 +7646,7 @@ window.renderPublicCatalog = () => {
             let pricingHtml = `
                 ${tabsHtml}
                 ${optionsHtml}
-                <div style="text-align: center; margin-top: 5px; margin-bottom: 15px; font-size: 24px; font-weight: 900; color: var(--mac-green);" id="priceDisplay_${item.id}">
+                <div style="text-align: center; margin-top: 5px; margin-bottom: 22px; font-size: 24px; font-weight: 900; color: var(--mac-green);" id="priceDisplay_${item.id}">
                     ${window.formatStorePrice(tabsData[0].options[0].price)}
                 </div>
             `;
@@ -7675,8 +7675,8 @@ window.renderPublicCatalog = () => {
                 </div>
                 <div class="store-product-glass-footer" style="padding: 15px; display: flex; flex-direction: column;">
                 ${ratingHtml}
-                    <strong class="store-product-title" style="display:block; font-size:18px; line-height:1.3; color: var(--mac-text-main); word-break: break-word; text-align: center; margin-bottom: 15px;">${item.platform}</strong>
-                    ${stockHtml ? `<div style="text-align:center; margin-top:5px;">${stockHtml}</div>` : ''}
+                    <strong class="store-product-title" style="display:block; font-size:18px; line-height:1.3; color: var(--mac-text-main); word-break: break-word; text-align: center; margin-bottom: 10px;">${item.platform}</strong>
+                    ${stockHtml ? `<div style="text-align:center; margin-top:0px; margin-bottom:22px;">${stockHtml}</div>` : ''}
                     
                     ${pricingHtml}
                     ${btnHTML}
