@@ -619,11 +619,11 @@ window.openProfileModal = () => {
         document.getElementById('binanceExchangeRateInput').value = currentUserData.binanceExchangeRate || '';
     }
     if (document.getElementById('imapEmailInput')) {
-    document.getElementById('imapEmailInput').value = currentUserData.imapEmail || '';
-}
-if (document.getElementById('imapPasswordInput')) {
-    document.getElementById('imapPasswordInput').value = currentUserData.imapPassword || '';
-}
+        document.getElementById('imapEmailInput').value = currentUserData.imapEmail || '';
+    }
+    if (document.getElementById('imapPasswordInput')) {
+        document.getElementById('imapPasswordInput').value = currentUserData.imapPassword || '';
+    }
     // 2. Carga los chips de servicios y pagos
     if (typeof window.renderCustomServicesChips === 'function') window.renderCustomServicesChips();
     tempPaymentMethods = (currentUserData.paymentMethods || []).map(m => ({ ...m, isEditing: false }));
@@ -1156,7 +1156,7 @@ window.saveGateways = async () => {
     const cajaBinAlias = document.getElementById('binanceAliasInput');
     const cajaBinRate = document.getElementById('binanceExchangeRateInput');
     const cajaImapEmail = document.getElementById('imapEmailInput');
-const cajaImapPass = document.getElementById('imapPasswordInput');
+    const cajaImapPass = document.getElementById('imapPasswordInput');
 
     // Extraemos sus valores
     if (cajaMp) mpAccessToken = cajaMp.value.trim();
@@ -3659,7 +3659,7 @@ window.editStoreItem = (index) => {
     });
 
     document.getElementById('editProdInvite').checked = item.requiresInvite || false;
-    
+
     const autoDeliverEl = document.getElementById('editProdAutoDeliver');
     if (autoDeliverEl) autoDeliverEl.checked = item.autoDeliver || false;
 
@@ -3706,7 +3706,7 @@ window.saveEditedProduct = async () => {
     const plat = document.getElementById('editProdName').value.trim();
     const cat = document.getElementById('editProdCat').value;
     const invite = document.getElementById('editProdInvite').checked;
-    
+
     const autoDeliverEl = document.getElementById('editProdAutoDeliver');
     const autoDeliver = autoDeliverEl ? autoDeliverEl.checked : false;
 
@@ -7253,18 +7253,21 @@ window.saveStoreSettings = async () => {
 window.addStoreCoupon = async () => {
     const code = document.getElementById('newCouponCode').value.trim().toUpperCase();
     const percent = parseFloat(document.getElementById('newCouponPercent').value) || 0;
+    const targetEl = document.getElementById('newCouponTarget');
+    const target = targetEl ? targetEl.value : 'global';
 
     if (!code || percent <= 0) return window.showNotification("⚠️ Ingresa un código y un descuento válido.");
 
     let coupons = currentUserData.storeCoupons || [];
     if (coupons.some(c => c.code === code)) return window.showNotification("Ese código ya existe.");
 
-    coupons.push({ code, percent });
+    coupons.push({ code, percent, target });
     try {
         await updateDoc(doc(db, "users", currentUser.uid), { storeCoupons: coupons });
         currentUserData.storeCoupons = coupons;
         document.getElementById('newCouponCode').value = '';
         document.getElementById('newCouponPercent').value = '';
+        if (targetEl) targetEl.value = 'global';
         window.renderStoreCoupons();
         window.showNotification("🎟️ Cupón creado");
     } catch (e) { }
@@ -7276,9 +7279,13 @@ window.renderStoreCoupons = () => {
     const coupons = currentUserData.storeCoupons || [];
 
     coupons.forEach((c, index) => {
+        const targetText = (c.target && c.target !== 'global') ? `<span style="font-size: 10px; color: var(--mac-blue); display: block; margin-top: 2px;">Solo: ${c.target}</span>` : `<span style="font-size: 10px; color: var(--mac-text-secondary); display: block; margin-top: 2px;">Global</span>`;
         list.innerHTML += `
-            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mac-surface); border: 1px dashed var(--mac-green); padding: 10px 15px; border-radius: 8px;">
-                <span style="font-weight: 900; color: var(--mac-green); letter-spacing: 1px;">${c.code} <span style="font-size: 11px; color: var(--mac-text-secondary);">(-${c.percent}%)</span></span>
+            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mac-surface); border: 1px dashed var(--mac-green); padding: 10px 15px; border-radius: 8px; margin-bottom: 5px;">
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-weight: 900; color: var(--mac-green); letter-spacing: 1px;">${c.code} <span style="font-size: 11px; color: var(--mac-text-main);">(-${c.percent}%)</span></span>
+                    ${targetText}
+                </div>
                 <button class="action-btn btn-del" style="padding: 4px; font-size: 14px;" onclick="window.deleteStoreCoupon(${index})"><i class='bx bx-trash'></i></button>
             </div>
         `;
@@ -10130,7 +10137,7 @@ window.populateCouponTargets = () => {
     const catalog = currentUserData.storeCatalog || [];
 
     catalog.forEach(item => {
-        select.innerHTML += `<option value="${item.id}">Solo: ${item.platform}</option>`;
+        select.innerHTML += `<option value="${item.platform}">Solo: ${item.platform}</option>`;
     });
 };
 
