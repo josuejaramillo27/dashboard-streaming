@@ -1,81 +1,67 @@
 :root {
-    /* Fondo base: Blanco perla / Gris ultra claro */
-    --mac-bg: #f3f4f6;
+    /* --- FONDO Y SUPERFICIES (Modo Claro - Perla Escarchada) --- */
+    --mac-bg: #F5F5F7; /* Blanco perla muy suave (Evita el blanco médico) */
+    --mac-surface: #FFFFFF; /* Tarjetas en blanco puro translúcido */
+    --mac-border: #E5E5EA; /* Bordes plata casi invisibles */
+    --mac-border-solid: #D1D1D6; 
 
-    /* Paneles y Rectángulos: Cristal blanco puro translúcido */
-    --mac-surface: rgba(255, 255, 255, 0.75);
+    /* --- TEXTOS (Modo Claro) --- */
+    --mac-text-main: #1C1C1E; /* Gris grafito oscuro (Mucho más elegante que el negro 000) */
+    --mac-text-secondary: #8E8E93; /* Gris plata suave para datos secundarios */
 
-    /* Textos: Gris carbón profundo (más elegante que el negro puro) */
-    --mac-text-main: #111827;
-    /* Un negro casi puro */
-    --mac-text-secondary: #4b5563;
-    /* Gris más oscuro y legible */
+    /* --- ACENTOS (Colores desaturados y premium para el Modo Claro) --- */
+    --mac-blue: #007AFF; /* Azul clásico iOS (Confianza y tecnología) */
+    --mac-blue-hover: #005BB5; 
+    --mac-green: #34C759; /* Verde manzana suave */
+    --mac-orange: #D4AF37; /* Oro champán (Exclusividad premium) */
+    --mac-red: #FF3B30; /* Rojo limpio */
 
-    /* Bordes: Sutiles líneas grises casi invisibles */
-    --mac-border: rgba(0, 0, 0, 0.08);
-    --mac-border-solid: rgba(0, 0, 0, 0.15);
-
-    /* 🪄 ACENTOS "AURORA TECH" (Modo Claro) */
-    --mac-blue: #4f46e5;
-    /* Índigo vibrante y corporativo */
-    --mac-blue-hover: #4338ca;
-    /* Índigo más oscuro al presionar */
-    --mac-red: #ef4444;
-    --mac-green: #10b981;
-    /* Verde esmeralda fresco (más moderno) */
-    --mac-orange: #f59e0b;
-
-    /* Cajas interiores y fondos de inputs */
-    --mac-gray: rgba(0, 0, 0, 0.04);
-    --mac-table-hover: rgba(0, 0, 0, 0.03);
+    /* --- CAJAS, FONDOS INTERNOS Y SOMBRAS --- */
+    --mac-gray: rgba(0, 0, 0, 0.03); /* Cajas de texto apenas sombreadas */
+    --mac-table-hover: rgba(0, 122, 255, 0.05); /* Hover muy sutil en azul */
     --mac-dropdown-bg: rgba(255, 255, 255, 0.95);
 
-    /* 🪄 SOMBRAS PREMIUM: Le damos un levísimo resplandor índigo a las sombras */
-    --glass-shadow: 0 10px 40px -10px rgba(79, 70, 229, 0.12), 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+    /* Sombras Premium para fondos claros (Amplias y muy difuminadas) */
+    --glass-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08), 0 4px 15px 0 rgba(0, 0, 0, 0.03);
     --glass-blur: blur(25px);
 
-    /* 🪄 LUCES DE AURORA PARA EL MODO CLARO (Efecto Perlado / Holográfico) */
-    --aurora-1: rgba(79, 70, 229, 0.07);
-    /* Índigo suave */
-    --aurora-2: rgba(45, 212, 191, 0.08);
-    /* Cian pastel */
-    --aurora-3: rgba(139, 92, 246, 0.05);
-    /* Morado claro tenue */
+    /* --- LUCES AURORA DE FONDO (Para la animación) --- */
+    --aurora-1: rgba(0, 122, 255, 0.04); /* Azul muy tenue */
+    --aurora-2: rgba(212, 175, 55, 0.04); /* Dorado muy tenue */
+    --aurora-3: rgba(52, 199, 89, 0.03); /* Verde tenue */
 }
 
 body.dark-mode {
-    /* Fondo base: Negro mate abisal */
-    --mac-bg: #050505;
+    /* --- FONDO Y SUPERFICIES (Modo Oscuro - Onyx & Oro Blanco) --- */
+    --mac-bg: #050505; /* Negro puro casi absoluto. Máximo contraste minimalista. */
+    --mac-surface: #121212; /* Tarjetas muy oscuras, apenas separadas del fondo. */
+    --mac-border: #2A2A2A; /* Bordes sutiles oscuros. */
+    --mac-border-solid: #333333;
 
-    /* Paneles principales: Cristal oscuro ahumado */
-    --mac-surface: rgba(18, 18, 22, 0.70);
+    /* --- TEXTOS (Modo Oscuro) --- */
+    --mac-text-main: #FFFFFF; /* Blanco puro para máxima legibilidad. */
+    --mac-text-secondary: #8E8E93; /* Gris plata suave para datos secundarios. */
 
-    /* Textos nítidos */
-    --mac-text-main: #f5f5f7;
-    --mac-text-secondary: #8e8e93;
+    /* --- ACENTOS (Colores desaturados para Profesionalidad) --- */
+    --mac-blue: #0A84FF; /* Azul Apple oscuro. Profesional y limpio. */
+    --mac-blue-hover: #0066CC;
+    --mac-green: #30D158; /* Verde esmeralda para el dinero. */
+    --mac-orange: #E5A352; /* Oro cálido desaturado. Transmite exclusividad. */
+    --mac-red: #FF453A; /* Rojo elegante para alertas. */
 
-    /* Bordes con un micro-resplandor índigo sutil */
-    --mac-border: rgba(94, 92, 230, 0.18);
-    --mac-border-solid: rgba(255, 255, 255, 0.12);
+    /* --- CAJAS, FONDOS INTERNOS Y SOMBRAS --- */
+    --mac-gray: rgba(255, 255, 255, 0.05); /* Fondos internos (Inputs, notas) */
+    --mac-table-hover: rgba(255, 255, 255, 0.08); /* Hover sutil en blanco */
+    --mac-dropdown-bg: rgba(18, 18, 18, 0.95);
 
-    /* Acentos Aurora Tech */
-    --mac-blue: #5e5ce6;
-    --mac-blue-hover: #4b48d6;
-    --mac-red: #ff453a;
-    --mac-green: #30d158;
-    --mac-orange: #ff9f0a;
-
-    /* 🪄 EL CAMBIO CLAVE: Reemplazamos el gris opaco por un negro/índigo translúcido */
-    --mac-gray: rgba(255, 255, 255, 0.04);
-    --mac-table-hover: rgba(94, 92, 230, 0.08);
-    --mac-dropdown-bg: rgba(20, 20, 25, 0.90);
-
-    --glass-shadow: 0 15px 45px rgba(0, 0, 0, 0.85);
+    /* Sombras oscuras sofisticadas */
+    --glass-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
     --glass-blur: blur(25px);
 
-    --aurora-1: rgba(94, 92, 230, 0.14);
-    --aurora-2: rgba(45, 212, 191, 0.08);
-    --aurora-3: rgba(10, 132, 255, 0.06);
+    /* --- LUCES AURORA DE FONDO (Para la animación en Modo Oscuro) --- */
+    --aurora-1: rgba(10, 132, 255, 0.08); /* Azul nocturno */
+    --aurora-2: rgba(229, 163, 82, 0.06); /* Destellos dorados en el fondo */
+    --aurora-3: rgba(255, 255, 255, 0.03); /* Blanco plata */
 }
 
 /* =========================================================
