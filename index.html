@@ -2095,9 +2095,9 @@
                         <h2 style="margin: 0; font-size: 24px; color: var(--mac-text-main);"><i class='bx bx-key'></i> Gestor de Accesos Externos</h2>
                         <p style="color:var(--mac-text-secondary); font-size:14px; margin:5px 0 0 0;">Vincula servicios externos a tu cuenta mediante tokens.</p>
                     </div>
-                    <button class="btn-primary" onclick="window.addApiConnectionCard()" style="display: flex; align-items: center; gap: 8px;">
-                        <i class='bx bx-plus'></i> Añadir Nueva Conexión
-                    </button>
+                    <div style="text-align: center; margin-bottom: 20px;">
+    <button class="btn-primary" style="width: auto; padding: 10px 25px;" onclick="window.addApiConnection()">+ Añadir Nueva Conexión</button>
+</div>
                 </div>
 
                 <div id="apiConnectionsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px;">
@@ -2105,9 +2105,9 @@
                 </div>
 
                 <div style="display: flex; justify-content: flex-end; margin-top: 20px; border-top: 1px solid var(--mac-border); padding-top: 15px;">
-                    <button class="btn-primary" onclick="window.saveApiConnections()" style="padding: 10px 20px; font-weight: bold;">
-                        <i class='bx bx-save'></i> Guardar Configuración
-                    </button>
+                    <div style="text-align: right; margin-top: 20px;">
+    <button class="btn-primary" style="width: auto; padding: 12px 30px;" onclick="window.saveApiConnections()"><i class='bx bx-save'></i> Guardar Configuración</button>
+</div>
                 </div>
             </div>
 
