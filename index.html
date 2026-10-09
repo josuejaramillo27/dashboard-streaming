@@ -1258,11 +1258,8 @@
                     onclick="window.switchDashboardSection('financeSection', this); window.loadFinanceData();">
                     <i class='bx bx-line-chart'></i> <span>Finanzas y Metas</span>
                 </a>
-                <a href="#" class="sidebar-item" title="Novedades" onclick="window.openNewsModal()"
-                    style="position: relative;">
-                    <i class='bx bxs-envelope'></i> <span>Novedades</span>
-                    <span id="newsBadgeSidebar"
-                        style="display:none; background:#FF2D55; width:8px; height:8px; border-radius:50%; margin-left:auto;"></span>
+                <a href="#" class="sidebar-item" title="Gestor de Accesos" onclick="window.switchDashboardSection('accessManagerSection', this); window.loadApiConnections();">
+                    <i class='bx bx-key'></i> <span>Gestor de Accesos</span>
                 </a>
                 <div style="margin: 15px 0; border-top: 1px dashed var(--mac-border);"></div>
                 <a href="#" class="sidebar-item" title="Mi Perfil & Bot"
@@ -2090,6 +2087,29 @@
                     </div>
                 </div> <!-- Fin modal-card -->
             </div> <!-- Fin storeModal -->
+
+            <!-- GESTOR DE ACCESOS -->
+            <div id="accessManagerSection" class="dashboard-section" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div>
+                        <h2 style="margin: 0; font-size: 24px; color: var(--mac-text-main);"><i class='bx bx-key'></i> Gestor de Accesos Externos</h2>
+                        <p style="color:var(--mac-text-secondary); font-size:14px; margin:5px 0 0 0;">Vincula servicios externos a tu cuenta mediante tokens.</p>
+                    </div>
+                    <button class="btn-primary" onclick="window.addApiConnectionCard()" style="display: flex; align-items: center; gap: 8px;">
+                        <i class='bx bx-plus'></i> Añadir Nueva Conexión
+                    </button>
+                </div>
+
+                <div id="apiConnectionsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <!-- Tarjetas dinámicas aquí -->
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; margin-top: 20px; border-top: 1px solid var(--mac-border); padding-top: 15px;">
+                    <button class="btn-primary" onclick="window.saveApiConnections()" style="padding: 10px 20px; font-weight: bold;">
+                        <i class='bx bx-save'></i> Guardar Configuración
+                    </button>
+                </div>
+            </div>
 
             <!-- SECCIÓN 5: FINANZAS Y METAS -->
             <div id="financeSection" class="dashboard-section" style="display: none;">
