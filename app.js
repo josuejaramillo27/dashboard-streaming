@@ -10290,3 +10290,180 @@ window.unarchiveAndEdit = (id) => {
     document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
     window.showNotification("Modifica los datos y presiona Guardar para reactivarlo.");
 };
+
+// ============================================================================
+// GESTOR DE CONEXIONES API
+// ============================================================================
+let tempApiConnections = [];
+
+window.loadApiConnections = () => {
+    tempApiConnections = [];
+    if (currentUserData && currentUserData.apiConnections) {
+        // Hacemos una copia profunda
+        tempApiConnections = JSON.parse(JSON.stringify(currentUserData.apiConnections));
+    }
+    window.renderApiConnections();
+};
+
+window.addApiConnectionCard = () => {
+    tempApiConnections.push({
+        platform: '',
+        email: '',
+        token: '',
+        permissions: 'A'
+    });
+    window.renderApiConnections();
+};
+
+window.deleteApiConnection = (index) => {
+    tempApiConnections.splice(index, 1);
+    window.renderApiConnections();
+};
+
+window.renderApiConnections = () => {
+    const list = document.getElementById('apiConnectionsList');
+    if (!list) return;
+
+    list.innerHTML = '';
+
+    if (tempApiConnections.length === 0) {
+        list.innerHTML = '<div style="color:var(--mac-text-secondary); padding: 20px; text-align: center; width: 100%;">No hay conexiones registradas.</div>';
+        return;
+    }
+
+    // Opciones para el select de plataforma basado en customServices o un default
+    let platformOptions = '<option value="">Selecciona Plataforma</option>';
+    if (currentUserData && currentUserData.customServices && currentUserData.customServices.length > 0) {
+        currentUserData.customServices.forEach(srv => {
+            let srvName = typeof srv === 'string' ? srv : srv.name;
+            platformOptions += `<option value="${srvName}">${srvName}</option>`;
+        });
+        platformOptions += `<option value="Otra">Otra...</option>`;
+    } else {
+        platformOptions += `
+            <option value="Netflix">Netflix</option>
+            <option value="Disney+">Disney+</option>
+            <option value="Max">Max</option>
+            <option value="Prime Video">Prime Video</option>
+            <option value="Otra">Otra...</option>
+        `;
+    }
+
+    tempApiConnections.forEach((conn, index) => {
+        const card = document.createElement('div');
+        card.style.cssText = 'background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 12px; padding: 15px; position: relative; display: flex; flex-direction: column; gap: 10px;';
+
+        card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="margin:0; color:var(--mac-text-main); font-size: 16px;"><i class='bx bx-link'></i> Conexión #${index + 1}</h4>
+                <button onclick="window.deleteApiConnection(${index})" style="background:transparent; border:none; color:var(--mac-red); font-size: 20px; cursor: pointer;" title="Eliminar Conexión"><i class='bx bx-trash'></i></button>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 12px; color:var(--mac-text-secondary); font-weight: bold;">Plataforma Vinculada</label>
+                <select class="form-input platform-select" style="width:100%;" onchange="window.updateTempConn(${index}, 'platform', this.value)">
+                    ${platformOptions}
+                </select>
+                <input type="text" class="form-input platform-other" placeholder="Escribe la plataforma" style="display: none; margin-top: 5px; width: 100%;" oninput="window.updateTempConn(${index}, 'platform', this.value)">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 12px; color:var(--mac-text-secondary); font-weight: bold;">Correo de Origen</label>
+                <input type="email" class="form-input" placeholder="ejemplo@correo.com" value="${conn.email || ''}" oninput="window.updateTempConn(${index}, 'email', this.value)" style="width: 100%;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 12px; color:var(--mac-text-secondary); font-weight: bold;">Token de Aplicación (16 dígitos)</label>
+                <input type="password" class="form-input" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" value="${conn.token || ''}" oninput="window.updateTempConn(${index}, 'token', this.value)" style="width: 100%;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 12px; color:var(--mac-text-secondary); font-weight: bold;">Nivel de Permisos Autorizados</label>
+                <select class="form-input" style="width:100%;" onchange="window.updateTempConn(${index}, 'permissions', this.value)">
+                    <option value="A" ${conn.permissions === 'A' ? 'selected' : ''}>Solo Lectura de Alertas</option>
+                    <option value="B" ${conn.permissions === 'B' ? 'selected' : ''}>Modificación y Alertas</option>
+                </select>
+            </div>
+        `;
+        list.appendChild(card);
+
+        // Set select value after appending
+        const selectEl = card.querySelector('.platform-select');
+        const otherEl = card.querySelector('.platform-other');
+
+        let isListed = Array.from(selectEl.options).some(opt => opt.value === conn.platform);
+        if (conn.platform && !isListed && conn.platform !== 'Otra') {
+            selectEl.value = 'Otra';
+            otherEl.style.display = 'block';
+            otherEl.value = conn.platform;
+        } else if (conn.platform) {
+            selectEl.value = conn.platform;
+        }
+
+        selectEl.addEventListener('change', (e) => {
+            if (e.target.value === 'Otra') {
+                otherEl.style.display = 'block';
+                window.updateTempConn(index, 'platform', otherEl.value);
+            } else {
+                otherEl.style.display = 'none';
+                window.updateTempConn(index, 'platform', e.target.value);
+            }
+        });
+    });
+};
+
+window.updateTempConn = (index, field, value) => {
+    if (tempApiConnections[index]) {
+        tempApiConnections[index][field] = value;
+    }
+};
+
+window.saveApiConnections = async () => {
+    if (!currentUser) {
+        Swal.fire('Error', 'No hay sesión activa.', 'error');
+        return;
+    }
+
+    // 1. Validación básica de 16 caracteres para el token
+    for (let i = 0; i < tempApiConnections.length; i++) {
+        const conn = tempApiConnections[i];
+        if (!conn.platform || !conn.email || !conn.token) {
+            Swal.fire('Atención', `Completa todos los campos de la Conexión #${i + 1}.`, 'warning');
+            return;
+        }
+        let cleanToken = conn.token.replace(/\s/g, '');
+        if (cleanToken.length < 16) {
+            Swal.fire('Atención', `El token de la Conexión #${i + 1} debe tener al menos 16 dígitos.`, 'warning');
+            return;
+        }
+        // Guardamos el token limpio (sin espacios) por si el usuario lo pegó mal
+        conn.token = cleanToken;
+    }
+
+    // 2. Efecto visual de carga
+    Swal.fire({
+        title: 'Guardando...',
+        text: 'Actualizando conexiones de lectura...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    try {
+        // 3. Ejecución directa a Firebase (Ya tienes db, doc y updateDoc globales)
+        const userRef = doc(db, "users", currentUser.uid);
+        await updateDoc(userRef, {
+            apiConnections: tempApiConnections
+        });
+
+        // 4. Actualizar la memoria local para no tener que recargar la página
+        if (currentUserData) {
+            currentUserData.apiConnections = tempApiConnections;
+        }
+
+        Swal.fire('Guardado', 'Las conexiones se han guardado exitosamente.', 'success');
+
+    } catch (error) {
+        console.error("Error al guardar conexiones: ", error);
+        Swal.fire('Error', 'Hubo un problema de conexión con la base de datos.', 'error');
+    }
+};
