@@ -6816,10 +6816,27 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
                             <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.pin || ''}', 'PIN')"><i class='bx bx-copy'></i></button>
                         </div>
                     </div>
-                    ${storeUserData.imapEmail && storeUserData.imapPassword ? `
-<button onclick="window.requestAccessCode('${storeUserData.imapEmail}', '${storeUserData.imapPassword}', '${acc.saleType || 'Perfil'}')" class="btn-primary" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; background: var(--mac-blue); border: none;">
-    <i class='bx bx-mobile-landscape'></i> Solicitar Código de Acceso
-</button>` : ''}
+                    ${(() => {
+    // 1. Verificamos si el vendedor tiene conexiones configuradas en el nuevo sistema
+    const connections = storeUserData.apiConnections || [];
+    
+    // 2. Buscamos si existe una conexión exacta para ESTA plataforma (platName)
+    const connInfo = connections.find(c => c.platform === platName);
+    
+    // 3. Si la encontramos, inyectamos el botón usando los datos específicos de esa plataforma
+    if (connInfo && connInfo.email && connInfo.token) {
+        // Determinamos el nivel de seguridad basado en el selector del Gestor
+        const isFullAccount = connInfo.permission === 'Modificación y Alertas';
+        const accessLevel = isFullAccount ? 'Cuenta Completa' : 'Perfil';
+        
+        return `
+        <button onclick="window.requestAccessCode('${connInfo.email}', '${connInfo.token}', '${accessLevel}')" class="btn-primary" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; background: var(--mac-blue); border: none;">
+            <i class='bx bx-mobile-landscape'></i> Solicitar Código de Acceso
+        </button>`;
+    }
+    // Si no hay conexión para esta plataforma, no mostramos nada
+    return '';
+})()}
                     <button onclick="window.openReviewModal('${clientObj.id}', '${platName}', '${clientObj.name.replace(/'/g, "\\'")}', '${clientObj.phone || ''}')" class="btn-secondary" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; border: 1px solid var(--mac-orange); color: var(--mac-orange); background: rgba(255, 149, 0, 0.1); transition: 0.2s;"><i class='bx bxs-star'></i> Calificar Servicio</button>
                 </div>
             `;
