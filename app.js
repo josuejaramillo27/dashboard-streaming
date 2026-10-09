@@ -1155,8 +1155,6 @@ window.saveGateways = async () => {
     const cajaBinPayId = document.getElementById('binancePayIdInput');
     const cajaBinAlias = document.getElementById('binanceAliasInput');
     const cajaBinRate = document.getElementById('binanceExchangeRateInput');
-    const cajaImapEmail = document.getElementById('imapEmailInput');
-    const cajaImapPass = document.getElementById('imapPasswordInput');
 
     // Extraemos sus valores
     if (cajaMp) mpAccessToken = cajaMp.value.trim();
@@ -1179,9 +1177,7 @@ window.saveGateways = async () => {
         let updateData = {
             binancePayId: binancePayId,
             binanceAlias: binanceAlias,
-            binanceExchangeRate: binanceExchangeRate,
-            imapEmail: cajaImapEmail ? cajaImapEmail.value.trim() : '',
-            imapPassword: cajaImapPass ? cajaImapPass.value.trim() : ''
+            binanceExchangeRate: binanceExchangeRate
         };
 
         // Solo guardamos claves si hay texto y NO son asteriscos
