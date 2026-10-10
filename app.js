@@ -10266,7 +10266,7 @@ window.requestAccessCode = async (masterEmail, appToken, accessLevel, targetEmai
                 Se escaneará la bandeja maestra en busca de este correo/alias:<br>
                 <span style="font-size: 11px; color: var(--mac-orange);">* Puedes editarlo si usas un correo redireccionado.</span>
             </p>
-            <input id="swal-search-input" class="swal2-input" value="${defaultSearchTerm}" placeholder="Ej: cuenta@dominio.com">
+            <input id="swal-search-input" class="swal2-input" value="${defaultSearchTerm}" placeholder="Ej: cuenta@dominio.com" style="width: 85%; max-width: 100%; box-sizing: border-box; margin: 0 auto; display: block; font-size: 15px;">
         `,
         focusConfirm: false,
         showCancelButton: true,
