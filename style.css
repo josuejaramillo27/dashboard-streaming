@@ -1,24 +1,35 @@
 :root {
     /* --- FONDO Y SUPERFICIES (Modo Claro - Perla Escarchada) --- */
-    --mac-bg: #F5F5F7; /* Blanco perla muy suave (Evita el blanco médico) */
-    --mac-surface: #FFFFFF; /* Tarjetas en blanco puro translúcido */
-    --mac-border: #E5E5EA; /* Bordes plata casi invisibles */
-    --mac-border-solid: #D1D1D6; 
+    --mac-bg: #F5F5F7;
+    /* Blanco perla muy suave (Evita el blanco médico) */
+    --mac-surface: #FFFFFF;
+    /* Tarjetas en blanco puro translúcido */
+    --mac-border: #E5E5EA;
+    /* Bordes plata casi invisibles */
+    --mac-border-solid: #D1D1D6;
 
     /* --- TEXTOS (Modo Claro) --- */
-    --mac-text-main: #1C1C1E; /* Gris grafito oscuro (Mucho más elegante que el negro 000) */
-    --mac-text-secondary: #8E8E93; /* Gris plata suave para datos secundarios */
+    --mac-text-main: #1C1C1E;
+    /* Gris grafito oscuro (Mucho más elegante que el negro 000) */
+    --mac-text-secondary: #8E8E93;
+    /* Gris plata suave para datos secundarios */
 
     /* --- ACENTOS (Colores desaturados y premium para el Modo Claro) --- */
-    --mac-blue: #007AFF; /* Azul clásico iOS (Confianza y tecnología) */
-    --mac-blue-hover: #005BB5; 
-    --mac-green: #34C759; /* Verde manzana suave */
-    --mac-orange: #D4AF37; /* Oro champán (Exclusividad premium) */
-    --mac-red: #FF3B30; /* Rojo limpio */
+    --mac-blue: #007AFF;
+    /* Azul clásico iOS (Confianza y tecnología) */
+    --mac-blue-hover: #005BB5;
+    --mac-green: #34C759;
+    /* Verde manzana suave */
+    --mac-orange: #D4AF37;
+    /* Oro champán (Exclusividad premium) */
+    --mac-red: #FF3B30;
+    /* Rojo limpio */
 
     /* --- CAJAS, FONDOS INTERNOS Y SOMBRAS --- */
-    --mac-gray: rgba(0, 0, 0, 0.03); /* Cajas de texto apenas sombreadas */
-    --mac-table-hover: rgba(0, 122, 255, 0.05); /* Hover muy sutil en azul */
+    --mac-gray: rgba(0, 0, 0, 0.03);
+    /* Cajas de texto apenas sombreadas */
+    --mac-table-hover: rgba(0, 122, 255, 0.05);
+    /* Hover muy sutil en azul */
     --mac-dropdown-bg: rgba(255, 255, 255, 0.95);
 
     /* Sombras Premium para fondos claros (Amplias y muy difuminadas) */
@@ -26,32 +37,46 @@
     --glass-blur: blur(25px);
 
     /* --- LUCES AURORA DE FONDO (Para la animación) --- */
-    --aurora-1: rgba(0, 122, 255, 0.04); /* Azul muy tenue */
-    --aurora-2: rgba(212, 175, 55, 0.04); /* Dorado muy tenue */
-    --aurora-3: rgba(52, 199, 89, 0.03); /* Verde tenue */
+    --aurora-1: rgba(0, 122, 255, 0.04);
+    /* Azul muy tenue */
+    --aurora-2: rgba(212, 175, 55, 0.04);
+    /* Dorado muy tenue */
+    --aurora-3: rgba(52, 199, 89, 0.03);
+    /* Verde tenue */
 }
 
 body.dark-mode {
     /* --- FONDO Y SUPERFICIES (Modo Oscuro - Onyx & Oro Blanco) --- */
-    --mac-bg: #050505; /* Negro puro casi absoluto. Máximo contraste minimalista. */
-    --mac-surface: #0A0A0A; /* Tarjetas muy oscuras, apenas separadas del fondo. */
-    --mac-border: #2A2A2A; /* Bordes sutiles oscuros. */
+    --mac-bg: #050505;
+    /* Negro puro casi absoluto. Máximo contraste minimalista. */
+    --mac-surface: #0A0A0A;
+    /* Tarjetas muy oscuras, apenas separadas del fondo. */
+    --mac-border: #2A2A2A;
+    /* Bordes sutiles oscuros. */
     --mac-border-solid: #333333;
 
     /* --- TEXTOS (Modo Oscuro) --- */
-    --mac-text-main: #FFFFFF; /* Blanco puro para máxima legibilidad. */
-    --mac-text-secondary: #8E8E93; /* Gris plata suave para datos secundarios. */
+    --mac-text-main: #FFFFFF;
+    /* Blanco puro para máxima legibilidad. */
+    --mac-text-secondary: #8E8E93;
+    /* Gris plata suave para datos secundarios. */
 
     /* --- ACENTOS (Colores desaturados para Profesionalidad) --- */
-    --mac-blue: #0A84FF; /* Azul Apple oscuro. Profesional y limpio. */
+    --mac-blue: #0A84FF;
+    /* Azul Apple oscuro. Profesional y limpio. */
     --mac-blue-hover: #0066CC;
-    --mac-green: #30D158; /* Verde esmeralda para el dinero. */
-    --mac-orange: #E5A352; /* Oro cálido desaturado. Transmite exclusividad. */
-    --mac-red: #FF453A; /* Rojo elegante para alertas. */
+    --mac-green: #30D158;
+    /* Verde esmeralda para el dinero. */
+    --mac-orange: #E5A352;
+    /* Oro cálido desaturado. Transmite exclusividad. */
+    --mac-red: #FF453A;
+    /* Rojo elegante para alertas. */
 
     /* --- CAJAS, FONDOS INTERNOS Y SOMBRAS --- */
-    --mac-gray: rgba(255, 255, 255, 0.02); /* Fondos internos (Inputs, notas) */
-    --mac-table-hover: rgba(255, 255, 255, 0.08); /* Hover sutil en blanco */
+    --mac-gray: rgba(255, 255, 255, 0.02);
+    /* Fondos internos (Inputs, notas) */
+    --mac-table-hover: rgba(255, 255, 255, 0.08);
+    /* Hover sutil en blanco */
     --mac-dropdown-bg: rgba(18, 18, 18, 0.95);
 
     /* Sombras oscuras sofisticadas */
@@ -59,9 +84,12 @@ body.dark-mode {
     --glass-blur: blur(25px);
 
     /* --- LUCES AURORA DE FONDO (Para la animación en Modo Oscuro) --- */
-    --aurora-1: rgba(10, 132, 255, 0.08); /* Azul nocturno */
-    --aurora-2: rgba(229, 163, 82, 0.06); /* Destellos dorados en el fondo */
-    --aurora-3: rgba(255, 255, 255, 0.03); /* Blanco plata */
+    --aurora-1: rgba(10, 132, 255, 0.08);
+    /* Azul nocturno */
+    --aurora-2: rgba(229, 163, 82, 0.06);
+    /* Destellos dorados en el fondo */
+    --aurora-3: rgba(255, 255, 255, 0.03);
+    /* Blanco plata */
 }
 
 /* =========================================================
@@ -2340,6 +2368,7 @@ body.dark-mode .bottom-nav {
     align-items: center;
     gap: 4px;
     flex-shrink: 0;
+    width: max-content !important;
     transition: all 0.2s;
 }
 
@@ -3185,7 +3214,7 @@ body.dark-mode .segmented-btn.active {
     border-radius: 20px !important;
     font-size: 14px !important;
     transition: all 0.3s ease !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
 }
 
 body:not(.dark-mode) .spotify-search-container input {
@@ -3473,4 +3502,8 @@ canvas {
     /* Para que no bloquee clics en los productos */
 }
 
-.status.archived { background: rgba(152, 152, 157, 0.15); color: var(--mac-text-secondary); border: 1px solid var(--mac-border); }
+.status.archived {
+    background: rgba(152, 152, 157, 0.15);
+    color: var(--mac-text-secondary);
+    border: 1px solid var(--mac-border);
+}
