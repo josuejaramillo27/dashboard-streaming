@@ -10286,7 +10286,7 @@ window.requestAccessCode = async (masterEmail, appToken, accessLevel, targetEmai
     });
 
     try {
-        const response = await fetch('http://164.92.230.161:3000/api/get-code', {
+        const response = await fetch('https://bot.panelagc.com/api/get-code', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
