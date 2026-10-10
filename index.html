@@ -1212,14 +1212,15 @@
     </div>
 
     <!-- PORTAL DE CONSULTAS EXTERNAS -->
-    <div id="externalQueryPortal" class="container" style="display: none; align-items: center; justify-content: center; min-height: 100vh;">
-        <div style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); padding: 40px; border-radius: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); text-align: center; width: 100%; max-width: 400px;">
+    <div id="externalQueryPortal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; align-items: center; justify-content: center; background: transparent; z-index: 9999;">
+        <div style="background: var(--mac-surface); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--mac-border); padding: 40px; border-radius: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); text-align: center; width: 90%; max-width: 400px; position: relative;">
+            <button onclick="window.logoutExternalUser()" style="position: absolute; top: 15px; right: 15px; background: rgba(255,59,48,0.1); color: var(--mac-red); border: none; padding: 6px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s;"><i class='bx bx-log-out'></i> Salir</button>
             <img id="externalPortalLogo" src="AGC.png" style="width: 80px; height: 80px; border-radius: 16px; margin-bottom: 20px; object-fit: contain;">
             <h2 style="color: var(--mac-text-main); margin: 0 0 10px 0; font-size: 24px;">Portal de Consultas</h2>
             <p id="externalPortalSellerName" style="color: var(--mac-text-secondary); margin-bottom: 25px; font-size: 14px;">Inicia sesión para ejecutar tu consulta</p>
-            
+
             <div id="externalLoginForm">
-                <input type="text" id="externalUsername" placeholder="Nombre de Usuario" style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); margin-bottom: 20px; font-size: 15px; box-sizing: border-box; outline: none;">
+                <input type="text" id="externalUsername" placeholder="Nombre de Usuario" style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 20px; font-size: 15px; box-sizing: border-box; outline: none;">
                 <button class="btn-primary" onclick="window.verifyExternalUser()" style="width: 100%; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: bold; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); border: none;">Ingresar</button>
             </div>
 
@@ -2137,23 +2138,29 @@
                 </div>
 
                 <div style="margin-top: 40px; border-top: 2px dashed var(--mac-border); padding-top: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <div>
-                            <h2 style="margin: 0; font-size: 20px; color: var(--mac-text-main);"><i class='bx bx-group'></i>
+                            <h2 style="margin: 0; font-size: 20px; color: var(--mac-text-main);"><i
+                                    class='bx bx-group'></i>
                                 Gestor de Sub-Usuarios Externos</h2>
-                            <p style="color:var(--mac-text-secondary); font-size:13px; margin:5px 0 0 0;">Crea accesos independientes para clientes terceros.</p>
+                            <p style="color:var(--mac-text-secondary); font-size:13px; margin:5px 0 0 0;">Crea accesos
+                                independientes para clientes terceros.</p>
                         </div>
                         <div style="text-align: center;">
-                            <button class="btn-primary" style="width: auto; padding: 10px 25px; background: var(--mac-green); border: none;"
+                            <button class="btn-primary"
+                                style="width: auto; padding: 10px 25px; background: var(--mac-green); border: none;"
                                 onclick="window.addExternalSubUser()">+ Añadir Sub-Usuario</button>
                         </div>
                     </div>
-                    <div id="subUsersList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div id="subUsersList"
+                        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px;">
                         <!-- Tarjetas de sub-usuarios aquí -->
                     </div>
                     <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
                         <button class="btn-primary" style="width: auto; padding: 12px 30px;"
-                            onclick="window.saveExternalSubUsers()"><i class='bx bx-save'></i> Guardar Sub-Usuarios</button>
+                            onclick="window.saveExternalSubUsers()"><i class='bx bx-save'></i> Guardar
+                            Sub-Usuarios</button>
                     </div>
                 </div>
             </div>
