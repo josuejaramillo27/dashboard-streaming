@@ -6794,27 +6794,25 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
                 };
 
             accountsHtml += `
-                <div style="background: var(--mac-bg); padding: 15px; border-radius: 16px; border: 1px solid var(--mac-border); text-align: left; display: flex; flex-direction: column; height: 100%; box-sizing: border-box;">
-                    <div style="font-size: 14px; font-weight: 800; color: var(--mac-text-main); margin-bottom: 12px;">🎬 ${platName.toUpperCase()}</div>
+                <div style="background: var(--mac-surface); padding: 20px; border-radius: 20px; text-align: left; display: flex; flex-direction: column; box-sizing: border-box; width: 100%; max-width: 360px; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                    <div style="font-size: 15px; font-weight: 900; color: var(--mac-text-main); margin-bottom: 15px; text-align: center; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px;">🎬 ${platName.toUpperCase()}</div>
                     
-                    <div class="credential-card">
+                    <div class="credential-card" style="margin-bottom: 10px; padding: 10px 15px;">
                         <div class="credential-info"><span class="credential-label">Correo</span><span class="credential-value">${acc.email || '-'}</span></div>
-                        <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap;" onclick="window.copyToClipboard('${acc.email || ''}', 'Correo')"><i class='bx bx-copy'></i> Copiar</button>
+                        <button class="btn-copy-chip" style="white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.email || ''}', 'Correo')"><i class='bx bx-copy'></i></button>
                     </div>
                     
-                    <div class="credential-card">
+                    <div class="credential-card" style="margin-bottom: 15px; padding: 10px 15px;">
                         <div class="credential-info"><span class="credential-label">Contraseña</span><span class="credential-value">${acc.password || '-'}</span></div>
-                        <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap;" onclick="window.copyToClipboard('${acc.password || ''}', 'Clave')"><i class='bx bx-copy'></i> Copiar</button>
+                        <button class="btn-copy-chip" style="white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.password || ''}', 'Clave')"><i class='bx bx-copy'></i></button>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div class="credential-card" style="margin: 0; align-items: center;">
-                            <div class="credential-info"><span class="credential-label">Perfil N°</span><span class="credential-value">${acc.profile || '-'}</span></div>
-                            <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.profile || ''}', 'Perfil')"><i class='bx bx-copy'></i></button>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <div class="credential-card" style="margin: 0; padding: 10px; text-align: center; justify-content: center;">
+                            <div class="credential-info" style="padding: 0; align-items: center;"><span class="credential-label">Perfil</span><span class="credential-value" style="font-size: 16px; color: var(--mac-orange);">${acc.profile || '-'}</span></div>
                         </div>
-                        <div class="credential-card" style="margin: 0; align-items: center;">
-                            <div class="credential-info"><span class="credential-label">PIN Acceso</span><span class="credential-value">${acc.pin || '-'}</span></div>
-                            <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.pin || ''}', 'PIN')"><i class='bx bx-copy'></i></button>
+                        <div class="credential-card" style="margin: 0; padding: 10px; text-align: center; justify-content: center;">
+                            <div class="credential-info" style="padding: 0; align-items: center;"><span class="credential-label">PIN</span><span class="credential-value" style="font-size: 16px; color: var(--mac-orange);">${acc.pin || '-'}</span></div>
                         </div>
                     </div>
                     ${(() => {
@@ -6826,13 +6824,13 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
                         const accessLevel = isFullAccount ? 'Cuenta Completa' : 'Perfil';
 
                         return `
-                            <button onclick="window.requestAccessCode('${connInfo.email}', '${connInfo.token}', '${accessLevel}', '${acc.email || '-'}')" class="btn-primary" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; background: var(--mac-blue); border: none;">
-                                <i class='bx bx-mobile-landscape'></i> Solicitar Código de Acceso
+                            <button onclick="window.requestAccessCode('${connInfo.email}', '${connInfo.token}', '${accessLevel}', '${acc.email || '-'}', '${platName}')" class="btn-primary" style="margin-top: auto; width: 100%; padding: 12px; border-radius: 12px; font-weight: bold; background: var(--mac-blue); border: none;">
+                                <i class='bx bx-mobile-landscape'></i> Solicitar Código
                             </button>`;
                     }
                     return '';
                 })()}
-                    <button onclick="window.openReviewModal('${clientObj.id}', '${platName}', '${clientObj.name.replace(/'/g, "\\'")}', '${clientObj.phone || ''}')" class="btn-secondary" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; border: 1px solid var(--mac-orange); color: var(--mac-orange); background: rgba(255, 149, 0, 0.1); transition: 0.2s;"><i class='bx bxs-star'></i> Calificar Servicio</button>
+                    <button onclick="window.openReviewModal('${clientObj.id}', '${platName}', '${clientObj.name.replace(/'/g, "\\'")}', '${clientObj.phone || ''}')" class="btn-secondary" style="margin-top: 10px; width: 100%; padding: 12px; border-radius: 12px; font-weight: bold; border: 1px solid var(--mac-orange); color: var(--mac-orange); background: rgba(255, 149, 0, 0.1); transition: 0.2s;"><i class='bx bxs-star'></i> Calificar</button>
                 </div>
             `;
         });
@@ -10257,7 +10255,7 @@ window.updateEditStoreStockCount = () => {
 
 // --- SOLICITAR CÓDIGO AL VPS DESDE EL PORTAL ---
 window.requestAccessCode = async (masterEmail, appToken, accessLevel, targetEmail = '-', platformName = '') => {
-    
+
     let defaultSearchTerm = (targetEmail && targetEmail !== '-') ? targetEmail : '';
 
     // 🔥 SIEMPRE mostramos la ventana para confirmar o editar el término de búsqueda
@@ -10311,12 +10309,19 @@ window.requestAccessCode = async (masterEmail, appToken, accessLevel, targetEmai
                 icon: 'success',
                 title: 'Código Recibido',
                 html: `
-                    <p style="font-size: 12px; color: var(--mac-text-secondary); margin-bottom: 5px;">Remitente: ${data.sender}</p>
-                    <div style="background: rgba(0, 122, 255, 0.05); border: 1px dashed var(--mac-blue); border-radius: 12px; padding: 15px; margin: 10px 0; max-height: 180px; overflow-y: auto; text-align: left; font-size: 13px; color: var(--mac-text-main); white-space: pre-wrap;">${data.fullText}</div>
-                    <p style="font-size: 12px; font-weight: bold; color: var(--mac-orange);">Si solo buscas el número: <span style="font-size: 16px;">${data.code}</span></p>
+                    <div style="background: var(--mac-gray); border-radius: 12px; padding: 20px; margin: 15px 0; text-align: center;">
+                        <p style="font-size: 13px; color: var(--mac-text-secondary); margin: 0 0 10px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Código de Verificación</p>
+                        <div style="font-size: 38px; font-weight: 900; color: var(--mac-text-main); letter-spacing: 6px;">${data.code}</div>
+                    </div>
+                    <div style="background: transparent; padding: 15px; max-height: 140px; overflow-y: auto; text-align: left; font-size: 12px; color: var(--mac-text-secondary); white-space: pre-wrap; line-height: 1.5;">${data.fullText}</div>
+                    <p style="font-size: 11px; color: var(--mac-text-secondary); opacity: 0.7; margin-top: 15px;">Remitente: ${data.sender}</p>
                 `,
                 confirmButtonText: 'Cerrar',
-                confirmButtonColor: 'var(--mac-blue)'
+                confirmButtonColor: 'var(--mac-blue)',
+                width: 450,
+                customClass: {
+                    htmlContainer: 'swal-html-clean'
+                }
             });
         } else {
             Swal.fire('Atención', data.message, 'warning');
@@ -10588,8 +10593,8 @@ window.renderExternalSubUsers = () => {
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <label style="font-size: 12px; color:var(--mac-text-secondary); font-weight: bold;">Correo Específico Autorizado</label>
-                    <input type="email" class="form-input" placeholder="ejemplo@correo.com" value="${user.email || ''}" oninput="window.updateTempSubUser(${index}, 'email', this.value)" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
+                    <label style="font-size: 12px; color:var(--mac-text-secondary); font-weight: bold;">Correos Autorizados (Separados por coma)</label>
+                    <textarea class="form-input" placeholder="ejemplo1@correo.com, ejemplo2@correo.com" oninput="window.updateTempSubUser(${index}, 'email', this.value)" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box; resize: vertical; min-height: 60px;">${user.email || ''}</textarea>
                 </div>
             </div>
         `;
@@ -10688,15 +10693,42 @@ window.verifyExternalUser = () => {
     const container = document.getElementById('externalActionContainer');
     if (container) {
         container.style.display = 'flex';
+        
+        let emails = subUser.email ? subUser.email.split(',').map(e => e.trim()).filter(e => e) : [];
+        let selectHtml = '';
+        
+        if (emails.length > 1) {
+            selectHtml = `
+                <p style="margin: 0 0 5px 0; color: var(--mac-text-secondary); font-size: 13px;">Selecciona el correo:</p>
+                <select id="externalEmailSelect" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 5px;">
+                    ${emails.map(e => `<option value="${e}">${e}</option>`).join('')}
+                </select>
+            `;
+        } else if (emails.length === 1) {
+            selectHtml = `
+                <p style="margin: 0 0 5px 0; color: var(--mac-text-secondary); font-size: 13px;">Correo Autorizado:</p>
+                <h4 style="margin: 0 0 5px 0; color: var(--mac-text-main); font-size: 15px;">${emails[0]}</h4>
+                <input type="hidden" id="externalEmailSelect" value="${emails[0]}">
+            `;
+        } else {
+             selectHtml = `
+                <p style="margin: 0 0 5px 0; color: var(--mac-red); font-size: 13px;">No hay correos autorizados.</p>
+                <input type="hidden" id="externalEmailSelect" value="">
+            `;
+        }
+
         container.innerHTML = `
             <div style="background: rgba(255,255,255,0.05); border: 1px solid var(--mac-border); padding: 20px; border-radius: 16px; text-align: left;">
                 <p style="margin: 0 0 5px 0; color: var(--mac-text-secondary); font-size: 13px;">Plataforma Autorizada:</p>
                 <h3 style="margin: 0 0 15px 0; color: var(--mac-blue);">${subUser.platform}</h3>
                 
-                <p style="margin: 0 0 5px 0; color: var(--mac-text-secondary); font-size: 13px;">Correo Autorizado:</p>
-                <h4 style="margin: 0; color: var(--mac-text-main);">${subUser.email}</h4>
+                ${selectHtml}
             </div>
-            <button class="btn-primary" style="width: 100%; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: bold; background: var(--mac-green); border: none; margin-top: 10px; color: white;" onclick="window.executeExternalQuery('${subUser.platform}', '${subUser.email}')">Ejecutar Consulta</button>
+            <button class="btn-primary" style="width: 100%; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: bold; background: var(--mac-green); border: none; margin-top: 10px; color: white;" onclick="
+                const selectedEmail = document.getElementById('externalEmailSelect') ? document.getElementById('externalEmailSelect').value : '';
+                if(!selectedEmail) return Swal.fire('Atención', 'No hay correo disponible.', 'warning');
+                window.executeExternalQuery('${subUser.platform}', selectedEmail);
+            ">Ejecutar Consulta</button>
         `;
     }
 };
@@ -10710,5 +10742,20 @@ window.executeExternalQuery = (platform, authorizedEmail) => {
         return Swal.fire('Error', 'El vendedor no tiene una conexión API válida para esta plataforma.', 'error');
     }
 
-    window.requestAccessCode(conn.email, conn.token, 'Perfil', authorizedEmail);
+    window.requestAccessCode(conn.email, conn.token, 'Perfil', authorizedEmail, platform);
+};
+
+window.logoutExternalUser = () => {
+    const loginForm = document.getElementById('externalLoginForm');
+    const actionContainer = document.getElementById('externalActionContainer');
+    const usernameEl = document.getElementById('externalUsername');
+    
+    if(usernameEl) usernameEl.value = '';
+    
+    if(actionContainer) {
+        actionContainer.style.display = 'none';
+        actionContainer.innerHTML = '';
+    }
+    
+    if(loginForm) loginForm.style.display = 'block';
 };
