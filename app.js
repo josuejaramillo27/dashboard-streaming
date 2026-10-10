@@ -10256,7 +10256,7 @@ window.updateEditStoreStockCount = () => {
 };
 
 // --- SOLICITAR CÓDIGO AL VPS DESDE EL PORTAL ---
-window.requestAccessCode = async (masterEmail, appToken, accessLevel, targetEmail = '-') => {
+window.requestAccessCode = async (masterEmail, appToken, accessLevel, targetEmail = '-', , platformName = '') => {
     let finalTargetEmail = targetEmail;
 
     // Si el correo es '-' o viene vacío (Es un cliente externo o con datos incompletos)
