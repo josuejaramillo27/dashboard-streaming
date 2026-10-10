@@ -6817,20 +6817,20 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
                         </div>
                     </div>
                     ${(() => {
-                    const connections = storeUserData.apiConnections || [];
-                    const connInfo = connections.find(c => c.platform === platName);
-
-                    if (connInfo && connInfo.email && connInfo.token) {
-                        const isFullAccount = connInfo.permission === 'Modificación y Alertas';
-                        const accessLevel = isFullAccount ? 'Cuenta Completa' : 'Perfil';
-
-                        return `
-        <button onclick="window.requestAccessCode('${connInfo.email}', '${connInfo.token}', '${accessLevel}', '${acc.email || '-'}')" class="btn-primary" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; background: var(--mac-blue); border: none;">
-            <i class='bx bx-mobile-landscape'></i> Solicitar Código de Acceso
-        </button>`;
-                    }
-                    return '';
-                })()}
+                        const connections = storeUserData.apiConnections || [];
+                        const connInfo = connections.find(c => c.platform === platName);
+                        
+                        if (connInfo && connInfo.email && connInfo.token) {
+                            const isFullAccount = connInfo.permission === 'Modificación y Alertas';
+                            const accessLevel = isFullAccount ? 'Cuenta Completa' : 'Perfil';
+                            
+                            return `
+                            <button onclick="window.requestAccessCode('${connInfo.email}', '${connInfo.token}', '${accessLevel}', '${acc.email || '-'}')" class="btn-primary" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; background: var(--mac-blue); border: none;">
+                                <i class='bx bx-mobile-landscape'></i> Solicitar Código de Acceso
+                            </button>`;
+                        }
+                        return '';
+                    })()}
                     <button onclick="window.openReviewModal('${clientObj.id}', '${platName}', '${clientObj.name.replace(/'/g, "\\'")}', '${clientObj.phone || ''}')" class="btn-secondary" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; border: 1px solid var(--mac-orange); color: var(--mac-orange); background: rgba(255, 149, 0, 0.1); transition: 0.2s;"><i class='bx bxs-star'></i> Calificar Servicio</button>
                 </div>
             `;
@@ -10255,29 +10255,62 @@ window.updateEditStoreStockCount = () => {
 };
 
 // --- SOLICITAR CÓDIGO AL VPS DESDE EL PORTAL ---
-window.requestAccessCode = async (sellerEmail, sellerAppPassword, currentSaleType) => {
+window.requestAccessCode = async (masterEmail, appToken, accessLevel, targetEmail = '-') => {
+    let finalTargetEmail = targetEmail;
+
+    // Si el correo es '-' o viene vacío (Es un cliente externo o con datos incompletos)
+    if (!finalTargetEmail || finalTargetEmail === '-') {
+        const { value: emailIngresado } = await Swal.fire({
+            title: 'Validación Requerida',
+            text: 'Para buscar tu código de acceso, ingresa el correo de la cuenta de streaming a la que intentas acceder:',
+            input: 'email',
+            inputPlaceholder: 'ejemplo@dominio.com',
+            showCancelButton: true,
+            confirmButtonText: 'Buscar Código',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: 'var(--mac-blue)',
+            background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+            color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+        });
+
+        if (!emailIngresado) return; // Si cancela, no hacemos nada
+        finalTargetEmail = emailIngresado.trim();
+    }
+
+    // Ventana de carga
     Swal.fire({
-        title: 'Revisando bandeja matriz...',
-        text: 'Esto puede tomar unos segundos',
+        title: 'Buscando código...',
+        html: `Escaneando bandeja para <b>${finalTargetEmail}</b>.<br>Esto puede tomar unos segundos.`,
         allowOutsideClick: false,
         didOpen: () => { Swal.showLoading(); }
     });
 
     try {
-        const response = await fetch('https://bot.panelagc.com/api/get-code', {
+        const response = await fetch('http://164.92.230.161:3000/api/get-code', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: sellerEmail, appPassword: sellerAppPassword, saleType: currentSaleType })
+            body: JSON.stringify({
+                email: masterEmail,
+                appPassword: appToken,
+                saleType: accessLevel,
+                targetEmail: finalTargetEmail
+            })
         });
+
         const data = await response.json();
 
         if (data.status === 'success') {
-            Swal.fire({ title: 'Código de Acceso', text: data.code, icon: 'success', confirmButtonText: 'Listo' });
+            Swal.fire({
+                icon: 'success',
+                title: 'Código de Acceso',
+                html: `<div style="font-size: 32px; font-weight: 900; color: var(--mac-blue); letter-spacing: 4px; margin: 15px 0;">${data.code}</div><p style="font-size: 13px; color: var(--mac-text-secondary);">Úsalo rápidamente antes de que expire.</p>`,
+                confirmButtonText: 'Listo'
+            });
         } else {
             Swal.fire('Atención', data.message, 'warning');
         }
     } catch (error) {
-        Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
+        Swal.fire('Error', 'No se pudo contactar al servidor de lectura IMAP.', 'error');
     }
 };
 
