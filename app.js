@@ -10257,31 +10257,36 @@ window.updateEditStoreStockCount = () => {
 
 // --- SOLICITAR CÓDIGO AL VPS DESDE EL PORTAL ---
 window.requestAccessCode = async (masterEmail, appToken, accessLevel, targetEmail = '-', platformName = '') => {
-    let finalTargetEmail = targetEmail;
+    
+    let defaultSearchTerm = (targetEmail && targetEmail !== '-') ? targetEmail : '';
 
-    // Si el correo es '-' o viene vacío (Es un cliente externo o con datos incompletos)
-    if (!finalTargetEmail || finalTargetEmail === '-') {
-        const { value: emailIngresado } = await Swal.fire({
-            title: 'Validación Requerida',
-            text: 'Para buscar tu código de acceso, ingresa el correo de la cuenta de streaming a la que intentas acceder:',
-            input: 'email',
-            inputPlaceholder: 'ejemplo@dominio.com',
-            showCancelButton: true,
-            confirmButtonText: 'Buscar Código',
-            cancelButtonText: 'Cancelar',
-            confirmButtonColor: 'var(--mac-blue)',
-            background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
-            color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
-        });
+    // 🔥 SIEMPRE mostramos la ventana para confirmar o editar el término de búsqueda
+    const { value: searchKeyword } = await Swal.fire({
+        title: '🔎 Confirmar Búsqueda',
+        html: `
+            <p style="font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 15px;">
+                Se escaneará la bandeja maestra en busca de este correo/alias:<br>
+                <span style="font-size: 11px; color: var(--mac-orange);">* Puedes editarlo si usas un correo redireccionado.</span>
+            </p>
+            <input id="swal-search-input" class="swal2-input" value="${defaultSearchTerm}" placeholder="Ej: cuenta@dominio.com">
+        `,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Buscar Código',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: 'var(--mac-blue)',
+        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
+        preConfirm: () => {
+            return document.getElementById('swal-search-input').value.trim();
+        }
+    });
 
-        if (!emailIngresado) return; // Si cancela, no hacemos nada
-        finalTargetEmail = emailIngresado.trim();
-    }
+    if (!searchKeyword) return; // Si cancela la ventana
 
-    // Ventana de carga
     Swal.fire({
         title: 'Buscando código...',
-        html: `Escaneando bandeja para <b>${finalTargetEmail}</b>.<br>Esto puede tomar unos segundos.`,
+        html: `Escaneando últimos 10 minutos para <b>${searchKeyword}</b>...`,
         allowOutsideClick: false,
         didOpen: () => { Swal.showLoading(); }
     });
@@ -10294,7 +10299,7 @@ window.requestAccessCode = async (masterEmail, appToken, accessLevel, targetEmai
                 email: masterEmail,
                 appPassword: appToken,
                 saleType: accessLevel,
-                targetEmail: finalTargetEmail,
+                targetEmail: searchKeyword, // Enviamos lo que el usuario confirmó en la ventana
                 platformName: platformName
             })
         });
