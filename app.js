@@ -10294,7 +10294,8 @@ window.requestAccessCode = async (masterEmail, appToken, accessLevel, targetEmai
                 email: masterEmail,
                 appPassword: appToken,
                 saleType: accessLevel,
-                targetEmail: finalTargetEmail
+                targetEmail: finalTargetEmail,
+                platformName: platformName
             })
         });
 
@@ -10303,9 +10304,14 @@ window.requestAccessCode = async (masterEmail, appToken, accessLevel, targetEmai
         if (data.status === 'success') {
             Swal.fire({
                 icon: 'success',
-                title: 'Código de Acceso',
-                html: `<div style="font-size: 32px; font-weight: 900; color: var(--mac-blue); letter-spacing: 4px; margin: 15px 0;">${data.code}</div><p style="font-size: 13px; color: var(--mac-text-secondary);">Úsalo rápidamente antes de que expire.</p>`,
-                confirmButtonText: 'Listo'
+                title: 'Código Recibido',
+                html: `
+                    <p style="font-size: 12px; color: var(--mac-text-secondary); margin-bottom: 5px;">Remitente: ${data.sender}</p>
+                    <div style="background: rgba(0, 122, 255, 0.05); border: 1px dashed var(--mac-blue); border-radius: 12px; padding: 15px; margin: 10px 0; max-height: 180px; overflow-y: auto; text-align: left; font-size: 13px; color: var(--mac-text-main); white-space: pre-wrap;">${data.fullText}</div>
+                    <p style="font-size: 12px; font-weight: bold; color: var(--mac-orange);">Si solo buscas el número: <span style="font-size: 16px;">${data.code}</span></p>
+                `,
+                confirmButtonText: 'Cerrar',
+                confirmButtonColor: 'var(--mac-blue)'
             });
         } else {
             Swal.fire('Atención', data.message, 'warning');
@@ -10556,7 +10562,7 @@ window.renderExternalSubUsers = () => {
 
     tempExternalSubUsers.forEach((user, index) => {
         const selectedOptions = platformOptions.replace(`value="${user.platform}"`, `value="${user.platform}" selected`);
-        
+
         list.innerHTML += `
             <div style="background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 12px; padding: 15px; position: relative; display: flex; flex-direction: column; gap: 10px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -10593,7 +10599,7 @@ window.updateTempSubUser = (index, field, value) => {
 
 window.saveExternalSubUsers = async () => {
     if (!currentUser) return;
-    
+
     for (let i = 0; i < tempExternalSubUsers.length; i++) {
         const u = tempExternalSubUsers[i];
         if (!u.username || !u.platform || !u.email) {
@@ -10627,7 +10633,7 @@ window.checkExternalQueryPortal = async () => {
     if (document.getElementById('authView')) document.getElementById('authView').style.display = 'none';
     if (document.getElementById('appView')) document.getElementById('appView').style.display = 'none';
     if (document.getElementById('adminView')) document.getElementById('adminView').style.display = 'none';
-    
+
     const portal = document.getElementById('externalQueryPortal');
     if (portal) portal.style.display = 'flex';
 
@@ -10638,7 +10644,7 @@ window.checkExternalQueryPortal = async () => {
             const sellerDoc = querySnapshot.docs[0];
             window.externalSellerData = sellerDoc.data();
             window.externalSellerId = sellerDoc.id;
-            
+
             if (window.externalSellerData.logoUrl) {
                 const logoEl = document.getElementById('externalPortalLogo');
                 if (logoEl) logoEl.src = window.externalSellerData.logoUrl;
@@ -10661,7 +10667,7 @@ window.verifyExternalUser = () => {
     if (!usernameEl) return;
     const username = usernameEl.value.trim();
     if (!username) return Swal.fire('Atención', 'Ingresa un nombre de usuario.', 'warning');
-    
+
     if (!window.externalSellerData || !window.externalSellerData.externalSubUsers) {
         return Swal.fire('Error', 'No hay sub-usuarios registrados.', 'error');
     }
@@ -10673,7 +10679,7 @@ window.verifyExternalUser = () => {
 
     const loginForm = document.getElementById('externalLoginForm');
     if (loginForm) loginForm.style.display = 'none';
-    
+
     const container = document.getElementById('externalActionContainer');
     if (container) {
         container.style.display = 'flex';
@@ -10694,7 +10700,7 @@ window.executeExternalQuery = (platform, authorizedEmail) => {
     if (!window.externalSellerData) return;
     const apiConns = window.externalSellerData.apiConnections || [];
     const conn = apiConns.find(c => c.platform === platform);
-    
+
     if (!conn || !conn.token) {
         return Swal.fire('Error', 'El vendedor no tiene una conexión API válida para esta plataforma.', 'error');
     }
