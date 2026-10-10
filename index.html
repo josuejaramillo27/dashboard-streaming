@@ -1220,8 +1220,8 @@
             <p id="externalPortalSellerName" style="color: var(--mac-text-secondary); margin-bottom: 25px; font-size: 14px;">Inicia sesión para ejecutar tu consulta</p>
 
             <div id="externalLoginForm">
-                <input type="text" id="externalUsername" placeholder="Nombre de Usuario" style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 20px; font-size: 15px; box-sizing: border-box; outline: none;">
-                <button class="btn-primary" onclick="window.verifyExternalUser()" style="width: 100%; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: bold; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); border: none;">Ingresar</button>
+                <input type="text" id="externalUsername" placeholder="Nombre de Usuario" style="width: 85%; max-width: 320px; margin: 0 auto 20px auto; display: block; padding: 14px; border-radius: 12px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); font-size: 15px; box-sizing: border-box; outline: none;">
+                <button class="btn-primary" onclick="window.verifyExternalUser()" style="width: 85%; max-width: 320px; margin: 0 auto; display: block; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: bold; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); border: none;">Ingresar</button>
             </div>
 
             <div id="externalActionContainer" style="display: none; flex-direction: column; gap: 15px; margin-top: 20px;">
@@ -2110,34 +2110,44 @@
 
             <!-- GESTOR DE ACCESOS -->
             <div id="accessManagerSection" class="dashboard-section" style="display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <div>
-                        <h2 style="margin: 0; font-size: 24px; color: var(--mac-text-main);"><i class='bx bx-key'></i>
-                            Gestor de Accesos Externos</h2>
-                        <p style="color:var(--mac-text-secondary); font-size:14px; margin:5px 0 0 0;">Vincula servicios
-                            externos a tu cuenta mediante tokens.</p>
+                <!-- PESTAÑAS TIPO CHROME PARA SEPARAR API DE SUB-USUARIOS -->
+                <div class="chrome-tabs-container" style="margin: 0 0 20px 0; border: none; background: transparent; padding: 0;">
+                    <div class="chrome-tab active access-tab-btn" onclick="window.switchAccessTab('tabAccesosAPI', this)"><i class='bx bx-key'></i> Accesos API</div>
+                    <div class="chrome-tab access-tab-btn" onclick="window.switchAccessTab('tabSubUsuarios', this)"><i class='bx bx-group'></i> Sub-Usuarios</div>
+                </div>
+
+                <!-- PESTAÑA: ACCESOS API -->
+                <div id="tabAccesosAPI" class="access-tab-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div>
+                            <h2 style="margin: 0; font-size: 24px; color: var(--mac-text-main);"><i class='bx bx-key'></i>
+                                Gestor de Accesos Externos</h2>
+                            <p style="color:var(--mac-text-secondary); font-size:14px; margin:5px 0 0 0;">Vincula servicios
+                                externos a tu cuenta mediante tokens.</p>
+                        </div>
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <button class="btn-primary" style="width: auto; padding: 10px 25px;"
+                                onclick="window.addApiConnection()">+ Añadir Nueva Conexión</button>
+                        </div>
                     </div>
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <button class="btn-primary" style="width: auto; padding: 10px 25px;"
-                            onclick="window.addApiConnection()">+ Añadir Nueva Conexión</button>
+
+                    <div id="apiConnectionsList"
+                        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                        <!-- Tarjetas dinámicas aquí -->
+                    </div>
+
+                    <div
+                        style="display: flex; justify-content: flex-end; margin-top: 20px; border-top: 1px solid var(--mac-border); padding-top: 15px;">
+                        <div style="text-align: right; margin-top: 20px;">
+                            <button class="btn-primary" style="width: auto; padding: 12px 30px;"
+                                onclick="window.saveApiConnections()"><i class='bx bx-save'></i> Guardar
+                                Configuración</button>
+                        </div>
                     </div>
                 </div>
 
-                <div id="apiConnectionsList"
-                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                    <!-- Tarjetas dinámicas aquí -->
-                </div>
-
-                <div
-                    style="display: flex; justify-content: flex-end; margin-top: 20px; border-top: 1px solid var(--mac-border); padding-top: 15px;">
-                    <div style="text-align: right; margin-top: 20px;">
-                        <button class="btn-primary" style="width: auto; padding: 12px 30px;"
-                            onclick="window.saveApiConnections()"><i class='bx bx-save'></i> Guardar
-                            Configuración</button>
-                    </div>
-                </div>
-
-                <div style="margin-top: 40px; border-top: 2px dashed var(--mac-border); padding-top: 20px;">
+                <!-- PESTAÑA: SUB-USUARIOS -->
+                <div id="tabSubUsuarios" class="access-tab-content" style="display: none;">
                     <div
                         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <div>
@@ -3753,13 +3763,13 @@
             <p style="font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 15px;">Ingresa tus datos de
                 cliente para ver tus credenciales:</p>
 
-            <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
                 <input type="tel" id="portalPhoneSearchInput" placeholder="WhatsApp Registrado (Ej: +51...)"
-                    style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); text-align: center; font-size: 14px; box-sizing: border-box;">
+                    style="width: 85%; max-width: 320px; padding: 14px; border-radius: 12px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); text-align: center; font-size: 14px; box-sizing: border-box;">
                 <input type="text" id="portalCodeSearchInput" placeholder="🔑 Código Portal Web"
-                    style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); text-align: center; text-transform: uppercase; font-size: 14px; font-weight: bold; letter-spacing: 2px; box-sizing: border-box;">
+                    style="width: 85%; max-width: 320px; padding: 14px; border-radius: 12px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); text-align: center; text-transform: uppercase; font-size: 14px; font-weight: bold; letter-spacing: 2px; box-sizing: border-box;">
                 <button class="btn-primary"
-                    style="width: 100%; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 800; margin-top: 5px; box-shadow: 0 8px 20px rgba(0, 122, 255, 0.2);"
+                    style="width: 85%; max-width: 320px; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 800; margin-top: 5px; box-shadow: 0 8px 20px rgba(0, 122, 255, 0.2);"
                     onclick="window.searchPortalByPhone()">Buscar Accesos <i class='bx bx-right-arrow-alt'></i></button>
             </div>
         </div>
