@@ -1,35 +1,27 @@
 :root {
-    /* --- FONDO Y SUPERFICIES (Modo Claro - Perla Escarchada) --- */
-    --mac-bg: #F5F5F7;
-    /* Blanco perla muy suave (Evita el blanco médico) */
-    --mac-surface: #FFFFFF;
-    /* Tarjetas en blanco puro translúcido */
-    --mac-border: #E5E5EA;
-    /* Bordes plata casi invisibles */
-    --mac-border-solid: #D1D1D6;
+    /* --- FONDO Y SUPERFICIES (Modo Claro - Perla & Grafito) --- */
+    --mac-bg: #F4F5F8;
+    --mac-surface: rgba(255, 255, 255, 0.85);
+    --mac-surface-elevated: #FFFFFF;
+    --mac-input-bg: #F9FAFB;
+    --mac-border: rgba(0, 0, 0, 0.08);
+    --mac-border-solid: #D1D5DB;
 
     /* --- TEXTOS (Modo Claro) --- */
-    --mac-text-main: #1C1C1E;
-    /* Gris grafito oscuro (Mucho más elegante que el negro 000) */
-    --mac-text-secondary: #8E8E93;
-    /* Gris plata suave para datos secundarios */
+    --mac-text-main: #111827;
+    --mac-text-secondary: #6B7280;
 
-    /* --- ACENTOS (Colores desaturados y premium para el Modo Claro) --- */
-    --mac-blue: #007AFF;
-    /* Azul clásico iOS (Confianza y tecnología) */
-    --mac-blue-hover: #005BB5;
-    --mac-green: #34C759;
-    /* Verde manzana suave */
-    --mac-orange: #D4AF37;
-    /* Oro champán (Exclusividad premium) */
-    --mac-red: #FF3B30;
-    /* Rojo limpio */
+    /* --- ACENTOS (Modo Claro) --- */
+    --mac-blue: #0066FF;
+    --mac-blue-hover: #0052CC;
+    --mac-indigo: #5856D6;
+    --mac-green: #10B981;
+    --mac-orange: #F59E0B;
+    --mac-red: #EF4444;
 
     /* --- CAJAS, FONDOS INTERNOS Y SOMBRAS --- */
-    --mac-gray: rgba(0, 0, 0, 0.03);
-    /* Cajas de texto apenas sombreadas */
-    --mac-table-hover: rgba(0, 122, 255, 0.05);
-    /* Hover muy sutil en azul */
+    --mac-gray: rgba(0, 0, 0, 0.035);
+    --mac-table-hover: rgba(0, 102, 255, 0.04);
     --mac-dropdown-bg: rgba(255, 255, 255, 0.95);
 
     /* Sombras Premium para fondos claros (Amplias y muy difuminadas) */
@@ -37,59 +29,45 @@
     --glass-blur: blur(25px);
 
     /* --- LUCES AURORA DE FONDO (Para la animación) --- */
-    --aurora-1: rgba(0, 122, 255, 0.04);
-    /* Azul muy tenue */
-    --aurora-2: rgba(212, 175, 55, 0.04);
-    /* Dorado muy tenue */
-    --aurora-3: rgba(52, 199, 89, 0.03);
-    /* Verde tenue */
+    --aurora-1: rgba(0, 102, 255, 0.04);
+    --aurora-2: rgba(245, 158, 11, 0.04);
+    --aurora-3: rgba(16, 185, 129, 0.03);
 }
 
 body.dark-mode {
-    /* --- FONDO Y SUPERFICIES (Modo Oscuro - Onyx & Oro Blanco) --- */
-    --mac-bg: #050505;
-    /* Negro puro casi absoluto. Máximo contraste minimalista. */
-    --mac-surface: #0A0A0A;
-    /* Tarjetas muy oscuras, apenas separadas del fondo. */
-    --mac-border: #2A2A2A;
-    /* Bordes sutiles oscuros. */
-    --mac-border-solid: #333333;
+    /* --- FONDO Y SUPERFICIES (Modo Oscuro - Onyx & Cristal) --- */
+    --mac-bg: #090A0F;
+    --mac-surface: rgba(20, 22, 28, 0.78);
+    --mac-surface-elevated: #1C1F26;
+    --mac-input-bg: rgba(255, 255, 255, 0.04);
+    --mac-border: rgba(255, 255, 255, 0.08);
+    --mac-border-solid: #2E323B;
 
     /* --- TEXTOS (Modo Oscuro) --- */
-    --mac-text-main: #FFFFFF;
-    /* Blanco puro para máxima legibilidad. */
-    --mac-text-secondary: #8E8E93;
-    /* Gris plata suave para datos secundarios. */
+    --mac-text-main: #F9FAFB;
+    --mac-text-secondary: #9CA3AF;
 
-    /* --- ACENTOS (Colores desaturados para Profesionalidad) --- */
-    --mac-blue: #0A84FF;
-    /* Azul Apple oscuro. Profesional y limpio. */
-    --mac-blue-hover: #0066CC;
+    /* --- ACENTOS (Modo Oscuro) --- */
+    --mac-blue: #2E88FF;
+    --mac-blue-hover: #1A73E8;
+    --mac-indigo: #6E6CE8;
     --mac-green: #30D158;
-    /* Verde esmeralda para el dinero. */
-    --mac-orange: #E5A352;
-    /* Oro cálido desaturado. Transmite exclusividad. */
+    --mac-orange: #FF9F0A;
     --mac-red: #FF453A;
-    /* Rojo elegante para alertas. */
 
     /* --- CAJAS, FONDOS INTERNOS Y SOMBRAS --- */
-    --mac-gray: rgba(255, 255, 255, 0.02);
-    /* Fondos internos (Inputs, notas) */
-    --mac-table-hover: rgba(255, 255, 255, 0.08);
-    /* Hover sutil en blanco */
-    --mac-dropdown-bg: rgba(18, 18, 18, 0.95);
+    --mac-gray: rgba(255, 255, 255, 0.04);
+    --mac-table-hover: rgba(255, 255, 255, 0.06);
+    --mac-dropdown-bg: rgba(20, 22, 28, 0.95);
 
     /* Sombras oscuras sofisticadas */
-    --glass-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
+    --glass-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
     --glass-blur: blur(25px);
 
     /* --- LUCES AURORA DE FONDO (Para la animación en Modo Oscuro) --- */
-    --aurora-1: rgba(10, 132, 255, 0.08);
-    /* Azul nocturno */
-    --aurora-2: rgba(229, 163, 82, 0.06);
-    /* Destellos dorados en el fondo */
-    --aurora-3: rgba(255, 255, 255, 0.03);
-    /* Blanco plata */
+    --aurora-1: rgba(46, 136, 255, 0.08);
+    --aurora-2: rgba(255, 159, 10, 0.05);
+    --aurora-3: rgba(255, 255, 255, 0.02);
 }
 
 /* =========================================================
@@ -153,8 +131,8 @@ body::after {
 
     /* 🪄 MAGIA: Invertimos el logo blanco a negro puro para que contraste en fondo claro */
     filter: invert(1);
-    opacity: 0.20;
-    /* Opacidad baja porque el negro resalta mucho sobre el blanco */
+    opacity: 0.025;
+    /* Opacidad ultra sutil para no ensuciar el glassmorphism */
 
     pointer-events: none;
     z-index: 0;
@@ -167,8 +145,8 @@ body::after {
 body.dark-mode::after {
     /* Quitamos la inversión para que el logo vuelva a ser blanco original */
     filter: invert(0);
-    opacity: 0.15;
-    /* Subimos la opacidad para que brille bien sobre el fondo negro */
+    opacity: 0.02;
+    /* Opacidad limpia en modo oscuro */
 }
 
 /* Aseguramos que el panel principal siempre esté una capa por encima del logo */
@@ -269,45 +247,90 @@ body.dark-mode::after {
 }
 
 h1 {
-    text-align: center;
+    text-align: left;
     font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
     margin-bottom: 5px;
+    color: var(--mac-text-main);
+}
+
+h2 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--mac-text-main);
+    text-align: left;
+    margin: 0;
+}
+
+h2 + p,
+.section-subtitle {
+    font-size: 13.5px;
+    color: var(--mac-text-secondary);
+    font-weight: 400;
+    margin: 5px 0 0 0;
 }
 
 h3 {
-    text-align: center;
+    text-align: left;
     color: var(--mac-text-secondary);
     font-size: 14px;
     margin-top: 0;
     margin-bottom: 20px;
 }
 
+.login-container h1,
+.login-container h3,
+#publicStoreHeaderProfile h1,
+#publicStoreHeaderProfile p,
+#clientPortalView h1,
+#clientPortalView h3 {
+    text-align: center !important;
+}
+
 .stats-panel {
-    display: none;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
     margin-bottom: 25px;
 }
 
 .stat-card {
-    background: var(--mac-gray);
-    padding: 15px;
-    border-radius: 10px;
-    text-align: center;
-    border: 1px solid var(--mac-border);
+    background: var(--mac-surface) !important;
+    padding: 18px 20px;
+    border-radius: 14px;
+    text-align: left;
+    border: 1px solid var(--mac-border) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--mac-border-solid) !important;
 }
 
 .stat-card h4 {
-    margin: 0 0 5px 0;
-    font-size: 12px;
+    margin: 0 0 8px 0;
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
     color: var(--mac-text-secondary);
+    text-align: left;
 }
 
 .stat-card p {
     margin: 0;
-    font-size: 24px;
-    font-weight: bold;
+    font-size: 26px;
+    font-weight: 700;
     color: var(--mac-text-main);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    text-align: left;
 }
 
 .stat-active p {
@@ -329,6 +352,26 @@ h3 {
     margin-bottom: 25px;
 }
 
+#clientForm {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    align-items: flex-end;
+}
+
+#actionButtonsContainer {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+#actionButtonsContainer button {
+    min-width: 200px;
+    width: auto;
+}
+
 /* =========================================================
    CAMPOS DE TEXTO, FORMULARIOS Y BUSCADOR (ESTILO APPLE)
 ========================================================= */
@@ -336,47 +379,44 @@ input:not([type="checkbox"]):not([type="radio"]),
 select,
 .select-box,
 textarea {
-    padding: 12px 14px;
+    height: 42px;
+    padding: 0 14px;
     border: 1px solid var(--mac-border);
     border-radius: 10px;
-    /* Bordes un poco más suaves */
-    font-size: 14px;
+    font-size: 13.5px;
     width: 100%;
     box-sizing: border-box;
-
-    /* Fondo cristalino en lugar de totalmente transparente */
-    background-color: var(--mac-surface);
+    background-color: var(--mac-input-bg);
     color: var(--mac-text-main);
-
-    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
     outline: none;
-    /* Eliminamos el borde tosco del navegador */
     font-family: inherit;
     -webkit-appearance: none;
-    /* Limpia estilos forzados en celulares iOS/Android */
+    display: flex;
+    align-items: center;
 }
 
-/* 🪄 LA MAGIA: El efecto al tocar o hacer clic para escribir */
+textarea {
+    height: auto;
+    min-height: 80px;
+    padding: 12px 14px;
+}
+
 input:focus,
 select:focus,
 textarea:focus,
 .select-box:focus {
     border-color: var(--mac-blue);
-    background-color: var(--mac-bg);
-    /* Se vuelve sólido para facilitar la lectura */
-    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.15);
-    /* El famoso anillo de luz iOS */
+    background-color: var(--mac-surface-elevated);
+    box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.15);
     transform: translateY(-1px);
-    /* Se levanta un milímetro */
 }
 
-/* Estilo elegante para el texto de relleno (placeholder) */
 input::placeholder,
 textarea::placeholder {
     color: var(--mac-text-secondary);
     opacity: 0.85;
-    /* Más sólido y visible */
-    font-weight: 500;
+    font-weight: 400;
 }
 
 .custom-select {
@@ -433,23 +473,45 @@ textarea::placeholder {
 }
 
 button {
-    padding: 10px;
+    padding: 10px 16px;
     border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: bold;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 600;
     cursor: pointer;
+    width: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: inherit;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.auth-form button,
+.modal-footer button.w-100 {
     width: 100%;
 }
 
 .btn-primary {
-    background-color: var(--mac-blue);
-    color: white;
+    background: linear-gradient(180deg, #1A8CFF 0%, var(--mac-blue) 100%);
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 6px rgba(0, 102, 255, 0.25);
+    border: none;
+    padding: 10px 18px;
 }
 
 .btn-secondary {
-    background-color: var(--mac-gray);
+    background: var(--mac-surface);
     color: var(--mac-text-main);
+    border: 1px solid var(--mac-border);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    padding: 10px 16px;
+}
+
+.btn-secondary:hover {
+    border-color: var(--mac-border-solid);
+    background: var(--mac-gray);
 }
 
 .toolbar {
@@ -473,30 +535,77 @@ button {
 table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: 13.5px;
 }
 
 th,
 td {
     padding: 12px;
-    border-bottom: 1px solid var(--mac-gray);
-    text-align: left;
+    border-bottom: 1px solid var(--mac-border);
+    font-size: 13.5px;
 }
 
 th {
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
     color: var(--mac-text-secondary);
-    border-bottom: 2px solid var(--mac-border);
+    border-bottom: 1px solid var(--mac-border);
+}
+
+/* Alineaciones de columnas en Tablas */
+#mainTable th:nth-child(1), #mainTable td:nth-child(1),
+#mainTable th:nth-child(2), #mainTable td:nth-child(2),
+#mainTable th:nth-child(3), #mainTable td:nth-child(3),
+#mainTable th:nth-child(4), #mainTable td:nth-child(4),
+#adminTable th:nth-child(1), #adminTable td:nth-child(1),
+#adminTable th:nth-child(2), #adminTable td:nth-child(2),
+#adminTable th:nth-child(3), #adminTable td:nth-child(3) {
+    text-align: left;
+}
+
+#mainTable th:nth-child(5), #mainTable td:nth-child(5) {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+#mainTable th:nth-child(6), #mainTable td:nth-child(6),
+#mainTable th:nth-child(7), #mainTable td:nth-child(7) {
+    text-align: center;
+}
+
+#mainTable th:last-child,
+#mainTable td.actions-cell,
+#adminTable th:last-child,
+#adminTable td.actions-cell {
+    text-align: right;
+    justify-content: flex-end;
+}
+
+.stat-card p,
+.store-product-price,
+.cart-item-price,
+#tableBody td,
+#adminTableBody td,
+#chartHeaderTotal,
+#chartHeaderTotalFin,
+#statProfit, #bdIncome, #bdCost, #bdProfit,
+#bdIncomeFin, #bdCostFin, #bdProfitFin,
+#displayFinancialGoal, #goalProgressText,
+#retentionRateText, #growthRateText {
+    font-variant-numeric: tabular-nums;
 }
 
 .client-profile {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .avatar {
-    width: 14px;
-    height: 14px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     flex-shrink: 0;
 }
@@ -506,42 +615,112 @@ th {
 ========================================================= */
 .actions-cell {
     display: flex;
-    gap: 5px;
+    gap: 6px;
     flex-wrap: wrap;
+    align-items: center;
 }
 
 .action-btn {
-    padding: 6px 10px;
+    background: var(--mac-gray);
+    color: var(--mac-text-main);
+    border: 1px solid var(--mac-border);
+    padding: 6px 12px;
     border-radius: 8px;
-    font-size: 12px;
+    font-size: 12.5px;
     font-weight: 600;
     width: auto;
-    color: var(--mac-text-main);
-    background: var(--mac-surface);
-    /* Fondo cristalino en lugar de gris sólido */
-    border: 1px solid var(--mac-border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    box-shadow: none;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
-/* Botones de acción específicos con brillo y cristal */
+/* Botones de acción específicos */
 .btn-wa {
-    background: rgba(52, 199, 89, 0.12) !important;
+    background: rgba(16, 185, 129, 0.1) !important;
     color: var(--mac-green) !important;
-    border: 1px solid rgba(52, 199, 89, 0.3) !important;
+    border: 1px solid rgba(16, 185, 129, 0.25) !important;
 }
 
 .btn-renew {
-    background: rgba(0, 122, 255, 0.12) !important;
+    background: rgba(0, 102, 255, 0.1) !important;
     color: var(--mac-blue) !important;
-    border: 1px solid rgba(0, 122, 255, 0.3) !important;
+    border: 1px solid rgba(0, 102, 255, 0.25) !important;
 }
 
 .btn-del {
-    background: rgba(255, 59, 48, 0.12) !important;
+    background: rgba(239, 68, 68, 0.1) !important;
     color: var(--mac-red) !important;
-    border: 1px solid rgba(255, 59, 48, 0.3) !important;
+    border: 1px solid transparent !important;
+}
+
+.btn-del:hover {
+    background: var(--mac-red) !important;
+    color: #fff !important;
+}
+
+/* =========================================================
+   PESTAÑAS ESTILO iOS SEGMENTED CONTROL
+========================================================= */
+.chrome-tabs-container {
+    display: inline-flex;
+    background: var(--mac-gray);
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid var(--mac-border);
+    gap: 4px;
+    margin-bottom: 20px;
+    width: auto;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.chrome-tabs-container::-webkit-scrollbar {
+    display: none;
+}
+
+.chrome-tab {
+    flex: initial;
+    min-width: auto;
+    max-width: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--mac-text-secondary);
+    background: transparent;
+    border: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    white-space: nowrap;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.chrome-tab:hover {
+    color: var(--mac-text-main);
+    background: rgba(0, 0, 0, 0.04);
+}
+
+body.dark-mode .chrome-tab:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.chrome-tab.active {
+    background: var(--mac-surface-elevated) !important;
+    color: var(--mac-text-main) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.chrome-tab.active::after {
+    display: none !important;
 }
 
 /* Etiquetas de Estado de las Cuentas */
@@ -650,25 +829,26 @@ th {
     }
 }
 
-/* --- CORRECCIÓN FORZADA PARA EL MENÚ DESPLEGABLE --- */
+/* --- MENÚ DESPLEGABLE ESTILO macOS --- */
 select {
-    background-color: #ffffff !important;
-    color: #000000 !important;
+    background-color: var(--mac-input-bg) !important;
+    color: var(--mac-text-main) !important;
+    border: 1px solid var(--mac-border) !important;
 }
 
 select option {
-    background-color: #ffffff !important;
-    color: #000000 !important;
+    background-color: var(--mac-surface-elevated) !important;
+    color: var(--mac-text-main) !important;
 }
 
 body.dark-mode select {
-    background-color: #1c1c1e !important;
-    color: #ffffff !important;
+    background-color: var(--mac-input-bg) !important;
+    color: var(--mac-text-main) !important;
 }
 
 body.dark-mode select option {
-    background-color: #1c1c1e !important;
-    color: #ffffff !important;
+    background-color: var(--mac-surface-elevated) !important;
+    color: var(--mac-text-main) !important;
 }
 
 /* --- ANIMACIÓN DE CARGA Y DESGLOSE --- */
@@ -1587,6 +1767,29 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
    1. MAGIA RESPONSIVA: CONTROL ABSOLUTO EXCLUSIVO PARA CELULARES
    ========================================================================== */
 @media (max-width: 768px) {
+    #clientForm {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+    }
+
+    .stats-panel {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+    }
+
+    #actionButtonsContainer {
+        justify-content: stretch !important;
+    }
+
+    #actionButtonsContainer button {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .pedido-card-grid {
+        grid-template-columns: 1fr !important;
+    }
+
     .header-top {
         flex-direction: column !important;
         align-items: flex-start !important;
@@ -1705,16 +1908,16 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
 .btn-primary:hover,
 .btn-secondary:hover,
 .btn-news-shiny:hover {
-    transform: translateY(-3px) scale(1.02);
-    filter: brightness(1.15);
+    filter: brightness(1.06);
+    transform: translateY(-1px);
 }
 
 .action-btn:active,
 .btn-primary:active,
 .btn-secondary:active,
 .btn-news-shiny:active {
-    transform: translateY(1px) scale(0.96);
-    filter: brightness(0.9);
+    transform: scale(0.98);
+    filter: brightness(0.95);
 }
 
 .modal-overlay {
