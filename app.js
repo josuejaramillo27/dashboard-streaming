@@ -2228,7 +2228,7 @@ window.renderTable = () => {
         </td>`;
         tbody.appendChild(tr);
     });
-    if (document.getElementById('statsPanel').style.display === 'grid') window.toggleStats(true);
+    if (document.getElementById('statsPanel')?.style.display === 'grid') window.toggleStats(true);
 };
 
 /* --- SISTEMA MULTI-PLATAFORMA AVANZADO DE ENVÍO POR WHATSAPP --- */
