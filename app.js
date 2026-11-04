@@ -21,7 +21,7 @@ const messaging = getMessaging(app);
 const googleProvider = new GoogleAuthProvider();
 
 let currentUser = null; let currentUserData = null; let clients = []; let editingClientId = null;
-let currentManageUserId = null; 
+let currentManageUserId = null;
 let multiAccData = {};
 let currentActiveTab = '';
 window.getDefaultAccData = () => ({ email: '', password: '', profile: '', pin: '', units: 1, months: 1, deviceName: '', deviceType: '', saleType: 'Perfil', inventoryId: null });
@@ -31,9 +31,9 @@ let editingNewsId = null;
 let editingNewsOldImg = null;
 
 const macPalette = ['#FF2D55', '#5856D6', '#FF9500', '#34C759', '#007AFF', '#AF52DE', '#FF3B30', '#FFCC00', '#5AC8FA'];
-const getCurrencyForCountry = (country) => { 
-    const dict = { 
-        "Perú": "S/", 
+const getCurrencyForCountry = (country) => {
+    const dict = {
+        "Perú": "S/",
         "Colombia": "COP $",
         "México": "MXN $",
         "Argentina": "ARS $",
@@ -53,39 +53,39 @@ const getCurrencyForCountry = (country) => {
         "Nicaragua": "C$",
         "Puerto Rico": "$",
         "Cuba": "CUP $"
-    }; 
+    };
     return dict[country] || "USD $"; // Por defecto USD si es "Otro País"
 };
-const updateThemeIcon = () => { 
-    const isDark = document.body.classList.contains('dark-mode'); 
-    document.querySelectorAll('.theme-toggle').forEach(btn => { 
-        btn.innerHTML = isDark ? "<i class='bx bx-sun'></i> Modo claro" : "<i class='bx bx-moon'></i> Modo oscuro"; 
-    }); 
+const updateThemeIcon = () => {
+    const isDark = document.body.classList.contains('dark-mode');
+    document.querySelectorAll('.theme-toggle').forEach(btn => {
+        btn.innerHTML = isDark ? "<i class='bx bx-sun'></i> Modo claro" : "<i class='bx bx-moon'></i> Modo oscuro";
+    });
 };
-if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode'); updateThemeIcon(); 
-window.toggleTheme = () => { 
-    document.body.classList.toggle('dark-mode'); 
-    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode')); 
-    updateThemeIcon(); 
-    
+if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode'); updateThemeIcon();
+window.toggleTheme = () => {
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    updateThemeIcon();
+
     // Si los gráficos están abiertos, los repintamos con el nuevo tema
     if (document.getElementById('analyticsSection') && document.getElementById('analyticsSection').style.display === 'flex') {
-        if(typeof window.toggleStats === 'function') window.toggleStats(true); 
+        if (typeof window.toggleStats === 'function') window.toggleStats(true);
     }
 };
 window.showNotification = (msg) => { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 5000); }
-function showView(viewId) { 
-    document.getElementById('authView').style.display = 'none'; 
-    document.getElementById('appView').style.display = 'none'; 
-    document.getElementById('adminView').style.display = 'none'; 
-    document.getElementById(viewId).style.display = 'block'; 
-    
+function showView(viewId) {
+    document.getElementById('authView').style.display = 'none';
+    document.getElementById('appView').style.display = 'none';
+    document.getElementById('adminView').style.display = 'none';
+    document.getElementById(viewId).style.display = 'block';
+
     if (viewId === 'appView') {
         document.body.classList.add('logged-in');
     } else {
         document.body.classList.remove('logged-in');
     }
-    
+
     const bottomNav = document.querySelector('.bottom-nav');
     if (bottomNav) {
         if (viewId === 'appView' && window.innerWidth <= 768) {
@@ -95,25 +95,25 @@ function showView(viewId) {
         }
     }
 }
-window.showLogin = () => { document.getElementById('loginForm').style.display='flex'; document.getElementById('registerForm').style.display='none'; document.getElementById('resetForm').style.display='none'; document.getElementById('authSubtitle').innerText='Iniciar Sesión'; }
-window.showRegister = () => { document.getElementById('loginForm').style.display='none'; document.getElementById('registerForm').style.display='flex'; document.getElementById('resetForm').style.display='none'; document.getElementById('authSubtitle').innerText='Crear Cuenta'; }
-window.showReset = () => { document.getElementById('loginForm').style.display='none'; document.getElementById('registerForm').style.display='none'; document.getElementById('resetForm').style.display='flex'; document.getElementById('authSubtitle').innerText='Recuperar Contraseña'; }
+window.showLogin = () => { document.getElementById('loginForm').style.display = 'flex'; document.getElementById('registerForm').style.display = 'none'; document.getElementById('resetForm').style.display = 'none'; document.getElementById('authSubtitle').innerText = 'Iniciar Sesión'; }
+window.showRegister = () => { document.getElementById('loginForm').style.display = 'none'; document.getElementById('registerForm').style.display = 'flex'; document.getElementById('resetForm').style.display = 'none'; document.getElementById('authSubtitle').innerText = 'Crear Cuenta'; }
+window.showReset = () => { document.getElementById('loginForm').style.display = 'none'; document.getElementById('registerForm').style.display = 'none'; document.getElementById('resetForm').style.display = 'flex'; document.getElementById('authSubtitle').innerText = 'Recuperar Contraseña'; }
 window.goToRegisterFromPlanes = () => {
     // 1. Ocultar la vista del catálogo de planes
     document.getElementById('planesPublicView').style.display = 'none';
-    
+
     // 2. Limpiar la URL (Quitar ?planes=true) para que no vuelva a atrapar la pantalla
     const url = new URL(window.location);
     url.searchParams.delete('planes');
     window.history.pushState({}, '', url);
-    
+
     // 3. Mandar al usuario directo a crear su cuenta
     showView('authView');
     window.showRegister();
 };
 window.togglePassword = (inputId, btn) => {
     const input = document.getElementById(inputId);
-    if (input.type === "password") { input.type = "text"; btn.innerText = "🙈"; } 
+    if (input.type === "password") { input.type = "text"; btn.innerText = "🙈"; }
     else { input.type = "password"; btn.innerText = "👁️"; }
 };
 
@@ -125,25 +125,25 @@ window.loginWithGoogle = async () => {
         const result = await signInWithPopup(auth, googleProvider);
         const user = result.user;
         const docSnap = await getDoc(doc(db, "users", user.uid));
-        
+
         if (!docSnap.exists()) {
             // NO se crea en Firebase aún. Guardamos temporal y mostramos el formulario pre-llenado.
             window.isGoogleSignup = true;
             window.tempGoogleUser = user;
-            
+
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('registerForm').style.display = 'flex';
             document.getElementById('authSubtitle').innerText = 'Completa tu Registro';
-            
+
             document.getElementById('regName').value = user.displayName || '';
             document.getElementById('regEmail').value = user.email || '';
             document.getElementById('regEmail').disabled = true; // Bloqueado para que no lo cambien
-            
+
             // Ocultamos la contraseña porque ya se autenticó con Google
             const pwdWrapper = document.getElementById('regPassword').parentElement;
-            if(pwdWrapper) pwdWrapper.style.display = 'none';
+            if (pwdWrapper) pwdWrapper.style.display = 'none';
             document.getElementById('regPassword').removeAttribute('required');
-            
+
             window.showNotification("¡Casi listo! Completa tu número y país.");
         } else {
             // Si ya existe, el onAuthStateChanged se encarga de cargarlo.
@@ -162,16 +162,16 @@ window.doRegister = async () => {
     const password = document.getElementById('regPassword').value;
     const country = document.getElementById('regCountry').value;
     const planElegido = document.getElementById('regPlanDemo').value;
-    
-    if(!name || !email || !country || !phone || !planElegido) return window.showNotification("Llena todos los campos");
-    if(!window.isGoogleSignup && !password) return window.showNotification("Falta la contraseña");
-    if(!phone.startsWith('+')) return window.showNotification("⚠️ El teléfono DEBE incluir el código de país (Ej: +51...)");
-    
-    const btn = document.querySelector('#registerForm .btn-primary'); 
-    const orig = btn.innerText; 
-    btn.innerText = "Creando... ⏳"; 
+
+    if (!name || !email || !country || !phone || !planElegido) return window.showNotification("Llena todos los campos");
+    if (!window.isGoogleSignup && !password) return window.showNotification("Falta la contraseña");
+    if (!phone.startsWith('+')) return window.showNotification("⚠️ El teléfono DEBE incluir el código de país (Ej: +51...)");
+
+    const btn = document.querySelector('#registerForm .btn-primary');
+    const orig = btn.innerText;
+    btn.innerText = "Creando... ⏳";
     btn.disabled = true;
-    
+
     try {
         let user = window.tempGoogleUser;
         // Solo creamos credencial con contraseña si NO viene de Google
@@ -179,7 +179,7 @@ window.doRegister = async () => {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             user = userCredential.user;
         }
-        
+
         const idToken = await user.getIdToken();
 
         const response = await fetch('https://bot.panelagc.com/api/completar-registro', {
@@ -195,39 +195,39 @@ window.doRegister = async () => {
         });
 
         if (!response.ok) throw new Error("Error del servidor al asignar perfil.");
-        
+
         window.isGoogleSignup = false;
         window.showNotification("¡Cuenta creada con éxito! Disfruta tu prueba gratuita.");
         window.location.reload(); // Recarga limpia para que Firebase atrape la sesión
-        
-    } catch (e) { 
-        window.showNotification("Error Reg: " + e.message); 
+
+    } catch (e) {
+        window.showNotification("Error Reg: " + e.message);
     } finally {
-        btn.innerText = orig; 
+        btn.innerText = orig;
         btn.disabled = false;
     }
 };
 
 window.doLogin = async () => {
     const email = document.getElementById('loginEmail').value, password = document.getElementById('loginPassword').value;
-    if(!email || !password) return window.showNotification("Ingresa tus datos");
-    
-    const btn = document.querySelector('#loginForm .btn-primary'); 
+    if (!email || !password) return window.showNotification("Ingresa tus datos");
+
+    const btn = document.querySelector('#loginForm .btn-primary');
     const orig = btn.innerHTML; // Cambiamos innerText por innerHTML
     btn.innerHTML = "Iniciando... <i class='bx bx-loader-alt bx-spin'></i>"; // Usamos el spinner
     btn.disabled = true;
-    
-    try { 
-        await signInWithEmailAndPassword(auth, email, password); 
-    } catch (e) { 
-        window.showNotification("Error Login: " + e.message); 
-        btn.innerHTML = orig; 
-        btn.disabled = false; 
+
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+    } catch (e) {
+        window.showNotification("Error Login: " + e.message);
+        btn.innerHTML = orig;
+        btn.disabled = false;
     }
 };
 
 window.doResetPassword = async () => {
-    const email = document.getElementById('resetEmail').value; if(!email) return window.showNotification("Ingresa tu correo");
+    const email = document.getElementById('resetEmail').value; if (!email) return window.showNotification("Ingresa tu correo");
     try { await sendPasswordResetEmail(auth, email); window.showNotification("Link enviado a tu correo"); window.showLogin(); } catch (e) { window.showNotification("Error Reset: " + e.message); }
 };
 /* --- BOTÓN NUCLEAR: FORZAR ACTUALIZACIÓN Y LIMPIAR CACHÉ --- */
@@ -271,7 +271,7 @@ window.forceAppUpdate = async () => {
 };
 window.doLogout = async () => {
     localStorage.removeItem('agc_owner_uid');
-    if(document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'none';
+    if (document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'none';
     clients = []; currentUser = null; currentUserData = null; document.getElementById('tableBody').innerHTML = ''; showView('authView'); window.showLogin();
     try { await signOut(auth); window.showNotification("Sesión cerrada"); } catch (e) { console.error(e); }
 };
@@ -279,12 +279,13 @@ window.doLogout = async () => {
 onAuthStateChanged(auth, async (user) => {
     // 🛑 Candado de Tienda, Portal y Planes (Evita que el Login se superponga)
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('planes') || urlParams.get('tienda') || urlParams.get('portal') || urlParams.get('store')) {
+    if (urlParams.get('planes') || urlParams.get('tienda') || urlParams.get('portal') || urlParams.get('store') || urlParams.get('consulta')) {
         if (document.getElementById('authView')) document.getElementById('authView').style.display = 'none';
-        
+
         // Ejecutar las vistas correspondientes si existen
         if (typeof window.checkPlanesView === 'function') window.checkPlanesView();
         if (typeof window.checkClientPortal === 'function') window.checkClientPortal();
+        if (typeof window.checkExternalQueryPortal === 'function') window.checkExternalQueryPortal();
         return;
     }
 
@@ -294,7 +295,7 @@ onAuthStateChanged(auth, async (user) => {
 
         // 🔥 MEJORA VISUAL: Ocultar login y dar feedback INMEDIATO
         document.getElementById('loginForm').style.display = 'none';
-        if(document.getElementById('authSubtitle')) {
+        if (document.getElementById('authSubtitle')) {
             document.getElementById('authSubtitle').innerHTML = "Cargando tu panel... <i class='bx bx-loader-alt bx-spin'></i>";
         }
 
@@ -304,15 +305,15 @@ onAuthStateChanged(auth, async (user) => {
                 currentUserData = docSnap.data();
                 globalCurrency = currentUserData.currency || "S/";
 
-                if(document.getElementById('brandName')) document.getElementById('brandName').innerText = currentUserData.name || 'Mi Panel';
-                
+                if (document.getElementById('brandName')) document.getElementById('brandName').innerText = currentUserData.name || 'Mi Panel';
+
                 // --- 1. LÓGICA DE LA INSIGNIA ORIGINAL (MÓVIL / CABECERA) ---
                 const planBadge = document.getElementById('userPlanBadge');
                 if (planBadge && currentUserData.role !== 'admin') {
                     const planActual = (currentUserData.plan_actual || 'demo').toLowerCase();
                     planBadge.style.display = 'inline-block';
                     planBadge.innerText = `Plan ${planActual}`;
-                    
+
                     if (planActual === 'pro' || planActual === 'elite') {
                         planBadge.style.color = '#FFD700'; planBadge.style.backgroundColor = 'rgba(255, 215, 0, 0.1)';
                     } else if (planActual === 'basico') {
@@ -325,14 +326,14 @@ onAuthStateChanged(auth, async (user) => {
                 }
 
                 // --- 2. LÓGICA DE LA BARRA LATERAL EN PC Y CELULAR ---
-                if(document.getElementById('brandNameSidebar')) document.getElementById('brandNameSidebar').innerText = currentUserData.name || 'Mi Panel';
-                if(document.getElementById('mobileBrandName')) document.getElementById('mobileBrandName').innerText = currentUserData.name || 'Mi Panel';    
-                
+                if (document.getElementById('brandNameSidebar')) document.getElementById('brandNameSidebar').innerText = currentUserData.name || 'Mi Panel';
+                if (document.getElementById('mobileBrandName')) document.getElementById('mobileBrandName').innerText = currentUserData.name || 'Mi Panel';
+
                 const planBadgeSide = document.getElementById('userPlanBadgeSidebar');
                 if (planBadgeSide && currentUserData.role !== 'admin') {
                     const planActual = (currentUserData.plan_actual || 'demo').toLowerCase();
                     planBadgeSide.innerText = `Plan ${planActual}`;
-                    
+
                     if (planActual === 'pro' || planActual === 'elite') {
                         // AQUÍ SE ACTIVA LA ANIMACIÓN ESTILO PASS ROYALE
                         planBadgeSide.className = 'badge-pro-animated';
@@ -356,21 +357,21 @@ onAuthStateChanged(auth, async (user) => {
                 }
 
                 // Inyección del logo
-                if(currentUserData.logoUrl) {
-                    if(document.getElementById('brandLogoSidebar')) { document.getElementById('brandLogoSidebar').src = currentUserData.logoUrl; document.getElementById('brandLogoSidebar').style.display = 'block'; }
-                    if(document.getElementById('mobileBrandLogo')) { document.getElementById('mobileBrandLogo').src = currentUserData.logoUrl; document.getElementById('mobileBrandLogo').style.display = 'block'; }
+                if (currentUserData.logoUrl) {
+                    if (document.getElementById('brandLogoSidebar')) { document.getElementById('brandLogoSidebar').src = currentUserData.logoUrl; document.getElementById('brandLogoSidebar').style.display = 'block'; }
+                    if (document.getElementById('mobileBrandLogo')) { document.getElementById('mobileBrandLogo').src = currentUserData.logoUrl; document.getElementById('mobileBrandLogo').style.display = 'block'; }
                 }
 
-                if(document.getElementById('clientCost')) document.getElementById('clientCost').placeholder = `Costo Proveedor (${globalCurrency})`;
-                if(document.getElementById('clientPrice')) document.getElementById('clientPrice').placeholder = `Precio de Venta (${globalCurrency})`;
-                
+                if (document.getElementById('clientCost')) document.getElementById('clientCost').placeholder = `Costo Proveedor (${globalCurrency})`;
+                if (document.getElementById('clientPrice')) document.getElementById('clientPrice').placeholder = `Precio de Venta (${globalCurrency})`;
+
                 // 🔥 MEJORA DE RENDIMIENTO Y AUTO-BLOQUEO
                 const now = new Date(); let needsUpdate = false;
-                if (currentUserData.active === true && currentUserData.activeUntil) { 
-                    if (now > new Date(currentUserData.activeUntil)) { 
+                if (currentUserData.active === true && currentUserData.activeUntil) {
+                    if (now > new Date(currentUserData.activeUntil)) {
                         // --- CIERRE AUTOMÁTICO DE DEMO CON ALERTA ---
                         await updateDoc(doc(db, "users", user.uid), { active: false, activeUntil: null });
-                        
+
                         Swal.fire({
                             icon: 'warning',
                             title: '⏳ ¡Tu Demo ha expirado!',
@@ -385,73 +386,73 @@ onAuthStateChanged(auth, async (user) => {
                             window.doLogout();
                         });
                         return; // Detiene la carga del Dashboard
-                    } 
-                } else if (currentUserData.active === false && currentUserData.suspendedUntil) { 
-                    if (now > new Date(currentUserData.suspendedUntil)) { currentUserData.active = true; currentUserData.suspendedUntil = null; needsUpdate = true; } 
+                    }
+                } else if (currentUserData.active === false && currentUserData.suspendedUntil) {
+                    if (now > new Date(currentUserData.suspendedUntil)) { currentUserData.active = true; currentUserData.suspendedUntil = null; needsUpdate = true; }
                 }
-                
-                if (needsUpdate) { 
-                    updateDoc(doc(db, "users", user.uid), { active: currentUserData.active, activeUntil: currentUserData.activeUntil || null, suspendedUntil: currentUserData.suspendedUntil || null }); 
+
+                if (needsUpdate) {
+                    updateDoc(doc(db, "users", user.uid), { active: currentUserData.active, activeUntil: currentUserData.activeUntil || null, suspendedUntil: currentUserData.suspendedUntil || null });
                 }
-                
-                const loginBtn = document.querySelector('#loginForm .btn-primary'); 
+
+                const loginBtn = document.querySelector('#loginForm .btn-primary');
                 if (loginBtn) { loginBtn.innerText = "Ingresar"; loginBtn.disabled = false; }
-                
+
                 // Carga de vistas
-                if (currentUserData.role === 'admin') { 
-                    showView('adminView'); 
-                    loadAdminData(); 
-                    window.requestNotificationPermission(); 
-                    if(document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'flex'; // 👈 MOSTRAR ASISTENTE
-                } else { 
-                    if (currentUserData.active === true) { 
-                        showView('appView'); 
-                        if(document.getElementById('userGreeting')) document.getElementById('userGreeting').innerText = `Gestión de clientes`; 
+                if (currentUserData.role === 'admin') {
+                    showView('adminView');
+                    loadAdminData();
+                    window.requestNotificationPermission();
+                    if (document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'flex'; // 👈 MOSTRAR ASISTENTE
+                } else {
+                    if (currentUserData.active === true) {
+                        showView('appView');
+                        if (document.getElementById('userGreeting')) document.getElementById('userGreeting').innerText = `Gestión de clientes`;
                         loadUserClients();
                         window.checkNewNews();
-                        window.requestNotificationPermission(); 
+                        window.requestNotificationPermission();
                         window.renderInventory();
                         window.syncUserServices();
-                        if(document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'flex'; // 👈 MOSTRAR ASISTENTE
+                        if (document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'flex'; // 👈 MOSTRAR ASISTENTE
                         setTimeout(() => window.checkUrlRouting(), 300);
-                        
+
                         // --- LANZADOR DEL TUTORIAL ---
                         if (!currentUserData.tutorialVisto && window.innerWidth > 768) {
                             setTimeout(() => window.startTutorial(), 1500);
                         }
-                    } else { 
-                // NUEVO: Solo desloguea si no viene del botón de Google
-                if (!window.isGoogleSignup) {
-                    await signOut(auth); 
-                    showView('authView'); 
-                    window.showLogin(); 
-                }
-            }
-            } // <--- AÑADE ESTA LLAVE AQUÍ PARA CERRAR EL BLOQUE ANTERIOR
+                    } else {
+                        // NUEVO: Solo desloguea si no viene del botón de Google
+                        if (!window.isGoogleSignup) {
+                            await signOut(auth);
+                            showView('authView');
+                            window.showLogin();
+                        }
+                    }
+                } // <--- AÑADE ESTA LLAVE AQUÍ PARA CERRAR EL BLOQUE ANTERIOR
             } else { await signOut(auth); showView('authView'); window.showLogin(); }
-        } catch (e) { 
-            console.error(e); 
-            window.showNotification("ERROR DB: " + e.message); 
-            showView('authView'); 
+        } catch (e) {
+            console.error(e);
+            window.showNotification("ERROR DB: " + e.message);
+            showView('authView');
             window.showLogin();
         }
-    } else { 
-        currentUser = null; currentUserData = null; 
-        showView('authView'); 
-        window.showLogin(); 
-        if(document.getElementById('authSubtitle')) document.getElementById('authSubtitle').innerText = 'Área de Gestión y Control';
+    } else {
+        currentUser = null; currentUserData = null;
+        showView('authView');
+        window.showLogin();
+        if (document.getElementById('authSubtitle')) document.getElementById('authSubtitle').innerText = 'Área de Gestión y Control';
     }
 });
 
-window.closeModals = (resetTab = true) => { 
-    document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); 
+window.closeModals = (resetTab = true) => {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
     document.body.style.overflow = 'auto'; // Devuelve el scroll al fondo
-    
+
     // Solo devuelve el foco al botón de Clientes si es un cierre total (ej: tocar la X)
     if (resetTab === true) {
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         const btnClientes = document.getElementById('navClientes');
-        if(btnClientes) btnClientes.classList.add('active');
+        if (btnClientes) btnClientes.classList.add('active');
     }
 };
 /* --- CONTROLADOR DE SECCIONES DASHBOARD (PC Y MÓVIL) --- */
@@ -461,14 +462,14 @@ window.switchDashboardSection = (sectionId, menuElement) => {
         // 1. Apagamos TODAS las secciones
         document.querySelectorAll('.dashboard-section').forEach(sec => {
             sec.classList.remove('active-section');
-            sec.style.setProperty('display', 'none', 'important'); 
+            sec.style.setProperty('display', 'none', 'important');
         });
-        
+
         // 2. Encendemos SOLO la seleccionada
         const targetSection = document.getElementById(sectionId);
         if (targetSection) {
             targetSection.classList.add('active-section');
-            targetSection.style.setProperty('display', 'block', 'important'); 
+            targetSection.style.setProperty('display', 'block', 'important');
         }
 
         // 3. Pintamos de azul el botón
@@ -476,7 +477,7 @@ window.switchDashboardSection = (sectionId, menuElement) => {
             document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
             menuElement.classList.add('active');
         }
-        
+
         // 4. SI ESTAMOS EN CELULAR: Ocultamos el menú automáticamente
         if (window.innerWidth <= 768) {
             const sidebar = document.getElementById('mainSidebar');
@@ -493,18 +494,18 @@ window.switchDashboardSection = (sectionId, menuElement) => {
         if (mainContainer) mainContainer.scrollTop = 0;
         window.scrollTo(0, 0);
 
-    }, 60); 
+    }, 60);
 };
 // Blindaje del botón "Cerrar" para que regrese correctamente al Home en PC y CELULAR
 const originalCloseModals = window.closeModals;
 window.closeModals = (resetTab = true) => {
     originalCloseModals(resetTab);
-    
+
     // 👈 RESTAURAR ASISTENTE AL CERRAR MODALES (Solo si tiene sesión activa)
     if (currentUser && document.getElementById('aiFloatingBtn')) {
         document.getElementById('aiFloatingBtn').style.display = 'flex';
     }
-    
+
     // Le quitamos la validación de PC para que en celular también restaure el inicio
     if (resetTab === true) {
         document.querySelectorAll('.dashboard-section').forEach(sec => {
@@ -516,55 +517,154 @@ window.closeModals = (resetTab = true) => {
             home.classList.add('active-section');
             home.style.setProperty('display', 'block', 'important');
         }
-        
+
         document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
         const homeBtn = document.querySelector('.sidebar-item[onclick*="homeSection"]');
-        if(homeBtn) homeBtn.classList.add('active');
+        if (homeBtn) homeBtn.classList.add('active');
     }
 };
 
-/* --- CONFIGURACIÓN DE WHATSAPP Y PAGOS --- */
-window.openWaModal = () => { 
-    const defaultMsg = "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*. Para renovar, usa estos datos:\n\n{pago}"; 
-    const defaultDelivery = `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tu nueva cuenta de *{plataforma}*:\n\n📧 *Correo:* {correo}\n🔑 *Clave:* {pass}\n📌 *PIN:* {pin}\n\n📅 *Vence el:* {fecha}\n\n⚠️ *Reglas:* {reglas}\n\n¡Que disfrutes el contenido! 🍿`;
-    const defaultRenew = `🎉 *¡Renovación Exitosa, {nombre}!*\n\nTu servicio de *{plataforma}* ha sido renovado correctamente.\n📅 Nueva fecha de vencimiento: *{fecha}*\n\n🌐 *Tu Portal:* {link}\n🔑 *Código Web:* {codigo}\n\n¡Gracias por seguir confiando en nosotros! 🚀`;
+/* --- CONFIGURACIÓN DE WHATSAPP Y PAGOS (CENTRO DE PLANTILLAS AUTO-WA) --- */
+const defaultWaRecordatorio = "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*. Para renovar, usa estos datos:\n\n{pago}";
+const defaultWaEntrega = `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tu nueva cuenta de *{plataforma}*:\n\n📧 *Correo:* {correo}\n🔑 *Clave:* {pass}\n📌 *PIN:* {pin}\n\n📅 *Vence el:* {fecha}\n\n⚠️ *Reglas:* {reglas}\n\n¡Que disfrutes el contenido! 🍿`;
+const defaultWaRenovacion = `🎉 *¡Renovación Exitosa, {nombre}!*\n\nTu servicio de *{plataforma}* ha sido renovado correctamente.\n📅 Nueva fecha de vencimiento: *{fecha}*\n\n🌐 *Tu Portal:* {link}\n🔑 *Código Web:* {codigo}\n\n¡Gracias por seguir confiando en nosotros! 🚀`;
+const defaultPortal = "¡Hola, *{nombre}*! 👋\n\nPuedes consultar el estado de tu servicio de *{plataforma}* y tus datos de acceso en tiempo real desde tu portal web personal:\n\n🌐 *Link del Portal:* {link}\n📱 *WhatsApp:* {numero}\n🔑 *Código Web:* {codigo}\n\n_Guarda este mensaje para ingresar a consultar tus accesos cuando quieras._";
 
-    document.getElementById('editWaMessage').value = currentUserData.waTemplate || defaultMsg; 
-    document.getElementById('editWaDeliveryMessage').value = currentUserData.waDeliveryMessage || defaultDelivery; 
-    // Nuevo campo para renovación
-    if(document.getElementById('editWaRenewMessage')) {
-        document.getElementById('editWaRenewMessage').value = currentUserData.waRenewMessage || defaultRenew; 
+let activeWaTemplateTab = 'recordatorio';
+
+window.switchWaTemplateTab = (tipo) => {
+    activeWaTemplateTab = tipo;
+
+    // 1. Actualizar botones de Segmented Control / Píldoras
+    document.querySelectorAll('.wa-tpl-tab').forEach(btn => {
+        const isCurrent = btn.getAttribute('data-type') === tipo;
+        btn.classList.toggle('active', isCurrent);
+        btn.style.background = isCurrent ? 'var(--mac-surface)' : 'transparent';
+        btn.style.borderColor = isCurrent ? 'var(--mac-blue)' : 'transparent';
+        btn.style.color = isCurrent ? 'var(--mac-text-main)' : 'var(--mac-text-secondary)';
+        btn.style.fontWeight = isCurrent ? '700' : '600';
+        btn.style.boxShadow = isCurrent ? '0 2px 8px rgba(0, 122, 255, 0.15)' : 'none';
+    });
+
+    // 2. Mostrar solo el textarea activo
+    const mapTextareas = {
+        'recordatorio': { id: 'editWaMessage', label: '📅 Plantilla de Recordatorio de Cobro:', vars: ['{nombre}', '{plataforma}', '{fecha}', '{pago}', '{link}', '{numero}', '{codigo}'] },
+        'entrega': { id: 'editWaDeliveryMessage', label: '🍿 Plantilla de Entrega de Venta:', vars: ['{nombre}', '{plataforma}', '{correo}', '{pass}', '{profile}', '{pin}', '{fecha}', '{reglas}', '{bloqueCuentas}'] },
+        'renovacion': { id: 'editWaRenewMessage', label: '🔄 Plantilla de Renovación Exitosa:', vars: ['{nombre}', '{plataforma}', '{fecha}', '{link}', '{numero}', '{codigo}'] },
+        'portal': { id: 'editWaPortalMessage', label: '🌐 Plantilla de Link Portal Web:', vars: ['{nombre}', '{plataforma}', '{fecha}', '{link}', '{numero}', '{codigo}'] }
+    };
+
+    Object.entries(mapTextareas).forEach(([key, cfg]) => {
+        const el = document.getElementById(cfg.id);
+        if (el) el.style.display = (key === tipo) ? 'block' : 'none';
+    });
+
+    const lbl = document.getElementById('waActiveTemplateLabel');
+    if (lbl && mapTextareas[tipo]) lbl.innerText = mapTextareas[tipo].label;
+
+    // 3. Renderizar chips clicables de Variables Disponibles
+    const varsContainer = document.getElementById('waDynamicVarsContainer');
+    if (varsContainer) {
+        const allVars = ['{nombre}', '{plataforma}', '{fecha}', '{pago}', '{correo}', '{pass}', '{profile}', '{pin}', '{reglas}', '{bloqueCuentas}', '{link}', '{numero}', '{codigo}'];
+        const recommended = mapTextareas[tipo]?.vars || allVars;
+        // Mostrar primero las recomendadas de la pestaña y luego el resto
+        const orderedVars = [...recommended, ...allVars.filter(v => !recommended.includes(v))];
+
+        varsContainer.innerHTML = orderedVars.map(v => {
+            const isRec = recommended.includes(v);
+            const bg = isRec ? 'rgba(0, 122, 255, 0.12)' : 'var(--mac-surface)';
+            const border = isRec ? 'rgba(0, 122, 255, 0.35)' : 'var(--mac-border)';
+            const color = isRec ? 'var(--mac-blue)' : 'var(--mac-text-secondary)';
+            return `<button type="button" onclick="window.insertWaVariable('${v}')"
+                style="background: ${bg}; border: 1px solid ${border}; color: ${color}; font-size: 11.5px; font-weight: 700; font-family: monospace; padding: 4px 8px; border-radius: 6px; cursor: pointer; width: auto; margin: 0; transition: all 0.15s;">
+                ${v}
+            </button>`;
+        }).join('');
     }
-    
-    document.getElementById('waModal').style.display = 'flex'; 
 };
 
-window.saveWaMessage = async () => { 
+window.insertWaVariable = (variable) => {
+    const mapIds = {
+        'recordatorio': 'editWaMessage',
+        'entrega': 'editWaDeliveryMessage',
+        'renovacion': 'editWaRenewMessage',
+        'portal': 'editWaPortalMessage'
+    };
+    const activeId = mapIds[activeWaTemplateTab] || 'editWaMessage';
+    const textarea = document.getElementById(activeId);
+    if (!textarea) return;
+
+    const start = textarea.selectionStart ?? textarea.value.length;
+    const end = textarea.selectionEnd ?? textarea.value.length;
+    const before = textarea.value.substring(0, start);
+    const after = textarea.value.substring(end);
+    textarea.value = before + variable + after;
+    textarea.focus();
+    const newPos = start + variable.length;
+    textarea.setSelectionRange(newPos, newPos);
+};
+
+window.restoreDefaultWaTemplate = () => {
+    const defaults = {
+        'recordatorio': { id: 'editWaMessage', text: defaultWaRecordatorio },
+        'entrega': { id: 'editWaDeliveryMessage', text: defaultWaEntrega },
+        'renovacion': { id: 'editWaRenewMessage', text: defaultWaRenovacion },
+        'portal': { id: 'editWaPortalMessage', text: defaultPortal }
+    };
+    const current = defaults[activeWaTemplateTab];
+    if (current) {
+        const el = document.getElementById(current.id);
+        if (el) el.value = current.text;
+        window.showNotification("🔄 Plantilla restaurada al texto predeterminado.");
+    }
+};
+
+window.openWaModal = () => {
+    const elMsg = document.getElementById('editWaMessage');
+    const elDel = document.getElementById('editWaDeliveryMessage');
+    const elRen = document.getElementById('editWaRenewMessage');
+    const elPor = document.getElementById('editWaPortalMessage');
+
+    if (elMsg) elMsg.value = currentUserData.waTemplate || defaultWaRecordatorio;
+    if (elDel) elDel.value = currentUserData.waDeliveryMessage || defaultWaEntrega;
+    if (elRen) elRen.value = currentUserData.waRenewMessage || defaultWaRenovacion;
+    if (elPor) elPor.value = currentUserData.waPortalMessage || defaultPortal;
+
+    window.switchWaTemplateTab('recordatorio');
+    document.getElementById('waModal').style.display = 'flex';
+};
+
+window.saveWaMessage = async () => {
     const btn = document.querySelector('#waModal .btn-primary');
-    btn.innerText = "Guardando..."; btn.disabled = true;
-    try { 
-        const newRenewMsg = document.getElementById('editWaRenewMessage') ? document.getElementById('editWaRenewMessage').value : "";
+    if (btn) { btn.innerText = "Guardando..."; btn.disabled = true; }
+    try {
+        const valRecordatorio = (document.getElementById('editWaMessage')?.value || '').trim() || defaultWaRecordatorio;
+        const valEntrega = (document.getElementById('editWaDeliveryMessage')?.value || '').trim() || defaultWaEntrega;
+        const valRenovacion = (document.getElementById('editWaRenewMessage')?.value || '').trim() || defaultWaRenovacion;
+        const valPortal = (document.getElementById('editWaPortalMessage')?.value || '').trim() || defaultPortal;
 
-        await updateDoc(doc(db, "users", currentUser.uid), { 
-            waTemplate: document.getElementById('editWaMessage').value,
-            waDeliveryMessage: document.getElementById('editWaDeliveryMessage').value,
-            waRenewMessage: newRenewMsg // Se guarda en la base de datos
-        }); 
-        
-        currentUserData.waTemplate = document.getElementById('editWaMessage').value;
-        currentUserData.waDeliveryMessage = document.getElementById('editWaDeliveryMessage').value;
-        if(newRenewMsg) currentUserData.waRenewMessage = newRenewMsg; // Se actualiza en memoria
-        
-        window.showNotification("Configuración de WhatsApp guardada."); 
+        await updateDoc(doc(db, "users", currentUser.uid), {
+            waTemplate: valRecordatorio,
+            waDeliveryMessage: valEntrega,
+            waRenewMessage: valRenovacion,
+            waPortalMessage: valPortal
+        });
+
+        currentUserData.waTemplate = valRecordatorio;
+        currentUserData.waDeliveryMessage = valEntrega;
+        currentUserData.waRenewMessage = valRenovacion;
+        currentUserData.waPortalMessage = valPortal;
+
+        window.showNotification("✅ Configuración de WhatsApp guardada.");
         window.closeModals();
-    } catch(e) { 
-        window.showNotification("Error: " + e.message); 
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
     } finally {
-        btn.innerText = "Guardar Configuración"; btn.disabled = false;
+        if (btn) { btn.innerText = "Guardar Configuración"; btn.disabled = false; }
     }
 };
 // 🔥 NUEVO SISTEMA DE MEMORIA TEMPORAL PARA MÉTODOS DE PAGO
-let tempPaymentMethods = []; 
+let tempPaymentMethods = [];
 
 // --- MANEJO DE PESTAÑAS DENTRO DEL PERFIL ---
 window.switchProfileTab = (tabId, element) => {
@@ -576,28 +676,61 @@ window.switchProfileTab = (tabId, element) => {
 
 window.openUpgradeWa = () => {
     // Aquí pon tu número real
-    const adminPhone = "+51961341323"; 
+    const adminPhone = "+51961341323";
     const msg = encodeURIComponent("¡Hola! Quiero subir al Plan PRO para desbloquear el envío de Campañas Masivas y la subida de Estados automáticos.");
     window.open(`https://wa.me/${adminPhone}?text=${msg}`, '_blank');
 };
 
 // --- ABRIR MODAL DE PERFIL MODIFICADO PARA VERIFICAR PLAN ---
-window.openProfileModal = () => { 
+window.openProfileModal = () => {
     // 1. Carga los datos de texto del perfil
-    document.getElementById('editProfileName').value = currentUserData.name || ''; 
-    document.getElementById('editProfileCountry').value = currentUserData.country || ''; 
-    document.getElementById('editProfilePhone').value = currentUserData.phone || ''; 
-    document.getElementById('editProfileAlias').value = currentUserData.storeAlias || ''; 
-    document.getElementById('editReferencesLink').value = currentUserData.referencesLink || '';
-    
+    if (document.getElementById('editProfileName')) document.getElementById('editProfileName').value = currentUserData.name || '';
+    if (document.getElementById('editProfileCountry')) document.getElementById('editProfileCountry').value = currentUserData.country || '';
+    if (document.getElementById('editProfilePhone')) document.getElementById('editProfilePhone').value = currentUserData.phone || '';
+    if (document.getElementById('editProfileAlias')) document.getElementById('editProfileAlias').value = currentUserData.storeAlias || '';
+    if (document.getElementById('editReferencesLink')) document.getElementById('editReferencesLink').value = currentUserData.referencesLink || '';
+
+    // Bloquear/Desbloquear Pasarelas según el plan
+    const planActual = (currentUserData.plan_actual || 'demo').toLowerCase();
+    const btnPasarelas = document.getElementById('btnTabPasarelas');
+    if (btnPasarelas) {
+        btnPasarelas.style.display = (planActual === 'pro' || planActual === 'elite') ? 'inline-block' : 'none';
+    }
+
+    // --- Cargar Pasarelas Antiguas ---
+    if (document.getElementById('mpAccessTokenInput')) {
+        document.getElementById('mpAccessTokenInput').value = currentUserData.mpAccessToken ? `APP_USR-***${currentUserData.mpAccessToken.slice(-5)}` : '';
+    }
+    if (document.getElementById('binanceApiKeyInput')) {
+        document.getElementById('binanceApiKeyInput').value = currentUserData.binanceApiKey ? `***${currentUserData.binanceApiKey.slice(-5)}` : '';
+    }
+    if (document.getElementById('binanceSecretKeyInput')) {
+        document.getElementById('binanceSecretKeyInput').value = currentUserData.binanceSecretKey ? `***${currentUserData.binanceSecretKey.slice(-5)}` : '';
+    }
+
+    // --- NUEVO: Cargar Pasarelas de Binance Pay ---
+    if (document.getElementById('binancePayIdInput')) {
+        document.getElementById('binancePayIdInput').value = currentUserData.binancePayId || '';
+    }
+    if (document.getElementById('binanceAliasInput')) {
+        document.getElementById('binanceAliasInput').value = currentUserData.binanceAlias || '';
+    }
+    if (document.getElementById('binanceExchangeRateInput')) {
+        document.getElementById('binanceExchangeRateInput').value = currentUserData.binanceExchangeRate || '';
+    }
+    if (document.getElementById('imapEmailInput')) {
+        document.getElementById('imapEmailInput').value = currentUserData.imapEmail || '';
+    }
+    if (document.getElementById('imapPasswordInput')) {
+        document.getElementById('imapPasswordInput').value = currentUserData.imapPassword || '';
+    }
     // 2. Carga los chips de servicios y pagos
     if (typeof window.renderCustomServicesChips === 'function') window.renderCustomServicesChips();
     tempPaymentMethods = (currentUserData.paymentMethods || []).map(m => ({ ...m, isEditing: false }));
     window.renderPaymentMethodsList();
 
     // 3. VERIFICADOR DE PLAN PARA LA PESTAÑA DEL BOT
-    const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
-    if (plan === 'pro' || plan === 'elite') {
+    if (planActual === 'pro' || planActual === 'elite') {
         document.getElementById('botBasicWarning').style.display = 'none';
         document.getElementById('botProContent').style.display = 'block';
     } else {
@@ -605,14 +738,13 @@ window.openProfileModal = () => {
         document.getElementById('botProContent').style.display = 'none';
     }
 
-    // 🔥 AQUÍ ESTÁ LA LÍNEA CORREGIDA 🔥
     if (typeof window.renderBotSlots === 'function') {
         window.renderBotSlots();
     }
-    
+
     // 4. Reiniciar a la primera pestaña siempre que se abre
     const primeraPestana = document.querySelector('.profile-tab-btn');
-    if(primeraPestana) window.switchProfileTab('tabPerfilMarca', primeraPestana);
+    if (primeraPestana) window.switchProfileTab('tabPerfilMarca', primeraPestana);
 };
 
 // --- FUNCIÓN HÍBRIDA: ENVIAR CAMPAÑA MASIVA ---
@@ -621,22 +753,27 @@ window.sendMassCampaign = async () => {
     const imgUrl = document.getElementById('campaignImage').value.trim();
     const dbFilter = document.getElementById('campaignDbClients').value;
     const externalRaw = document.getElementById('campaignExternal').value.trim();
+    const platFilter = document.getElementById('campaignPlatformFilter').value;
 
     if (!msg) return window.showNotification("⚠️ Escribe un mensaje para tu campaña.");
 
     // 1. Recopilar clientes de la BD (Si lo seleccionó)
     let finalRecipients = [];
-    const today = new Date(); today.setHours(0,0,0,0);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
 
     if (dbFilter !== 'none') {
         clients.forEach(c => {
-            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0);
             const diffDays = Math.ceil((exp - today) / 86400000);
-            
+
             let apply = false;
             if (dbFilter === 'all') apply = true;
             if (dbFilter === 'expired' && diffDays < 0) apply = true;
             if (dbFilter === 'active' && diffDays >= 0) apply = true;
+
+            if (platFilter && platFilter !== "" && (!c.platform || !c.platform.toLowerCase().includes(platFilter.toLowerCase()))) {
+                apply = false;
+            }
 
             if (apply && c.phone) {
                 finalRecipients.push({ phone: c.phone, name: c.name || "amigo" });
@@ -650,8 +787,8 @@ window.sendMassCampaign = async () => {
         extArray.forEach(num => {
             // Aseguramos que tenga el +
             let cleanNum = num.replace(/[^\d+]/g, '');
-            if(cleanNum) {
-                if(!cleanNum.startsWith('+')) cleanNum = '+' + cleanNum;
+            if (cleanNum) {
+                if (!cleanNum.startsWith('+')) cleanNum = '+' + cleanNum;
                 finalRecipients.push({ phone: cleanNum, name: "amigo" });
             }
         });
@@ -684,7 +821,7 @@ window.sendMassCampaign = async () => {
 
     if (confirm.isConfirmed) {
         window.showNotification("🚀 Campaña enviada a la cola lenta de tu servidor.");
-        
+
         try {
             await fetch('https://bot.panelagc.com/api/campana-masiva', {
                 method: 'POST',
@@ -701,7 +838,8 @@ window.sendMassCampaign = async () => {
             document.getElementById('campaignImage').value = '';
             document.getElementById('campaignExternal').value = '';
             document.getElementById('campaignDbClients').value = 'none';
-        } catch(e) {
+            document.getElementById('campaignPlatformFilter').value = '';
+        } catch (e) {
             console.error("Error en campaña:", e);
         }
     }
@@ -711,10 +849,10 @@ window.renderBotSlots = () => {
     const contEstados = document.getElementById('statusSlotsContainer');
     const contGrupos = document.getElementById('groupSlotsContainer');
     if (!contEstados || !contGrupos) return;
-    
+
     contEstados.innerHTML = '';
     contGrupos.innerHTML = '';
-    
+
     const config = currentUserData.botConfig || {};
     const estados = config.estados || [];
     const grupos = config.gruposMensajes || [];
@@ -745,7 +883,7 @@ window.renderBotSlots = () => {
 
     // Cargar Checkboxes y Selects guardados
     document.getElementById('autoStatusActive').checked = config.estadosActivos || false;
-    document.getElementById('autoStatusInterval').value = config.estadosIntervaloHoras || 2;
+    document.getElementById('autoStatusInterval').value = config.estadosIntervaloHoras || 24;
     document.getElementById('autoGroupActive').checked = config.gruposActivos || false;
     document.getElementById('autoGroupInterval').value = config.gruposIntervaloHoras || 2;
 };
@@ -764,7 +902,7 @@ window.fetchWhatsAppGroups = async () => {
                 container.innerHTML = '<p style="font-size:12px; color:var(--mac-orange); text-align:center;">No perteneces a ningún grupo o el bot aún está cargando mensajes.</p>';
                 return;
             }
-            
+
             // Leemos los seleccionados en Firebase
             const savedGroups = (currentUserData.botConfig && currentUserData.botConfig.gruposTarget) ? currentUserData.botConfig.gruposTarget : [];
 
@@ -790,13 +928,13 @@ window.renderPaymentMethodsList = () => {
     const container = document.getElementById('paymentMethodsContainer');
     if (!container) return;
     container.innerHTML = '';
-    
+
     tempPaymentMethods.forEach((m, idx) => {
         if (m.isEditing) {
             // MODO EDICIÓN: Muestra el formulario para llenar los datos
             const div = document.createElement('div');
             div.style.cssText = "background: var(--mac-bg); border: 1px solid var(--mac-blue); border-radius: 12px; padding: 15px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,122,255,0.1);";
-            
+
             // Permite previsualizar la foto temporal si acaba de subir una
             let imgPreview = m.qrUrl ? `<img src="${m.qrUrl}" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid var(--mac-border); flex-shrink: 0;">` : '';
 
@@ -835,9 +973,9 @@ window.renderPaymentMethodsList = () => {
             // MODO RESUMEN: Muestra la tarjetita compacta y elegante
             const div = document.createElement('div');
             div.style.cssText = "background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 10px; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;";
-            
-            const iconHtml = (m.qrUrl || m.fileObj) 
-                ? `<div style="width: 35px; height: 35px; background: rgba(0, 122, 255, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--mac-blue); border: 1px solid var(--mac-blue);"><i class='bx bx-qr-scan'></i></div>` 
+
+            const iconHtml = (m.qrUrl || m.fileObj)
+                ? `<div style="width: 35px; height: 35px; background: rgba(0, 122, 255, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--mac-blue); border: 1px solid var(--mac-blue);"><i class='bx bx-qr-scan'></i></div>`
                 : `<div style="width: 35px; height: 35px; background: var(--mac-bg); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--mac-text-secondary); border: 1px solid var(--mac-border);"><i class='bx bxs-bank'></i></div>`;
 
             div.innerHTML = `
@@ -901,26 +1039,36 @@ window.confirmPaymentMethod = (idx) => {
     m.bank = bank;
     m.number = number;
     m.holder = holder;
-    
+
     // Si acaba de subir una foto, la guardamos temporalmente en memoria
     if (fileInput && fileInput.files.length > 0) {
         m.fileObj = fileInput.files[0];
         // Creamos una URL temporal para que la vea de inmediato si vuelve a editar
-        m.qrUrl = URL.createObjectURL(m.fileObj); 
+        m.qrUrl = URL.createObjectURL(m.fileObj);
     }
 
     m.isEditing = false;
     window.renderPaymentMethodsList();
 };
 
-window.saveProfile = async () => { 
-    const phone = document.getElementById('editProfilePhone').value.trim(); 
+window.saveProfile = async () => {
+    const phone = document.getElementById('editProfilePhone').value.trim();
     const name = document.getElementById('editProfileName').value;
     const country = document.getElementById('editProfileCountry').value;
-    if(!phone.startsWith('+')) return window.showNotification("⚠️ El teléfono DEBE incluir el código de país"); 
-    
+
+    // --- NUEVO: Capturar datos de Pasarelas de Pago ---
+    // (Asegúrate de que los IDs en tu HTML coincidan con estos)
+    const mpAccessToken = document.getElementById('mpAccessTokenInput') ? document.getElementById('mpAccessTokenInput').value.trim() : '';
+    const binanceApiKey = document.getElementById('binanceApiKeyInput') ? document.getElementById('binanceApiKeyInput').value.trim() : '';
+    const binanceSecretKey = document.getElementById('binanceSecretKeyInput') ? document.getElementById('binanceSecretKeyInput').value.trim() : '';
+    const binancePayId = document.getElementById('binancePayIdInput') ? document.getElementById('binancePayIdInput').value.trim() : '';
+    const binanceAlias = document.getElementById('binanceAliasInput') ? document.getElementById('binanceAliasInput').value.trim() : '';
+    const binanceExchangeRate = document.getElementById('binanceExchangeRateInput') ? parseFloat(document.getElementById('binanceExchangeRateInput').value) || null : null;
+
+    if (!phone.startsWith('+')) return window.showNotification("⚠️ El teléfono DEBE incluir el código de país");
+
     const btn = document.querySelector('#profileModal .btn-primary');
-    if(btn) { btn.innerText = "Subiendo... ⏳"; btn.disabled = true; }
+    if (btn) { btn.innerText = "Subiendo... ⏳"; btn.disabled = true; }
 
     try {
         let logoUrl = currentUserData.logoUrl || null;
@@ -941,24 +1089,23 @@ window.saveProfile = async () => {
             bannerUrl = await getDownloadURL(storageRefBanner);
         }
 
-        // 🔥 PROCESAR Y SUBIR LOS MÉTODOS DE PAGO CONFIRMADOS
+        // Procesar métodos de pago manuales
         let finalPaymentMethods = [];
-        
         for (let i = 0; i < tempPaymentMethods.length; i++) {
             let m = tempPaymentMethods[i];
-            
+
             if (m.isEditing) {
-                 m.bank = document.getElementById(`pmBank_${i}`).value.trim();
-                 m.number = document.getElementById(`pmNumber_${i}`).value.trim();
-                 m.holder = document.getElementById(`pmHolder_${i}`).value.trim();
-                 const fInput = document.getElementById(`pmQrFile_${i}`);
-                 if (fInput && fInput.files.length > 0) m.fileObj = fInput.files[0];
+                m.bank = document.getElementById(`pmBank_${i}`).value.trim();
+                m.number = document.getElementById(`pmNumber_${i}`).value.trim();
+                m.holder = document.getElementById(`pmHolder_${i}`).value.trim();
+                const fInput = document.getElementById(`pmQrFile_${i}`);
+                if (fInput && fInput.files.length > 0) m.fileObj = fInput.files[0];
             }
-            
-            if (!m.bank && !m.number) continue; 
+
+            if (!m.bank && !m.number) continue;
 
             let finalQrUrl = m.qrUrl;
-            
+
             if (m.fileObj) {
                 const storageRefQR = ref(storage, `qrs/${currentUser.uid}_qr_${Date.now()}_${i}`);
                 await uploadBytes(storageRefQR, m.fileObj);
@@ -976,20 +1123,17 @@ window.saveProfile = async () => {
         let rawAlias = document.getElementById('editProfileAlias').value;
         let finalAlias = rawAlias.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
-        let refInput = document.getElementById('editReferencesLink');
-        let referencesLink = refInput ? refInput.value.trim() : '';
-
-        // --- GUARDADO DE LA CONFIGURACIÓN AUTOMÁTICA DEL BOT ---
+        // Guardado de botConfig
         let estadosArray = [];
         let gruposArray = [];
         for (let i = 0; i < 5; i++) {
-            estadosArray.push({ 
-                texto: document.getElementById(`slotTxt_${i}`).value.trim(), 
-                imgUrl: document.getElementById(`slotImg_${i}`).value.trim() 
+            estadosArray.push({
+                texto: document.getElementById(`slotTxt_${i}`).value.trim(),
+                imgUrl: document.getElementById(`slotImg_${i}`).value.trim()
             });
-            gruposArray.push({ 
-                texto: document.getElementById(`grpTxt_${i}`).value.trim(), 
-                imgUrl: document.getElementById(`grpImg_${i}`).value.trim() 
+            gruposArray.push({
+                texto: document.getElementById(`grpTxt_${i}`).value.trim(),
+                imgUrl: document.getElementById(`grpImg_${i}`).value.trim()
             });
         }
 
@@ -997,38 +1141,68 @@ window.saveProfile = async () => {
 
         const botConfig = {
             estadosActivos: document.getElementById('autoStatusActive').checked,
-            estadosIntervaloHoras: parseInt(document.getElementById('autoStatusInterval').value) || 2,
+            estadosIntervaloHoras: parseInt(document.getElementById('autoStatusInterval').value) || 24,
             estados: estadosArray,
             estadosLastRun: (currentUserData.botConfig && currentUserData.botConfig.estadosLastRun) ? currentUserData.botConfig.estadosLastRun : null,
             estadosCurrentIndex: (currentUserData.botConfig && currentUserData.botConfig.estadosCurrentIndex) ? currentUserData.botConfig.estadosCurrentIndex : 0,
 
             gruposActivos: document.getElementById('autoGroupActive').checked,
             gruposIntervaloHoras: parseInt(document.getElementById('autoGroupInterval').value) || 2,
-            gruposMensajes: gruposArray, // 🔥 NUEVO ARRAY
+            gruposMensajes: gruposArray,
             gruposTarget: selectedGroups,
             gruposLastRun: (currentUserData.botConfig && currentUserData.botConfig.gruposLastRun) ? currentUserData.botConfig.gruposLastRun : null,
             gruposCurrentIndex: (currentUserData.botConfig && currentUserData.botConfig.gruposCurrentIndex) ? currentUserData.botConfig.gruposCurrentIndex : 0
         };
-        
-        // 🔥 AQUÍ ESTABA EL ERROR: Faltaba la coma después de finalPaymentMethods
-        await updateDoc(doc(db, "users", currentUser.uid), { 
-            name: name, country: country, currency: getCurrencyForCountry(country), 
+
+        // --- NUEVO: OBJETO DE ACTUALIZACIÓN CON PASARELAS ---
+        let updateData = {
+            name: name, country: country, currency: getCurrencyForCountry(country),
             phone: phone, logoUrl: logoUrl, bannerUrl: bannerUrl, storeAlias: finalAlias,
-            referencesLink: referencesLink,
-            paymentMethods: finalPaymentMethods, 
-            botConfig: botConfig
-        });
-        
+            paymentMethods: finalPaymentMethods,
+            botConfig: botConfig,
+            binancePayId: binancePayId,
+            binanceAlias: binanceAlias,
+            binanceExchangeRate: binanceExchangeRate
+        };
+
+        // Solo guardamos si el usuario escribió algo, o si quiso borrarlas
+        if (document.getElementById('mpAccessTokenInput')) {
+            // Solo lo actualizamos si el input NO tiene los asteriscos de seguridad
+            if (!mpAccessToken.includes('***')) updateData.mpAccessToken = mpAccessToken;
+        }
+        if (document.getElementById('binanceApiKeyInput')) {
+            if (!binanceApiKey.includes('***')) updateData.binanceApiKey = binanceApiKey;
+        }
+        if (document.getElementById('binanceSecretKeyInput')) {
+            if (!binanceSecretKey.includes('***')) updateData.binanceSecretKey = binanceSecretKey;
+        }
+
+        let binanceQrUrl = currentUserData.binanceQrUrl || null;
+        const binanceQrInput = document.getElementById('binanceQrUpload');
+        if (binanceQrInput && binanceQrInput.files.length > 0) {
+            const fileQr = binanceQrInput.files[0];
+            const storageRefQr = ref(storage, `qrs/${currentUser.uid}_binance_qr`);
+            await uploadBytes(storageRefQr, fileQr);
+            binanceQrUrl = await getDownloadURL(storageRefQr);
+            updateData.binanceQrUrl = binanceQrUrl;
+            currentUserData.binanceQrUrl = binanceQrUrl;
+        }
+
+        await updateDoc(doc(db, "users", currentUser.uid), updateData);
+
         // Actualizar la memoria global
         currentUserData.botConfig = botConfig;
-        currentUserData.storeAlias = finalAlias; 
+        currentUserData.storeAlias = finalAlias;
         currentUserData.name = name;
         currentUserData.country = country;
         currentUserData.phone = phone;
         currentUserData.logoUrl = logoUrl;
         currentUserData.bannerUrl = bannerUrl;
-        currentUserData.referencesLink = referencesLink;
-        currentUserData.paymentMethods = finalPaymentMethods; 
+        currentUserData.paymentMethods = finalPaymentMethods;
+        // Actualizamos en memoria local las pasarelas
+        if (updateData.mpAccessToken !== undefined) currentUserData.mpAccessToken = updateData.mpAccessToken;
+        if (updateData.binanceApiKey !== undefined) currentUserData.binanceApiKey = updateData.binanceApiKey;
+        if (updateData.binanceSecretKey !== undefined) currentUserData.binanceSecretKey = updateData.binanceSecretKey;
 
         globalCurrency = getCurrencyForCountry(country);
         currentUserData.currency = globalCurrency;
@@ -1036,41 +1210,118 @@ window.saveProfile = async () => {
         // Actualización DOM
         const brandSidebar = document.getElementById('brandNameSidebar');
         if (brandSidebar) brandSidebar.innerText = name || 'Mi Panel';
-        
+
         const mobileBrand = document.getElementById('mobileBrandName');
         if (mobileBrand) mobileBrand.innerText = name || 'Mi Panel';
-        
+
         const logoSidebar = document.getElementById('brandLogoSidebar');
         if (logoSidebar && logoUrl) { logoSidebar.src = logoUrl; logoSidebar.style.display = 'block'; }
-        
+
         const mobileLogo = document.getElementById('mobileBrandLogo');
         if (mobileLogo && logoUrl) { mobileLogo.src = logoUrl; mobileLogo.style.display = 'block'; }
 
         const costInput = document.getElementById('clientCost');
         if (costInput) costInput.placeholder = `Costo Proveedor (${globalCurrency})`;
-        
+
         const priceInput = document.getElementById('clientPrice');
         if (priceInput) priceInput.placeholder = `Precio de Venta (${globalCurrency})`;
 
-        window.showNotification("Perfil, Bot y Métodos de Pago guardados."); 
+        window.showNotification("Perfil, Bot y Pasarelas guardadas.");
         window.closeModals();
-        
+
         if (document.getElementById('tableBody')) window.renderTable();
         if (document.getElementById('statsPanel')) window.toggleStats(true);
-        
-    } catch(e) { 
-        window.showNotification("Error: " + e.message); 
+
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
     } finally {
-        if(btn) { btn.innerText = "Guardar Perfil"; btn.disabled = false; }
+        if (btn) { btn.innerText = "Guardar Perfil"; btn.disabled = false; }
+    }
+};
+
+// --- NUEVO: GUARDAR PASARELAS DE PAGO (PRO) ---
+window.saveGateways = async () => {
+    let mpAccessToken = "";
+    let binanceApiKey = "";
+    let binanceSecretKey = "";
+    let binancePayId = "";
+    let binanceAlias = "";
+    let binanceExchangeRate = null;
+
+    // Atrapamos las cajas HTML
+    const cajaMp = document.getElementById('mpAccessTokenInput');
+    const cajaBinApi = document.getElementById('binanceApiKeyInput');
+    const cajaBinSec = document.getElementById('binanceSecretKeyInput');
+    const cajaBinPayId = document.getElementById('binancePayIdInput');
+    const cajaBinAlias = document.getElementById('binanceAliasInput');
+    const cajaBinRate = document.getElementById('binanceExchangeRateInput');
+
+    // Extraemos sus valores
+    if (cajaMp) mpAccessToken = cajaMp.value.trim();
+    if (cajaBinApi) binanceApiKey = cajaBinApi.value.trim();
+    if (cajaBinSec) binanceSecretKey = cajaBinSec.value.trim();
+    if (cajaBinPayId) binancePayId = cajaBinPayId.value.trim();
+    if (cajaBinAlias) binanceAlias = cajaBinAlias.value.trim();
+    if (cajaBinRate) binanceExchangeRate = parseFloat(cajaBinRate.value) || null;
+
+    const btn = document.querySelector('#tabPasarelas .btn-primary');
+    const origText = btn ? btn.innerHTML : 'Guardar Pasarelas';
+
+    if (btn) {
+        btn.innerHTML = "Guardando... ⏳";
+        btn.disabled = true;
+    }
+
+    try {
+        // Empaquetamos los nuevos datos primero
+        let updateData = {
+            binancePayId: binancePayId,
+            binanceAlias: binanceAlias,
+            binanceExchangeRate: binanceExchangeRate
+        };
+
+        // Solo guardamos claves si hay texto y NO son asteriscos
+        if (mpAccessToken && !mpAccessToken.includes('***')) updateData.mpAccessToken = mpAccessToken;
+        if (binanceApiKey && !binanceApiKey.includes('***')) updateData.binanceApiKey = binanceApiKey;
+        if (binanceSecretKey && !binanceSecretKey.includes('***')) updateData.binanceSecretKey = binanceSecretKey;
+
+        // Si vació las cajas de claves, borramos de la BD
+        if (mpAccessToken === '') updateData.mpAccessToken = null;
+        if (binanceApiKey === '') updateData.binanceApiKey = null;
+        if (binanceSecretKey === '') updateData.binanceSecretKey = null;
+
+        // Actualizamos Firebase
+        if (Object.keys(updateData).length > 0) {
+            await updateDoc(doc(db, "users", currentUser.uid), updateData);
+
+            // Actualizamos la memoria local de la página
+            if (updateData.mpAccessToken !== undefined) currentUserData.mpAccessToken = updateData.mpAccessToken;
+            if (updateData.binanceApiKey !== undefined) currentUserData.binanceApiKey = updateData.binanceApiKey;
+            if (updateData.binanceSecretKey !== undefined) currentUserData.binanceSecretKey = updateData.binanceSecretKey;
+
+            currentUserData.binancePayId = updateData.binancePayId;
+            currentUserData.binanceAlias = updateData.binanceAlias;
+            currentUserData.binanceExchangeRate = updateData.binanceExchangeRate;
+        }
+
+        window.showNotification("✅ Pasarelas de pago guardadas exitosamente.");
+    } catch (e) {
+        window.showNotification("Error al guardar pasarelas: " + e.message);
+        console.error(e);
+    } finally {
+        if (btn) {
+            btn.innerHTML = origText;
+            btn.disabled = false;
+        }
     }
 };
 
 window.openSuggestionModal = () => { document.getElementById('suggestionText').value = ''; document.getElementById('suggestionModal').style.display = 'flex'; };
-window.sendSuggestion = async () => { const text = document.getElementById('suggestionText').value; if (!text) return window.showNotification("Escribe algo primero."); const btn = document.querySelector('#suggestionModal .btn-primary'); btn.innerText = "Enviando..."; btn.disabled = true; try { await addDoc(collection(db, "suggestions"), { userId: currentUser.uid, userName: currentUserData.name, text: text, date: new Date().toISOString(), approved: false }); window.showNotification("¡Gracias! 🚀"); window.closeModals(); } catch(e) { window.showNotification("Error: " + e.message); } finally { btn.innerText = "Enviar Idea 🚀"; btn.disabled = false; } };
+window.sendSuggestion = async () => { const text = document.getElementById('suggestionText').value; if (!text) return window.showNotification("Escribe algo primero."); const btn = document.querySelector('#suggestionModal .btn-primary'); btn.innerText = "Enviando..."; btn.disabled = true; try { await addDoc(collection(db, "suggestions"), { userId: currentUser.uid, userName: currentUserData.name, text: text, date: new Date().toISOString(), approved: false }); window.showNotification("¡Gracias! 🚀"); window.closeModals(); } catch (e) { window.showNotification("Error: " + e.message); } finally { btn.innerText = "Enviar Idea 🚀"; btn.disabled = false; } };
 
-window.openAccountModal = () => { 
-    const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(cb => cb.value); 
-    if(checked.length === 0) return window.showNotification("⚠️ Primero selecciona las plataformas en el menú desplegable.");
+window.openAccountModal = () => {
+    const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(cb => cb.value);
+    if (checked.length === 0) return window.showNotification("⚠️ Primero selecciona las plataformas en el menú desplegable.");
 
     // Creamos/Mantenemos las pestañas según las plataformas elegidas
     const newMultiAccData = {};
@@ -1078,7 +1329,7 @@ window.openAccountModal = () => {
     multiAccData = newMultiAccData;
 
     window.renderAccTabs(checked, 'accountModal');
-    document.getElementById('accountModal').style.display = 'flex'; 
+    document.getElementById('accountModal').style.display = 'flex';
 };
 
 // 🪄 Creador de Pestañas
@@ -1114,7 +1365,7 @@ window.switchAccTab = (platform, modalType) => {
         document.getElementById('accPin').value = data.pin || '';
         document.getElementById('accSaleType').value = data.saleType || 'Perfil';
         document.getElementById('accUnits').value = data.units || 1;
-        if(document.getElementById('accMonths')) document.getElementById('accMonths').value = data.months || 1;
+        if (document.getElementById('accMonths')) document.getElementById('accMonths').value = data.months || 1;
         document.getElementById('accDeviceName').value = data.deviceName || '';
         document.getElementById('accDeviceType').value = data.deviceType || '';
     } else {
@@ -1123,8 +1374,8 @@ window.switchAccTab = (platform, modalType) => {
         document.getElementById('viewAccPassword').innerText = data.password || '-';
         document.getElementById('viewAccProfile').innerText = data.profile || '-';
         document.getElementById('viewAccPin').innerText = data.pin || '-';
-        if(document.getElementById('viewAccMonths')) document.getElementById('viewAccMonths').innerText = data.months || '1';
-        
+        if (document.getElementById('viewAccMonths')) document.getElementById('viewAccMonths').innerText = data.months || '1';
+
         let deviceText = 'Sin configurar';
         if (data.deviceType) {
             let iconHtml = data.deviceType === 'TV' ? "<i class='bx bx-tv'></i>" : (data.deviceType === 'PC' ? "<i class='bx bx-laptop'></i>" : "<i class='bx bx-mobile-alt'></i>");
@@ -1140,17 +1391,17 @@ window.updateActiveTab = (field, value) => {
     if (currentActiveTab && multiAccData[currentActiveTab]) multiAccData[currentActiveTab][field] = value;
 };
 
-window.confirmAccountData = () => { 
-    window.closeModals(); 
+window.confirmAccountData = () => {
+    window.closeModals();
     const totalUnits = Object.values(multiAccData).reduce((sum, acc) => sum + (parseInt(acc.units) || 1), 0);
-    const btn = document.getElementById('btnAccountData'); 
-    btn.innerText = `✅ Datos Ingresados (${totalUnits} ud)`; 
-    btn.style.backgroundColor = "var(--mac-green)"; btn.style.color = "white"; 
+    const btn = document.getElementById('btnAccountData');
+    btn.innerText = `✅ Datos Ingresados (${totalUnits} ud)`;
+    btn.style.backgroundColor = "var(--mac-green)"; btn.style.color = "white";
 };
 
-window.viewAccountData = (id) => { 
+window.viewAccountData = (id) => {
     const c = clients.find(x => x.id === id);
-    
+
     // Adaptabilidad para leer clientes con pestañas o clientes viejos sin pestañas
     if (c.multiAccounts) {
         multiAccData = c.multiAccounts;
@@ -1167,17 +1418,17 @@ window.viewAccountData = (id) => {
 
     document.getElementById('viewAccProvider').innerText = c.providerName || 'Sin especificar';
     document.getElementById('viewAccPortalCode').innerText = c.portalCode || 'Sin Código';
-    document.getElementById('viewAccountModal').style.display = 'flex'; 
+    document.getElementById('viewAccountModal').style.display = 'flex';
 };
 
-window.openManageModal = (id, name, isActive, planActual) => { 
-    currentManageUserId = id; 
-    document.getElementById('manageUserName').innerText = name; 
-    document.getElementById('manageAction').value = isActive ? "true" : "false"; 
-    
+window.openManageModal = (id, name, isActive, planActual) => {
+    currentManageUserId = id;
+    document.getElementById('manageUserName').innerText = name;
+    document.getElementById('manageAction').value = isActive ? "true" : "false";
+
     const p = (planActual || 'demo').toLowerCase();
     const durationSelect = document.getElementById('manageDuration');
-    
+
     // Si es plan básico, ocultar opciones temporales. Si es PRO, permitirlas.
     if (p === 'basico') {
         durationSelect.style.display = 'none';
@@ -1186,9 +1437,9 @@ window.openManageModal = (id, name, isActive, planActual) => {
         durationSelect.style.display = 'block';
         durationSelect.value = 'permanent';
     }
-    
-    window.toggleDurationFields(); 
-    document.getElementById('adminManageModal').style.display = 'flex'; 
+
+    window.toggleDurationFields();
+    document.getElementById('adminManageModal').style.display = 'flex';
 };
 window.toggleDurationFields = () => { document.getElementById('temporaryFields').style.display = document.getElementById('manageDuration').value === 'temporary' ? 'flex' : 'none'; };
 window.toggleTempType = () => { document.getElementById('manageDays').style.display = document.getElementById('manageTempType').value === 'days' ? 'block' : 'none'; };
@@ -1196,30 +1447,30 @@ window.saveManageStatus = async () => {
     const action = document.getElementById('manageAction').value === "true";
     const duration = document.getElementById('manageDuration').value;
     let activeUntil = null, suspendedUntil = null;
-    
-    if (duration === 'temporary') { 
-        const targetDate = new Date(); 
-        if (document.getElementById('manageTempType').value === '3hours') { 
-            targetDate.setHours(targetDate.getHours() + 3); 
-        } else { 
-            targetDate.setDate(targetDate.getDate() + 30); 
-        } 
-        if (action === true) activeUntil = targetDate.toISOString(); 
-        else suspendedUntil = targetDate.toISOString(); 
+
+    if (duration === 'temporary') {
+        const targetDate = new Date();
+        if (document.getElementById('manageTempType').value === '3hours') {
+            targetDate.setHours(targetDate.getHours() + 3);
+        } else {
+            targetDate.setDate(targetDate.getDate() + 30);
+        }
+        if (action === true) activeUntil = targetDate.toISOString();
+        else suspendedUntil = targetDate.toISOString();
     }
-    
-    const btn = document.querySelector('#adminManageModal .btn-primary'); 
+
+    const btn = document.querySelector('#adminManageModal .btn-primary');
     btn.innerText = "Guardando..."; btn.disabled = true;
-    
-    try { 
-        await updateDoc(doc(db, "users", currentManageUserId), { active: action, activeUntil: activeUntil, suspendedUntil: suspendedUntil }); 
-        window.showNotification("Configuración aplicada."); 
-        window.closeModals(); 
-        loadAdminData(); 
-    } catch (e) { 
-        window.showNotification("Error: " + e.message); 
-    } finally { 
-        btn.innerText = "Guardar y Aplicar"; btn.disabled = false; 
+
+    try {
+        await updateDoc(doc(db, "users", currentManageUserId), { active: action, activeUntil: activeUntil, suspendedUntil: suspendedUntil });
+        window.showNotification("Configuración aplicada.");
+        window.closeModals();
+        loadAdminData();
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
+    } finally {
+        btn.innerText = "Guardar y Aplicar"; btn.disabled = false;
     }
 };
 /* --- SISTEMA DE GESTIÓN DE PLANES (ADMIN) --- */
@@ -1235,21 +1486,21 @@ window.openPlanModal = (id, name, planActual) => {
 window.savePlan = async () => {
     const btn = document.querySelector('#planModal .btn-primary');
     const originalText = btn.innerText;
-    btn.innerText = "Guardando... ⏳"; 
+    btn.innerText = "Guardando... ⏳";
     btn.disabled = true;
 
     const nuevoPlan = document.getElementById('newPlanSelect').value;
-    
+
     // Asignación matemática de límites según tu modelo de negocio
     let limite = 20;
     let dias = 3;
 
-    if (nuevoPlan === 'basico') { 
-        limite = 100; 
-        dias = 30; 
-    } else if (nuevoPlan === 'pro') { 
+    if (nuevoPlan === 'basico') {
+        limite = 100;
+        dias = 30;
+    } else if (nuevoPlan === 'pro') {
         limite = 9999; // Ilimitado
-        dias = 30; 
+        dias = 30;
     }
 
     // Calculamos la nueva fecha de vencimiento
@@ -1263,14 +1514,14 @@ window.savePlan = async () => {
             limite_clientes: limite,
             vencimiento_plan: fechaVencimiento.toISOString()
         });
-        
+
         window.showNotification(`Plan ${nuevoPlan.toUpperCase()} activado con éxito 💎`);
         window.closeModals();
         loadAdminData(); // Recarga la tabla para ver el cambio instantáneo
     } catch (e) {
         window.showNotification("Error: " + e.message);
     } finally {
-        btn.innerText = originalText; 
+        btn.innerText = originalText;
         btn.disabled = false;
     }
 };
@@ -1284,7 +1535,7 @@ window.toggleAdminPlanFilter = () => {
 };
 
 window.renderAdminUsers = () => {
-    const tbody = document.getElementById('adminTableBody'); 
+    const tbody = document.getElementById('adminTableBody');
     tbody.innerHTML = '';
     const statusFilter = document.getElementById('adminFilterStatus').value;
     const planFilter = document.getElementById('adminFilterPlan').value;
@@ -1297,17 +1548,17 @@ window.renderAdminUsers = () => {
 
         const id = data.id;
         const statusHtml = data.active ? `<span class="status active">Activado</span>` : `<span class="status expired">Suspendido</span>`;
-        let expText = ""; 
-        if (data.active && data.activeUntil) { expText = `<br><span style="font-size:11px; color:var(--mac-text-secondary);">Vence: ${new Date(data.activeUntil).toLocaleString('es-ES', {dateStyle:'short', timeStyle:'short'})}</span>`; } else if (!data.active && data.suspendedUntil) { expText = `<br><span style="font-size:11px; color:var(--mac-text-secondary);">Hasta: ${new Date(data.suspendedUntil).toLocaleString('es-ES', {dateStyle:'short', timeStyle:'short'})}</span>`; }
-        
+        let expText = "";
+        if (data.active && data.activeUntil) { expText = `<br><span style="font-size:11px; color:var(--mac-text-secondary);">Vence: ${new Date(data.activeUntil).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })}</span>`; } else if (!data.active && data.suspendedUntil) { expText = `<br><span style="font-size:11px; color:var(--mac-text-secondary);">Hasta: ${new Date(data.suspendedUntil).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })}</span>`; }
+
         const planDisplay = (data.plan_actual || 'demo').toUpperCase();
         const planColor = planDisplay === 'PRO' ? 'var(--mac-blue)' : (planDisplay === 'BASICO' ? 'var(--mac-green)' : 'var(--mac-text-secondary)');
         const safeName = (data.name || 'Usuario').replace(/'/g, "\\'");
-        
-        const tr = document.createElement('tr'); 
+
+        const tr = document.createElement('tr');
         tr.innerHTML = `
             <td data-label="Nombre"><strong>${data.name}</strong></td>
-            <td data-label="País">${data.country||'-'}</td>
+            <td data-label="País">${data.country || '-'}</td>
             <td data-label="Correo">${data.email}</td>
             <td data-label="Teléfono">${data.phone || '-'}</td>
             <td data-label="Plan"><strong style="color: ${planColor};">${planDisplay}</strong></td>
@@ -1315,7 +1566,7 @@ window.renderAdminUsers = () => {
             <td data-label="Acción" class="actions-cell" style="display: flex; gap: 5px;">
                 <button class="action-btn" style="border: 1px solid var(--mac-border); background: transparent;" onclick="window.openManageModal('${id}', '${safeName}', ${data.active}, '${data.plan_actual}')">⚙️ Estado</button>
                 <button class="action-btn" style="border: 1px solid var(--mac-blue); color: var(--mac-blue); background: transparent;" onclick="window.openPlanModal('${id}', '${safeName}', '${data.plan_actual || 'demo'}')">💎 Plan</button>
-            </td>`; 
+            </td>`;
         tbody.appendChild(tr);
     });
 };
@@ -1330,26 +1581,26 @@ async function loadAdminData() {
     // Llenar la caché y renderizar
     adminUsersCache = [];
     qUsers.forEach((d) => {
-        if(d.data().role !== 'admin') adminUsersCache.push({ id: d.id, ...d.data() });
+        if (d.data().role !== 'admin') adminUsersCache.push({ id: d.id, ...d.data() });
     });
     window.toggleAdminPlanFilter();
 
     // 2. Cargar Sugerencias
-    const sBody = document.getElementById('adminSuggestionsBody'); sBody.innerHTML = ''; 
-    let arrS = []; qSuggestions.forEach(d => arrS.push({ id: d.id, ...d.data() })); 
-    arrS.sort((a,b) => new Date(b.date) - new Date(a.date));
-    
-    arrS.forEach(s => { 
-        const tr = document.createElement('tr'); 
-        tr.innerHTML = `<td>${new Date(s.date).toLocaleDateString('es-ES')}</td><td><strong>${s.userName}</strong></td><td style="color:var(--mac-text-secondary);">${s.text}</td><td>${s.approved ? '<span style="color:var(--mac-green);font-weight:bold;">✅ Aprobada</span>' : '<span style="color:var(--mac-orange);font-weight:bold;">⏳ Pendiente</span>'}</td><td class="actions-cell">${s.approved ? '' : `<button class="action-btn btn-wa" onclick="window.approveSuggestion('${s.id}')">✔️ Aprobar</button>`} <button class="action-btn btn-del" onclick="window.deleteSuggestion('${s.id}')">🗑️</button></td>`; 
-        sBody.appendChild(tr); 
+    const sBody = document.getElementById('adminSuggestionsBody'); sBody.innerHTML = '';
+    let arrS = []; qSuggestions.forEach(d => arrS.push({ id: d.id, ...d.data() }));
+    arrS.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    arrS.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${new Date(s.date).toLocaleDateString('es-ES')}</td><td><strong>${s.userName}</strong></td><td style="color:var(--mac-text-secondary);">${s.text}</td><td>${s.approved ? '<span style="color:var(--mac-green);font-weight:bold;">✅ Aprobada</span>' : '<span style="color:var(--mac-orange);font-weight:bold;">⏳ Pendiente</span>'}</td><td class="actions-cell">${s.approved ? '' : `<button class="action-btn btn-wa" onclick="window.approveSuggestion('${s.id}')">✔️ Aprobar</button>`} <button class="action-btn btn-del" onclick="window.deleteSuggestion('${s.id}')">🗑️</button></td>`;
+        sBody.appendChild(tr);
     });
 
     // 3. Cargar Noticias
-    const nBody = document.getElementById('adminNewsBody'); nBody.innerHTML = ''; 
-    let arrN = []; qNews.forEach(d => arrN.push({ id: d.id, ...d.data() })); 
-    
-    arrN.sort((a,b) => {
+    const nBody = document.getElementById('adminNewsBody'); nBody.innerHTML = '';
+    let arrN = []; qNews.forEach(d => arrN.push({ id: d.id, ...d.data() }));
+
+    arrN.sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
         return new Date(b.fechaIso) - new Date(a.fechaIso);
@@ -1358,14 +1609,14 @@ async function loadAdminData() {
     arrN.forEach(n => {
         const dateStr = new Date(n.fechaIso).toLocaleDateString('es-ES');
         const imgHtml = n.img ? `<a href="${n.img}" target="_blank" style="color:var(--mac-blue); font-size:12px;">Ver Foto</a>` : '<span style="font-size:12px; color:var(--mac-text-secondary);">Sin foto</span>';
-        
+
         const titleSafe = n.titulo ? n.titulo.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
         const descSafe = n.desc ? n.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : '';
 
         const pinnedIcon = n.isPinned ? '<i class="bx bxs-pin" style="color: var(--mac-orange); margin-right: 5px;" title="Noticia Fijada"></i>' : '';
         const pinBtnColor = n.isPinned ? 'var(--mac-orange)' : 'var(--mac-text-secondary)';
 
-        const tr = document.createElement('tr'); 
+        const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${dateStr}</td>
             <td>${pinnedIcon}<strong>${n.titulo}</strong></td>
@@ -1374,7 +1625,7 @@ async function loadAdminData() {
                 <button class="action-btn" style="border: 1px solid ${pinBtnColor}; color: ${pinBtnColor}; background: transparent;" onclick="window.togglePinNews('${n.id}', ${!!n.isPinned})" title="Fijar / Desfijar"><i class='bx bx-pin'></i></button>
                 <button class="action-btn" style="border: 1px solid var(--mac-blue); color: var(--mac-blue); background: transparent;" onclick="window.startEditNews('${n.id}', '${titleSafe}', '${descSafe}', '${n.img || ''}')"><i class='bx bx-edit-alt'></i></button>
                 <button class="action-btn btn-del" onclick="window.deleteNews('${n.id}')"><i class='bx bx-trash'></i></button>
-            </td>`; 
+            </td>`;
         nBody.appendChild(tr);
     });
 }
@@ -1383,49 +1634,49 @@ async function loadAdminData() {
 window.startEditNews = (id, title, desc, img) => {
     editingNewsId = id;
     editingNewsOldImg = img;
-    
+
     document.getElementById('newsInputTitle').value = title;
     document.getElementById('newsInputDesc').value = desc;
-    
+
     const btnSubmit = document.getElementById('btnSubmitNews');
-    if(btnSubmit) btnSubmit.innerHTML = "<i class='bx bx-save'></i> Guardar Cambios";
-    
+    if (btnSubmit) btnSubmit.innerHTML = "<i class='bx bx-save'></i> Guardar Cambios";
+
     const btnCancel = document.getElementById('btnCancelEditNews');
-    if(btnCancel) btnCancel.style.display = 'block';
-    
+    if (btnCancel) btnCancel.style.display = 'block';
+
     document.getElementById('newsInputTitle').scrollIntoView({ behavior: 'smooth' });
 };
 
 window.cancelEditNews = () => {
     editingNewsId = null;
     editingNewsOldImg = null;
-    
-    document.getElementById('newsInputTitle').value = ''; 
-    document.getElementById('newsInputDesc').value = ''; 
+
+    document.getElementById('newsInputTitle').value = '';
+    document.getElementById('newsInputDesc').value = '';
     document.getElementById('newsInputImg').value = '';
-    
+
     const btnSubmit = document.getElementById('btnSubmitNews');
-    if(btnSubmit) btnSubmit.innerHTML = "<i class='bx bx-send'></i> Publicar Noticia a Todos";
-    
+    if (btnSubmit) btnSubmit.innerHTML = "<i class='bx bx-send'></i> Publicar Noticia a Todos";
+
     const btnCancel = document.getElementById('btnCancelEditNews');
-    if(btnCancel) btnCancel.style.display = 'none';
+    if (btnCancel) btnCancel.style.display = 'none';
 };
 
 window.saveNews = async () => {
     const title = document.getElementById('newsInputTitle').value;
     const desc = document.getElementById('newsInputDesc').value;
     const fileInput = document.getElementById('newsInputImg');
-    
+
     if (!title || !desc) return window.showNotification("Falta título o descripción");
-    
+
     const btn = document.getElementById('btnSubmitNews') || document.querySelector('#adminView .btn-primary');
-    const origText = btn.innerHTML; 
-    btn.innerText = "Procesando... ⏳"; 
+    const origText = btn.innerHTML;
+    btn.innerText = "Procesando... ⏳";
     btn.disabled = true;
 
     try {
         let imgUrl = editingNewsOldImg || ""; // Si editamos, usamos la antigua por defecto
-        
+
         // Si el admin sube una nueva imagen, la reemplazamos
         if (fileInput.files.length > 0) {
             const file = fileInput.files[0];
@@ -1433,26 +1684,26 @@ window.saveNews = async () => {
             await uploadBytes(storageRef, file);
             imgUrl = await getDownloadURL(storageRef);
         }
-        
+
         if (editingNewsId) {
             // MODO EDICIÓN
-            await updateDoc(doc(db, "news", editingNewsId), { 
-                titulo: title, 
-                desc: desc, 
-                img: imgUrl 
+            await updateDoc(doc(db, "news", editingNewsId), {
+                titulo: title,
+                desc: desc,
+                img: imgUrl
             });
             window.showNotification("Noticia actualizada con éxito ✏️");
-            window.cancelEditNews(); 
+            window.cancelEditNews();
         } else {
             // MODO CREACIÓN
-            await addDoc(collection(db, "news"), { 
-                titulo: title, 
-                desc: desc, 
-                img: imgUrl, 
+            await addDoc(collection(db, "news"), {
+                titulo: title,
+                desc: desc,
+                img: imgUrl,
                 fechaIso: new Date().toISOString(),
                 isPinned: false
             });
-            
+
             // 🔥 EL GATILLO DEL MEGÁFONO (Avisa al bot para que haga sonar los celulares)
             fetch('https://bot.panelagc.com/api/notificar-noticia', {
                 method: 'POST',
@@ -1464,26 +1715,26 @@ window.saveNews = async () => {
             }).catch(e => console.error("Error al notificar al bot:", e));
 
             window.showNotification("Noticia publicada con éxito 📢");
-            document.getElementById('newsInputTitle').value = ''; 
-            document.getElementById('newsInputDesc').value = ''; 
+            document.getElementById('newsInputTitle').value = '';
+            document.getElementById('newsInputDesc').value = '';
             fileInput.value = '';
         }
-        
+
         loadAdminData(); // Recarga la tabla
-    } catch(e) { 
-        window.showNotification("Error: " + e.message); 
-    } finally { 
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
+    } finally {
         // Restaurar estado del botón si hubo error o si fue creación
         if (!editingNewsId) {
-            btn.innerHTML = "<i class='bx bx-send'></i> Publicar Noticia a Todos"; 
+            btn.innerHTML = "<i class='bx bx-send'></i> Publicar Noticia a Todos";
         }
-        btn.disabled = false; 
+        btn.disabled = false;
     }
 };
 
 window.deleteNews = async (id) => {
     // ... tu código de deleteNews se queda igual ...
-    if(confirm("¿Seguro que deseas eliminar esta noticia de todos los paneles?")) {
+    if (confirm("¿Seguro que deseas eliminar esta noticia de todos los paneles?")) {
         await deleteDoc(doc(db, "news", id));
         window.showNotification("Noticia eliminada");
         loadAdminData();
@@ -1491,39 +1742,124 @@ window.deleteNews = async (id) => {
 };
 window.togglePinNews = async (id, currentStatus) => {
     try {
-        await updateDoc(doc(db, "news", id), { 
-            isPinned: !currentStatus 
+        await updateDoc(doc(db, "news", id), {
+            isPinned: !currentStatus
         });
         window.showNotification(currentStatus ? "Noticia desfijada" : "Noticia fijada 📌");
         loadAdminData(); // Recarga la tabla
-    } catch(e) { 
-        window.showNotification("Error: " + e.message); 
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
     }
 };
 window.approveSuggestion = async (id) => { await updateDoc(doc(db, "suggestions", id), { approved: true }); window.showNotification("Idea aprobada."); loadAdminData(); };
-window.deleteSuggestion = async (id) => { if(confirm("¿Eliminar sugerencia?")) { await deleteDoc(doc(db, "suggestions", id)); loadAdminData(); } };
+window.deleteSuggestion = async (id) => { if (confirm("¿Eliminar sugerencia?")) { await deleteDoc(doc(db, "suggestions", id)); loadAdminData(); } };
 
-async function loadUserClients() { 
-    document.getElementById('tableLoader').style.display = 'block'; 
-    document.getElementById('mainTable').style.display = 'none'; 
-    if(document.getElementById('loadMoreContainer')) document.getElementById('loadMoreContainer').style.display = 'none';
-    clients = []; 
-    
-    try {
-        const q = query(collection(db, "clients"), where("userId", "==", currentUser.uid), limit(30)); 
-        const snapshot = await getDocs(q); 
-        
-        if(!snapshot.empty) {
-            lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
-            if(snapshot.docs.length === 30 && document.getElementById('loadMoreContainer')) {
-                document.getElementById('loadMoreContainer').style.display = 'block';
+let allClientsLoaded = false;
+window._loadingAllClients = false;
+
+window.normalizeProfileNumber = (p) => {
+    if (p === undefined || p === null) return '';
+    return String(p).match(/\d+/)?.[0] || String(p).trim().toLowerCase();
+};
+
+window.setDefaultYear2026 = (resetValue = false) => {
+    const expInput = document.getElementById('expirationDate');
+    if (!expInput) return;
+
+    const getDefault2026Date = () => {
+        const now = new Date();
+        now.setDate(now.getDate() + 30);
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        return `2026-${mm}-${dd}`;
+    };
+
+    const enforceYear2026 = () => {
+        if (!expInput.value) return;
+        const parts = expInput.value.split('-');
+        if (parts.length === 3 && parts[0] !== '2026') {
+            expInput.value = `2026-${parts[1]}-${parts[2]}`;
+        }
+    };
+
+    if (!expInput.dataset.year2026Bound) {
+        expInput.dataset.year2026Bound = 'true';
+        expInput.addEventListener('focus', () => {
+            if (!expInput.value) {
+                expInput.value = getDefault2026Date();
+            } else {
+                enforceYear2026();
             }
+        });
+        expInput.addEventListener('click', () => {
+            if (!expInput.value) {
+                expInput.value = getDefault2026Date();
+            }
+        });
+        expInput.addEventListener('change', enforceYear2026);
+        expInput.addEventListener('blur', enforceYear2026);
+    }
+
+    if (resetValue && !editingClientId) {
+        expInput.value = getDefault2026Date();
+    } else if (expInput.value) {
+        enforceYear2026();
+    }
+};
+setTimeout(() => window.setDefaultYear2026(true), 300);
+
+window.ensureAllClientsLoaded = async () => {
+    if (allClientsLoaded || window._loadingAllClients || !currentUser?.uid) return;
+    window._loadingAllClients = true;
+    try {
+        const lmc = document.getElementById('loadMoreContainer');
+        if (lmc) lmc.style.display = 'none';
+
+        const qAll = query(collection(db, "clients"), where("userId", "==", currentUser.uid));
+        const snapAll = await getDocs(qAll);
+
+        const clientMap = new Map();
+        clients.forEach(c => { if (c && c.id) clientMap.set(c.id, c); });
+        snapAll.forEach(d => {
+            clientMap.set(d.id, { id: d.id, ...d.data() });
+        });
+
+        clients = Array.from(clientMap.values());
+        allClientsLoaded = true;
+        window.renderTable();
+    } catch (e) {
+        console.error("Error cargando todos los clientes para búsqueda:", e);
+    } finally {
+        window._loadingAllClients = false;
+    }
+};
+
+async function loadUserClients() {
+    document.getElementById('tableLoader').style.display = 'block';
+    document.getElementById('mainTable').style.display = 'none';
+    if (document.getElementById('loadMoreContainer')) document.getElementById('loadMoreContainer').style.display = 'none';
+    clients = [];
+    allClientsLoaded = false;
+
+    try {
+        const q = query(collection(db, "clients"), where("userId", "==", currentUser.uid), limit(30));
+        const snapshot = await getDocs(q);
+
+        if (!snapshot.empty) {
+            lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
+            if (snapshot.docs.length === 30 && document.getElementById('loadMoreContainer')) {
+                document.getElementById('loadMoreContainer').style.display = 'block';
+            } else {
+                allClientsLoaded = true;
+            }
+        } else {
+            allClientsLoaded = true;
         }
 
-        snapshot.forEach((d) => { clients.push({ id: d.id, ...d.data() }); }); 
-        window.renderTable(); 
-        document.getElementById('tableLoader').style.display = 'none'; 
-        document.getElementById('mainTable').style.display = 'table'; 
+        snapshot.forEach((d) => { clients.push({ id: d.id, ...d.data() }); });
+        window.renderTable();
+        document.getElementById('tableLoader').style.display = 'none';
+        document.getElementById('mainTable').style.display = 'table';
     } catch (e) {
         window.showNotification("Error leyendo clientes: " + e.message);
         console.error(e);
@@ -1531,7 +1867,7 @@ async function loadUserClients() {
 }
 
 window.loadMoreClients = async () => {
-    if(!lastVisibleDoc) return;
+    if (!lastVisibleDoc) return;
     const btn = document.querySelector('#loadMoreContainer button');
     btn.innerText = "Cargando..."; btn.disabled = true;
 
@@ -1539,14 +1875,19 @@ window.loadMoreClients = async () => {
         const q = query(collection(db, "clients"), where("userId", "==", currentUser.uid), startAfter(lastVisibleDoc), limit(30));
         const snapshot = await getDocs(q);
 
-        if(!snapshot.empty) {
+        if (!snapshot.empty) {
             lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
-            snapshot.forEach((d) => { clients.push({ id: d.id, ...d.data() }); }); 
+            snapshot.forEach((d) => {
+                if (!clients.some(c => c.id === d.id)) {
+                    clients.push({ id: d.id, ...d.data() });
+                }
+            });
             window.renderTable();
         }
-        
-        if(snapshot.docs.length < 30 && document.getElementById('loadMoreContainer')) {
+
+        if (snapshot.docs.length < 30 && document.getElementById('loadMoreContainer')) {
             document.getElementById('loadMoreContainer').style.display = 'none';
+            allClientsLoaded = true;
         }
     } catch (e) {
         window.showNotification("Error: " + e.message);
@@ -1555,29 +1896,30 @@ window.loadMoreClients = async () => {
     }
 };
 
-const resetAccountButton = () => { 
+const resetAccountButton = () => {
     multiAccData = {}; currentActiveTab = '';
-    const btn = document.getElementById('btnAccountData'); 
-    btn.innerText = "🔑 Ingresar Datos de Cuenta"; btn.style.backgroundColor = "var(--mac-gray)"; btn.style.color = "var(--mac-text-main)"; 
+    const btn = document.getElementById('btnAccountData');
+    btn.innerText = "🔑 Ingresar Datos de Cuenta"; btn.style.backgroundColor = "var(--mac-gray)"; btn.style.color = "var(--mac-text-main)";
 };
 /* --- GUARDAR CLIENTE (CON HERENCIA DE COLOR INTELIGENTE) --- */
 /* --- GUARDAR CLIENTE (CON LÍMITES, HERENCIA DE COLOR Y MATRIZ) --- */
 window.saveClientData = async () => {
-    const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(cb => cb.value); 
+    const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(cb => cb.value);
     const phone = document.getElementById('phone').value.trim();
-    
+
     if (!checked.length) return window.showNotification("Selecciona plataforma");
-    if(!phone.startsWith('+')) return window.showNotification("⚠️ El teléfono DEBE empezar con +");
-    
-    const cost = parseFloat(document.getElementById('clientCost').value) || 0; 
+    if (!phone.startsWith('+')) return window.showNotification("⚠️ El teléfono DEBE empezar con +");
+
+    const cost = parseFloat(document.getElementById('clientCost').value) || 0;
     const price = parseFloat(document.getElementById('clientPrice').value) || 0;
-    
+
     const btn = document.querySelector('#actionButtonsContainer .btn-primary');
     const origBtnText = btn.innerText;
     btn.innerText = "Verificando... ⏳";
     btn.disabled = true;
 
     try {
+        const isNewClient = !editingClientId;
         // 🔒 EL CANDADO DE LÍMITES
         if (!editingClientId) {
             const plan = currentUserData.plan_actual || 'demo';
@@ -1600,7 +1942,7 @@ window.saveClientData = async () => {
                     color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.mostrarPlanesSuscripcion(); 
+                        window.mostrarPlanesSuscripcion();
                     }
                 });
                 btn.innerText = origBtnText;
@@ -1621,104 +1963,129 @@ window.saveClientData = async () => {
                 finalLinkedMasterId = snapMatriz.docs[0].id;
             }
         }
-        
+
         if (!finalLinkedMasterId && typeof variablesEnlaceMatriz !== 'undefined' && variablesEnlaceMatriz.masterId && !editingClientId) {
             finalLinkedMasterId = variablesEnlaceMatriz.masterId;
         }
 
         let generatedPortalCode = Math.random().toString(36).substring(2, 6).toUpperCase();
-        
+
         // 🔥 MAGIA: Buscar si el teléfono ya tiene un código asignado en tu base de clientes
         const cleanPhoneToSave = phone.replace(/[^\d]/g, '');
         const existingClientWithPhone = clients.find(c => (c.phone ? c.phone.replace(/[^\d]/g, '') : '') === cleanPhoneToSave);
-        
+
         if (existingClientWithPhone && existingClientWithPhone.portalCode) {
             generatedPortalCode = existingClientWithPhone.portalCode; // Recicla el código de su compra anterior
         }
-        
-        const data = { 
-            userId: currentUser.uid, 
-            name: document.getElementById('clientName').value, 
-            platform: checked.join(', '), 
-            phone: phone, 
-            date: document.getElementById('expirationDate').value, 
+
+        const data = {
+            userId: currentUser.uid,
+            name: document.getElementById('clientName').value,
+            platform: checked.join(', '),
+            phone: phone,
+            date: document.getElementById('expirationDate').value,
             cost: cost,
             providerName: document.getElementById('clientProviderName').value,
             price: price,
             multiAccounts: multiAccData, // GUARDADO MULTI-PESTAÑA
             // Legacy fallbacks para que no se rompan las demás vistas
             accountSaleType: primaryData.saleType,
-            accountEmail: primaryData.email, 
-            accountPassword: primaryData.password, 
-            accountProfile: primaryData.profile, 
-            accountPin: primaryData.pin, 
+            accountEmail: primaryData.email,
+            accountPassword: primaryData.password,
+            accountProfile: primaryData.profile,
+            accountPin: primaryData.pin,
             accountUnits: primaryData.units || 1,
             accountMonths: primaryData.months || 1,
-            linkedMasterId: finalLinkedMasterId, 
-            accountDeviceName: primaryData.deviceName, 
+            linkedMasterId: finalLinkedMasterId,
+            accountDeviceName: primaryData.deviceName,
             accountDeviceType: primaryData.deviceType,
             portalCode: generatedPortalCode,
-            notes: window.currentClientNote
+            notes: window.currentClientNote,
+            archived: false
         };
 
-        if (editingClientId) { 
+        if (editingClientId) {
             const clienteAEditar = clients.find(c => c.id === editingClientId);
-            data.color = clienteAEditar.color || macPalette[Math.floor(Math.random() * macPalette.length)];
-            if (clienteAEditar.portalCode) {
+            data.color = clienteAEditar?.color || macPalette[Math.floor(Math.random() * macPalette.length)];
+            if (clienteAEditar?.portalCode) {
                 data.portalCode = clienteAEditar.portalCode;
             }
-            
-            await updateDoc(doc(db, "clients", editingClientId), data); 
-            window.showNotification("Actualizado"); 
-        } 
-        else { 
+
+            await updateDoc(doc(db, "clients", editingClientId), data);
+            const idx = clients.findIndex(c => c.id === editingClientId);
+            if (idx !== -1) {
+                clients[idx] = { id: editingClientId, ...data };
+            } else {
+                clients.unshift({ id: editingClientId, ...data });
+            }
+            window.showNotification("Actualizado");
+        }
+        else {
             const clienteExistente = clients.find(c => c.name.trim().toLowerCase() === data.name.trim().toLowerCase() && c.phone === data.phone);
             if (clienteExistente && clienteExistente.color) {
-                data.color = clienteExistente.color; 
+                data.color = clienteExistente.color;
             } else {
-                data.color = macPalette[Math.floor(Math.random() * macPalette.length)]; 
+                data.color = macPalette[Math.floor(Math.random() * macPalette.length)];
             }
-            await addDoc(collection(db, "clients"), data); 
-            window.showNotification("Agregado"); 
+            const docRef = await addDoc(collection(db, "clients"), data);
+            // Incluir de inmediato en el arreglo local clients
+            clients.unshift({ id: docRef.id, ...data });
+            window.showNotification("Agregado");
         }
 
-        // 🗑️ MAGIA AUTOMÁTICA: Eliminamos del stock lo que haya coincidido
-        let stock = currentUserData.inventory || [];
-        let updatedStock = false;
-        
-        Object.values(multiAccData).forEach(acc => {
-            // Buscamos coincidencia por inventoryId o por coincidencia exacta de datos
-            const matchIndex = stock.findIndex(item => 
-                (acc.inventoryId && item.id === acc.inventoryId) || 
-                (item.email && item.email.toLowerCase() === acc.email.toLowerCase() && String(item.profile) === String(acc.profile) && item.platform === acc.platform && item.status === 'libre')
-            );
-            
-            if (matchIndex !== -1) {
-                stock.splice(matchIndex, 1); // ELIMINA POR COMPLETO DEL INVENTARIO
-                updatedStock = true;
-            }
+        // 🗑️ MAGIA AUTOMÁTICA: Eliminamos del stock lo que haya coincidido (Cero Stock Fantasma)
+        let stock = [...(currentUserData.inventory || [])];
+        const initialStockLen = stock.length;
+
+        Object.entries(multiAccData).forEach(([platName, acc]) => {
+            const accEmail = (acc.email || '').trim().toLowerCase();
+            const targetPlat = (acc.platform || platName || '').trim().toLowerCase();
+            const accProfNorm = window.normalizeProfileNumber(acc.profile);
+            const isAccCompleta = acc.saleType === 'Cuenta Completa' || acc.saleType === 'Completa';
+
+            stock = stock.filter(item => {
+                if (acc.inventoryId && item.id === acc.inventoryId) return false;
+
+                const itemEmail = (item.email || '').trim().toLowerCase();
+                const itemPlat = (item.platform || '').trim().toLowerCase();
+                const itemProfNorm = window.normalizeProfileNumber(item.profile);
+                const isItemCompleta = item.type === 'Completa';
+
+                if (itemEmail && accEmail && itemEmail === accEmail && itemPlat === targetPlat) {
+                    if (isAccCompleta || isItemCompleta || itemProfNorm === accProfNorm) {
+                        return false;
+                    }
+                }
+                return true;
+            });
         });
-        
-        if (updatedStock) {
+
+        if (stock.length !== initialStockLen) {
             await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
             currentUserData.inventory = stock;
+            if (typeof window.renderInventory === 'function') window.renderInventory();
         }
-        
+
         // Limpiamos el puente de enlace de la Matriz para el siguiente registro
-        if(typeof variablesEnlaceMatriz !== 'undefined') {
+        if (typeof variablesEnlaceMatriz !== 'undefined') {
             variablesEnlaceMatriz = { masterId: null, profileNum: null };
         }
         window.currentClientNote = '';
-        editingClientId = null; 
-        document.getElementById('clientForm').reset(); 
-        resetAccountButton(); 
-        document.getElementById('selectText').textContent = 'Plataforma(s)...'; 
-        document.getElementById('selectText').classList.remove('has-selection'); 
-        document.getElementById('actionButtonsContainer').innerHTML = `<button type="button" class="btn-primary" onclick="window.saveClientData()">Agregar Cliente</button>`; 
-        loadUserClients();
+        editingClientId = null;
+        document.getElementById('clientForm').reset();
+        window.setDefaultYear2026(true);
+        resetAccountButton();
+        document.getElementById('selectText').textContent = 'Plataforma(s)...';
+        document.getElementById('selectText').classList.remove('has-selection');
+        document.getElementById('actionButtonsContainer').innerHTML = `<button type="button" class="btn-primary" onclick="window.saveClientData()">Agregar Cliente</button>`;
+        window.renderTable();
 
-    } catch(e) { 
-        window.showNotification("Error al guardar: " + e.message); 
+        if (isNewClient) {
+            window.promptStoreReference(checked[0]);
+        }
+
+    } catch (e) {
+        window.showNotification("Error al guardar: " + e.message);
     } finally {
         btn.innerText = origBtnText;
         btn.disabled = false;
@@ -1727,7 +2094,7 @@ window.saveClientData = async () => {
     const tipKey = 'portalTipSeen_' + currentUser.uid;
     if (!localStorage.getItem(tipKey)) {
         localStorage.setItem(tipKey, 'true'); // Guardar que ya se le mostró
-        
+
         Swal.fire({
             title: '🌐 ¡Nueva Opción Profesional!',
             html: `
@@ -1754,7 +2121,7 @@ window.saveClientData = async () => {
     }
 };
 
-window.deleteClient = async (id) => { 
+window.deleteClient = async (id) => {
     Swal.fire({
         title: '¿Borrar cliente?',
         text: "Los datos de este cliente se perderán.",
@@ -1768,13 +2135,13 @@ window.deleteClient = async (id) => {
         color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
     }).then(async (result) => {
         if (result.isConfirmed) {
-            await deleteDoc(doc(db, "clients", id)); 
-            loadUserClients(); 
+            await deleteDoc(doc(db, "clients", id));
+            loadUserClients();
             window.showNotification("🗑️ Cliente borrado");
         }
     });
 };
-window.renewClient = async (id) => { 
+window.renewClient = async (id) => {
     const c = clients.find(x => x.id === id);
     if (!c) return;
 
@@ -1789,7 +2156,7 @@ window.renewClient = async (id) => {
     // 1. Función para actualizar los números en tiempo real al escribir
     window.updateRenewDates = () => {
         let meses = parseInt(document.getElementById('swal-renew-months').value) || 1;
-        
+
         // Cálculo Mes a Mes (De fecha a fecha)
         let dMes = new Date(window.currentRenewBaseDate);
         dMes.setMonth(dMes.getMonth() + meses);
@@ -1806,17 +2173,17 @@ window.renewClient = async (id) => {
         window.currentRenewType = type;
         const cardMes = document.getElementById('optMesAMes');
         const card30d = document.getElementById('opt30Dias');
-        
-        if(type === 'mes') {
+
+        if (type === 'mes') {
             cardMes.style.border = '2px solid var(--mac-blue)';
             cardMes.style.background = 'rgba(0, 122, 255, 0.15)';
-            
+
             card30d.style.border = '1px solid var(--mac-border)';
             card30d.style.background = 'var(--mac-bg)';
         } else {
             card30d.style.border = '2px solid var(--mac-blue)';
             card30d.style.background = 'rgba(0, 122, 255, 0.15)';
-            
+
             cardMes.style.border = '1px solid var(--mac-border)';
             cardMes.style.background = 'var(--mac-bg)';
         }
@@ -1871,7 +2238,7 @@ window.renewClient = async (id) => {
             // Evaluamos la selección al presionar Confirmar
             const meses = parseInt(document.getElementById('swal-renew-months').value) || 1;
             let finalDate = new Date(window.currentRenewBaseDate);
-            
+
             if (window.currentRenewType === 'mes') {
                 finalDate.setMonth(finalDate.getMonth() + meses);
             } else {
@@ -1883,7 +2250,7 @@ window.renewClient = async (id) => {
 
     if (confirmacion) {
         let fechaNueva = confirmacion; // Recibimos la fecha exacta calculada
-        const strFirebase = `${fechaNueva.getFullYear()}-${String(fechaNueva.getMonth()+1).padStart(2,'0')}-${String(fechaNueva.getDate()).padStart(2,'0')}`;
+        const strFirebase = `${fechaNueva.getFullYear()}-${String(fechaNueva.getMonth() + 1).padStart(2, '0')}-${String(fechaNueva.getDate()).padStart(2, '0')}`;
         const bonitaNueva = fechaNueva.toLocaleDateString('es-ES');
 
         aplicarRenovacionFirebase(id, strFirebase, bonitaNueva, c);
@@ -1893,22 +2260,22 @@ window.renewClient = async (id) => {
 const aplicarRenovacionFirebase = async (id, strFirebase, nuevaFechaBonita, c) => {
     try {
         const nuevasRenovaciones = (c.renovations || 0) + 1;
-        await updateDoc(doc(db, "clients", id), { 
-            date: strFirebase, 
-            renovations: nuevasRenovaciones 
-        }); 
-        window.showNotification("Servicio renovado ✅"); 
-        loadUserClients(); 
+        await updateDoc(doc(db, "clients", id), {
+            date: strFirebase,
+            renovations: nuevasRenovaciones
+        });
+        window.showNotification("Servicio renovado ✅");
+        loadUserClients();
 
         const plan = currentUserData.plan_actual || 'demo';
         if (plan === 'pro' || plan === 'elite') {
-            
+
             // 👈 AHORA SÍ CONSTRUIMOS TU MENSAJE PERSONALIZADO DE RENOVACIÓN
             let baseMsg = currentUserData.waRenewMessage || "🎉 *¡Renovación Exitosa, {nombre}!*\n\nTu servicio de *{plataforma}* ha sido renovado correctamente.\n📅 Nueva fecha de vencimiento: *{fecha}*\n\n🌐 *Tu Portal:* {link}\n🔑 *Código Web:* {codigo}\n\n¡Gracias por seguir confiando en nosotros! 🚀";
             let uCount = c.accountUnits || 1;
             let precioCalculado = (c.price || 0) * uCount;
             let moneda = currentUserData.currency || "S/";
-            
+
             const baseUrl = window.location.origin + window.location.pathname;
             const portalAlias = currentUserData.storeAlias || currentUser.uid;
             const portalUrl = `${baseUrl}?portal=${portalAlias}`;
@@ -1923,69 +2290,87 @@ const aplicarRenovacionFirebase = async (id, strFirebase, nuevaFechaBonita, c) =
                 .replace(/{numero}/g, c.phone)
                 .replace(/{codigo}/g, c.portalCode || 'N/A');
 
-            const datosRenovacion = { 
-                distribuidorId: currentUser.uid, 
-                numeroCliente: c.phone, 
-                plataforma: c.platform, 
+            const datosRenovacion = {
+                distribuidorId: currentUser.uid,
+                numeroCliente: c.phone,
+                plataforma: c.platform,
                 nuevaFecha: nuevaFechaBonita,
                 mensajeRenovacion: finalMsg // 👈 SE LO PASAMOS AL BOT
             };
             fetch('https://bot.panelagc.com/api/confirmar-renovacion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datosRenovacion) });
         }
-    } catch (error) { 
-        window.showNotification("Error: " + error.message); 
+    } catch (error) {
+        window.showNotification("Error: " + error.message);
     }
 };
 
-window.startEdit = (id) => {
-    editingClientId = id; 
-    const c = clients.find(x => x.id === id);
+window.startEdit = async (id) => {
+    editingClientId = id;
+    let c = clients.find(x => x.id === id);
+    if (!c) {
+        try {
+            const docSnap = await getDoc(doc(db, "clients", id));
+            if (docSnap.exists()) {
+                c = { id: docSnap.id, ...docSnap.data() };
+                if (!clients.some(x => x.id === c.id)) clients.unshift(c);
+            }
+        } catch (err) {
+            console.error("Error buscando cliente en Firestore:", err);
+        }
+    }
+    if (!c) return window.showNotification("Cliente no encontrado.");
+
     window.currentClientNote = c.notes || '';
-    document.getElementById('clientName').value = c.name; 
-    document.getElementById('phone').value = c.phone; 
-    document.getElementById('expirationDate').value = c.date;
-    document.getElementById('clientCost').value = c.cost || ''; 
-    document.getElementById('clientPrice').value = c.price || ''; 
-    document.getElementById('clientProviderName').value = c.providerName || '';
-    
+    document.getElementById('clientName').value = c.name || '';
+    document.getElementById('phone').value = c.phone || '';
+    document.getElementById('expirationDate').value = c.date || '';
+    document.getElementById('clientCost').value = c.cost !== undefined && c.cost !== null ? c.cost : '';
+    document.getElementById('clientPrice').value = c.price !== undefined && c.price !== null ? c.price : '';
+    if (document.getElementById('clientProviderName')) {
+        document.getElementById('clientProviderName').value = c.providerName || '';
+    }
+
     // 🔥 RECONSTRUIR multiAccData DESDE LA BASE DE DATOS
-    if (c.multiAccounts) {
+    if (c.multiAccounts && Object.keys(c.multiAccounts).length > 0) {
         multiAccData = c.multiAccounts;
     } else {
         // Soporte para clientes antiguos que no tenían pestañas
-        const platforms = c.platform.split(', ');
+        const platforms = (c.platform || '').split(', ').filter(Boolean);
         multiAccData = {};
         platforms.forEach(p => {
-            multiAccData[p] = { 
-                email: c.accountEmail || '', 
-                password: c.accountPassword || '', 
-                profile: c.accountProfile || '', 
-                pin: c.accountPin || '', 
-                saleType: c.accountSaleType || 'Perfil', 
-                units: c.accountUnits || 1, 
-                deviceName: c.accountDeviceName || '', 
-                deviceType: c.accountDeviceType || '' 
+            multiAccData[p] = {
+                email: c.accountEmail || '',
+                password: c.accountPassword || '',
+                profile: c.accountProfile || '',
+                pin: c.accountPin || '',
+                saleType: c.accountSaleType || 'Perfil',
+                units: c.accountUnits || 1,
+                months: c.accountMonths || 1,
+                deviceName: c.accountDeviceName || '',
+                deviceType: c.accountDeviceType || ''
             };
         });
     }
-    
+
     if (typeof variablesEnlaceMatriz !== 'undefined') {
         variablesEnlaceMatriz.masterId = c.linkedMasterId || null;
         variablesEnlaceMatriz.profileNum = c.accountProfile || null;
         variablesEnlaceMatriz.originalEmail = c.accountEmail || '';
         variablesEnlaceMatriz.originalPass = c.accountPassword || '';
     }
-    
+
     const totalUnits = Object.values(multiAccData).reduce((sum, acc) => sum + (parseInt(acc.units) || 1), 0);
-    const btn = document.getElementById('btnAccountData'); 
-    btn.innerText = `✅ Datos de Cuenta (${totalUnits} ud)`; 
-    btn.style.backgroundColor = "var(--mac-green)"; 
-    btn.style.color = "white";
-    
-    const cbs = document.querySelectorAll('#checkboxDropdown input'); 
-    cbs.forEach(cb => cb.checked = false); 
-    c.platform.split(', ').forEach(p => { cbs.forEach(cb => { if(cb.value === p) cb.checked = true; }); });
-    document.getElementById('selectText').textContent = c.platform; 
+    const btn = document.getElementById('btnAccountData');
+    if (btn) {
+        btn.innerText = `✅ Datos de Cuenta (${totalUnits} ud)`;
+        btn.style.backgroundColor = "var(--mac-green)";
+        btn.style.color = "white";
+    }
+
+    const cbs = document.querySelectorAll('#checkboxDropdown input');
+    cbs.forEach(cb => cb.checked = false);
+    (c.platform || '').split(', ').forEach(p => { cbs.forEach(cb => { if (cb.value === p) cb.checked = true; }); });
+    document.getElementById('selectText').textContent = c.platform || 'Plataforma(s)...';
     document.getElementById('selectText').classList.add('has-selection');
     document.getElementById('actionButtonsContainer').innerHTML = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button type="button" class="btn-primary" onclick="window.saveClientData()">Guardar</button><button type="button" class="btn-secondary" onclick="window.cancelEdit()">Cancelar</button></div>`;
     document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
@@ -1993,51 +2378,68 @@ window.startEdit = (id) => {
 
 window.cancelEdit = () => {
     window.currentClientNote = '';
-    editingClientId = null; 
-    document.getElementById('clientForm').reset(); 
-    resetAccountButton(); 
+    editingClientId = null;
+    document.getElementById('clientForm').reset();
+    window.setDefaultYear2026(true);
+    resetAccountButton();
     if (typeof variablesEnlaceMatriz !== 'undefined') { variablesEnlaceMatriz = { masterId: null, profileNum: null }; }
-    document.getElementById('selectText').textContent = 'Plataforma(s)...'; 
-    document.getElementById('selectText').classList.remove('has-selection'); 
-    document.getElementById('actionButtonsContainer').innerHTML = `<button type="button" class="btn-primary" onclick="window.saveClientData()">Agregar Cliente</button>`; 
+    document.getElementById('selectText').textContent = 'Plataforma(s)...';
+    document.getElementById('selectText').classList.remove('has-selection');
+    document.getElementById('actionButtonsContainer').innerHTML = `<button type="button" class="btn-primary" onclick="window.saveClientData()">Agregar Cliente</button>`;
 };
 /* --- RENDERIZAR TABLA (NOMBRES DE COLORES) --- */
 window.renderTable = () => {
-    const tbody = document.getElementById('tableBody'); tbody.innerHTML = ''; const today = new Date(); today.setHours(0,0,0,0);
-    const search = document.getElementById('searchInput').value.toLowerCase(); const filter = document.getElementById('filterSelect').value;
-    let proc = clients.map(c => { const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0); const diff = Math.ceil((exp - today) / 86400000); return { ...c, expDate: exp, diffDays: diff, statusCat: diff > 3 ? 'active' : (diff >= 0 ? 'warning' : 'expired') }; }).sort((a, b) => a.diffDays - b.diffDays);
-    
+    const tbody = document.getElementById('tableBody'); if (!tbody) return; tbody.innerHTML = ''; const today = new Date(); today.setHours(0, 0, 0, 0);
+    const search = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+    const filter = document.getElementById('filterSelect')?.value || 'all';
+
+    // TAREA 7: Si el usuario escribe en el buscador o filtra por un estado específico, ocultar Cargar más y descargar todos los clientes de la sesión
+    if (search !== '' || filter !== 'all') {
+        const lmc = document.getElementById('loadMoreContainer');
+        if (lmc) lmc.style.display = 'none';
+        if (!allClientsLoaded && !window._loadingAllClients) {
+            window.ensureAllClientsLoaded();
+        }
+    }
+
+    let proc = clients.map(c => { const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0); const diff = Math.ceil((exp - today) / 86400000); return { ...c, expDate: exp, diffDays: diff, statusCat: c.archived ? 'archived' : (diff > 3 ? 'active' : (diff >= 0 ? 'warning' : 'expired')) }; }).sort((a, b) => a.diffDays - b.diffDays);
+
     proc.forEach(c => {
         if (filter !== 'all' && c.statusCat !== filter) return;
         if (search && !c.name.toLowerCase().includes(search) && !c.phone.toLowerCase().includes(search) && !c.platform.toLowerCase().includes(search)) return;
-        const stText = c.diffDays > 0 ? `Faltan ${c.diffDays} d` : (c.diffDays === 0 ? 'Hoy' : 'Vencido');
+        const stText = c.archived ? 'Archivado' : (c.diffDays > 0 ? `Faltan ${c.diffDays} d` : (c.diffDays === 0 ? 'Hoy' : 'Vencido'));
         const uCount = c.accountUnits || 1; const prof = ((c.price || 0) - (c.cost || 0)) * uCount; const dispUnits = uCount > 1 ? `<span style="font-size:11px;color:var(--mac-text-secondary);display:block;">(${uCount} unidades)</span>` : ''; // UI de Etiquetas, Notas y Lealtad
         let tagHtml = c.tag ? `<span style="background: ${c.tagColor}15; color: ${c.tagColor}; font-size: 10px; padding: 2px 6px; border-radius: 6px; border: 1px solid ${c.tagColor}50; display:inline-block; margin-top:4px; font-weight:bold;">${c.tag}</span>` : '';
         // 1. Creamos la "N" estilo Notion (Clickeable)
         let notionNoteHtml = c.notes ? `<div onclick="window.viewClientNote('${c.id}')" title="Ver Nota" style="display:flex; align-items:center; justify-content:center; width:24px; height:24px; background:#000; color:#fff; border-radius:6px; font-weight:900; font-family:sans-serif; font-size:12px; cursor:pointer; flex-shrink:0; box-shadow:0 2px 5px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2);">N</div>` : '';
         let loyatyHtml = (c.renovations > 0) ? `<span title="${c.renovations} renovaciones continuas" style="font-size: 12px; color: #FFD700; margin-left: 5px;"><i class='bx bxs-star'></i>${c.renovations}</span>` : '';
-// LOGICA DE DISPOSITIVOS CON BOXICONS
+        // LOGICA DE DISPOSITIVOS CON BOXICONS
         let deviceIndicator = '';
         if (c.accountDeviceType) {
             let iconHtml = '';
             if (c.accountDeviceType === 'TV') iconHtml = "<i class='bx bx-tv'></i>";
             if (c.accountDeviceType === 'PC') iconHtml = "<i class='bx bx-laptop'></i>";
             if (c.accountDeviceType === 'Celular') iconHtml = "<i class='bx bx-mobile-alt'></i>";
-            
+
             let tooltip = c.accountDeviceName ? `Dispositivo: ${c.accountDeviceName}` : 'Dispositivo Activo';
             deviceIndicator = `<span title="${tooltip}" style="cursor:help; margin-left:5px; font-size:14px;">${iconHtml}<span class="device-dot-green"></span></span>`;
         } else {
             deviceIndicator = `<span title="Sin dispositivo configurado" class="device-dot-red"></span>`;
         }
+        const cCol = c.color || '#0066FF';
+        const initial = (c.name || '?').trim().charAt(0).toUpperCase();
         const tr = document.createElement('tr');
         tr.innerHTML = `<td data-label="Cliente" onclick="if(window.innerWidth <= 768) window.openMobileClientModal('${c.id}')">
-            <div class="client-profile">
-                <!-- 🔥 FIX: LA ETIQUETA AHORA TIENE LA CLASE 'mobile-inline-badge' PARA DESAPARECER EN PC -->
-                <span style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px;">
-                    <span style="color:${c.color || 'var(--mac-text-main)'}; font-weight: 800; font-size: 15px; letter-spacing: 0.5px;">${c.name}</span>
-                    <span class="status ${c.statusCat} mobile-inline-badge" style="font-size: 10px; padding: 2px 6px; border-radius: 6px; line-height: 1;">${stText}</span>
-                </span>
-                ${loyatyHtml}<br>${tagHtml} <!-- 👈 ELIMINAMOS EL VIEJO ÍCONO DE AQUÍ -->
+            <div class="client-profile" style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 28px; height: 28px; border-radius: 50%; background: ${cCol}20; color: ${cCol}; font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">${initial}</div>
+                <div>
+                    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px;">
+                        <span style="color: var(--mac-text-main); font-weight: 600; font-size: 14px;">${c.name}</span>
+                        ${loyatyHtml}
+                        <span class="status ${c.statusCat} mobile-inline-badge" style="font-size: 10px; padding: 2px 6px; border-radius: 6px; line-height: 1;">${stText}</span>
+                    </div>
+                    ${tagHtml ? `<div>${tagHtml}</div>` : ''}
+                </div>
             </div>
         </td>
         <td data-label="Plataformas" style="font-weight: 500;">${c.platform}${deviceIndicator}</td>
@@ -2060,7 +2462,9 @@ window.renderTable = () => {
                     <button class="dropdown-item" onclick="window.openWaSendModal('${c.id}')" style="color: var(--mac-green);"><i class='bx bxl-whatsapp'></i> WhatsApp</button>
                     <button class="dropdown-item" onclick="window.downloadTicket('${c.id}', event)" style="color: #AF52DE;"><i class='bx bx-receipt'></i> Recibo</button>
                     <button class="dropdown-item" onclick="window.openLinkModal('${c.id}', '${c.platform}')" style="color: #007AFF;"><i class='bx bx-link'></i> Vincular a Matriz</button>
-                    ${c.statusCat !== 'active' ? `<button class="dropdown-item" onclick="window.renewClient('${c.id}')"><i class='bx bx-refresh'></i> Renovar</button>` : ''}
+                    ${!c.archived ? `<button class="dropdown-item" onclick="window.toggleArchiveClient('${c.id}', true)"><i class='bx bx-archive-in'></i> Archivar</button>` : ''}
+                    ${c.archived ? `<button class="dropdown-item" onclick="window.unarchiveAndEdit('${c.id}')"><i class='bx bx-archive-out'></i> Reactivar Cliente</button>` : ''}
+                    ${c.statusCat !== 'active' && !c.archived ? `<button class="dropdown-item" onclick="window.renewClient('${c.id}')"><i class='bx bx-refresh'></i> Renovar</button>` : ''}
                     <button class="dropdown-item" onclick="window.startEdit('${c.id}')"><i class='bx bx-edit-alt'></i> Editar</button>
                     <button class="dropdown-item text-danger" onclick="window.deleteClient('${c.id}')"><i class='bx bx-trash'></i> Borrar</button>
                 </div>
@@ -2068,7 +2472,7 @@ window.renderTable = () => {
         </td>`;
         tbody.appendChild(tr);
     });
-    if(document.getElementById('statsPanel').style.display === 'grid') window.toggleStats(true);
+    if (document.getElementById('statsPanel')?.style?.display === 'grid') window.toggleStats(true);
 };
 
 /* --- SISTEMA MULTI-PLATAFORMA AVANZADO DE ENVÍO POR WHATSAPP --- */
@@ -2250,7 +2654,7 @@ window.confirmSendWa = () => {
 
     if (currentWaType === 'renovacion') {
         let baseMsg = currentUserData.waTemplate || "¡Hola, *{nombre}*! Tu servicio de *{plataforma}* vence el *{fecha}*.";
-        
+
         const baseUrl = window.location.origin + window.location.pathname;
         const portalAlias = currentUserData.storeAlias || currentUser.uid;
         const portalUrl = `${baseUrl}?portal=${portalAlias}`;
@@ -2267,8 +2671,15 @@ window.confirmSendWa = () => {
         const baseUrl = window.location.origin + window.location.pathname;
         const portalAlias = currentUserData.storeAlias || currentUser.uid;
         const portalUrl = `${baseUrl}?portal=${portalAlias}`;
+        const basePortalMsg = currentUserData.waPortalMessage || defaultPortal;
 
-        finalMsg = `¡Hola, *${c.name}*! 👋\n\nPuedes consultar el estado de tu servicio de *${c.platform}* y tus datos de acceso en tiempo real desde tu portal web personal:\n\n🌐 *Link del Portal:* ${portalUrl}\n📱 *WhatsApp:* ${c.phone}\n🔑 *Código Web:* ${c.portalCode || 'N/A'}\n\n_Guarda este mensaje para ingresar a consultar tus accesos cuando quieras._`;
+        finalMsg = basePortalMsg
+            .replace(/{nombre}/g, c.name || 'Cliente')
+            .replace(/{plataforma}/g, c.platform || 'Streaming')
+            .replace(/{fecha}/g, dateStr)
+            .replace(/{link}/g, portalUrl)
+            .replace(/{numero}/g, c.phone || '')
+            .replace(/{codigo}/g, c.portalCode || 'N/A');
 
     } else if (currentWaType === 'datos') {
         const checkboxes = Array.from(document.querySelectorAll('.wa-data-chk:checked'));
@@ -2326,16 +2737,16 @@ window.toggleSettingsMenu = (e) => {
 
 window.togglePlatformDropdown = (event) => {
     document.getElementById('checkboxDropdown').classList.toggle('show');
-    event.stopPropagation(); 
+    event.stopPropagation();
 };
 
-document.addEventListener('click', (e) => { 
+document.addEventListener('click', (e) => {
     // Cierra el menú de Plataformas si se hace clic fuera
     const chkDrop = document.getElementById('checkboxDropdown');
     if (chkDrop && !chkDrop.contains(e.target) && e.target.id !== 'selectBox') {
-        chkDrop.classList.remove('show'); 
+        chkDrop.classList.remove('show');
     }
-    
+
     // Cierra el menú de Configuración si se hace clic fuera
     const setDrop = document.getElementById('settingsDropdown');
     if (setDrop && !setDrop.contains(e.target) && e.target.textContent !== '⚙️') {
@@ -2343,30 +2754,31 @@ document.addEventListener('click', (e) => {
     }
 });
 document.addEventListener('click', (e) => { if (!document.getElementById('checkboxDropdown').contains(e.target) && e.target.id !== 'selectBox') document.getElementById('checkboxDropdown').classList.remove('show'); });
-document.querySelectorAll('#checkboxDropdown input').forEach(cb => { cb.addEventListener('change', () => { const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value); const el = document.getElementById('selectText'); if(checked.length) { el.textContent = checked.join(', '); el.classList.add('has-selection'); } else { el.textContent = 'Plataforma(s)...'; el.classList.remove('has-selection'); } }); });
+document.querySelectorAll('#checkboxDropdown input').forEach(cb => { cb.addEventListener('change', () => { const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value); const el = document.getElementById('selectText'); if (checked.length) { el.textContent = checked.join(', '); el.classList.add('has-selection'); } else { el.textContent = 'Plataforma(s)...'; el.classList.remove('has-selection'); } }); });
 
 window.toggleStats = (forceUpdate = false) => {
-    const p = document.getElementById('statsPanel'); 
+    const p = document.getElementById('statsPanel');
     const a = document.getElementById('analyticsSection');
-    
+    if (!p) return;
+
     if (!forceUpdate) {
-        const isVisible = p.style.display === 'grid';
-        p.style.display = isVisible ? 'none' : 'grid';
-        a.style.display = isVisible ? 'none' : 'flex';
+        const isVisible = p?.style?.display === 'grid';
+        if (p?.style) p.style.display = isVisible ? 'none' : 'grid';
+        if (a?.style) a.style.display = isVisible ? 'none' : 'flex';
     }
-    
-    if (p.style.display === 'grid') {
-        let act=0, w=0, e=0, profit=0, income=0, cost=0; const t = new Date(); t.setHours(0,0,0,0);
+
+    if (p?.style?.display === 'grid') {
+        let act = 0, w = 0, e = 0, profit = 0, income = 0, cost = 0; const t = new Date(); t.setHours(0, 0, 0, 0);
         clients.forEach(c => {
-            const x = new Date(c.date); x.setMinutes(x.getMinutes() + x.getTimezoneOffset()); x.setHours(0,0,0,0);
-            const d = Math.ceil((x-t)/86400000);
-            if(d>=0) { if(d>3) act++; else w++; const uCount = c.accountUnits || 1; profit += ((c.price || 0) - (c.cost || 0)) * uCount; income += (c.price || 0) * uCount; cost += (c.cost || 0) * uCount; } else e++;
+            const x = new Date(c.date); x.setMinutes(x.getMinutes() + x.getTimezoneOffset()); x.setHours(0, 0, 0, 0);
+            const d = Math.ceil((x - t) / 86400000);
+            if (d >= 0) { if (d > 3) act++; else w++; const uCount = c.accountUnits || 1; profit += ((c.price || 0) - (c.cost || 0)) * uCount; income += (c.price || 0) * uCount; cost += (c.cost || 0) * uCount; } else e++;
         });
-        document.getElementById('statActive').innerText=act; document.getElementById('statWarning').innerText=w; document.getElementById('statExpired').innerText=e;
+        document.getElementById('statActive').innerText = act; document.getElementById('statWarning').innerText = w; document.getElementById('statExpired').innerText = e;
         document.getElementById('statProfit').innerText = `${globalCurrency}${profit.toFixed(2)}`; document.getElementById('bdIncome').innerText = `${globalCurrency}${income.toFixed(2)}`; document.getElementById('bdCost').innerText = `${globalCurrency}${cost.toFixed(2)}`; document.getElementById('bdProfit').innerText = `${globalCurrency}${profit.toFixed(2)}`;
-        
+
         // ¡Magia! Renderizamos los gráficos si la librería ya cargó
-        if(typeof ApexCharts !== 'undefined') {
+        if (typeof ApexCharts !== 'undefined') {
             setTimeout(() => {
                 window.renderCharts(income, cost, profit);
             }, 100);
@@ -2374,31 +2786,31 @@ window.toggleStats = (forceUpdate = false) => {
     }
 };
 
-window.exportToExcel = () => { if (!clients.length) return window.showNotification("No hay datos"); let csv = `data:text/csv;charset=utf-8,Cliente,Plataformas,WhatsApp,Unidades,Costo Total(${globalCurrency}),Precio Total(${globalCurrency}),Vencimiento\n`; clients.forEach(c => { const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); const u = c.accountUnits||1; csv += `"${c.name}","${c.platform}",${c.phone},${u},${(c.cost||0)*u},${(c.price||0)*u},${exp.toLocaleDateString('es-ES')}\n`; }); const link = document.createElement("a"); link.setAttribute("href", encodeURI(csv)); link.setAttribute("download", `Clientes_${new Date().toLocaleDateString('es-ES').replace(/\//g, '-')}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); }
-window.copyExpiredList = () => { const t = new Date(); t.setHours(0,0,0,0); let exp = []; clients.forEach(c => { const x = new Date(c.date); x.setMinutes(x.getMinutes() + x.getTimezoneOffset()); x.setHours(0,0,0,0); if (x < t) exp.push(`- ${c.name} | ${c.platform} | ${c.phone}`); }); if (!exp.length) return window.showNotification("Sin vencidos"); navigator.clipboard.writeText("🚨 VENCEDORES:\n\n" + exp.join('\n')).then(() => window.showNotification("Lista copiada")); }
+window.exportToExcel = () => { if (!clients.length) return window.showNotification("No hay datos"); let csv = `data:text/csv;charset=utf-8,Cliente,Plataformas,WhatsApp,Unidades,Costo Total(${globalCurrency}),Precio Total(${globalCurrency}),Vencimiento\n`; clients.forEach(c => { const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); const u = c.accountUnits || 1; csv += `"${c.name}","${c.platform}",${c.phone},${u},${(c.cost || 0) * u},${(c.price || 0) * u},${exp.toLocaleDateString('es-ES')}\n`; }); const link = document.createElement("a"); link.setAttribute("href", encodeURI(csv)); link.setAttribute("download", `Clientes_${new Date().toLocaleDateString('es-ES').replace(/\//g, '-')}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); }
+window.copyExpiredList = () => { const t = new Date(); t.setHours(0, 0, 0, 0); let exp = []; clients.forEach(c => { const x = new Date(c.date); x.setMinutes(x.getMinutes() + x.getTimezoneOffset()); x.setHours(0, 0, 0, 0); if (x < t) exp.push(`- ${c.name} | ${c.platform} | ${c.phone}`); }); if (!exp.length) return window.showNotification("Sin vencidos"); navigator.clipboard.writeText("🚨 VENCEDORES:\n\n" + exp.join('\n')).then(() => window.showNotification("Lista copiada")); }
 
 
 /* --- GENERADOR DE RECIBOS EN IMAGEN (VERSIÓN DEFINITIVA IPHONE + PC) --- */
 window.downloadTicket = async (clientId, event) => {
     // Capturamos el botón correctamente
-    const btn = event.currentTarget || event.target; 
+    const btn = event.currentTarget || event.target;
     const originalText = btn.innerHTML;
     btn.innerHTML = "⏳ Gen...";
     btn.disabled = true;
 
     try {
         const c = clients.find(x => x.id === clientId);
-        if(!c) return window.showNotification("Cliente no encontrado");
+        if (!c) return window.showNotification("Cliente no encontrado");
 
         // 1. Llenar los datos de texto del ticket
         document.getElementById('ticketBrand').innerText = currentUserData.name || 'Mi Panel';
         document.getElementById('ticketClient').innerText = c.name;
         document.getElementById('ticketPlatform').innerText = c.platform;
-        
-        const exp = new Date(c.date); 
-        exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); 
+
+        const exp = new Date(c.date);
+        exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
         document.getElementById('ticketDate').innerText = exp.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
-        
+
         const total = (c.price || 0) * (c.accountUnits || 1);
         document.getElementById('ticketPrice').innerText = `${globalCurrency}${total.toFixed(2)}`;
 
@@ -2408,16 +2820,16 @@ window.downloadTicket = async (clientId, event) => {
             if (currentUserData.logoUrl) {
                 await new Promise((resolve) => {
                     const img = new Image();
-                    img.crossOrigin = 'anonymous'; 
+                    img.crossOrigin = 'anonymous';
                     img.src = currentUserData.logoUrl + (currentUserData.logoUrl.includes('?') ? '&' : '?') + 'cb=' + new Date().getTime();
-                    
+
                     img.onload = () => {
                         const tempCanvas = document.createElement('canvas');
                         tempCanvas.width = img.width;
                         tempCanvas.height = img.height;
                         const ctx = tempCanvas.getContext('2d');
                         ctx.drawImage(img, 0, 0);
-                        
+
                         ticketLogo.src = tempCanvas.toDataURL('image/png');
                         ticketLogo.style.display = 'inline-block';
                         resolve();
@@ -2425,7 +2837,7 @@ window.downloadTicket = async (clientId, event) => {
                     img.onerror = () => {
                         console.error("Firebase bloqueó la lectura de la imagen.");
                         ticketLogo.style.display = 'none';
-                        resolve(); 
+                        resolve();
                     };
                 });
                 await new Promise(r => setTimeout(r, 150));
@@ -2436,16 +2848,16 @@ window.downloadTicket = async (clientId, event) => {
 
         // 2. Tomar la foto
         const ticketEl = document.getElementById('ticketTemplate');
-        ticketEl.style.left = '0px'; 
-        
+        ticketEl.style.left = '0px';
+
         // 🔴 CORRECCIÓN: SIN allowTaint PARA EVITAR SECURITY ERROR
-        const canvas = await html2canvas(ticketEl, { 
+        const canvas = await html2canvas(ticketEl, {
             backgroundColor: '#1c1c1e',
-            scale: 2, 
-            useCORS: true 
+            scale: 2,
+            useCORS: true
         });
-        
-        ticketEl.style.left = '-9999px'; 
+
+        ticketEl.style.left = '-9999px';
 
         // 3. COMPARTIR EN IPHONE / DESCARGAR EN PC (Blob API)
         canvas.toBlob(async (blob) => {
@@ -2485,12 +2897,12 @@ window.downloadTicket = async (clientId, event) => {
             }
         }, 'image/png');
 
-    } catch(e) {
+    } catch (e) {
         console.error("Error completo en Recibo:", e);
         window.showNotification("Error al generar el recibo.");
     } finally {
         // Restaurar el botón original
-        if(btn) {
+        if (btn) {
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
@@ -2500,23 +2912,23 @@ window.downloadTicket = async (clientId, event) => {
 window.openNewsModal = async () => {
     // 1. Apagamos el punto rojo y guardamos el "Visto"
     const badge = document.getElementById('newsBadge');
-    if(badge) badge.style.display = 'none';
+    if (badge) badge.style.display = 'none';
     localStorage.setItem('lastSeenNews', new Date().toISOString());
     document.getElementById('newsModal').style.display = 'flex';
     const sidebar = document.getElementById('newsSidebar');
     const content = document.getElementById('newsContentArea');
-    
+
     // 1. LIMPIEZA INMEDIATA (Evita que se vea el Wrapped fantasma)
     sidebar.innerHTML = '<div style="padding:20px; text-align:center; color: var(--mac-text-secondary);">⏳ Buscando novedades...</div>';
     content.innerHTML = '<div style="display:flex; height:100%; align-items:center; justify-content:center;"><p style="color: var(--mac-text-secondary); text-align: center;">⏳ Cargando información...</p></div>';
-    
-try {
+
+    try {
         const qNews = await getDocs(collection(db, "news"));
         let noticias = [];
         qNews.forEach(d => noticias.push({ id: d.id, ...d.data() }));
-        
+
         // ORDEN INTELIGENTE PARA EL CLIENTE: 1ro Fijados, 2do por fecha
-        noticias.sort((a,b) => {
+        noticias.sort((a, b) => {
             if (a.isPinned && !b.isPinned) return -1;
             if (!a.isPinned && b.isPinned) return 1;
             return new Date(b.fechaIso) - new Date(a.fechaIso);
@@ -2525,24 +2937,24 @@ try {
         sidebar.innerHTML = '';
         content.innerHTML = '<div style="display:flex; height:100%; align-items:center; justify-content:center;"><p style="color: var(--mac-text-secondary); text-align: center;">👈 Selecciona una noticia de la izquierda para ver los detalles.</p></div>';
 
-        if(noticias.length === 0) {
+        if (noticias.length === 0) {
             sidebar.innerHTML = '<div style="padding:15px; text-align:center; color:var(--mac-text-secondary);">No hay noticias nuevas por ahora.</div>';
             return;
         }
 
         noticias.forEach((noticia) => {
             const dateStr = new Date(noticia.fechaIso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
-            
+
             // Etiqueta visual de anclado
             const pinnedLabel = noticia.isPinned ? `<span style="background:var(--mac-orange); color:white; font-size:9px; padding:2px 6px; border-radius:10px; margin-right:5px; font-weight: bold;">FIJADO <i class='bx bxs-pin'></i></span>` : '';
 
             const div = document.createElement('div');
             div.className = 'news-item-title';
             div.innerHTML = `<strong>${noticia.titulo}</strong><br><span style="font-size:11px; font-weight:normal; opacity: 0.8; display:flex; align-items:center; margin-top: 4px;">${pinnedLabel}${dateStr}</span>`;
-            div.onclick = () => window.viewNewsDetail({...noticia, fecha: dateStr}, div);
+            div.onclick = () => window.viewNewsDetail({ ...noticia, fecha: dateStr }, div);
             sidebar.appendChild(div);
         });
-    } catch(e) {
+    } catch (e) {
         sidebar.innerHTML = '<div style="padding:10px; color:var(--mac-red);">Error al cargar las noticias.</div>';
         content.innerHTML = '';
         console.error(e);
@@ -2587,7 +2999,7 @@ window.setFinancialGoal = async () => {
             currentUserData.financialGoal = parseFloat(goal);
             window.showNotification("✅ Proyección financiera actualizada");
             window.loadFinanceData();
-        } catch(e) { window.showNotification("Error: " + e.message); }
+        } catch (e) { window.showNotification("Error: " + e.message); }
     }
 };
 
@@ -2603,18 +3015,18 @@ window.toggleTimeFilter = () => {
 // 2. Al hacer clic en una opción
 window.selectTimeFilter = (value, text, iconClass, event) => {
     event.stopPropagation(); // Evita que el clic lo cierre e inmediatamente lo abra
-    
+
     // Cambiar el texto y el ícono principal
     document.getElementById('timeFilterText').innerText = text;
     document.querySelector('.time-filter-selected i:first-child').className = `bx ${iconClass}`;
-    
+
     // Iluminar la opción seleccionada
     document.querySelectorAll('.time-option').forEach(opt => opt.classList.remove('active'));
     event.currentTarget.classList.add('active');
-    
+
     // Cerrar el menú
     document.getElementById('customTimeFilter').classList.remove('open');
-    
+
     // Ejecutar tu lógica de gráficos existente
     window.changeDashboardFilter(value);
 };
@@ -2633,8 +3045,8 @@ window.changeDashboardFilter = (val) => {
 };
 
 window.loadFinanceData = () => {
-    let act=0, profit=0, income=0, cost=0; 
-    const t = new Date(); t.setHours(0,0,0,0);
+    let act = 0, profit = 0, income = 0, cost = 0;
+    const t = new Date(); t.setHours(0, 0, 0, 0);
     let validAccountsCount = 0;
     const filter = window.currentDashboardFilter;
 
@@ -2644,41 +3056,41 @@ window.loadFinanceData = () => {
     const anioInicio = new Date(t.getFullYear(), 0, 1);
 
     clients.forEach(c => {
-        const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
-        
+        const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0);
+
         // Magia: Extraer fecha de pago aproximada restando los meses contratados
         const mesesContratados = c.accountMonths || 1;
         const fechaPago = new Date(exp);
         fechaPago.setMonth(fechaPago.getMonth() - mesesContratados);
 
-        const d = Math.ceil((exp-t)/86400000); // Días para vencer
+        const d = Math.ceil((exp - t) / 86400000); // Días para vencer
         let entraEnFiltro = false;
 
         // Evaluador de filtros
-        if (filter === 'proyeccion') { if(d >= 0 && d <= 14) entraEnFiltro = true; } 
-        else if (filter === 'hoy') { if(fechaPago.getTime() === t.getTime()) entraEnFiltro = true; } 
-        else if (filter === 'semana') { if(fechaPago >= semanaInicio && fechaPago <= t) entraEnFiltro = true; } 
-        else if (filter === 'mes') { if(fechaPago >= mesInicio && fechaPago <= t) entraEnFiltro = true; } 
-        else if (filter === 'anio') { if(fechaPago >= anioInicio && fechaPago <= t) entraEnFiltro = true; }
+        if (filter === 'proyeccion') { if (d >= 0 && d <= 14) entraEnFiltro = true; }
+        else if (filter === 'hoy') { if (fechaPago.getTime() === t.getTime()) entraEnFiltro = true; }
+        else if (filter === 'semana') { if (fechaPago >= semanaInicio && fechaPago <= t) entraEnFiltro = true; }
+        else if (filter === 'mes') { if (fechaPago >= mesInicio && fechaPago <= t) entraEnFiltro = true; }
+        else if (filter === 'anio') { if (fechaPago >= anioInicio && fechaPago <= t) entraEnFiltro = true; }
 
         // Sumar a tarjetas principales SOLO si pasa el filtro
-        if(entraEnFiltro) {
-            const uCount = c.accountUnits || 1; 
+        if (entraEnFiltro) {
+            const uCount = c.accountUnits || 1;
             profit += ((c.price || 0) - (c.cost || 0)) * uCount;
             income += (c.price || 0) * uCount;
             cost += (c.cost || 0) * uCount;
             validAccountsCount += uCount;
         }
-        
+
         // Las cuentas activas siempre se muestran en global para no asustar al usuario
-        if (d >= 0) act++; 
+        if (d >= 0) act++;
     });
 
-    if(document.getElementById('bdIncomeFin')) document.getElementById('bdIncomeFin').innerText = `${globalCurrency}${income.toFixed(2)}`;
-    if(document.getElementById('bdCostFin')) document.getElementById('bdCostFin').innerText = `${globalCurrency}${cost.toFixed(2)}`;
-    if(document.getElementById('bdProfitFin')) document.getElementById('bdProfitFin').innerText = `${globalCurrency}${profit.toFixed(2)}`;
-    if(document.getElementById('chartHeaderCuentas')) document.getElementById('chartHeaderCuentas').innerText = act;
-    if(document.getElementById('chartHeaderCuentasFin')) document.getElementById('chartHeaderCuentasFin').innerText = act;
+    if (document.getElementById('bdIncomeFin')) document.getElementById('bdIncomeFin').innerText = `${globalCurrency}${income.toFixed(2)}`;
+    if (document.getElementById('bdCostFin')) document.getElementById('bdCostFin').innerText = `${globalCurrency}${cost.toFixed(2)}`;
+    if (document.getElementById('bdProfitFin')) document.getElementById('bdProfitFin').innerText = `${globalCurrency}${profit.toFixed(2)}`;
+    if (document.getElementById('chartHeaderCuentas')) document.getElementById('chartHeaderCuentas').innerText = act;
+    if (document.getElementById('chartHeaderCuentasFin')) document.getElementById('chartHeaderCuentasFin').innerText = act;
 
     // --- LÓGICA DE METAS Y ASESOR FINANCIERO (Se mantiene igual) ---
     const goal = currentUserData.financialGoal || 0;
@@ -2687,36 +3099,36 @@ window.loadFinanceData = () => {
     const progressText = document.getElementById('goalProgressText');
     const advisorBox = document.getElementById('financeAdvisorBox');
 
-    if(displayGoal) displayGoal.innerText = `${globalCurrency}${goal.toFixed(2)}`;
-    
+    if (displayGoal) displayGoal.innerText = `${globalCurrency}${goal.toFixed(2)}`;
+
     if (goal > 0) {
         let pct = (profit / goal) * 100;
-        if (pct < 0) pct = 0; 
-        
-        if(progressBar) progressBar.style.width = `${Math.min(pct, 100)}%`;
-        if(progressText) progressText.innerText = `${pct.toFixed(1)}%`;
+        if (pct < 0) pct = 0;
+
+        if (progressBar) progressBar.style.width = `${Math.min(pct, 100)}%`;
+        if (progressText) progressText.innerText = `${pct.toFixed(1)}%`;
 
         if (profit >= goal) {
-            if(advisorBox) { advisorBox.innerHTML = `<strong>¡Felicidades! 🏆</strong> Has superado tu meta mensual de ganancia. Estás obteniendo una rentabilidad del <strong>${((profit/cost)*100).toFixed(0)}%</strong> sobre tu inversión total.`; advisorBox.style.borderLeftColor = 'var(--mac-green)'; }
+            if (advisorBox) { advisorBox.innerHTML = `<strong>¡Felicidades! 🏆</strong> Has superado tu meta mensual de ganancia. Estás obteniendo una rentabilidad del <strong>${((profit / cost) * 100).toFixed(0)}%</strong> sobre tu inversión total.`; advisorBox.style.borderLeftColor = 'var(--mac-green)'; }
         } else {
             const faltante = goal - profit;
             const avgCost = validAccountsCount > 0 ? (cost / validAccountsCount) : 0;
             const avgProfitPerAccount = validAccountsCount > 0 ? (profit / validAccountsCount) : 0;
-            
+
             let adviceHTML = `Te faltan <strong>${globalCurrency}${faltante.toFixed(2)}</strong> de ganancia para lograr tu meta mensual.<br><br>`;
             if (avgProfitPerAccount > 0) {
                 const accountsNeeded = Math.ceil(faltante / avgProfitPerAccount);
                 const suggestedPriceFor10 = avgCost + (faltante / 10);
                 adviceHTML += `💡 <strong>¿Cómo lograrlo?</strong><br>• Puedes vender <strong>${accountsNeeded} cuentas más</strong> manteniendo tu precio actual.<br>• ⚡ <strong>Vía rápida:</strong> Si prefieres llegar a la meta vendiendo <strong>solo 10 cuentas nuevas</strong>, deberías venderlas a <strong>${globalCurrency}${suggestedPriceFor10.toFixed(2)}</strong> cada una.`;
-            } else if (validAccountsCount > 0) { adviceHTML += `⚠️ Actualmente estás vendiendo a un precio menor o igual a tu inversión.`; } 
+            } else if (validAccountsCount > 0) { adviceHTML += `⚠️ Actualmente estás vendiendo a un precio menor o igual a tu inversión.`; }
             else { adviceHTML += `💡 Registra tus primeras ventas (con Costo y Precio) para que la IA calcule las estrategias necesarias.`; }
 
-            if(advisorBox) { advisorBox.innerHTML = adviceHTML; advisorBox.style.borderLeftColor = 'var(--mac-orange)'; }
+            if (advisorBox) { advisorBox.innerHTML = adviceHTML; advisorBox.style.borderLeftColor = 'var(--mac-orange)'; }
         }
     } else {
-        if(progressBar) progressBar.style.width = '0%';
-        if(progressText) progressText.innerText = '0%';
-        if(advisorBox) { advisorBox.innerHTML = `💡 Aún no has definido una meta. Haz clic en <strong>Fijar Meta</strong> para proyectar tus ganancias.`; advisorBox.style.borderLeftColor = 'var(--mac-blue)'; }
+        if (progressBar) progressBar.style.width = '0%';
+        if (progressText) progressText.innerText = '0%';
+        if (advisorBox) { advisorBox.innerHTML = `💡 Aún no has definido una meta. Haz clic en <strong>Fijar Meta</strong> para proyectar tus ganancias.`; advisorBox.style.borderLeftColor = 'var(--mac-blue)'; }
     }
 
     // --- NUEVO: CÁLCULOS DE RETENCIÓN, CRECIMIENTO Y RENTABILIDAD ---
@@ -2737,11 +3149,11 @@ window.loadFinanceData = () => {
             if (c.renovations > 0) clientesRenovados++;
         }
 
-        const exp = new Date(c.date); 
+        const exp = new Date(c.date);
         exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
-        const fechaPago = new Date(exp); 
+        const fechaPago = new Date(exp);
         fechaPago.setMonth(fechaPago.getMonth() - (c.accountMonths || 1));
-        
+
         const pIncome = (c.price || 0) * (c.accountUnits || 1);
         const pCost = (c.cost || 0) * (c.accountUnits || 1);
 
@@ -2761,9 +3173,9 @@ window.loadFinanceData = () => {
 
     // Pintar Retención
     const tasaRetencion = totalActivos > 0 ? (clientesRenovados / totalActivos) * 100 : 0;
-    if(document.getElementById('retentionRateText')) document.getElementById('retentionRateText').innerText = `${tasaRetencion.toFixed(1)}%`;
-    if(document.getElementById('retentionBar')) document.getElementById('retentionBar').style.width = `${tasaRetencion}%`;
-    if(document.getElementById('retentionDetailsText')) document.getElementById('retentionDetailsText').innerText = `${clientesRenovados} de ${totalActivos} clientes activos renovaron este mes.`;
+    if (document.getElementById('retentionRateText')) document.getElementById('retentionRateText').innerText = `${tasaRetencion.toFixed(1)}%`;
+    if (document.getElementById('retentionBar')) document.getElementById('retentionBar').style.width = `${tasaRetencion}%`;
+    if (document.getElementById('retentionDetailsText')) document.getElementById('retentionDetailsText').innerText = `${clientesRenovados} de ${totalActivos} clientes activos renovaron este mes.`;
 
     // Pintar Crecimiento
     let tasaCrecimiento = 0;
@@ -2772,15 +3184,15 @@ window.loadFinanceData = () => {
     } else if (ingresosMesActual > 0) {
         tasaCrecimiento = 100;
     }
-    if(document.getElementById('growthRateText')) document.getElementById('growthRateText').innerText = `${tasaCrecimiento >= 0 ? '+' : ''}${tasaCrecimiento.toFixed(1)}%`;
-    if(document.getElementById('growthDetailsText')) document.getElementById('growthDetailsText').innerText = `Mes actual: ${globalCurrency}${ingresosMesActual.toFixed(2)} | Mes anterior: ${globalCurrency}${ingresosMesAnterior.toFixed(2)}`;
+    if (document.getElementById('growthRateText')) document.getElementById('growthRateText').innerText = `${tasaCrecimiento >= 0 ? '+' : ''}${tasaCrecimiento.toFixed(1)}%`;
+    if (document.getElementById('growthDetailsText')) document.getElementById('growthDetailsText').innerText = `Mes actual: ${globalCurrency}${ingresosMesActual.toFixed(2)} | Mes anterior: ${globalCurrency}${ingresosMesAnterior.toFixed(2)}`;
 
     // Pintar Top Rentabilidad (Margen)
     let marginArray = Object.keys(margenesPlataforma).map(key => {
         let m = margenesPlataforma[key];
         let marginPct = m.income > 0 ? (m.profit / m.income) * 100 : 0;
         return { platform: key, margin: marginPct, profit: m.profit };
-    }).sort((a,b) => b.margin - a.margin).slice(0, 5);
+    }).sort((a, b) => b.margin - a.margin).slice(0, 5);
 
     const topMarginList = document.getElementById('topMarginStatsList');
     if (topMarginList) {
@@ -2800,7 +3212,7 @@ window.loadFinanceData = () => {
 
     // Pintar Ingresos por Método de Pago
     const pmContainer = document.getElementById('paymentMethodsStatsList');
-    if(pmContainer && currentUserData.paymentMethods && currentUserData.paymentMethods.length > 0) {
+    if (pmContainer && currentUserData.paymentMethods && currentUserData.paymentMethods.length > 0) {
         pmContainer.innerHTML = '';
         const methods = currentUserData.paymentMethods;
         const avg = income / methods.length; // Estimado estadístico visual
@@ -2823,7 +3235,7 @@ window.loadFinanceData = () => {
 
     // Dibujar Gráficos enviando el filtro
     setTimeout(() => {
-        if(typeof ApexCharts !== 'undefined') window.renderCharts(income, cost, profit, filter);
+        if (typeof ApexCharts !== 'undefined') window.renderCharts(income, cost, profit, filter);
     }, 100);
 };
 
@@ -2842,25 +3254,25 @@ window.downloadWrapup = async (acc, platform, day, clientName, clientUnits, fras
         document.getElementById('wrapupTopDay').innerText = day;
         document.getElementById('wrapupTopClient').innerText = clientName;
         document.getElementById('wrapupClientAccounts').innerText = `${clientUnits} cuentas registradas en el mes`;
-        
+
         setTimeout(async () => {
             const wrapupEl = document.getElementById('wrapupTemplate');
-            wrapupEl.style.left = '0px'; 
-            wrapupEl.style.top = '0px'; 
-            
-            const canvas = await html2canvas(wrapupEl, { 
+            wrapupEl.style.left = '0px';
+            wrapupEl.style.top = '0px';
+
+            const canvas = await html2canvas(wrapupEl, {
                 backgroundColor: '#000000',
-                scale: 2 
+                scale: 2
             });
-            
-            wrapupEl.style.left = '-9999px'; 
-            wrapupEl.style.top = '-9999px'; 
+
+            wrapupEl.style.left = '-9999px';
+            wrapupEl.style.top = '-9999px';
 
             const link = document.createElement('a');
             link.download = `AGC_Wrapped_${mes.replace(/\s+/g, '_')}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
-            
+
             window.showNotification("¡Tu tarjeta Wrapped se descargó con éxito! 🏆");
             btn.innerHTML = originalText;
             btn.disabled = false;
@@ -2881,22 +3293,22 @@ window.openMobileClientModal = (id) => {
     // 1. Llenar textos principales
     const mcName = document.getElementById('mcName');
     if (mcName) mcName.innerText = c.name;
-    
+
     const mcPhone = document.getElementById('mcPhone');
     if (mcPhone) mcPhone.innerText = c.phone;
 
-    const uCount = c.accountUnits || 1; 
+    const uCount = c.accountUnits || 1;
     const total = (c.price || 0) * uCount;
     const mcPrice = document.getElementById('mcPrice');
     if (mcPrice) mcPrice.innerText = `${globalCurrency}${total.toFixed(2)}`;
 
     const exp = new Date(c.date);
     exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
-    exp.setHours(0,0,0,0);
-    
+    exp.setHours(0, 0, 0, 0);
+
     const mcDate = document.getElementById('mcDate');
     if (mcDate) mcDate.innerText = exp.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-    
+
     // 🛡️ CORRECCIÓN 1: Validar que el HTML de Novedades exista antes de modificarlo
     const badgesContainer = document.getElementById('mcBadges');
     if (badgesContainer) {
@@ -2915,26 +3327,26 @@ window.openMobileClientModal = (id) => {
             notesContainer.style.display = 'none';
         }
     }
-    
+
     // 2. Calcular estado
-    const today = new Date(); today.setHours(0,0,0,0);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
     const diffDays = Math.ceil((exp - today) / 86400000);
     const statusCat = diffDays > 3 ? 'active' : (diffDays >= 0 ? 'warning' : 'expired');
     const stText = diffDays > 0 ? `Faltan ${diffDays} d` : (diffDays === 0 ? 'Hoy' : 'Vencido');
-    
+
     const statusBadge = document.getElementById('mcStatus');
     if (statusBadge) {
         statusBadge.className = `status ${statusCat}`;
         statusBadge.innerText = stText;
     }
-    
+
     // 🛡️ CORRECCIÓN 2: Limpiar nombres con comillas (Ej: McDonald's) para que no rompan el botón HTML
     const safeName = c.name ? c.name.replace(/'/g, "\\'") : '';
     const safePlatform = c.platform ? c.platform.replace(/'/g, "\\'") : '';
-    
+
     // 3. Inyectar Botones Grandes
     const renewBtn = statusCat !== 'active' ? `<button class="action-btn btn-renew" style="padding:12px; font-size:14px;" onclick="window.closeModals(); window.renewClient('${c.id}')"><i class='bx bx-refresh'></i> Renovar</button>` : '';
-    
+
     const mcActions = document.getElementById('mcActions');
     if (mcActions) {
         mcActions.innerHTML = `
@@ -2947,7 +3359,7 @@ window.openMobileClientModal = (id) => {
             ${renewBtn}
         `;
     }
-    
+
     // 4. Mostrar el modal
     const mobileModal = document.getElementById('mobileClientModal');
     if (mobileModal) {
@@ -2962,16 +3374,16 @@ window.requestNotificationPermission = async () => {
     try {
         console.log("Solicitando permiso de notificaciones...");
         const permission = await Notification.requestPermission();
-        
+
         if (permission === 'granted') {
             console.log("Permiso concedido. Obteniendo token...");
             const currentToken = await getToken(messaging, { vapidKey: 'BKBlbQcgMzLg-oCuFXjhn_2ekkAcrsGRS49RP3mKBvJDB-fPLzovUeYnNfmFi96ib5RtjJzta5nMlm7VsmSJC7k' });
-            
+
             if (currentToken) {
                 // MODIFICACIÓN: En lugar de fcmToken (texto), usamos fcmTokens (Lista/Array)
                 // arrayUnion asegura que si el token ya existe, no lo duplique.
-                await updateDoc(doc(db, "users", currentUser.uid), { 
-                    fcmTokens: arrayUnion(currentToken) 
+                await updateDoc(doc(db, "users", currentUser.uid), {
+                    fcmTokens: arrayUnion(currentToken)
                 });
                 console.log("Token de notificaciones agregado a la lista con éxito.");
             } else {
@@ -2996,7 +3408,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
     deferredPrompt = e;
     // Muestra nuestro botón de instalación
     const installBtn = document.getElementById('btnInstallApp');
-    if(installBtn) installBtn.style.display = 'block';
+    if (installBtn) installBtn.style.display = 'block';
 });
 
 // Función que se ejecuta al darle clic al botón
@@ -3018,7 +3430,7 @@ window.installApp = async () => {
 // Si la app ya se instaló con éxito, nos aseguramos de ocultar el botón
 window.addEventListener('appinstalled', () => {
     const installBtn = document.getElementById('btnInstallApp');
-    if(installBtn) installBtn.style.display = 'none';
+    if (installBtn) installBtn.style.display = 'none';
     window.showNotification("¡App instalada correctamente! 📱");
 });
 
@@ -3027,9 +3439,9 @@ window.vincularBot = async () => {
     // 🔒 Verificamos si es un usuario Demo
     const plan = currentUserData.plan_actual || 'demo';
     if (plan === 'demo' || plan === 'basico') { // Ahora bloqueamos a demo y básico
-        
+
         window.closeModals();
-        
+
         Swal.fire({
             icon: 'lock',
             title: 'Función Premium',
@@ -3045,20 +3457,20 @@ window.vincularBot = async () => {
                 window.mostrarPlanesSuscripcion(); // <-- Aquí llamamos al catálogo
             }
         });
-        return; 
+        return;
     }
 
     const qrContainer = document.getElementById('qrContainer');
     const botStatus = document.getElementById('botStatus');
     const botQrImage = document.getElementById('botQrImage');
-    
+
     qrContainer.style.display = 'block';
-    botQrImage.style.display = 'none'; 
+    botQrImage.style.display = 'none';
     botStatus.innerText = "⏳ Conectando con el servidor...";
 
     try {
         // Reemplaza los números por la IP real de tu servidor en DigitalOcean
-const response = await fetch(`https://bot.panelagc.com/api/conectar/${currentUser.uid}`);
+        const response = await fetch(`https://bot.panelagc.com/api/conectar/${currentUser.uid}`);
         const data = await response.json();
 
         if (data.status === 'qr') {
@@ -3066,7 +3478,7 @@ const response = await fetch(`https://bot.panelagc.com/api/conectar/${currentUse
             botQrImage.style.display = 'inline-block';
             botStatus.innerText = "📱 Escanea este código con tu WhatsApp para activar el bot.";
             botStatus.style.color = "var(--mac-text-main)";
-        } 
+        }
         else if (data.status === 'conectado') {
             botQrImage.style.display = 'none';
             botStatus.innerText = "✅ " + data.message;
@@ -3117,23 +3529,23 @@ window.checkNewNews = async () => {
         // Traemos solo la noticia más reciente para no gastar lecturas en Firebase
         const qNews = query(collection(db, "news"), limit(1));
         const snap = await getDocs(qNews);
-        
+
         if (!snap.empty) {
             let noticias = [];
             snap.forEach(d => noticias.push(d.data()));
             // Ordenamos para asegurar que tenemos la más nueva
-            noticias.sort((a,b) => new Date(b.fechaIso) - new Date(a.fechaIso));
-            
+            noticias.sort((a, b) => new Date(b.fechaIso) - new Date(a.fechaIso));
+
             const latestNewsDate = noticias[0].fechaIso;
             const lastSeen = localStorage.getItem('lastSeenNews');
-            
+
             // Si nunca ha visto las noticias, o si la noticia más nueva es más reciente que su última visita
             if (!lastSeen || new Date(latestNewsDate) > new Date(lastSeen)) {
                 const badge = document.getElementById('newsBadge');
-                if(badge) badge.style.display = 'block';
+                if (badge) badge.style.display = 'block';
             }
         }
-    } catch(e) {
+    } catch (e) {
         console.error("Error revisando noticias:", e);
     }
 };
@@ -3144,9 +3556,9 @@ window.checkNewNews = async () => {
 
 window.openStoreModal = () => {
     const plan = currentUserData.plan_actual || 'demo';
-    
+
     if (plan !== 'basico' && plan !== 'pro' && plan !== 'elite') {
-        window.closeModals(true); 
+        window.closeModals(true);
         Swal.fire({
             icon: 'lock', title: 'Función de Suscripción', text: 'Tener tu propio Catálogo Web para vender en automático requiere el Plan Básico o PRO.',
             confirmButtonText: '💎 Ver Planes', confirmButtonColor: '#007AFF', showCancelButton: true, cancelButtonText: 'Cancelar',
@@ -3155,13 +3567,13 @@ window.openStoreModal = () => {
         return;
     }
 
-    window.closeModals(false); 
+    window.closeModals(false);
     const aliasOrUid = currentUserData.storeAlias || currentUser.uid;
     const linkInput = document.getElementById('storeLinkInput');
     if (linkInput) {
         linkInput.value = window.location.origin + window.location.pathname + "?tienda=" + aliasOrUid;
     }
-    
+
     // 🔥 ACTUALIZAR EL SWITCH DE ESTADO
     const storeToggle = document.getElementById('storeActiveToggle');
     if (storeToggle) storeToggle.checked = currentUserData.storeActive !== false; // true por defecto
@@ -3169,6 +3581,7 @@ window.openStoreModal = () => {
     // 🔥 Renderizamos los productos y categorías directamente
     window.renderStoreItems();
     window.syncStoreCategories();
+    window.populateCouponTargets();
 
     // 🪄 MAGIA EXTRA: Resetea el modal a la primera pestaña (Catálogo) siempre que se abra
     const tabBtn = document.querySelector('#storeModal .chrome-tab');
@@ -3181,7 +3594,7 @@ window.openStoreModal = () => {
         const vistas = currentUserData.storeViews || 0;
         const ventas = currentUserData.storeSalesCount || 0;
         const ingresos = currentUserData.storeRevenue || 0;
-        
+
         ownerStatsContainer.innerHTML = `
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 20px;">
                 <div style="background: var(--mac-surface); padding: 15px; border-radius: 12px; border: 1px solid var(--mac-border); text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
@@ -3212,8 +3625,8 @@ window.toggleStoreActive = async (checkbox) => {
         await updateDoc(doc(db, "users", currentUser.uid), { storeActive: isActive });
         currentUserData.storeActive = isActive;
         window.showNotification(isActive ? "Tienda Abierta 🟢" : "Tienda Cerrada 🔴");
-    } catch(e) { 
-        window.showNotification("Error guardando el estado: " + e.message); 
+    } catch (e) {
+        window.showNotification("Error guardando el estado: " + e.message);
         checkbox.checked = !checkbox.checked; // Revierte si hay error
     }
 };
@@ -3224,20 +3637,20 @@ window.saveExternalStore = async () => {
     if (!url.startsWith('http')) return window.showNotification("⚠️ El link debe empezar con http:// o https://");
     try {
         await updateDoc(doc(db, "users", currentUser.uid), { externalStoreUrl: url });
-        currentUserData.externalStoreUrl = url; 
+        currentUserData.externalStoreUrl = url;
         document.getElementById('storeExternalInput').value = '';
         window.showNotification("¡Catálogo externo vinculado con éxito! 🔗");
-        window.openStoreModal(); 
-    } catch(e) { window.showNotification("Error: " + e.message); }
+        window.openStoreModal();
+    } catch (e) { window.showNotification("Error: " + e.message); }
 };
 
 window.removeExternalStore = async () => {
     try {
         await updateDoc(doc(db, "users", currentUser.uid), { externalStoreUrl: null });
-        currentUserData.externalStoreUrl = null; 
+        currentUserData.externalStoreUrl = null;
         window.showNotification("Catálogo desvinculado. Tiendita interna reactivada 🏪");
         window.openStoreModal();
-    } catch(e) { window.showNotification("Error: " + e.message); }
+    } catch (e) { window.showNotification("Error: " + e.message); }
 };
 
 window.handleStoreTypeChange = () => {
@@ -3251,11 +3664,11 @@ window.toggleStoreStockFields = () => {
     const type = document.getElementById('storeType') ? document.getElementById('storeType').value : 'Servicio';
     const addComboBtn = document.getElementById('btnAddComboPlatformBtn');
     const label = document.getElementById('storeStockLabel');
-    
+
     if (isChecked) {
         configDiv.style.display = 'flex';
         const listContainer = document.getElementById('storeStockPlatformsList');
-        listContainer.innerHTML = ''; 
+        listContainer.innerHTML = '';
         if (type === 'Combo') {
             label.innerText = 'Selecciona las plataformas del inventario que integran este Combo:';
             if (addComboBtn) addComboBtn.style.display = 'inline-flex';
@@ -3290,7 +3703,7 @@ window.addStoreStockSelectRow = () => {
     });
     selectHTML += `</select>`;
 
-    const removeBtnHTML = listContainer.children.length > 0 ? 
+    const removeBtnHTML = listContainer.children.length > 0 ?
         `<button type="button" class="action-btn btn-del" style="padding: 4px 8px; font-size: 11px;" onclick="this.parentElement.remove(); window.updateStoreStockCount();"><i class='bx bx-trash'></i></button>` : '';
 
     rowDiv.innerHTML = selectHTML + removeBtnHTML;
@@ -3302,7 +3715,7 @@ window.updateStoreStockCount = () => {
     const countText = document.getElementById('storeStockCountText');
     const selects = document.querySelectorAll('.store-stock-select');
     const selectedPlatforms = Array.from(selects).map(s => s.value).filter(val => val !== '');
-    
+
     if (selectedPlatforms.length === 0) {
         countText.innerText = '0 disp.'; countText.style.color = 'var(--mac-text-secondary)'; return;
     }
@@ -3370,12 +3783,12 @@ window.removeStoreCategory = async (index) => {
 window.addStoreItem = async () => {
     const type = document.getElementById('storeType') ? document.getElementById('storeType').value : 'Servicio';
     const plat = document.getElementById('storePlatform').value.trim();
-    
+
     // Leemos el nuevo builder visual
     const storeTabs = window.extractBuilderData('builder-crear');
-    
+
     if (!plat || storeTabs.length === 0) return window.showNotification("Completa la plataforma y al menos una Pestaña con precio");
-    
+
     const p1P = storeTabs[0].options[0].price; // Precio base visual
 
     const cat = document.getElementById('storeCategorySelect').value;
@@ -3404,13 +3817,14 @@ window.addStoreItem = async () => {
             const snapshot = await uploadBytes(storageRef, file);
             imgUrl = await getDownloadURL(snapshot.ref);
         }
-
+        const autoDeliver = document.getElementById('storeAutoDeliver') ? document.getElementById('storeAutoDeliver').checked : false;
         let catalog = currentUserData.storeCatalog || [];
-        catalog.push({ 
-            id: 'item_' + Date.now(), platform: plat, price: p1P, 
+        catalog.push({
+            id: 'item_' + Date.now(), platform: plat, price: p1P,
             storeTabs: storeTabs, pricingOptions: storeTabs[0].options, // Guardado Dual (Soporta Legacy)
-            category: cat, desc: desc, imgUrl: imgUrl, type: type, 
-            autoStock: autoStock, stockPlatforms: stockPlatforms, requiresInvite: requiresInvite, badgeOption: badgeOption, status: 'disponible' 
+            category: cat, desc: desc, imgUrl: imgUrl, type: type,
+            autoStock: autoStock, stockPlatforms: stockPlatforms, requiresInvite: requiresInvite, badgeOption: badgeOption, status: 'disponible',
+            autoDeliver: autoDeliver
         });
 
         await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
@@ -3421,37 +3835,37 @@ window.addStoreItem = async () => {
         if (document.getElementById('storeDesc')) document.getElementById('storeDesc').value = '';
         if (fileInput) fileInput.value = '';
         document.getElementById('builder-crear').innerHTML = ''; // Resetea el builder
-        window.addTabToBuilder('builder-crear', '1 Mes', [{label: 'Perfil', price: ''}]); // Tab Default
+        window.addTabToBuilder('builder-crear', '1 Mes', [{ label: 'Perfil', price: '' }]); // Tab Default
 
         document.getElementById('storeAutoStock').checked = false;
-        if(document.getElementById('storeRequiresInvite')) document.getElementById('storeRequiresInvite').checked = false;
-        
+        if (document.getElementById('storeRequiresInvite')) document.getElementById('storeRequiresInvite').checked = false;
+
         document.querySelectorAll('.store-toggle-card').forEach(label => {
             label.style.border = '1px solid var(--mac-border)'; label.style.background = 'var(--mac-surface)';
             const icon = label.querySelector('.store-toggle-icon');
-            if(icon) { icon.className = 'bx bx-circle store-toggle-icon'; icon.style.color = 'var(--mac-text-secondary)'; }
+            if (icon) { icon.className = 'bx bx-circle store-toggle-icon'; icon.style.color = 'var(--mac-text-secondary)'; }
         });
 
         document.getElementById('storeBadgeOption').value = '';
         window.toggleStoreStockFields();
         window.renderStoreItems();
         window.showNotification("✅ Producto añadido al catálogo");
-    } catch(e) { window.showNotification("Error: " + e.message); } 
+    } catch (e) { window.showNotification("Error: " + e.message); }
     finally { btn.innerHTML = "<i class='bx bx-plus-circle' style='font-size: 22px;'></i> Añadir al Catálogo"; btn.disabled = false; }
 };
 window.renderStoreItems = () => {
     const list = document.getElementById('storeItemsList');
     list.innerHTML = '';
     const catalog = currentUserData.storeCatalog || [];
-    
-    if(catalog.length === 0) {
+
+    if (catalog.length === 0) {
         list.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); font-size:12px;">Tu catálogo está vacío.</p>';
         return;
     }
 
     catalog.forEach((item, index) => {
         let isAgotado = item.status === 'agotado';
-        
+
         const statusBadge = isAgotado ? `<span style="background:var(--mac-red); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold;">AGOTADO</span>` : `<span style="background:var(--mac-green); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold;">DISPONIBLE</span>`;
         const typeBadge = item.type === 'Combo' ? `<span style="background:var(--mac-orange); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:bold; margin-right:5px;"><i class='bx bx-gift'></i> COMBO</span>` : '';
 
@@ -3461,13 +3875,13 @@ window.renderStoreItems = () => {
         // 🔥 FIX: Un solo div con el diseño correcto
         const div = document.createElement('div');
         div.style.cssText = `display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; background:var(--mac-surface); padding:15px; border-radius:12px; border:1px solid var(--mac-border); opacity: ${isAgotado ? '0.7' : '1'}; gap: 15px;`;
-        
+
         div.innerHTML = `
             <div style="flex:1; min-width:200px; overflow:hidden;">
                 ${typeBadge}
                 <strong style="color:var(--mac-text-main); font-size:15px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.platform}</strong>
                 <span style="color:var(--mac-text-secondary); font-size:12px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; white-space:pre-wrap; margin:4px 0;">${item.desc || ''}</span>
-                <span style="color:var(--mac-green); font-size:14px; font-weight:bold; display:block; margin-top:2px;">${globalCurrency}${item.price.toFixed(2)}</span>
+                <span style="color:var(--mac-green); font-size:14px; font-weight:bold; display:block; margin-top:2px;">${globalCurrency}${window.formatStorePrice(item.price)}</span>
                 <div style="margin-top: 8px;">${statusBadge}</div>
             </div>
             <div style="display:flex; flex-direction:row; gap:8px; flex-shrink: 0; flex-wrap:wrap; justify-content:flex-end;">
@@ -3484,7 +3898,7 @@ window.editStoreItem = (index) => {
     const item = currentUserData.storeCatalog[index];
     document.getElementById('editProdIndex').value = index;
     document.getElementById('editProdName').value = item.platform;
-    
+
     // Cargar categorías disponibles
     const catSelect = document.getElementById('editProdCat');
     catSelect.innerHTML = '<option value="">Sin Categoría</option>';
@@ -3494,16 +3908,36 @@ window.editStoreItem = (index) => {
     });
 
     document.getElementById('editProdInvite').checked = item.requiresInvite || false;
+
+    const autoDeliverEl = document.getElementById('editProdAutoDeliver');
+    if (autoDeliverEl) autoDeliverEl.checked = item.autoDeliver || false;
+
+    const autoStockEl = document.getElementById('editProdAutoStock');
+    if (autoStockEl) {
+        autoStockEl.checked = item.autoStock || false;
+        if (item.autoStock) {
+            document.getElementById('editStoreStockConfig').style.display = 'flex';
+            document.getElementById('editStoreStockPlatformsList').innerHTML = '';
+            if (item.stockPlatforms && item.stockPlatforms.length > 0) {
+                item.stockPlatforms.forEach(p => window.addEditStoreStockSelectRow(p));
+            } else {
+                window.toggleEditStoreStockFields();
+            }
+        } else {
+            document.getElementById('editStoreStockConfig').style.display = 'none';
+            document.getElementById('editStoreStockPlatformsList').innerHTML = '';
+        }
+    }
     document.getElementById('editProdDesc').value = item.desc || '';
-    document.getElementById('editProdImg').value = ''; 
+    document.getElementById('editProdImg').value = '';
 
     // Llenar el Builder de Pestañas
     const builder = document.getElementById('builder-editar');
     builder.innerHTML = '';
-    
+
     let tabsData = item.storeTabs || [];
     if (tabsData.length === 0) {
-        const opts = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{label: 'Opciones', price: item.price}];
+        const opts = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{ label: 'Opciones', price: item.price }];
         tabsData = [{ name: 'General', options: opts }];
     }
 
@@ -3521,6 +3955,22 @@ window.saveEditedProduct = async () => {
     const plat = document.getElementById('editProdName').value.trim();
     const cat = document.getElementById('editProdCat').value;
     const invite = document.getElementById('editProdInvite').checked;
+
+    const autoDeliverEl = document.getElementById('editProdAutoDeliver');
+    const autoDeliver = autoDeliverEl ? autoDeliverEl.checked : false;
+
+    const autoStockEl = document.getElementById('editProdAutoStock');
+    const autoStock = autoStockEl ? autoStockEl.checked : false;
+
+    let stockPlatforms = [];
+    if (autoStock) {
+        const selects = document.querySelectorAll('.edit-store-stock-select');
+        stockPlatforms = Array.from(selects).map(s => s.value).filter(val => val !== '');
+        if (stockPlatforms.length === 0 && document.getElementById('storeBadgeOption')?.value !== 'a_pedido') {
+            return window.showNotification("⚠️ Selecciona una plataforma del inventario para conectar el stock.");
+        }
+    }
+
     const desc = document.getElementById('editProdDesc').value.trim();
     const fileInput = document.getElementById('editProdImg');
 
@@ -3532,7 +3982,7 @@ window.saveEditedProduct = async () => {
     btn.innerHTML = "Guardando... ⏳"; btn.disabled = true;
 
     try {
-        let newImgUrl = catalog[index].imgUrl || ""; 
+        let newImgUrl = catalog[index].imgUrl || "";
         if (fileInput && fileInput.files.length > 0) {
             const storageRef = ref(storage, `store_images/${currentUser.uid}_${Date.now()}_${fileInput.files[0].name}`);
             const snapshot = await uploadBytes(storageRef, fileInput.files[0]);
@@ -3542,20 +3992,25 @@ window.saveEditedProduct = async () => {
         catalog[index].platform = plat;
         catalog[index].category = cat;
         catalog[index].requiresInvite = invite;
+        if (autoDeliverEl) catalog[index].autoDeliver = autoDeliver;
+        if (autoStockEl) {
+            catalog[index].autoStock = autoStock;
+            catalog[index].stockPlatforms = stockPlatforms;
+        }
         catalog[index].desc = desc;
         catalog[index].storeTabs = storeTabs;
         catalog[index].price = storeTabs[0].options[0].price; // Base referencial
         catalog[index].pricingOptions = storeTabs[0].options; // Dual save
-        catalog[index].imgUrl = newImgUrl; 
-        
+        catalog[index].imgUrl = newImgUrl;
+
         await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
         currentUserData.storeCatalog = catalog;
-        
+
         window.renderStoreItems();
         document.getElementById('editProductModal').style.display = 'none';
         window.showNotification("✅ Producto editado y actualizado");
-    } catch(e) { 
-        window.showNotification("Error: " + e.message); 
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
     } finally {
         btn.innerHTML = origTxt; btn.disabled = false;
     }
@@ -3567,7 +4022,7 @@ window.toggleStoreItemStatus = async (index) => {
         await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
         currentUserData.storeCatalog = catalog;
         window.renderStoreItems();
-    } catch(e) { window.showNotification("Error al cambiar estado"); }
+    } catch (e) { window.showNotification("Error al cambiar estado"); }
 };
 
 window.deleteStoreItem = async (index) => {
@@ -3577,7 +4032,7 @@ window.deleteStoreItem = async (index) => {
         await updateDoc(doc(db, "users", currentUser.uid), { storeCatalog: catalog });
         currentUserData.storeCatalog = catalog;
         window.renderStoreItems();
-    } catch(e) { window.showNotification("Error al borrar"); }
+    } catch (e) { window.showNotification("Error al borrar"); }
 };
 
 window.copyStoreLink = () => {
@@ -3603,11 +4058,11 @@ window.shareProduct = async (itemId) => {
     const catalog = window.publicCatalogCache || [];
     const item = catalog.find(i => i.id === itemId);
     if (!item) return;
-    
-    const storeUrl = window.location.origin + window.location.pathname + "?tienda=" + data.storeAlias; 
-    const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
+
+    const storeUrl = window.location.origin + window.location.pathname + "?tienda=" + data.storeAlias;
+    const priceStr = window.formatStorePrice(item.price);
     const text = `🔥 ¡Mira esta oferta de *${item.platform}* a solo *${priceStr}* en la tienda oficial de ${data.name}!`;
-    
+
     if (navigator.share) {
         try {
             await navigator.share({ title: data.name, text: text, url: storeUrl });
@@ -3624,10 +4079,14 @@ window.addToCartConDuracion = (itemId) => {
     // Leemos cuántos meses seleccionó el cliente
     const selectElement = document.getElementById('duracion_' + itemId);
     const meses = parseInt(selectElement.value) || 1;
-    
+
     // Clonamos el producto para no alterar el catálogo original
-    const cartItem = { ...originalItem }; 
-    
+    const cartItem = { ...originalItem };
+
+    cartItem.basePlatform = originalItem.platform;
+    cartItem.saleType = cartItem.type === 'Completa' ? 'Completa' : 'Perfil';
+    cartItem.months = meses;
+
     // Multiplicamos el precio y actualizamos el nombre
     cartItem.price = originalItem.price * meses;
     if (meses > 1) {
@@ -3638,7 +4097,7 @@ window.addToCartConDuracion = (itemId) => {
     window.storeCart.push(cartItem);
     document.getElementById('cartBadge').innerText = window.storeCart.length;
     document.getElementById('floatingCartBtn').style.display = 'flex';
-    
+
     document.getElementById('cartPanelOverlay').classList.add('active');
     document.getElementById('cartPanel').classList.add('active');
     window.renderCartItems();
@@ -3647,11 +4106,16 @@ window.addToCartConDuracion = (itemId) => {
 window.addToCart = (itemId) => {
     const item = window.publicCatalogCache.find(i => i.id === itemId);
     if (!item) return;
-    
-    window.storeCart.push(item);
+
+    const cartItem = { ...item };
+    cartItem.basePlatform = item.platform;
+    cartItem.saleType = cartItem.type === 'Completa' ? 'Completa' : 'Perfil';
+    cartItem.months = 1;
+
+    window.storeCart.push(cartItem);
     document.getElementById('cartBadge').innerText = window.storeCart.length;
     document.getElementById('floatingCartBtn').style.display = 'flex';
-    
+
     // Abre el panel automáticamente como UX Premium
     document.getElementById('cartPanelOverlay').classList.add('active');
     document.getElementById('cartPanel').classList.add('active');
@@ -3668,27 +4132,27 @@ window.renderCartItems = () => {
     const container = document.getElementById('cartItemsContainer');
     const totalEl = document.getElementById('cartTotalPrice');
     const data = window.publicStoreDataCache;
-    
+
     container.innerHTML = '';
     let total = 0;
-    
+
     if (window.storeCart.length === 0) {
         container.innerHTML = '<div style="text-align: center; color: var(--mac-text-secondary); margin-top: 50px;"><i class="bx bx-shopping-bag" style="font-size: 64px; opacity: 0.3; margin-bottom: 15px;"></i><p style="font-weight: bold; font-size: 16px;">Tu carrito está vacío</p></div>';
         totalEl.innerText = `${data.currency || 'S/'}0.00`;
         document.getElementById('floatingCartBtn').style.display = 'none';
         return;
     }
-    
+
     window.storeCart.forEach((item, index) => {
         total += item.price;
         const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}">` : `<div style="width:65px; height:65px; border-radius:12px; background:var(--mac-gray); display:flex; align-items:center; justify-content:center; border: 1px solid var(--mac-border);"><i class="bx bx-play-circle" style="color:var(--mac-text-secondary); font-size:24px;"></i></div>`;
-        
+
         container.innerHTML += `
             <div class="cart-item">
                 ${imgHTML}
                 <div class="cart-item-info">
                     <div class="cart-item-title">${item.platform}</div>
-                    <div class="cart-item-price">${data.currency || 'S/'}${item.price.toFixed(2)}</div>
+                    <div class="cart-item-price">${window.formatStorePrice(item.price)}</div>
                 </div>
                 <button class="cart-item-remove" onclick="window.removeFromCart(${index})" title="Quitar"><i class='bx bx-trash'></i></button>
             </div>
@@ -3705,38 +4169,42 @@ window.removeFromCart = (index) => {
 
 window.openCheckoutFromCart = () => {
     if (window.storeCart.length === 0) return window.showNotification("Tu carrito está vacío.");
-    
+
     window.toggleCartPanel(); // Cerramos el panel lateral
-    
+
     const data = window.publicStoreDataCache;
     let totalPrice = 0;
     let platforms = [];
     let requiresInvite = false;
     let isCombo = false;
-    
+
     window.storeCart.forEach(item => {
         totalPrice += item.price;
         platforms.push(item.platform);
         if (item.requiresInvite) requiresInvite = true;
         if (item.type === 'Combo') isCombo = true;
     });
-    
+
     const joinedPlatforms = platforms.join(' + ');
     const finalType = window.storeCart.length > 1 || isCombo ? 'Paquete' : 'Servicio';
-    
-    // Preparar el objeto maestro para submitCheckout
+
+    let autoDeliver = true;
+    window.storeCart.forEach(item => {
+        if (!item.autoDeliver) autoDeliver = false;
+    });
     currentCheckoutItem = {
         platform: joinedPlatforms,
         price: totalPrice,
         requiresInvite: requiresInvite,
-        type: finalType
+        type: finalType,
+        autoDeliver: autoDeliver
     };
-    
+
     document.getElementById('checkoutItemName').innerText = window.storeCart.length > 1 ? `Paquete (${window.storeCart.length} servicios)` : joinedPlatforms;
-    document.getElementById('checkoutItemPrice').innerText = `${data.currency || 'S/'}${totalPrice.toFixed(2)}`;
-    
+    document.getElementById('cartTotalPrice').innerText = window.formatStorePrice(window.currentCartFinalTotal || totalPrice);
+
     const emailContainer = document.getElementById('checkoutEmailContainer');
-    if(emailContainer) {
+    if (emailContainer) {
         emailContainer.style.display = requiresInvite ? 'flex' : 'none';
         document.getElementById('checkoutClientEmail').value = '';
     }
@@ -3744,14 +4212,28 @@ window.openCheckoutFromCart = () => {
     const pmContainer = document.getElementById('checkoutPaymentMethods');
     pmContainer.innerHTML = '';
     const methods = data.paymentMethods || [];
+
+    // --- NUEVO: BOTONES DE PAGO AUTOMÁTICOS ---
+    let botonesAutomaticos = `
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+            <button class="btn-primary" style="background: #009EE3; border: none; padding: 14px; font-weight: 800; font-size: 14px;" onclick="window.iniciarPagoAutomatico('mercadopago')">
+                Pagar con Mercado Pago
+            </button>
+            <button class="btn-primary" style="background: #FCD535; color: #1E2329; border: none; padding: 14px; font-weight: 800; font-size: 14px;" onclick="window.iniciarPagoAutomatico('binance')">
+                Pagar con Binance
+            </button>
+        </div>
+        <p style="text-align: center; color: var(--mac-text-secondary); font-size: 12px; margin-bottom: 15px; font-weight: bold;">--- O PAGO MANUAL ---</p>
+    `;
+
     if (methods.length === 0) {
-        pmContainer.innerHTML = '<p style="font-size: 12px; color: var(--mac-red); text-align: center;">El vendedor aún no ha configurado métodos de pago.</p>';
+        pmContainer.innerHTML = botonesAutomaticos + '<p style="font-size: 12px; color: var(--mac-red); text-align: center;">El vendedor aún no ha configurado métodos de pago manuales.</p>';
     } else {
         let selectHtml = `<select id="pmSelectDropdown" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 14px; font-weight: bold; outline: none; margin-bottom: 10px;" onchange="window.showPaymentDetails(this.value)">`;
-        selectHtml += `<option value="">-- Elige un método de pago --</option>`;
+        selectHtml += `<option value="">-- Elige un pago manual (Yape, Transf) --</option>`;
         methods.forEach((m, idx) => { selectHtml += `<option value="${idx}">🏦 ${m.bank}</option>`; });
         selectHtml += `</select><div id="pmDetailsContainer" style="display:none; background: var(--mac-bg); padding: 15px; border-radius: 10px; border: 1px dashed var(--mac-border);"></div>`;
-        pmContainer.innerHTML = selectHtml;
+        pmContainer.innerHTML = botonesAutomaticos + selectHtml;
     }
 
     document.getElementById('checkoutPhone').value = '';
@@ -3772,38 +4254,38 @@ window.searchPublicStore = () => {
 window.filterStoreType = (type, event) => {
     window.currentStoreTypeFilter = type;
     document.querySelectorAll('#publicStoreFilters .spotify-type-btn').forEach(btn => btn.classList.remove('active'));
-    if(event) event.currentTarget.classList.add('active');
+    if (event) event.currentTarget.classList.add('active');
     window.renderPublicCatalog();
 };
 
 window.filterStoreCategory = (cat, event) => {
     window.currentStoreCatFilter = cat;
     document.querySelectorAll('#publicStoreCategoryFilters .spotify-chip-btn').forEach(btn => btn.classList.remove('active'));
-    if(event) event.currentTarget.classList.add('active');
+    if (event) event.currentTarget.classList.add('active');
     window.renderPublicCatalog();
 };
 // EL DETECTOR DEL CLIENTE PÚBLICO (MÓDULO DE TIENDITA OPTIMIZADO)
 const checkPublicStore = async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const storeId = urlParams.get('tienda');
-    
+
     if (storeId) {
         document.getElementById('authView').style.display = 'none';
         document.getElementById('appView').style.display = 'none';
         document.getElementById('adminView').style.display = 'none';
-        
+
         const storeView = document.getElementById('publicStoreView');
         storeView.style.display = 'block';
-        
+
         try {
             let data = null;
             const q = query(collection(db, "users"), where("storeAlias", "==", storeId));
             const snap = await getDocs(q);
-            
-            if (!snap.empty) { 
-                data = snap.docs[0].data(); 
+
+            if (!snap.empty) {
+                data = snap.docs[0].data();
                 data.uid = snap.docs[0].id; // 🔥 FIX: Atrapa el ID oculto del vendedor
-            } 
+            }
             else {
                 const docRef = await getDoc(doc(db, "users", storeId));
                 if (docRef.exists()) {
@@ -3816,7 +4298,7 @@ const checkPublicStore = async () => {
                 document.getElementById('publicStoreName').innerText = "Tienda no encontrada";
                 return;
             }
-            
+
             const plan = data.plan_actual || 'demo';
             if ((plan !== 'pro' && plan !== 'basico') || data.active === false) {
                 document.getElementById('publicStoreName').innerText = "Tienda inactiva";
@@ -3828,10 +4310,10 @@ const checkPublicStore = async () => {
             // 🪄 NUEVO: Mostramos el check verificado y el Footer SOLO cuando la tienda cargó con éxito
             const verifiedBadge = document.getElementById('publicStoreVerified');
             if (verifiedBadge) verifiedBadge.style.display = 'inline-flex';
-            
+
             const storeFooter = document.getElementById('publicStoreFooter');
             if (storeFooter) storeFooter.style.display = 'flex';
-            
+
             const logoEl = document.getElementById('publicStoreLogo');
             if (data.logoUrl) {
                 logoEl.src = data.logoUrl;
@@ -3840,7 +4322,7 @@ const checkPublicStore = async () => {
 
             const bannerEl = document.getElementById('publicStoreBanner');
             const headerProfileEl = document.getElementById('publicStoreHeaderProfile');
-            
+
             if (data.bannerUrl) {
                 bannerEl.style.backgroundImage = `url(${data.bannerUrl})`;
                 bannerEl.style.display = 'block';
@@ -3853,7 +4335,16 @@ const checkPublicStore = async () => {
             // Guardamos la información en memoria caché global para agilizar los filtros instantáneos
             window.publicCatalogCache = data.storeCatalog || [];
             window.publicStoreDataCache = data;
-
+            const currencyBtn = document.getElementById('storeCurrencyToggleBtn');
+            if (currencyBtn) {
+                if (data.binanceExchangeRate && parseFloat(data.binanceExchangeRate) > 0) {
+                    currencyBtn.style.display = 'block';
+                    currencyBtn.innerHTML = `<i class='bx bx-transfer-alt'></i> Mostrar en USDT`;
+                    window.storeDisplayCurrency = 'local'; // Reset por seguridad
+                } else {
+                    currencyBtn.style.display = 'none';
+                }
+            }
             // Activamos Filtros y Buscador estilo Spotify
             const filtersWrapper = document.getElementById('storeAppFiltersWrapper');
             if (window.publicCatalogCache.length > 0) {
@@ -3866,21 +4357,20 @@ const checkPublicStore = async () => {
                 supportBtn.href = `https://wa.me/${numLimpio}?text=${encodeURIComponent('¡Hola! Estoy visitando tu catálogo virtual y me gustaría hacerte una consulta.')}`;
                 supportBtn.style.display = 'inline-flex';
             }
-            // Activamos el botón de Referencias si el usuario configuró su link
+            // Activamos el botón de Referencias si el usuario subió alguna
             const refBtn = document.getElementById('publicStoreReferencesBtn');
             if (refBtn) {
-                if (data.referencesLink && data.referencesLink !== '') {
-                    refBtn.href = data.referencesLink;
+                if (data.storeReferences && data.storeReferences.length > 0) {
                     refBtn.style.display = 'inline-flex';
                 } else {
-                    refBtn.style.display = 'none'; // Se oculta si no hay link
+                    refBtn.style.display = 'none'; // Se oculta si no hay referencias
                 }
             }
             // 🔥 Cuando el catálogo carga con éxito, movemos todo hacia arriba
             const storeViewEl = document.getElementById('publicStoreView');
             if (storeViewEl) {
                 storeViewEl.style.justifyContent = 'flex-start';
-                storeViewEl.style.paddingTop = '30px'; 
+                storeViewEl.style.paddingTop = '30px';
             }
             // --- NUEVO: CONTADOR DE VISITAS ÚNICAS ---
             const viewerUid = localStorage.getItem('agc_owner_uid');
@@ -3900,17 +4390,18 @@ const checkPublicStore = async () => {
                 const vistas = data.storeViews || 0;
                 const compradores = data.storeSalesCount || 0;
                 statsContainer.innerHTML = `
-                    <div style="background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: white; font-size: 11px; padding: 6px 14px; border-radius: 20px; display: flex; gap: 12px; font-weight: bold; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-                        <span style="display:flex; align-items:center; gap:5px;"><i class='bx bx-show' style="color: #007AFF; font-size: 14px;"></i> ${vistas} Visitas</span>
-                        <span style="display:flex; align-items:center; gap:5px;"><i class='bx bx-shopping-bag' style="color: #34C759; font-size: 14px;"></i> ${compradores} Compradores</span>
+                    <div style="background: var(--mac-surface); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); color: var(--mac-text-main); font-size: 12px; height: 36px; padding: 0 16px; border-radius: 20px; display: flex; align-items: center; gap: 14px; font-weight: 600; border: 1px solid var(--mac-border); box-shadow: var(--glass-shadow); box-sizing: border-box;">
+                        <span style="display:flex; align-items:center; gap:5px;"><i class='bx bx-show' style="color: var(--mac-blue); font-size: 14px;"></i> <span style="font-variant-numeric: tabular-nums;">${vistas}</span> Visitas</span>
+                        <span style="display:flex; align-items:center; gap:5px;"><i class='bx bx-shopping-bag' style="color: var(--mac-green); font-size: 14px;"></i> <span style="font-variant-numeric: tabular-nums;">${compradores}</span> Compradores</span>
                     </div>
                 `;
             }
             // --- NUEVO: OBTENER RESEÑAS APROBADAS PARA LA TIENDA ---
             try {
-                const qRev = query(collection(db, "reviews"), where("vendedorId", "==", data.uid), where("status", "==", "aprobada"));
+                // Fetch using only vendedorId to avoid requiring a composite index, then filter locally
+                const qRev = query(collection(db, "reviews"), where("vendedorId", "==", data.uid));
                 const snapRev = await getDocs(qRev);
-                window.publicReviewsCache = snapRev.docs.map(d => d.data());
+                window.publicReviewsCache = snapRev.docs.map(d => d.data()).filter(r => r.status === 'aprobada');
             } catch (errRev) {
                 console.error("Error cargando reseñas:", errRev);
                 window.publicReviewsCache = [];
@@ -3932,22 +4423,22 @@ window.openCheckoutModal = (itemId) => {
     const data = window.publicStoreDataCache;
     const catalog = window.publicCatalogCache || [];
     currentCheckoutItem = catalog.find(i => i.id === itemId);
-    
+
     if (!currentCheckoutItem) return;
 
     document.getElementById('checkoutItemName').innerText = currentCheckoutItem.platform;
     document.getElementById('checkoutItemPrice').innerText = `${data.currency || 'S/'}${currentCheckoutItem.price.toFixed(2)}`;
-    
+
     // Si requiere invitación, pedimos correo
     const emailContainer = document.getElementById('checkoutEmailContainer');
-    if(emailContainer) {
+    if (emailContainer) {
         emailContainer.style.display = currentCheckoutItem.requiresInvite ? 'flex' : 'none';
         document.getElementById('checkoutClientEmail').value = '';
     }
 
     const pmContainer = document.getElementById('checkoutPaymentMethods');
     pmContainer.innerHTML = '';
-    
+
     const methods = data.paymentMethods || [];
     if (methods.length === 0) {
         pmContainer.innerHTML = '<p style="font-size: 12px; color: var(--mac-red); text-align: center;">El vendedor aún no ha configurado métodos de pago.</p>';
@@ -3972,11 +4463,11 @@ window.showPaymentDetails = (idx) => {
         container.style.display = 'none'; // Si no elige nada, oculta los datos
         return;
     }
-    
+
     // 🔥 FIX: Leer datos tanto de la Tiendita como del Portal
     const data = window.publicStoreDataCache || portalStoreData;
     const m = data.paymentMethods[idx];
-    
+
     let qrBtn = '';
     if (m.qrUrl) {
         // 🔥 BOTÓN DE DESCARGA en lugar de mostrar la imagen
@@ -4015,41 +4506,270 @@ window.descargarQR = async (url, banco) => {
     }
 };
 window.openRenewFromPortal = (clientId, platform, price) => {
-    const data = portalStoreData; // Usamos la data pública del portal
-    
-    document.getElementById('checkoutItemName').innerText = `Renovación: ${platform}`;
-    document.getElementById('checkoutItemPrice').innerText = `${data.currency || 'S/'}${parseFloat(price).toFixed(2)}`;
-    
-    const emailContainer = document.getElementById('checkoutEmailContainer');
-    if(emailContainer) emailContainer.style.display = 'none';
+    const data = portalStoreData;
 
-    const pmContainer = document.getElementById('checkoutPaymentMethods');
-    pmContainer.innerHTML = '';
-    const methods = data.paymentMethods || [];
-    if (methods.length === 0) {
-        pmContainer.innerHTML = '<p style="font-size: 12px; color: var(--mac-red); text-align: center;">El administrador no ha configurado métodos de pago.</p>';
-    } else {
-        let selectHtml = `<select id="pmSelectDropdown" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 14px; font-weight: bold; outline: none; margin-bottom: 10px;" onchange="window.showPaymentDetails(this.value)">`;
-        selectHtml += `<option value="">-- Elige un método de pago --</option>`;
-        methods.forEach((m, idx) => { selectHtml += `<option value="${idx}">🏦 ${m.bank}</option>`; });
-        selectHtml += `</select><div id="pmDetailsContainer" style="display:none; background: var(--mac-bg); padding: 15px; border-radius: 10px; border: 1px dashed var(--mac-border);"></div>`;
-        pmContainer.innerHTML = selectHtml;
-    }
-
-    // Configurar estado global para que submitCheckout sepa qué hacer
     currentCheckoutItem = {
         isRenewal: true,
         clientId: clientId,
         platform: platform,
         price: parseFloat(price),
-        requiresInvite: false
+        requiresInvite: false,
+        autoDeliver: true // Siempre true para renovaciones
     };
+
+    document.getElementById('checkoutItemName').innerText = `Renovación: ${platform}`;
+    document.getElementById('checkoutItemPrice').innerText = window.formatStorePrice(currentCheckoutItem.price);
+
+    const emailContainer = document.getElementById('checkoutEmailContainer');
+    if (emailContainer) emailContainer.style.display = 'none';
+
+    const pmContainer = document.getElementById('checkoutPaymentMethods');
+    pmContainer.innerHTML = '';
+    const methods = data.paymentMethods || [];
+
+    // BOTONES AUTOMÁTICOS
+    let botonesAutomaticos = `
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+            <button class="btn-primary" style="background: #009EE3; border: none; padding: 14px; font-weight: 800; font-size: 14px;" onclick="window.iniciarPagoAutomatico('mercadopago')">
+                Pagar con Mercado Pago
+            </button>
+            <button class="btn-primary" style="background: #FCD535; color: #1E2329; border: none; padding: 14px; font-weight: 800; font-size: 14px;" onclick="window.iniciarPagoAutomatico('binance')">
+                Pagar con Binance
+            </button>
+        </div>
+        <p style="text-align: center; color: var(--mac-text-secondary); font-size: 12px; margin-bottom: 15px; font-weight: bold;">--- O PAGO MANUAL ---</p>
+    `;
+
+    if (methods.length === 0) {
+        pmContainer.innerHTML = botonesAutomaticos + '<p style="font-size: 12px; color: var(--mac-red); text-align: center;">El administrador no ha configurado métodos de pago manuales.</p>';
+    } else {
+        let selectHtml = `<select id="pmSelectDropdown" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--mac-surface); border: 1px solid var(--mac-border); color: var(--mac-text-main); font-size: 14px; font-weight: bold; outline: none; margin-bottom: 10px;" onchange="window.showPaymentDetails(this.value)">`;
+        selectHtml += `<option value="">-- Elige un pago manual (Yape, Transf) --</option>`;
+        methods.forEach((m, idx) => { selectHtml += `<option value="${idx}">🏦 ${m.bank}</option>`; });
+        selectHtml += `</select><div id="pmDetailsContainer" style="display:none; background: var(--mac-bg); padding: 15px; border-radius: 10px; border: 1px dashed var(--mac-border);"></div>`;
+        pmContainer.innerHTML = botonesAutomaticos + selectHtml;
+    }
 
     document.getElementById('checkoutPhone').value = '';
     document.getElementById('checkoutClientName').value = '';
     document.getElementById('checkoutReceipt').value = '';
     document.getElementById('checkoutModal').style.display = 'flex';
 };
+
+window.iniciarPagoAutomatico = async (metodo) => {
+    const name = document.getElementById('checkoutClientName').value.trim();
+    const phone = document.getElementById('checkoutPhone').value.trim();
+
+    if (!name) return window.showNotification("⚠️ Por favor, ingresa tu nombre.");
+    if (!phone || !phone.startsWith('+')) return window.showNotification("⚠️ Ingresa tu WhatsApp incluyendo el código de país (Ej: +51...)");
+
+    let clienteCorreo = '';
+    if (currentCheckoutItem.requiresInvite) {
+        clienteCorreo = document.getElementById('checkoutClientEmail').value.trim();
+        if (!clienteCorreo) return window.showNotification("⚠️ Debes ingresar tu correo para recibir la invitación.");
+    }
+
+    // Modal de Carga
+    Swal.fire({
+        title: 'Generando Pago...',
+        html: 'Por favor espera, te estamos redirigiendo a la pasarela segura.',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading() }
+    });
+
+    try {
+        const dataTienda = window.publicStoreDataCache || portalStoreData;
+        const vendedorId = dataTienda.uid;
+        const pedidoId = `ped_${Date.now()}`;
+
+        // -- REVERSE LOOKUP AQUÍ --
+        let bp = currentCheckoutItem.basePlatform || currentCheckoutItem.platform;
+        let st = currentCheckoutItem.saleType || 'Perfil';
+        let mo = currentCheckoutItem.months || 1;
+
+        const rules = (window.currentUserData && window.currentUserData.storeStockRules) || (window.publicStoreDataCache && window.publicStoreDataCache.storeStockRules) || {};
+        const itemsToProcess = (window.storeCart && window.storeCart.length > 0) ? window.storeCart : [currentCheckoutItem];
+
+        if (itemsToProcess.length > 0) {
+            const firstItem = itemsToProcess[0];
+            const pId = firstItem.id;
+            const sOpt = window.storeSelectedOptions?.[pId] || {};
+            const tName = firstItem.tabName || sOpt.tabName || 'General';
+            const vName = firstItem.variantName || sOpt.variantName || sOpt.label || firstItem.label || '';
+
+            for (const [key, rule] of Object.entries(rules)) {
+                if (rule && rule.productId === pId) {
+                    const tabMatch = (!rule.tabName || rule.tabName === 'General') ? true : (rule.tabName === tName);
+                    const varMatch = (!rule.variantName) ? true : (rule.variantName === vName);
+
+                    if (tabMatch && varMatch) {
+                        const parts = key.split('_');
+                        if (parts.length >= 3) {
+                            bp = parts[0];
+                            st = parts[1];
+                            mo = parseInt(parts[2]) || 1;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        // -- FIN REVERSE LOOKUP --
+
+        // 1. Guardar el pedido en Firebase (esperando_pago)
+        await setDoc(doc(db, "pedidos", pedidoId), {
+            vendedorId: vendedorId,
+            clienteId: currentCheckoutItem.isRenewal ? currentCheckoutItem.clientId : null,
+            clienteNombre: name,
+            clienteNumero: phone,
+            tipo: currentCheckoutItem.isRenewal ? 'renovacion' : (currentCheckoutItem.type || 'Servicio'),
+            plataforma: currentCheckoutItem.platform,
+            basePlatform: bp,
+            saleType: st,
+            months: mo,
+            precio: currentCheckoutItem.price,
+            comprobanteUrl: 'PAGO_AUTOMATICO', // Indicador de que no hay captura
+            metodoPago: metodo,
+            requiereInvitacion: currentCheckoutItem.requiresInvite || false,
+            clienteCorreo: clienteCorreo,
+            entregaAutomatica: currentCheckoutItem.autoDeliver || false, // Enviar instrucción al Bot
+            estado: 'esperando_pago', // El Webhook de la VPS lo cambiará a 'aprobado'
+            fecha: new Date().toISOString()
+
+        });
+
+        // 2. Hacer fetch a tu VPS en DigitalOcean
+        if (metodo === 'binance') {
+            Swal.close();
+
+            const dataTienda = window.publicStoreDataCache || portalStoreData;
+            // Cálculo Dinámico USDT
+            const rate = parseFloat(dataTienda.binanceExchangeRate) || 1;
+            const priceUSDT = (currentCheckoutItem.price / rate).toFixed(2);
+
+            const payId = dataTienda.binancePayId || 'No configurado';
+            const alias = dataTienda.binanceAlias || '';
+
+            const qrHtml = dataTienda.binanceQrUrl ?
+                `<div style="flex: 1; min-width: 200px; display: flex; justify-content: center;">
+                    <img src="${dataTienda.binanceQrUrl}" alt="QR Binance" style="width: 100%; max-width: 220px; height: 220px; object-fit: contain; border-radius: 12px; border: 1px solid #444; box-shadow: 0 4px 10px rgba(0,0,0,0.3); margin: 0 auto;">
+                </div>` : '';
+
+            const { value: transactionId } = await Swal.fire({
+                title: 'Pagar con Binance',
+                width: '650px', // Ensancha el modal en PC
+                html: `
+                    <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <p style="margin-bottom: 15px; font-size: 15px; color: var(--mac-text-main);">
+                            Envía exactamente <b style="color: #FCD535; font-size: 18px;">${priceUSDT} USDT</b>
+                        </p>
+                        
+                        <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; align-items: center; width: 100%; margin-bottom: 15px;">
+                            
+                            ${qrHtml}
+
+                            <div style="flex: 1.5; min-width: 260px; display: flex; flex-direction: column; align-items: center; width: 100%;">
+                                <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; border: 1px solid #555; margin-bottom: 15px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; position: relative; overflow: hidden;">
+                                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #FCD535;"></div>
+                                    <p style="margin: 0 0 8px 0; font-size: 12px; color: var(--mac-text-secondary);">Binance Pay ID (Copia este número):</p>
+                                    
+                                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #000; padding: 10px; border-radius: 8px; border: 1px dashed #FCD535; width: 100%; box-sizing: border-box;">
+                                        <span style="font-size: clamp(16px, 5vw, 22px); font-weight: 900; color: #fff; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${payId}</span>
+                                        <button class="action-btn" style="background: #FCD535; border: none; color: #000; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; flex-shrink: 0;" onclick="window.copyToClipboard('${payId}', 'Binance Pay ID')">Copiar</button>
+                                    </div>
+                                    ${alias ? `<p style="margin: 10px 0 0 0; font-size: 12px; color: #FCD535; font-weight: bold;">Verifica el Alias: ${alias}</p>` : ''}
+                                </div>
+
+                                <p style="font-size: 12px; color: var(--mac-text-secondary); margin-bottom: 8px;">
+                                    Pega aquí el <b>Order ID (Número de Orden)</b>:
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                input: 'text',
+                inputPlaceholder: 'Ej: 1234567890123456',
+                inputAttributes: {
+                    style: 'text-align: center; font-size: 15px; font-weight: bold; letter-spacing: 1px; width: 100%; max-width: 320px; margin: 0 auto; display: block;'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Verificar Pago',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (!transactionId) return;
+
+            // Mostrar modal de verificación
+            Swal.fire({
+                title: 'Verificando pago...',
+                html: 'Estamos buscando tu transacción en Binance. Esto tomará unos segundos...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading() }
+            });
+
+            const response = await fetch('https://bot.panelagc.com/api/verificar-pago-binance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    vendedorId: vendedorId,
+                    pedidoId: pedidoId,
+                    transactionId: transactionId.trim(),
+                    precio: parseFloat(priceUSDT)
+                })
+            });
+
+            const dataResp = await response.json();
+
+            if (dataResp.status === 'ok') {
+                window.storeCart = [];
+                document.getElementById('cartBadge').innerText = '0';
+                document.getElementById('floatingCartBtn').style.display = 'none';
+                document.getElementById('checkoutModal').style.display = 'none';
+
+                Swal.fire({
+                    title: '¡Pago Confirmado!',
+                    text: 'Tu pago fue verificado correctamente. Tu servicio llegará a tu WhatsApp en unos instantes.',
+                    icon: 'success',
+                    confirmButtonText: 'Excelente'
+                });
+            } else {
+                Swal.fire('Error al Verificar', dataResp.error || 'No se encontró tu pago. Revisa el ID e intenta nuevamente.', 'error');
+            }
+
+        } else {
+            // LÓGICA DE MERCADO PAGO (Automática con Redirección)
+            const response = await fetch('https://bot.panelagc.com/api/crear-pago-mp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    vendedorId: vendedorId,
+                    pedidoId: pedidoId,
+                    titulo: currentCheckoutItem.platform,
+                    precio: currentCheckoutItem.price
+                })
+            });
+
+            const dataResp = await response.json();
+
+            if (dataResp.status === 'ok') {
+                window.storeCart = [];
+                document.getElementById('cartBadge').innerText = '0';
+                document.getElementById('floatingCartBtn').style.display = 'none';
+                document.getElementById('checkoutModal').style.display = 'none';
+
+                // Redirigir a Mercado Pago
+                window.location.href = dataResp.init_point;
+            } else {
+                Swal.fire('Error', dataResp.error || 'El vendedor no tiene configurado este método de pago.', 'error');
+            }
+        }
+
+    } catch (error) {
+        console.error(error);
+        Swal.fire('Error', 'Hubo un problema de red al contactar al servidor.', 'error');
+    }
+};
+
 window.submitCheckout = async () => {
     const name = document.getElementById('checkoutClientName').value.trim();
     const phone = document.getElementById('checkoutPhone').value.trim();
@@ -4074,11 +4794,45 @@ window.submitCheckout = async () => {
     try {
         // 🔥 FIX: Leer el ID del vendedor desde la Tiendita o desde el Portal
         const data = window.publicStoreDataCache || portalStoreData;
-        const vendedorId = data.uid; 
-        
+        const vendedorId = data.uid;
+
         const storageRef = ref(storage, `comprobantes/${vendedorId}_${Date.now()}_${file.name}`);
         await uploadBytes(storageRef, file);
         const comprobanteUrl = await getDownloadURL(storageRef);
+
+        // -- REVERSE LOOKUP AQUÍ --
+        let bp = currentCheckoutItem.basePlatform || currentCheckoutItem.platform;
+        let st = currentCheckoutItem.saleType || 'Perfil';
+        let mo = currentCheckoutItem.months || 1;
+
+        const rules = (window.currentUserData && window.currentUserData.storeStockRules) || (window.publicStoreDataCache && window.publicStoreDataCache.storeStockRules) || {};
+        const itemsToProcess = (window.storeCart && window.storeCart.length > 0) ? window.storeCart : [currentCheckoutItem];
+
+        if (itemsToProcess.length > 0) {
+            const firstItem = itemsToProcess[0];
+            const pId = firstItem.id;
+            const sOpt = window.storeSelectedOptions?.[pId] || {};
+            const tName = firstItem.tabName || sOpt.tabName || 'General';
+            const vName = firstItem.variantName || sOpt.variantName || sOpt.label || firstItem.label || '';
+
+            for (const [key, rule] of Object.entries(rules)) {
+                if (rule && rule.productId === pId) {
+                    const tabMatch = (!rule.tabName || rule.tabName === 'General') ? true : (rule.tabName === tName);
+                    const varMatch = (!rule.variantName) ? true : (rule.variantName === vName);
+
+                    if (tabMatch && varMatch) {
+                        const parts = key.split('_');
+                        if (parts.length >= 3) {
+                            bp = parts[0];
+                            st = parts[1];
+                            mo = parseInt(parts[2]) || 1;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        // -- FIN REVERSE LOOKUP --
 
         await addDoc(collection(db, "pedidos"), {
             vendedorId: vendedorId,
@@ -4087,10 +4841,14 @@ window.submitCheckout = async () => {
             clienteNumero: phone,
             tipo: currentCheckoutItem.isRenewal ? 'renovacion' : (currentCheckoutItem.type || 'Servicio'),
             plataforma: currentCheckoutItem.platform,
+            basePlatform: bp,
+            saleType: st,
+            months: mo,
             precio: currentCheckoutItem.price,
             comprobanteUrl: comprobanteUrl,
             requiereInvitacion: currentCheckoutItem.requiresInvite || false,
             clienteCorreo: clienteCorreo,
+            entregaAutomatica: currentCheckoutItem.autoDeliver || false,
             estado: 'pendiente',
             fecha: new Date().toISOString()
         });
@@ -4118,9 +4876,9 @@ window.submitCheckout = async () => {
         // --- NUEVO: REDIRECCIÓN AL WHATSAPP DEL VENDEDOR ---
         const dataTienda = window.publicStoreDataCache || portalStoreData;
         const vendedorNum = dataTienda.phone ? dataTienda.phone.replace(/[^\d]/g, '') : '';
-        const wsText = `Hola, acabo de pagar mi pedido en tu tienda web.\n\n*🛒 Producto:* ${currentCheckoutItem.platform}\n*💰 Total Pagado:* ${dataTienda.currency || 'S/'}${currentCheckoutItem.price.toFixed(2)}\n*👤 A nombre de:* ${name}\n\nPor favor, verifica mi comprobante para entregarme el acceso.`;
+        const wsText = `Hola, acabo de pagar mi pedido en tu tienda web.\n\n*🛒 Producto:* ${currentCheckoutItem.platform}\n*💰 Total Pagado:* ${window.formatStorePrice(currentCheckoutItem.price)}\n*👤 A nombre de:* ${name}\n\nPor favor, verifica mi comprobante para entregarme el acceso.`;
         const waUrl = `https://wa.me/${vendedorNum}?text=${encodeURIComponent(wsText)}`;
-        
+
         Swal.fire({
             icon: 'success',
             title: '¡Pago Enviado con Éxito!',
@@ -4138,7 +4896,7 @@ window.submitCheckout = async () => {
             }
         });
 
-    } catch (error) { window.showNotification("Error: " + error.message); } 
+    } catch (error) { window.showNotification("Error: " + error.message); }
     finally { btn.innerHTML = origText; btn.disabled = false; }
 };
 // --- SISTEMA DE REGLAS POR PLATAFORMA ---
@@ -4158,7 +4916,7 @@ window.savePlatformRule = async () => {
     const txt = document.getElementById('ruleText').value.trim();
     let rules = currentUserData.platformRules || {};
     rules[p] = txt;
-    
+
     try {
         const btn = document.querySelector('#rulesModal .btn-primary');
         btn.innerText = "Guardando...";
@@ -4166,7 +4924,7 @@ window.savePlatformRule = async () => {
         currentUserData.platformRules = rules;
         window.showNotification("✅ Regla de " + p + " guardada.");
         btn.innerText = "Guardar Regla";
-    } catch(e) {
+    } catch (e) {
         window.showNotification("Error: " + e.message);
     }
 };
@@ -4175,39 +4933,39 @@ window.savePlatformRule = async () => {
 window.switchMainTab = (tab) => {
     const btnClientes = document.getElementById('btnTabClientes');
     const btnCuentas = document.getElementById('btnTabCuentas');
-    
+
     // FIX: Atrapamos al contenedor general que envuelve a toda la tabla y botones
     const mainTableEl = document.getElementById('mainTable');
-    const tableClientesWrapper = mainTableEl ? mainTableEl.parentElement : null; 
-    
-    const tableCuentas = document.getElementById('accountsTableContainer'); 
-    const subtitle = document.getElementById('userGreeting'); 
+    const tableClientesWrapper = mainTableEl ? mainTableEl.parentElement : null;
+
+    const tableCuentas = document.getElementById('accountsTableContainer');
+    const subtitle = document.getElementById('userGreeting');
     const filterSelect = document.getElementById('filterSelect');
     const searchInput = document.getElementById('searchInput');
 
     if (tab === 'clientes') {
-        if(btnClientes) { btnClientes.style.background = 'var(--mac-blue)'; btnClientes.style.color = 'white'; }
-        if(btnCuentas) { btnCuentas.style.background = 'transparent'; btnCuentas.style.color = 'var(--mac-text-secondary)'; }
-        
-        if(tableClientesWrapper) tableClientesWrapper.style.setProperty('display', 'block', 'important'); 
-        if(tableCuentas) tableCuentas.style.setProperty('display', 'none', 'important');
-        if(subtitle) subtitle.innerText = 'Gestión de clientes';
-        
-        if(filterSelect) filterSelect.style.display = 'block'; 
-        if(searchInput) searchInput.value = '';
+        if (btnClientes) { btnClientes.style.background = 'var(--mac-blue)'; btnClientes.style.color = 'white'; }
+        if (btnCuentas) { btnCuentas.style.background = 'transparent'; btnCuentas.style.color = 'var(--mac-text-secondary)'; }
+
+        if (tableClientesWrapper) tableClientesWrapper.style.setProperty('display', 'block', 'important');
+        if (tableCuentas) tableCuentas.style.setProperty('display', 'none', 'important');
+        if (subtitle) subtitle.innerText = 'Gestión de clientes';
+
+        if (filterSelect) filterSelect.style.display = 'block';
+        if (searchInput) searchInput.value = '';
         window.renderTable();
 
     } else if (tab === 'cuentas') {
-        if(btnCuentas) { btnCuentas.style.background = 'var(--mac-blue)'; btnCuentas.style.color = 'white'; }
-        if(btnClientes) { btnClientes.style.background = 'transparent'; btnClientes.style.color = 'var(--mac-text-secondary)'; }
-        
-        if(tableClientesWrapper) tableClientesWrapper.style.setProperty('display', 'none', 'important');
-        if(tableCuentas) tableCuentas.style.setProperty('display', 'block', 'important');
-        if(subtitle) subtitle.innerText = 'Gestión de cuentas';
-        
-        if(filterSelect) filterSelect.style.display = 'none'; 
-        if(searchInput) searchInput.value = '';
-        if(typeof window.renderMasterAccounts === 'function') window.renderMasterAccounts(); 
+        if (btnCuentas) { btnCuentas.style.background = 'var(--mac-blue)'; btnCuentas.style.color = 'white'; }
+        if (btnClientes) { btnClientes.style.background = 'transparent'; btnClientes.style.color = 'var(--mac-text-secondary)'; }
+
+        if (tableClientesWrapper) tableClientesWrapper.style.setProperty('display', 'none', 'important');
+        if (tableCuentas) tableCuentas.style.setProperty('display', 'block', 'important');
+        if (subtitle) subtitle.innerText = 'Gestión de cuentas';
+
+        if (filterSelect) filterSelect.style.display = 'none';
+        if (searchInput) searchInput.value = '';
+        if (typeof window.renderMasterAccounts === 'function') window.renderMasterAccounts();
     }
 };
 /* ==========================================
@@ -4217,7 +4975,7 @@ window.switchMainTab = (tab) => {
 window.openInventoryModal = () => {
     window.closeModals(false); // 🧹 LIMPIEZA SILENCIOSA ANTES DE ABRIR
     document.getElementById('inventoryModal').style.display = 'flex';
-    document.body.style.overflow = 'hidden'; 
+    document.body.style.overflow = 'hidden';
     window.renderInventory();
 };
 let editingInvId = null; // Variable global para saber si estamos editando
@@ -4225,28 +4983,44 @@ let editingInvId = null; // Variable global para saber si estamos editando
 window.addInventoryAccount = async () => {
     const platform = document.getElementById('invPlatform').value;
     const type = document.getElementById('invType').value;
+    const months = parseInt(document.getElementById('invMonths').value) || 1;
     const email = document.getElementById('invEmail').value.trim();
     const pass = document.getElementById('invPass').value.trim();
-    const profile = document.getElementById('invProfile').value.trim(); 
+    const profile = document.getElementById('invProfile').value.trim();
     const pin = document.getElementById('invPin').value.trim() || 'N/A';
 
     if (!platform || !email || !pass) return window.showNotification("Plataforma, Correo y Contraseña son obligatorios.");
     if (type === 'Perfil' && (!profile || !/\d/.test(profile))) return window.showNotification("⚠️ En 'N° Perfil' debes incluir al menos un NÚMERO (Ej: 3, J3).");
 
     const btn = document.getElementById('btnSaveInv');
-    btn.innerHTML = "⏳ Procesando..."; btn.disabled = true;
+    if (btn) { btn.innerHTML = "⏳ Procesando..."; btn.disabled = true; }
 
     try {
         let stock = currentUserData.inventory || [];
-        
+
+        let newItemConfig = [];
         if (editingInvId) {
             // MODO EDICIÓN: Actualizamos los datos del objeto existente
-            stock = stock.map(item => item.id === editingInvId ? { ...item, platform, type, email, pass, profile, pin } : item);
-            window.showNotification("✅ Cuenta actualizada");
+            stock = stock.map(item => item.id === editingInvId ? { ...item, platform, type, months, email, pass, profile, pin } : item);
+            newItemConfig = [stock.find(i => i.id === editingInvId)];
         } else {
             // MODO CREACIÓN
             const accountId = 'acc_' + Date.now();
-            stock.push({ id: accountId, platform, type, email, pass, profile, pin, status: 'libre' });
+            const newAcc = { id: accountId, platform, type, months, email, pass, profile, pin, status: 'libre' };
+            stock.push(newAcc);
+            newItemConfig = [newAcc];
+        }
+
+        // 🛑 INTERCEPCIÓN DEL MOTOR DE MAPPING ANTES DE GUARDAR
+        const canSave = await window.checkAndLinkStockRules(newItemConfig);
+        if (!canSave) {
+            if (btn) { btn.innerHTML = "<i class='bx bx-save'></i> Guardar en stock"; btn.disabled = false; }
+            return;
+        }
+
+        if (editingInvId) {
+            window.showNotification("✅ Cuenta actualizada");
+        } else {
             window.showNotification("✅ Cuenta añadida al stock");
         }
 
@@ -4258,47 +5032,57 @@ window.addInventoryAccount = async () => {
     } catch (e) {
         window.showNotification("Error: " + e.message);
     } finally {
-        btn.innerHTML = "<i class='bx bx-save'></i> Guardar en stock"; btn.disabled = false;
+        if (btn) { btn.innerHTML = "<i class='bx bx-save'></i> Guardar en stock"; btn.disabled = false; }
     }
 };
 
 window.editInventoryAccount = (id) => {
     const stock = currentUserData.inventory || [];
     const item = stock.find(i => i.id === id);
-    if(!item) return;
+    if (!item) return;
 
     document.getElementById('invPlatform').value = item.platform || '';
     document.getElementById('invType').value = item.type || 'Perfil';
+    document.getElementById('invMonths').value = item.months || 1;
     document.getElementById('invEmail').value = item.email || '';
     document.getElementById('invPass').value = item.pass || '';
     document.getElementById('invProfile').value = item.profile || '';
     document.getElementById('invPin').value = item.pin || '';
 
     editingInvId = id;
-    
+
     // Cambiamos el aspecto visual del formulario
-    document.getElementById('btnSaveInv').innerHTML = "<i class='bx bx-check-double'></i> Actualizar Cuenta";
-    document.getElementById('btnSaveInv').style.backgroundColor = "var(--mac-orange)";
-    document.getElementById('btnCancelInv').style.display = "block";
+    const btnSaveInv = document.getElementById('btnSaveInv');
+    if (btnSaveInv) {
+        btnSaveInv.innerHTML = "<i class='bx bx-check-double'></i> Actualizar Cuenta";
+        btnSaveInv.style.backgroundColor = "var(--mac-orange)";
+    }
+    const btnCancelInv = document.getElementById('btnCancelInv');
+    if (btnCancelInv) btnCancelInv.style.display = "block";
 };
 
 window.cancelInventoryEdit = () => {
     editingInvId = null;
     document.getElementById('invPlatform').value = '';
     document.getElementById('invType').value = 'Perfil';
+    document.getElementById('invMonths').value = 1;
     document.getElementById('invEmail').value = '';
     document.getElementById('invPass').value = '';
     document.getElementById('invProfile').value = '';
     document.getElementById('invPin').value = '';
-    
-    document.getElementById('btnSaveInv').innerHTML = "<i class='bx bx-save'></i> Guardar en stock";
-    document.getElementById('btnSaveInv').style.backgroundColor = "var(--mac-blue)";
-    document.getElementById('btnCancelInv').style.display = "none";
+
+    const btnSaveInv = document.getElementById('btnSaveInv');
+    if (btnSaveInv) {
+        btnSaveInv.innerHTML = "<i class='bx bx-save'></i> Guardar en stock";
+        btnSaveInv.style.backgroundColor = "var(--mac-blue)";
+    }
+    const btnCancelInv = document.getElementById('btnCancelInv');
+    if (btnCancelInv) btnCancelInv.style.display = "none";
 };
 
 window.renderInventory = () => {
     const list = document.getElementById('inventoryList');
-    if (!list) return; 
+    if (!list) return;
     list.innerHTML = '';
     const stock = currentUserData.inventory || [];
     const cuentasLibres = stock.filter(item => item.status === 'libre');
@@ -4310,23 +5094,35 @@ window.renderInventory = () => {
 
     cuentasLibres.forEach(item => {
         const div = document.createElement('div');
-        div.style.cssText = "background:var(--mac-surface); padding:12px; border-radius:8px; border:1px solid var(--mac-border); display:flex; justify-content:space-between; align-items:center;";
-        const tipoBadge = item.type === 'Completa' ? `<span style="background:var(--mac-orange); color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px; font-weight:bold;"><i class='bx bxs-star'></i> COMPLETA</span>` : `<span style="background:var(--mac-blue); color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:5px; font-weight:bold;"><i class='bx bxs-user'></i> PERFIL</span>`;
+        div.style.cssText = "background:var(--mac-surface); padding:14px 18px; border-radius:12px; border:1px solid var(--mac-border); display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:10px; box-shadow:0 1px 3px rgba(0,0,0,0.03);";
+        const tipoBadge = item.type === 'Completa' ? `<span style="background:rgba(245, 158, 11, 0.12); color:var(--mac-orange); font-size:11px; padding:3px 8px; border-radius:8px; font-weight:700;"><i class='bx bxs-star'></i> COMPLETA</span>` : `<span style="background:rgba(0, 102, 255, 0.1); color:var(--mac-blue); font-size:11px; padding:3px 8px; border-radius:8px; font-weight:700;"><i class='bx bxs-user'></i> PERFIL</span>`;
 
         div.innerHTML = `
-            <div>
-                <strong style="color:var(--mac-text-main); font-size:15px;">${item.platform}</strong>${tipoBadge}
-                <div style="color:var(--mac-text-secondary); font-size:12px; margin-top:4px;">
-                    <i class='bx bx-envelope'></i> ${item.email}<br>
-                    <i class='bx bx-lock-alt'></i> ${item.pass} | <i class='bx bx-user-circle'></i>: ${item.profile} | <i class='bx bx-pin'></i>: ${item.pin}
+            <div style="flex:1; min-width:0;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                    <strong style="color:var(--mac-text-main); font-size:15px; font-weight:700;">${item.platform}</strong>
+                    ${tipoBadge}
+                </div>
+                <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:12.5px; color:var(--mac-text-secondary);">
+                    <span style="display:inline-flex; align-items:center; gap:4px; font-family:ui-monospace, monospace; background:var(--mac-gray); padding:3px 8px; border-radius:6px; border:1px solid var(--mac-border); color:var(--mac-text-main);">
+                        <i class='bx bx-envelope' style="color:var(--mac-text-secondary);"></i> ${item.email}
+                    </span>
+                    <span style="display:inline-flex; align-items:center; gap:4px; font-family:ui-monospace, monospace; background:var(--mac-gray); padding:3px 8px; border-radius:6px; border:1px solid var(--mac-border); color:var(--mac-text-main);">
+                        <i class='bx bx-lock-alt' style="color:var(--mac-text-secondary);"></i> ${item.pass}
+                    </span>
+                    <span style="display:inline-flex; align-items:center; gap:4px; font-family:ui-monospace, monospace; background:var(--mac-gray); padding:3px 8px; border-radius:6px; border:1px solid var(--mac-border); color:var(--mac-text-secondary);">
+                        <i class='bx bx-user-circle'></i> ${item.profile || '-'}
+                    </span>
+                    <span style="display:inline-flex; align-items:center; gap:4px; font-family:ui-monospace, monospace; background:var(--mac-gray); padding:3px 8px; border-radius:6px; border:1px solid var(--mac-border); color:var(--mac-text-secondary);">
+                        <i class='bx bx-pin'></i> PIN: ${item.pin || '-'}
+                    </span>
                 </div>
             </div>
-            <div style="display:flex; gap: 5px;">
+            <div style="display:flex; gap:6px; flex-shrink:0;">
                 <button class="action-btn" style="color:var(--mac-text-main); border:1px solid var(--mac-border);" onclick="window.copyFromInventory('${item.id}')" title="Copiar Datos"><i class='bx bx-copy'></i></button>
-                <button class="action-btn" style="color:var(--mac-green); border:1px solid var(--mac-green); background: rgba(52, 199, 89, 0.1);" onclick="window.deliverFromInventory('${item.id}')" title="Entregar a Cliente"><i class='bx bx-send'></i></button>
-                <!-- EL NUEVO BOTÓN DE EDITAR -->
-                <button class="action-btn" style="color:var(--mac-orange); border:1px solid var(--mac-orange); background: rgba(255, 149, 0, 0.1);" onclick="window.editInventoryAccount('${item.id}')" title="Editar Cuenta"><i class='bx bx-edit-alt'></i></button>
-                <button class="action-btn btn-del" onclick="window.deleteInventoryAccount('${item.id}')"><i class='bx bx-trash'></i></button>
+                <button class="action-btn" style="color:var(--mac-green); border:1px solid var(--mac-border); background:rgba(16, 185, 129, 0.12);" onclick="window.deliverFromInventory('${item.id}')" title="Entregar a Cliente"><i class='bx bx-send'></i></button>
+                <button class="action-btn" style="color:var(--mac-orange); border:1px solid var(--mac-border); background:rgba(245, 158, 11, 0.12);" onclick="window.editInventoryAccount('${item.id}')" title="Editar Cuenta"><i class='bx bx-edit-alt'></i></button>
+                <button class="action-btn btn-del" onclick="window.deleteInventoryAccount('${item.id}')" title="Eliminar"><i class='bx bx-trash'></i></button>
             </div>
         `;
         list.appendChild(div);
@@ -4335,12 +5131,12 @@ window.renderInventory = () => {
 window.deliverFromInventory = (id) => {
     const stock = currentUserData.inventory || [];
     const item = stock.find(i => i.id === id);
-    if(!item) return;
+    if (!item) return;
 
     // 1. Ir a la vista principal
     window.closeModals(true);
     window.switchMainTab('clientes');
-    
+
     // 🔥 NUEVA LÓGICA DE PESTAÑAS (MULTI-ACC)
     multiAccData = {};
     multiAccData[item.platform] = window.getDefaultAccData();
@@ -4355,7 +5151,7 @@ window.deliverFromInventory = (id) => {
     // 3. Seleccionar la plataforma en el multiselect
     const cbs = document.querySelectorAll('#checkboxDropdown input');
     cbs.forEach(cb => cb.checked = false);
-    cbs.forEach(cb => { if(cb.value === item.platform) cb.checked = true; });
+    cbs.forEach(cb => { if (cb.value === item.platform) cb.checked = true; });
     const selectText = document.getElementById('selectText');
     if (selectText) {
         selectText.textContent = item.platform;
@@ -4378,16 +5174,16 @@ window.deliverFromInventory = (id) => {
 window.copyFromInventory = (id) => {
     const stock = currentUserData.inventory || [];
     const item = stock.find(i => i.id === id);
-    if(!item) return;
+    if (!item) return;
 
     // Obtener formato desde configuración de WhatsApp del usuario
     const baseMsg = currentUserData.waDeliveryMessage || "🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tu nueva cuenta de *{plataforma}*:\n\n📧 *Correo:* {correo}\n🔑 *Clave:* {pass}\n📌 *PIN:* {pin}\n\n📅 *Vence el:* {fecha}\n\n⚠️ *Reglas:* {reglas}\n\n¡Que disfrutes el contenido! 🍿";
-    
+
     // Calcular 1 mes desde hoy
     const h = new Date();
     h.setMonth(h.getMonth() + 1);
     const dateStr = h.toLocaleDateString('es-ES');
-    
+
     // Obtener reglas de la plataforma
     const rulesDB = currentUserData.platformRules || {};
     const itemRules = rulesDB[item.platform] || "Uso personal, no modificar los datos de acceso.";
@@ -4401,7 +5197,7 @@ window.copyFromInventory = (id) => {
         .replace(/{profile}/gi, item.profile || 'N/A')
         .replace(/{fecha}/gi, dateStr)
         .replace(/{reglas}/gi, itemRules);
-    
+
     // Copiar al portapapeles
     navigator.clipboard.writeText(finalMsg).then(() => {
         window.showNotification("📋 Formato de entrega copiado con fecha a 1 mes");
@@ -4428,28 +5224,28 @@ window.deleteInventoryAccount = async (id) => {
 
 // 1. Abrir modal y cargar los pedidos desde Firebase
 window.openPedidosModal = async () => {
-    window.closeModals(false); 
+    window.closeModals(false);
     document.getElementById('pedidosModal').style.display = 'flex';
-    document.body.style.overflow = 'hidden'; 
+    document.body.style.overflow = 'hidden';
     const list = document.getElementById('pedidosList');
     list.innerHTML = '<p style="text-align:center;">Cargando ventas pendientes...</p>';
 
     try {
         const q = query(collection(db, "pedidos"), where("vendedorId", "==", currentUser.uid), where("estado", "==", "pendiente"));
         const snapshot = await getDocs(q);
-        
+
         if (snapshot.empty) {
             list.innerHTML = '<p style="text-align:center; color:var(--mac-text-secondary); margin-top:20px;">No tienes ventas pendientes.</p>';
             return;
         }
 
         list.innerHTML = '';
-        
+
         // 1. Obtener Cuentas libres (para compras normales)
         const inventarioLimpio = (currentUserData.inventory || []).filter(i => i.status === 'libre');
         window.opcionesCuentasGlobal = `<option value="">-- Selecciona una cuenta para entregar --</option>`;
         inventarioLimpio.forEach(acc => {
-            window.opcionesCuentasGlobal += `<option value="${acc.id}">[${acc.platform} - ${acc.type}] ${acc.email} ${acc.type === 'Perfil' ? '(P: '+acc.profile+')' : ''}</option>`;
+            window.opcionesCuentasGlobal += `<option value="${acc.id}">[${acc.platform} - ${acc.type}] ${acc.email} ${acc.type === 'Perfil' ? '(P: ' + acc.profile + ')' : ''}</option>`;
         });
 
         // 2. Obtener Matrices (para compras por invitación)
@@ -4514,30 +5310,34 @@ window.openPedidosModal = async () => {
             }
 
             const div = document.createElement('div');
-            div.style.cssText = "background:var(--mac-bg); padding:15px; border-radius:10px; border:1px solid var(--mac-border);";
+            div.className = "pedido-card-grid";
+            div.style.cssText = "background:var(--mac-surface); padding:20px; border-radius:14px; border:1px solid var(--mac-border); box-shadow:0 2px 8px rgba(0,0,0,0.04); display:grid; grid-template-columns: 200px 1fr; gap:20px; align-items:start;";
             div.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px;">
-                    <div>
-                        <strong style="color:var(--mac-blue); font-size:16px;"><i class='bx bx-cart-add'></i> ${pedido.plataforma}</strong><br>
-                        <span style="color:var(--mac-text-main); font-size:13px; font-weight: 600;">👤 ${nombreCli} | 📞 WA: ${pedido.clienteNumero}</span>
-                        <span style="display:block; font-size:12px; color:var(--mac-text-secondary); margin-top:2px;">Tipo: ${pedido.tipo.toUpperCase()} | Monto: <b style="color:var(--mac-green);">${globalCurrency}${pedido.precio.toFixed(2)}</b></span>
-                    </div>
-                    <button class="action-btn btn-del" onclick="window.rechazarPedido('${pId}')"><i class='bx bx-x'></i></button>
-                </div>
-                
-                <div style="text-align: center; margin-bottom: 15px; background: rgba(0,0,0,0.02); padding: 10px; border-radius: 8px;">
-                    <a href="${pedido.comprobanteUrl}" target="_blank">
-                        <img src="${pedido.comprobanteUrl}" style="height: 140px; border-radius: 8px; object-fit: contain; border: 1px solid var(--mac-border);">
+                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--mac-gray); padding:12px; border-radius:10px; border:1px solid var(--mac-border); height:100%; box-sizing:border-box;">
+                    <span style="font-size:11px; font-weight:700; color:var(--mac-text-secondary); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.04em;">Comprobante</span>
+                    <a href="${pedido.comprobanteUrl}" target="_blank" style="display:block; width:100%; text-align:center;">
+                        <img src="${pedido.comprobanteUrl}" style="max-width:100%; max-height:220px; width:auto; height:auto; border-radius:8px; object-fit:contain; border:1px solid var(--mac-border); box-shadow:0 2px 6px rgba(0,0,0,0.08); transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
                     </a>
+                    <span style="font-size:11px; color:var(--mac-blue); margin-top:8px; font-weight:600;"><i class='bx bx-zoom-in'></i> Ver completo</span>
                 </div>
-                
-                ${dynamicControls}
-                
-                <div style="margin-bottom:15px;">
-                    <input type="number" id="precio_venta_${pId}" placeholder="Confirma Precio Total Cobrado" value="${pedido.precio}" style="width:100%; padding:10px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border); font-weight:bold;">
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid var(--mac-border); padding-bottom:10px;">
+                        <div>
+                            <strong style="color:var(--mac-blue); font-size:17px; font-weight:700;"><i class='bx bx-cart-add'></i> ${pedido.plataforma}</strong>
+                            <div style="color:var(--mac-text-main); font-size:13.5px; font-weight:600; margin-top:2px;">👤 ${nombreCli} &nbsp;|&nbsp; 📞 ${pedido.clienteNumero}</div>
+                            <div style="font-size:12.5px; color:var(--mac-text-secondary); margin-top:4px;">Tipo: <b>${pedido.tipo.toUpperCase()}</b> &nbsp;|&nbsp; Cobrado: <b style="color:var(--mac-green); font-size:14px; font-variant-numeric:tabular-nums;">${globalCurrency}${pedido.precio.toFixed(2)}</b></div>
+                        </div>
+                        <button class="action-btn btn-del" onclick="window.rechazarPedido('${pId}')" title="Rechazar y borrar"><i class='bx bx-trash'></i></button>
+                    </div>
+                    ${dynamicControls}
+                    <div>
+                        <label style="font-size:11px; font-weight:bold; color:var(--mac-text-secondary); display:block; margin-bottom:4px;">Precio Final Cobrado:</label>
+                        <input type="number" id="precio_venta_${pId}" placeholder="Confirma Precio Total Cobrado" value="${pedido.precio}" style="width:100%; padding:10px 14px; border-radius:8px; background:var(--mac-input-bg); color:var(--mac-text-main); border:1px solid var(--mac-border); font-weight:bold; font-variant-numeric:tabular-nums;">
+                    </div>
+                    <div style="margin-top:4px;">
+                        ${btnAction}
+                    </div>
                 </div>
-
-                ${btnAction}
             `;
             list.appendChild(div);
         });
@@ -4561,9 +5361,32 @@ window.rechazarPedido = async (pedidoId) => {
     try {
         await deleteDoc(doc(db, "pedidos", pedidoId));
         window.showNotification("🚫 Solicitud rechazada");
-        window.openPedidosModal(); 
+        window.openPedidosModal();
     } catch (e) {
         window.showNotification("Error: " + e.message);
+    }
+};
+
+// Helper para alternar el Modo de Entrega en el modal de Aprobar Venta
+window.selectDeliveryModeSwal = (mode) => {
+    window._selectedDeliveryMode = mode;
+    const modes = ['credenciales', 'portal', 'ambos'];
+    modes.forEach(m => {
+        const btn = document.getElementById(`btn-deliv-mode-${m}`);
+        if (!btn) return;
+        const isActive = (m === mode);
+        btn.style.border = isActive ? '2px solid var(--mac-blue)' : '1px solid var(--mac-border)';
+        btn.style.background = isActive ? 'rgba(0, 122, 255, 0.14)' : 'var(--mac-surface)';
+        btn.style.color = isActive ? 'var(--mac-text-main)' : 'var(--mac-text-secondary)';
+    });
+
+    const chkContainer = document.getElementById('swal-credenciales-box');
+    const portalNotice = document.getElementById('swal-portal-notice');
+    if (chkContainer) {
+        chkContainer.style.display = (mode === 'portal') ? 'none' : 'block';
+    }
+    if (portalNotice) {
+        portalNotice.style.display = (mode === 'portal' || mode === 'ambos') ? 'block' : 'none';
     }
 };
 
@@ -4585,25 +5408,45 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
     }
 
     const precioTotal = parseFloat(document.getElementById(`precio_venta_${pedidoId}`).value) || 0;
+    window._selectedDeliveryMode = 'credenciales';
 
-    // 🔥 NUEVA VENTANITA UNIFICADA (MESES EN LÍNEA + TARJETAS DE DATOS)
+    // 🔥 VENTANA UNIFICADA CON MODO DE ENTREGA (CREDENCIALES / PORTAL WEB / AMBOS)
     const confirmacion = await Swal.fire({
         title: 'Configurar Entrega',
         html: `
-            <div style="text-align: left; display: flex; flex-direction: column; gap: 15px;">
+            <div style="text-align: left; display: flex; flex-direction: column; gap: 14px;">
                 
                 <!-- BLOQUE 1: Meses (Todo en una fila) -->
-                <div style="background: var(--mac-bg); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border); display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                <div style="background: var(--mac-bg); padding: 12px 15px; border-radius: 12px; border: 1px dashed var(--mac-border); display: flex; justify-content: space-between; align-items: center; gap: 10px;">
                     <label style="font-size: 13px; font-weight: bold; color: var(--mac-text-main); margin: 0;">¿Por cuántos meses pagó?</label>
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <input type="number" id="swal-meses-venta" value="1" min="1" style="width: 55px; text-align: center; font-size: 16px; font-weight: bold; padding: 6px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); outline: none;">
                         <span style="font-size: 13px; color: var(--mac-text-secondary); font-weight: bold;">Mes(es)</span>
                     </div>
                 </div>
+
+                <!-- BLOQUE 2: Selector de Modo de Entrega por WhatsApp -->
+                <div style="background: var(--mac-bg); padding: 14px; border-radius: 12px; border: 1px solid var(--mac-border);">
+                    <label style="font-size: 12px; font-weight: 700; color: var(--mac-text-secondary); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 10px; display: block;">Modo de Entrega por WhatsApp:</label>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <button type="button" id="btn-deliv-mode-credenciales" onclick="window.selectDeliveryModeSwal('credenciales')"
+                            style="width: 100%; margin: 0; padding: 10px 12px; border-radius: 10px; border: 2px solid var(--mac-blue); background: rgba(0, 122, 255, 0.14); color: var(--mac-text-main); font-size: 13px; font-weight: 700; text-align: left; cursor: pointer; transition: all 0.2s;">
+                            🔑 Enviar Credenciales Directas
+                        </button>
+                        <button type="button" id="btn-deliv-mode-portal" onclick="window.selectDeliveryModeSwal('portal')"
+                            style="width: 100%; margin: 0; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-secondary); font-size: 13px; font-weight: 700; text-align: left; cursor: pointer; transition: all 0.2s;">
+                            🌐 Enviar Acceso al Portal Web + Código
+                        </button>
+                        <button type="button" id="btn-deliv-mode-ambos" onclick="window.selectDeliveryModeSwal('ambos')"
+                            style="width: 100%; margin: 0; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-secondary); font-size: 13px; font-weight: 700; text-align: left; cursor: pointer; transition: all 0.2s;">
+                            🚀 Enviar Ambos (Credenciales + Portal Web)
+                        </button>
+                    </div>
+                </div>
                 
-                <!-- BLOQUE 2: Datos a enviar (Tarjetas Premium) -->
-                <div style="background: var(--mac-bg); padding: 15px; border-radius: 12px; border: 1px dashed var(--mac-border);">
-                    <label style="font-size: 13px; font-weight: bold; color: var(--mac-text-main); margin-bottom: 12px; display: block;">¿Qué datos enviarás por WhatsApp?</label>
+                <!-- BLOQUE 3: Datos a enviar (Tarjetas Premium) -->
+                <div id="swal-credenciales-box" style="background: var(--mac-bg); padding: 14px; border-radius: 12px; border: 1px dashed var(--mac-border);">
+                    <label style="font-size: 13px; font-weight: bold; color: var(--mac-text-main); margin-bottom: 10px; display: block;">¿Qué credenciales deseas incluir?</label>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <label onclick="window.toggleSwalChk(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); transition: all 0.2s;">
@@ -4633,6 +5476,11 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
                     
                     <p style="font-size: 10px; color: var(--mac-text-secondary); margin: 10px 0 0 0; line-height: 1.3;">* El sistema siempre guardará todos los datos completos en tu panel por seguridad.</p>
                 </div>
+
+                <!-- Aviso de Portal Web -->
+                <div id="swal-portal-notice" style="display: none; background: rgba(94, 92, 230, 0.1); border: 1px solid rgba(94, 92, 230, 0.35); padding: 12px; border-radius: 10px; font-size: 12px; color: var(--mac-text-main); line-height: 1.45;">
+                    🌐 <b>Entrega con Portal Web:</b> Se enviará tu plantilla personalizada de Portal Web con el link directo y su <b>Código Web</b> para consultar accesos y dejar reseñas.
+                </div>
             </div>
         `,
         icon: 'question',
@@ -4646,6 +5494,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
         preConfirm: () => {
             return {
                 meses: parseInt(document.getElementById('swal-meses-venta').value) || 1,
+                deliveryMode: window._selectedDeliveryMode || 'credenciales',
                 sendCorreo: document.getElementById('chk-correo').checked,
                 sendPass: document.getElementById('chk-pass').checked,
                 sendPerfil: document.getElementById('chk-perfil').checked,
@@ -4656,26 +5505,41 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
 
     if (!confirmacion.isConfirmed) return;
     const mesesContratados = confirmacion.value.meses;
-    const opcEnvio = confirmacion.value; // Guardamos qué casillas marcó
+    const opcEnvio = confirmacion.value;
+    const deliveryMode = opcEnvio.deliveryMode || 'credenciales';
 
     try {
         window.showNotification("⏳ Procesando entrega...");
 
-        let stock = currentUserData.inventory || [];
+        let stock = [...(currentUserData.inventory || [])];
         let cuentasEntregar = [];
-        
+
         // Calcular fecha
-        const h = new Date(); 
-        h.setDate(h.getDate() + (mesesContratados * 30)); 
-        const dateFirebase = `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}-${String(h.getDate()).padStart(2,'0')}`; 
-        const dateWhatsApp = h.toLocaleDateString('es-ES'); 
-        
+        const h = new Date();
+        h.setDate(h.getDate() + (mesesContratados * 30));
+        const dateFirebase = `${h.getFullYear()}-${String(h.getMonth() + 1).padStart(2, '0')}-${String(h.getDate()).padStart(2, '0')}`;
+        const dateWhatsApp = h.toLocaleDateString('es-ES');
+
         const numeroLimpio = numeroCliente.replace(/[^\d]/g, '');
         const numeroBonito = "+" + numeroLimpio;
         const rulesDB = currentUserData.platformRules || {};
-        
+
+        // Generar o reutilizar portalCode para este número
+        let generatedPortalCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+        const existingClientWithPhone = clients.find(c => (c.phone ? c.phone.replace(/[^\d]/g, '') : '') === numeroLimpio);
+        if (existingClientWithPhone && existingClientWithPhone.portalCode) {
+            generatedPortalCode = existingClientWithPhone.portalCode;
+        }
+
+        const baseUrl = window.location.origin + window.location.pathname;
+        const portalAlias = currentUserData.storeAlias || currentUser.uid;
+        const portalUrl = `${baseUrl}?portal=${portalAlias}`;
+        const finalClientName = (nombreCliente && nombreCliente.trim()) ? nombreCliente.trim() : "Cliente Nuevo";
+
         let primerClienteId = null;
+        let textoCredenciales = "";
         let textoFinal = "";
+        let plataformasEntregadasStr = plataforma;
 
         if (requiereInvitacion) {
             // LÓGICA DE INVITACIÓN DIRECTA
@@ -4687,29 +5551,35 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
             multiAcc[plataforma].months = mesesContratados;
             multiAcc[plataforma].masterAccountId = matrizId;
             multiAcc[plataforma].saleType = 'Perfil';
-            
-            const docRef = await addDoc(collection(db, "clients"), {
+
+            const nuevoClienteObj = {
                 userId: currentUser.uid,
-                name: nombreCliente, 
-                phone: numeroBonito, 
+                name: finalClientName,
+                phone: numeroBonito,
                 platform: plataforma,
-                accountEmail: clienteCorreo,      
-                accountPassword: "",    
-                accountPin: "",          
+                accountSaleType: 'Perfil',
+                accountEmail: clienteCorreo,
+                accountPassword: "",
+                accountPin: "",
                 accountProfile: perfilMatriz,
                 accountUnits: 1,
                 accountMonths: mesesContratados,
                 cost: 0,
-                price: precioTotal, 
+                price: precioTotal,
                 date: dateFirebase,
-                linkedMasterId: matrizId, 
+                linkedMasterId: matrizId,
                 multiAccounts: multiAcc,
+                portalCode: generatedPortalCode,
+                archived: false,
                 color: macPalette[Math.floor(Math.random() * macPalette.length)]
-            });
+            };
+
+            const docRef = await addDoc(collection(db, "clients"), nuevoClienteObj);
             primerClienteId = docRef.id;
+            clients.unshift({ id: docRef.id, ...nuevoClienteObj });
 
             let reglasStr = rulesText ? `\n⚠️ *Reglas:* ${rulesText}` : "";
-            textoFinal = `🎉 *¡Gracias por tu compra!*\n\nLa invitación de *${plataforma}* ha sido enviada con éxito a tu correo: *${clienteCorreo}*.\n\n📅 *Vence el:* ${dateWhatsApp}${reglasStr}\n\n¡Revisa tu bandeja de entrada y acepta la invitación para empezar a disfrutar del servicio! 🍿`;
+            textoCredenciales = `🎉 *¡Gracias por tu compra!*\n\nLa invitación de *${plataforma}* ha sido enviada con éxito a tu correo: *${clienteCorreo}*.\n\n📅 *Vence el:* ${dateWhatsApp}${reglasStr}\n\n¡Revisa tu bandeja de entrada y acepta la invitación para empezar a disfrutar del servicio! 🍿`;
 
         } else {
             // LÓGICA TRADICIONAL (INVENTARIO)
@@ -4719,38 +5589,94 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
                 cuentasEntregar.push(acc);
             }
 
+            plataformasEntregadasStr = cuentasEntregar.map(c => c.platform).join(', ');
             const precioDividido = precioTotal / cuentasIds.length;
+
             for (let cuenta of cuentasEntregar) {
                 let matrizAsignada = null;
                 const qMatriz = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid), where("email", "==", cuenta.email));
                 const snapMatriz = await getDocs(qMatriz);
                 if (!snapMatriz.empty) matrizAsignada = snapMatriz.docs[0].id;
 
-                const docRef = await addDoc(collection(db, "clients"), {
+                const saleTypeVal = cuenta.type === 'Completa' ? 'Cuenta Completa' : 'Perfil';
+                const profileVal = cuenta.profile || "1";
+                const pinVal = cuenta.pin || "N/A";
+
+                const multiAcc = {};
+                multiAcc[cuenta.platform] = {
+                    ...window.getDefaultAccData(),
+                    email: cuenta.email || '',
+                    password: cuenta.pass || '',
+                    profile: profileVal,
+                    pin: pinVal,
+                    saleType: saleTypeVal,
+                    units: 1,
+                    months: mesesContratados,
+                    masterAccountId: matrizAsignada,
+                    inventoryId: cuenta.id
+                };
+
+                const nuevoClienteObj = {
                     userId: currentUser.uid,
-                    name: "Cliente Nuevo", phone: numeroBonito, platform: cuenta.platform,
-                    accountEmail: cuenta.email, accountPassword: cuenta.pass,    
-                    accountPin: cuenta.pin, accountProfile: cuenta.profile || "1",
-                    accountUnits: 1, accountMonths: mesesContratados, cost: 0, price: precioDividido, 
-                    date: dateFirebase, linkedMasterId: matrizAsignada, 
+                    name: finalClientName,
+                    phone: numeroBonito,
+                    platform: cuenta.platform,
+                    accountSaleType: saleTypeVal,
+                    accountEmail: cuenta.email,
+                    accountPassword: cuenta.pass,
+                    accountPin: pinVal,
+                    accountProfile: profileVal,
+                    accountUnits: 1,
+                    accountMonths: mesesContratados,
+                    cost: 0,
+                    price: precioDividido,
+                    date: dateFirebase,
+                    linkedMasterId: matrizAsignada,
+                    multiAccounts: multiAcc,
+                    portalCode: generatedPortalCode,
+                    archived: false,
                     color: macPalette[Math.floor(Math.random() * macPalette.length)]
-                });
-                
+                };
+
+                const docRef = await addDoc(collection(db, "clients"), nuevoClienteObj);
                 if (!primerClienteId) primerClienteId = docRef.id;
+                clients.unshift({ id: docRef.id, ...nuevoClienteObj });
+
                 cuenta.rules = rulesDB[cuenta.platform] || "Uso personal, no modificar los datos de acceso.";
-                stock = stock.filter(item => item.id !== cuenta.id);
+
+                // TAREA 3.3: Filtrar tanto por id como por coincidencia exacta de email + platform + profile normalizados
+                const cuentaEmailNorm = (cuenta.email || '').trim().toLowerCase();
+                const cuentaPlatNorm = (cuenta.platform || '').trim().toLowerCase();
+                const cuentaProfNorm = window.normalizeProfileNumber(cuenta.profile);
+                const isCuentaCompleta = cuenta.type === 'Completa';
+
+                stock = stock.filter(item => {
+                    if (item.id === cuenta.id) return false;
+                    const itemEmailNorm = (item.email || '').trim().toLowerCase();
+                    const itemPlatNorm = (item.platform || '').trim().toLowerCase();
+                    const itemProfNorm = window.normalizeProfileNumber(item.profile);
+                    const isItemCompleta = item.type === 'Completa';
+
+                    if (itemEmailNorm && cuentaEmailNorm && itemEmailNorm === cuentaEmailNorm && itemPlatNorm === cuentaPlatNorm) {
+                        if (isCuentaCompleta || isItemCompleta || itemProfNorm === cuentaProfNorm) {
+                            return false;
+                        }
+                    }
+                    return true;
+                });
             }
             await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
             currentUserData.inventory = stock;
+            window.renderInventory();
 
             let bloqueCuentas = "";
-            cuentasEntregar.forEach((c, index) => { 
+            cuentasEntregar.forEach((c, index) => {
                 bloqueCuentas += `\n🍿 *CUENTA ${index + 1}: ${c.platform}*\n`;
                 if (opcEnvio.sendCorreo) bloqueCuentas += `📧 *Correo:* ${c.email}\n`;
                 if (opcEnvio.sendPass) bloqueCuentas += `🔑 *Clave:* ${c.pass}\n`;
                 if (opcEnvio.sendPerfil) bloqueCuentas += `👤 *Perfil:* ${c.profile || '1'}\n`;
                 if (opcEnvio.sendPin) bloqueCuentas += `📌 *PIN:* ${c.pin || 'N/A'}\n`;
-                bloqueCuentas += `⚠️ *Reglas:* ${c.rules}\n`; 
+                bloqueCuentas += `⚠️ *Reglas:* ${c.rules}\n`;
             });
 
             let templateMsg = currentUserData.waDeliveryMessage || `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tus cuentas:\n{bloqueCuentas}\n📅 *Vence el:* {fecha}\n\n¡Que disfrutes el contenido! 🍿`;
@@ -4760,10 +5686,29 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
                 templateMsg = `🎉 *¡Gracias por tu compra!*\n\nAquí tienes los datos de tus cuentas:\n{bloqueCuentas}\n📅 *Vence el:* {fecha}\n\n¡Que disfrutes el contenido! 🍿`;
             }
 
-            textoFinal = templateMsg
-                .replace(/{nombre}/g, nombreCliente)
+            textoCredenciales = templateMsg
+                .replace(/{nombre}/g, finalClientName)
+                .replace(/{plataforma}/g, plataformasEntregadasStr)
                 .replace(/{bloqueCuentas}/g, bloqueCuentas)
                 .replace(/{fecha}/g, dateWhatsApp || '');
+        }
+
+        // Construir bloque del Portal Web
+        const basePortalMsg = currentUserData.waPortalMessage || defaultPortal;
+        const textoPortal = basePortalMsg
+            .replace(/{nombre}/g, finalClientName)
+            .replace(/{plataforma}/g, plataformasEntregadasStr)
+            .replace(/{fecha}/g, dateWhatsApp || '')
+            .replace(/{link}/g, portalUrl)
+            .replace(/{numero}/g, numeroBonito)
+            .replace(/{codigo}/g, generatedPortalCode);
+
+        if (deliveryMode === 'portal') {
+            textoFinal = textoPortal;
+        } else if (deliveryMode === 'ambos') {
+            textoFinal = `${textoCredenciales}\n\n━━━━━━━━━━━━━━━━━━━━\n\n${textoPortal}`;
+        } else {
+            textoFinal = textoCredenciales;
         }
 
         await updateDoc(doc(db, "pedidos", pedidoId), { estado: "aprobado" });
@@ -4771,25 +5716,25 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
         try {
             const newSalesCount = (currentUserData.storeSalesCount || 0) + 1;
             const newRevenue = (currentUserData.storeRevenue || 0) + precioTotal;
-            await updateDoc(doc(db, "users", currentUser.uid), { 
-                storeSalesCount: newSalesCount, 
-                storeRevenue: newRevenue 
+            await updateDoc(doc(db, "users", currentUser.uid), {
+                storeSalesCount: newSalesCount,
+                storeRevenue: newRevenue
             });
             currentUserData.storeSalesCount = newSalesCount;
             currentUserData.storeRevenue = newRevenue;
         } catch (errStoreStats) {
             console.error("Error actualizando stats de la tienda:", errStoreStats);
         }
-        window.renderInventory(); 
-        loadUserClients(); 
+        window.renderInventory();
+        window.renderTable();
 
         const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
 
         if (plan === 'pro' || plan === 'elite') {
             const payloadEntrega = {
                 distribuidorId: currentUser.uid,
-                numeroCliente: numeroLimpio + '@s.whatsapp.net', 
-                cuentas: requiereInvitacion ? [{platform: plataforma}] : cuentasEntregar, 
+                numeroCliente: numeroLimpio + '@s.whatsapp.net',
+                cuentas: requiereInvitacion ? [{ platform: plataforma }] : cuentasEntregar,
                 fechaVencimiento: dateWhatsApp,
                 mensajeEntrega: textoFinal
             };
@@ -4797,7 +5742,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
             fetch('https://bot.panelagc.com/api/entregar-cuenta', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payloadEntrega)
             }).catch(err => console.error("Error de red al contactar al bot:", err));
-              
+
             Swal.fire({
                 icon: 'success', title: '¡Venta Aprobada!',
                 html: '<p style="color:var(--mac-text-secondary);">El Bot ya le está enviando la información al cliente.</p><p style="margin-top:10px; font-size:14px; font-weight:bold;">¿Deseas completar el nombre del cliente ahora?</p>',
@@ -4806,13 +5751,13 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
             }).then((result) => {
                 if (result.isConfirmed && primerClienteId) {
                     window.closeModals(true); window.switchMainTab('clientes'); window.startEdit(primerClienteId);
-                } else { window.openPedidosModal(); }
+                } else { window.openPedidosModal(); window.promptStoreReference(plataforma); }
             });
 
         } else {
             const waUrl = `https://wa.me/${numeroLimpio}?text=${encodeURIComponent(textoFinal)}`;
-            window.open(waUrl, '_blank'); 
-            
+            window.open(waUrl, '_blank');
+
             Swal.fire({
                 icon: 'success', title: '¡Venta Aprobada!',
                 html: `<div style="margin-bottom:15px;"><a href="${waUrl}" target="_blank" style="display:inline-block; background:#25D366; color:white; padding:10px 15px; border-radius:8px; text-decoration:none; font-weight:bold;"><i class="bx bxl-whatsapp"></i> Reenviar Accesos (Clic Aquí)</a></div><p style="margin-top:10px; font-size:14px; font-weight:bold;">2. ¿Deseas completar el nombre del cliente ahora?</p>`,
@@ -4821,7 +5766,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
             }).then((result) => {
                 if (result.isConfirmed && primerClienteId) {
                     window.closeModals(true); window.switchMainTab('clientes'); window.startEdit(primerClienteId);
-                } else { window.openPedidosModal(); }
+                } else { window.openPedidosModal(); window.promptStoreReference(plataforma); }
             });
         }
 
@@ -4833,7 +5778,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
 window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVenta) => {
     // 1. Buscamos primero en la memoria rápida (los últimos 30 clientes cargados)
     let c = clients.find(x => x.id === clientId);
-    
+
     // 2. Si no está en la memoria rápida, lo buscamos directo en la Base de Datos
     if (!c) {
         try {
@@ -4852,13 +5797,13 @@ window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVe
     let fechaAntigua = new Date(year, month - 1, day);
     const antiguaFechaBonita = fechaAntigua.toLocaleDateString('es-ES');
 
-    window.currentRenewType = 'mes'; 
+    window.currentRenewType = 'mes';
     window.currentRenewBaseDate = fechaAntigua;
 
     // 🔥 FIX: 1. Función para actualizar los números en tiempo real al escribir
     window.updateRenewDates = () => {
         let meses = parseInt(document.getElementById('swal-renew-months').value) || 1;
-        
+
         let dMes = new Date(window.currentRenewBaseDate);
         dMes.setMonth(dMes.getMonth() + meses);
         document.getElementById('date-mes').innerText = dMes.toLocaleDateString('es-ES');
@@ -4873,8 +5818,8 @@ window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVe
         window.currentRenewType = type;
         const cardMes = document.getElementById('optMesAMes');
         const card30d = document.getElementById('opt30Dias');
-        
-        if(type === 'mes') {
+
+        if (type === 'mes') {
             cardMes.style.border = '2px solid var(--mac-blue)';
             cardMes.style.background = 'rgba(0, 122, 255, 0.15)';
             card30d.style.border = '1px solid var(--mac-border)';
@@ -4934,8 +5879,8 @@ window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVe
     if (confirmacion) {
         try {
             window.showNotification("⏳ Actualizando fecha...");
-            let fechaNueva = confirmacion; 
-            const strFirebase = `${fechaNueva.getFullYear()}-${String(fechaNueva.getMonth()+1).padStart(2,'0')}-${String(fechaNueva.getDate()).padStart(2,'0')}`;
+            let fechaNueva = confirmacion;
+            const strFirebase = `${fechaNueva.getFullYear()}-${String(fechaNueva.getMonth() + 1).padStart(2, '0')}-${String(fechaNueva.getDate()).padStart(2, '0')}`;
             const nuevaFechaBonita = fechaNueva.toLocaleDateString('es-ES');
 
             // 1. Desaparecemos el pedido
@@ -4954,11 +5899,11 @@ window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVe
             // 4. Preparamos el Mensaje
             const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
             let baseMsg = currentUserData.waRenewMessage || "🎉 *¡Renovación Exitosa, {nombre}!*\n\nTu servicio de *{plataforma}* ha sido renovado correctamente.\n📅 Nueva fecha de vencimiento: *{fecha}*\n\n🌐 *Tu Portal:* {link}\n🔑 *Código Web:* {codigo}\n\n¡Gracias por seguir confiando en nosotros! 🚀";
-            
+
             const baseUrl = window.location.origin + window.location.pathname;
             const portalAlias = currentUserData.storeAlias || currentUser.uid;
             const portalUrl = `${baseUrl}?portal=${portalAlias}`;
-            
+
             let finalMsg = baseMsg
                 .replace(/{nombre}/g, c.name)
                 .replace(/{plataforma}/g, plataforma)
@@ -4971,10 +5916,10 @@ window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVe
 
             // 5. Enviar mensaje por bot o WA
             if (plan === 'pro' || plan === 'elite') {
-                fetch('https://bot.panelagc.com/api/confirmar-renovacion', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ distribuidorId: currentUser.uid, numeroCliente: c.phone, plataforma: plataforma, nuevaFecha: nuevaFechaBonita, mensajeRenovacion: finalMsg }) 
+                fetch('https://bot.panelagc.com/api/confirmar-renovacion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ distribuidorId: currentUser.uid, numeroCliente: c.phone, plataforma: plataforma, nuevaFecha: nuevaFechaBonita, mensajeRenovacion: finalMsg })
                 });
                 window.showNotification("✅ Renovación completada. El bot avisará al cliente.");
             } else {
@@ -4991,8 +5936,8 @@ window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVe
 
 /* ========================================== MÓDULO DE CUENTAS MATRICES (ESTILO MATRIZ) ========================================== */
 let variablesEnlaceMatriz = { masterId: null, profileNum: null };
-let editingMasterId = null; 
-window.masterAlertShown = false; 
+let editingMasterId = null;
+window.masterAlertShown = false;
 
 // Ocultar o mostrar campos adicionales según el origen de la cuenta
 window.toggleMatProviderFields = () => {
@@ -5013,7 +5958,7 @@ window.openNewMasterAccountModal = () => {
     document.getElementById('matProvider').value = 'Propia';
     document.getElementById('matExpiryDate').value = '';
     document.getElementById('matProviderName').value = '';
-    
+
     window.toggleMatProviderFields();
     document.querySelector('#masterAccountModal h3').innerHTML = "<i class='bx bx-plus-circle'></i> Nueva Cuenta Matriz";
     document.getElementById('masterAccountModal').style.display = 'flex';
@@ -5022,7 +5967,7 @@ window.openNewMasterAccountModal = () => {
 // 2. ABRIR MODAL PARA EDITAR
 window.editMasterAccount = (id, platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName) => {
     editingMasterId = id;
-    
+
     document.getElementById('matPlatform').value = platform;
     document.getElementById('matEmail').value = email;
     document.getElementById('matPass').value = pass;
@@ -5031,17 +5976,17 @@ window.editMasterAccount = (id, platform, email, pass, maxProfiles, cost, provid
     document.getElementById('matProvider').value = provider;
     document.getElementById('matExpiryDate').value = expiryDate || '';
     document.getElementById('matProviderName').value = providerName || '';
-    
+
     window.toggleMatProviderFields();
     document.querySelector('#masterAccountModal h3').innerHTML = "<i class='bx bx-edit'></i> Editar Cuenta Matriz";
     document.getElementById('masterAccountModal').style.display = 'flex';
 };
 
-// 3. ELIMINAR CUENTA MATRIZ
+// 3. ELIMINAR CUENTA MATRIZ (CON LIMPIEZA TOTAL DE STOCK FANTASMA)
 window.deleteMasterAccount = async (id) => {
     Swal.fire({
         title: '¿Eliminar Cuenta Matriz?',
-        text: "Los clientes vinculados no se borrarán, pero perderán su enlace a esta cuenta.",
+        text: "Los clientes vinculados no se borrarán, pero perderán su enlace a esta cuenta y se limpiarán sus perfiles libres del inventario.",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#FF3B30',
@@ -5053,10 +5998,34 @@ window.deleteMasterAccount = async (id) => {
     }).then(async (result) => {
         if (result.isConfirmed) {
             try {
+                // 1. Obtener datos de la matriz antes de eliminarla
+                const matDocSnap = await getDoc(doc(db, "masterAccounts", id));
+                if (matDocSnap.exists()) {
+                    const matData = matDocSnap.data();
+                    const matEmail = (matData.email || '').trim().toLowerCase();
+                    const matPlatform = (matData.platform || '').trim().toLowerCase();
+
+                    if (matEmail && matPlatform && Array.isArray(currentUserData.inventory)) {
+                        const prevLen = currentUserData.inventory.length;
+                        const nuevoStock = currentUserData.inventory.filter(item => {
+                            const itemEmail = (item.email || '').trim().toLowerCase();
+                            const itemPlatform = (item.platform || '').trim().toLowerCase();
+                            return !(itemEmail === matEmail && itemPlatform === matPlatform);
+                        });
+
+                        if (nuevoStock.length !== prevLen) {
+                            await updateDoc(doc(db, "users", currentUser.uid), { inventory: nuevoStock });
+                            currentUserData.inventory = nuevoStock;
+                            if (typeof window.renderInventory === 'function') window.renderInventory();
+                        }
+                    }
+                }
+
+                // 2. Eliminar documento de la matriz
                 await deleteDoc(doc(db, "masterAccounts", id));
-                window.showNotification("🗑️ Cuenta Matriz eliminada");
+                window.showNotification("🗑️ Cuenta Matriz y stock asociado eliminados");
                 window.renderMasterAccounts();
-            } catch(e) { window.showNotification("Error: " + e.message); }
+            } catch (e) { window.showNotification("Error: " + e.message); }
         }
     });
 };
@@ -5076,7 +6045,7 @@ window.saveMasterAccount = async () => {
 
     try {
         const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
-        
+
         if (!editingMasterId) {
             const qMatCount = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
             const snapMatCount = await getDocs(qMatCount);
@@ -5090,21 +6059,21 @@ window.saveMasterAccount = async () => {
             const qCli = query(collection(db, "clients"), where("userId", "==", currentUser.uid));
             const snapCli = await getDocs(qCli);
             let clientesAfectados = [];
-            
+
             snapCli.forEach(d => {
                 const c = d.data();
                 let isAffected = false;
                 let platName = "";
                 let profileStr = "";
                 let pinStr = "";
-                
+
                 // Buscar en modelo antiguo
                 if (c.linkedMasterId === editingMasterId) {
                     if (c.accountEmail !== email || c.accountPassword !== pass) {
                         isAffected = true; platName = c.platform; profileStr = c.accountProfile; pinStr = c.accountPin;
                     }
                 }
-                
+
                 // Buscar en modelo nuevo (multipestaña)
                 if (c.multiAccounts) {
                     for (let platKey in c.multiAccounts) {
@@ -5115,7 +6084,7 @@ window.saveMasterAccount = async () => {
                         }
                     }
                 }
-                
+
                 if (isAffected) {
                     clientesAfectados.push({ id: d.id, data: c, name: c.name, phone: c.phone, platform: platName, profile: profileStr, pin: pinStr });
                 }
@@ -5123,9 +6092,9 @@ window.saveMasterAccount = async () => {
 
             let clientesParaNotificar = [];
             let opcionesEnvio = { correo: true, clave: true, perfil: true, pin: true };
-            
+
             const plan = (currentUserData.plan_actual || 'demo').toLowerCase();
-            
+
             // 2. Si hay clientes afectados y es PRO, lanzamos el Modal Interactivo
             if (clientesAfectados.length > 0 && (plan === 'pro' || plan === 'elite')) {
                 // Dibujamos las tarjetas de los clientes con el check activo por defecto
@@ -5200,7 +6169,7 @@ window.saveMasterAccount = async () => {
             window.showNotification("⏳ Guardando datos...");
 
             await updateDoc(doc(db, "masterAccounts", editingMasterId), { platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName });
-            
+
             const updatePromises = [];
             clientesAfectados.forEach(clientObj => {
                 const c = clientObj.data;
@@ -5211,7 +6180,7 @@ window.saveMasterAccount = async () => {
                     rootUpdates.accountEmail = email;
                     rootUpdates.accountPassword = pass;
                 }
-                
+
                 if (c.multiAccounts) {
                     for (let platKey in mAccounts) {
                         if (mAccounts[platKey].masterAccountId === editingMasterId) {
@@ -5221,7 +6190,7 @@ window.saveMasterAccount = async () => {
                     }
                     rootUpdates.multiAccounts = mAccounts;
                 }
-                
+
                 updatePromises.push(updateDoc(doc(db, "clients", clientObj.id), rootUpdates));
             });
 
@@ -5234,12 +6203,12 @@ window.saveMasterAccount = async () => {
                 let clientesFormateados = clientesParaNotificar.map(c => {
                     // Armamos el mensaje dinámicamente según los checks de opciones
                     let mensajePersonalizado = `🔄 *¡Actualización de Seguridad!*\n\nHola *${c.name}*, los datos de tu acceso a *${c.platform}* han sido actualizados para garantizar la estabilidad de tu servicio.\n\nAquí tienes tus nuevas credenciales activas:\n`;
-                    
+
                     if (opcionesEnvio.correo) mensajePersonalizado += `\n📧 *Correo:* ${email}`;
                     if (opcionesEnvio.clave) mensajePersonalizado += `\n🔑 *Clave:* ${pass}`;
                     if (opcionesEnvio.perfil) mensajePersonalizado += `\n👤 *Perfil:* ${c.profile || '1'}`;
                     if (opcionesEnvio.pin) mensajePersonalizado += `\n📌 *PIN:* ${c.pin || 'N/A'}`;
-                    
+
                     mensajePersonalizado += `\n\n¡Sigue disfrutando del mejor entretenimiento! 🍿`;
 
                     return {
@@ -5257,7 +6226,7 @@ window.saveMasterAccount = async () => {
                         clientes: clientesFormateados
                     })
                 }).catch(e => console.error("Error al contactar al bot para actualizar:", e));
-                
+
                 setTimeout(() => {
                     window.showNotification(`🤖 Bot avisando a ${clientesFormateados.length} cliente(s) seleccionados.`);
                 }, 1500);
@@ -5268,12 +6237,12 @@ window.saveMasterAccount = async () => {
             await addDoc(collection(db, "masterAccounts"), { userId: currentUser.uid, platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName, timestamp: Date.now() });
             window.showNotification("✅ Cuenta Matriz registrada con éxito");
         }
-        
+
         document.getElementById('masterAccountModal').style.display = 'none';
         editingMasterId = null;
         window.renderMasterAccounts();
-    } catch(e) { 
-        window.showNotification("Error: " + e.message); 
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
     }
 };
 
@@ -5287,7 +6256,7 @@ window.renderMasterAccounts = async () => {
     const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
     let alertsContainer = document.getElementById('masterAccountsAlerts');
-    if(!alertsContainer) {
+    if (!alertsContainer) {
         alertsContainer = document.createElement('div');
         alertsContainer.id = 'masterAccountsAlerts';
         alertsContainer.style.cssText = "display: none; flex-direction: column; gap: 8px; margin-bottom: 15px; width:100%;";
@@ -5299,7 +6268,7 @@ window.renderMasterAccounts = async () => {
     try {
         const qMat = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
         const snapMat = await getDocs(qMat);
-        
+
         const qCli = query(collection(db, "clients"), where("userId", "==", currentUser.uid));
         const snapCli = await getDocs(qCli);
         const listaClientes = snapCli.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -5311,7 +6280,7 @@ window.renderMasterAccounts = async () => {
 
         container.innerHTML = '';
         let alertasVencimiento = [];
-        let alertasUnicas = new Set(); 
+        let alertasUnicas = new Set();
 
         let cuentasEncontradas = 0;
 
@@ -5322,7 +6291,7 @@ window.renderMasterAccounts = async () => {
             if (searchTerm) {
                 const matchPlatform = acc.platform && acc.platform.toLowerCase().includes(searchTerm);
                 const matchEmail = acc.email && acc.email.toLowerCase().includes(searchTerm);
-                if (!matchPlatform && !matchEmail) return; 
+                if (!matchPlatform && !matchEmail) return;
             }
 
             cuentasEncontradas++;
@@ -5343,9 +6312,9 @@ window.renderMasterAccounts = async () => {
             let infoVencimientoHTML = '';
             if (acc.provider === 'Proveedor Externo') {
                 const nombreProv = acc.providerName ? ` (${acc.providerName})` : '';
-                
+
                 if (acc.expiryDate) {
-                    const hoy = new Date(); hoy.setHours(0,0,0,0);
+                    const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
                     const [year, month, day] = acc.expiryDate.split('-');
                     const fechaVenc = new Date(year, month - 1, day);
                     const diffTime = fechaVenc - hoy;
@@ -5409,52 +6378,51 @@ window.renderMasterAccounts = async () => {
 
             for (let i = 1; i <= acc.maxProfiles; i++) {
                 // NUEVA LÓGICA MULTI-PLATAFORMA Y MULTI-PERFIL CORREGIDA
-            const clienteEnPerfil = clientesDeEstaCuenta.find(c => {
-                let pName = null;
-                if (c.multiAccounts) {
-                    // 🔥 Búsqueda exacta: Solo mirar la cuenta vinculada a ESTA matriz
-                    const linkedAcc = Object.values(c.multiAccounts).find(a => a.masterAccountId === accId);
-                    
-                    if (linkedAcc) {
-                        pName = linkedAcc.profile;
-                    } else if (c.linkedMasterId === accId && c.multiAccounts[acc.platform]) {
-                        // Fallback de seguridad para clientes antiguos
-                        pName = c.multiAccounts[acc.platform].profile;
+                const clienteEnPerfil = clientesDeEstaCuenta.find(c => {
+                    let pName = null;
+                    if (c.multiAccounts) {
+                        // 🔥 Búsqueda exacta: Solo mirar la cuenta vinculada a ESTA matriz
+                        const linkedAcc = Object.values(c.multiAccounts).find(a => a.masterAccountId === accId);
+
+                        if (linkedAcc) {
+                            pName = linkedAcc.profile;
+                        } else if (c.linkedMasterId === accId && c.multiAccounts[acc.platform]) {
+                            // Fallback de seguridad para clientes antiguos
+                            pName = c.multiAccounts[acc.platform].profile;
+                        }
+                    } else {
+                        pName = c.accountProfile;
                     }
-                } else {
-                    pName = c.accountProfile;
-                }
-                
-                if (!pName) return false;
-                
-                // Extrae todos los números (Soporta múltiples perfiles separados por comas)
-                const numerosEncontrados = String(pName).match(/\d+/g); 
-                if (!numerosEncontrados) return false;
-                
-                // Verifica si la ranura actual (i) coincide
-                return numerosEncontrados.some(num => parseInt(num) === i);
-            });
+
+                    if (!pName) return false;
+
+                    // Extrae todos los números (Soporta múltiples perfiles separados por comas)
+                    const numerosEncontrados = String(pName).match(/\d+/g);
+                    if (!numerosEncontrados) return false;
+
+                    // Verifica si la ranura actual (i) coincide
+                    return numerosEncontrados.some(num => parseInt(num) === i);
+                });
                 if (clienteEnPerfil) {
                     perfilesHTML += `
-                        <div style="background: rgba(255, 159, 10, 0.08); border: 1px solid var(--mac-orange); padding: 10px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; min-height: 85px;">
-                            <div>
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-                                    <strong style="color: var(--mac-orange); font-size: 12px;">👤 Perfil ${i}</strong>
-                                    <button class="action-btn" onclick="window.editarClienteDesdeMatriz('${clienteEnPerfil.id}')" style="background:none; border:none; padding:0; cursor:pointer; color:var(--mac-text-secondary); font-size:12px;"><i class='bx bx-edit-alt'></i></button>
-                                </div>
-                                <span style="color: var(--mac-text-main); font-size: 13px; font-weight: bold; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${clienteEnPerfil.name}</span>
-                                <small style="color: var(--mac-text-secondary); font-size: 11px;">Vence: ${clienteEnPerfil.date}</small>
+                        <div style="background: var(--mac-surface-elevated); border: 1px solid var(--mac-border); border-left: 3px solid var(--mac-blue); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; min-height: 88px; gap: 6px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="background: rgba(0, 122, 255, 0.12); color: var(--mac-blue); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px;">Perfil ${i}</span>
+                                <button class="action-btn" onclick="window.editarClienteDesdeMatriz('${clienteEnPerfil.id}')" title="Editar cliente" style="background:none; border:none; padding:2px 4px; cursor:pointer; color:var(--mac-text-secondary); font-size:13px; width:auto; margin:0;"><i class='bx bx-edit-alt'></i></button>
                             </div>
+                            <span style="font-weight: 700; font-size: 13.5px; color: var(--mac-text-main); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${clienteEnPerfil.name}</span>
+                            <small style="color: var(--mac-text-secondary); font-size: 11.5px; display: flex; align-items: center; gap: 4px;"><i class='bx bx-calendar' style="font-size: 13px; color: var(--mac-blue);"></i> ${clienteEnPerfil.date}</small>
                         </div>
                     `;
                 } else {
                     perfilesHTML += `
-                        <div style="background: rgba(48, 209, 88, 0.05); border: 1px dashed var(--mac-green); padding: 10px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; min-height: 85px;">
-                            <div>
-                                <strong style="color: var(--mac-green); font-size: 12px; display: block; margin-bottom: 4px;">🟢 Perfil ${i} Libre</strong>
+                        <div style="background: rgba(16, 185, 129, 0.04); border: 1px solid rgba(16, 185, 129, 0.18); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; min-height: 88px; gap: 8px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--mac-green); display: inline-block; flex-shrink: 0;"></span>
+                                <span style="color: var(--mac-text-main); font-size: 12px; font-weight: 600;">Perfil ${i} • Disponible</span>
                             </div>
-                            <button class="btn-primary" style="font-size: 11px; padding: 4px 8px; width: 100%; text-align: center; background: rgba(48, 209, 88, 0.15); color: var(--mac-green); border: 1px solid var(--mac-green);" onclick="window.vincularClienteAMatriz('${accId}', '${pPlat}', '${pMail}', '${pPass}', ${i}, ${acc.cost}, ${acc.maxProfiles})">
-                                <i class='bx bx-plus'></i> Asignar
+                            <button type="button" style="font-size: 12px; padding: 6px 10px; width: 100%; margin: 0; text-align: center; background: rgba(16, 185, 129, 0.12); color: var(--mac-green); border: none; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onclick="window.vincularClienteAMatriz('${accId}', '${pPlat}', '${pMail}', '${pPass}', ${i}, ${acc.cost}, ${acc.maxProfiles})">
+                                + Asignar
                             </button>
                         </div>
                     `;
@@ -5494,20 +6462,21 @@ window.renderMasterAccounts = async () => {
             }
         }
 
-    } catch(e) {
+    } catch (e) {
         container.innerHTML = `<p style="text-align:center; color:var(--mac-orange);">Error cargando matrices: ${e.message}</p>`;
     }
 };
 
-// 7. ACCIÓN PARA SALTAR AL FORMULARIO DE CLIENTE DESDE LA MATRIZ
-window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum, matCost = 0, matMaxProfiles = 1) => {
+// 7. ACCIÓN PARA SALTAR AL FORMULARIO DE CLIENTE DESDE LA MATRIZ (CON LIMPIEZA DE STOCK FANTASMA)
+window.vincularClienteAMatriz = async (masterId, platform, email, pass, profileNum, matCost = 0, matMaxProfiles = 1) => {
     variablesEnlaceMatriz.masterId = masterId;
     variablesEnlaceMatriz.profileNum = profileNum;
 
     editingClientId = null;
     document.getElementById('clientForm').reset();
+    window.setDefaultYear2026(true);
     document.getElementById('clientName').value = "Perfil " + profileNum;
-    
+
     // --- LÓGICA NUEVA: CÁLCULO DE INVERSIÓN AUTOMÁTICA ---
     const costInput = document.getElementById('clientCost');
     if (costInput) {
@@ -5516,16 +6485,17 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum, ma
     }
     // -----------------------------------------------------
 
-    const cbs = document.querySelectorAll('#checkboxDropdown input'); 
-    cbs.forEach(cb => cb.checked = false); 
-    cbs.forEach(cb => { if(cb.value === platform) cb.checked = true; });
+    const cbs = document.querySelectorAll('#checkboxDropdown input');
+    cbs.forEach(cb => cb.checked = false);
+    cbs.forEach(cb => { if (cb.value === platform) cb.checked = true; });
     const selectText = document.getElementById('selectText');
     if (selectText) {
-        selectText.textContent = platform; 
+        selectText.textContent = platform;
         selectText.classList.add('has-selection');
     }
+    if (typeof window.updateProviderDropdown === 'function') window.updateProviderDropdown();
 
-    multiAccData = {}; 
+    multiAccData = {};
     multiAccData[platform] = window.getDefaultAccData();
     multiAccData[platform].email = email;
     multiAccData[platform].password = pass;
@@ -5535,23 +6505,44 @@ window.vincularClienteAMatriz = (masterId, platform, email, pass, profileNum, ma
     multiAccData[platform].saleType = 'Perfil';
     multiAccData[platform].masterAccountId = masterId; // Asegura el enlace en el nuevo sistema
 
-    // --- INICIO NUEVA LÓGICA: Detectar en Inventario ---
-    const stock = currentUserData.inventory || [];
-    // Buscamos si este mismo perfil de esta misma cuenta está libre en el inventario
-    const invMatch = stock.find(i => i.platform === platform && i.email === email && String(i.profile) === String(profileNum) && i.status === 'libre');
+    // --- INICIO NUEVA LÓGICA: Detectar y limpiar en Inventario con perfil normalizado ---
+    const stock = [...(currentUserData.inventory || [])];
+    const targetEmailNorm = (email || '').trim().toLowerCase();
+    const targetPlatNorm = (platform || '').trim().toLowerCase();
+    const targetProfNorm = window.normalizeProfileNumber(profileNum);
+
+    const invMatch = stock.find(item => {
+        const itemEmailNorm = (item.email || '').trim().toLowerCase();
+        const itemPlatNorm = (item.platform || '').trim().toLowerCase();
+        const itemProfNorm = window.normalizeProfileNumber(item.profile);
+        return itemEmailNorm === targetEmailNorm && itemPlatNorm === targetPlatNorm && (item.type === 'Completa' || itemProfNorm === targetProfNorm);
+    });
+
     if (invMatch) {
-        // Al inyectar el inventoryId, la función de Guardar Cliente lo eliminará del stock automáticamente
-        multiAccData[platform].inventoryId = invMatch.id; 
+        multiAccData[platform].inventoryId = invMatch.id;
+        const nuevoStock = stock.filter(item => {
+            if (item.id === invMatch.id) return false;
+            const itemEmailNorm = (item.email || '').trim().toLowerCase();
+            const itemPlatNorm = (item.platform || '').trim().toLowerCase();
+            const itemProfNorm = window.normalizeProfileNumber(item.profile);
+            return !(itemEmailNorm === targetEmailNorm && itemPlatNorm === targetPlatNorm && (item.type === 'Completa' || itemProfNorm === targetProfNorm));
+        });
+
+        if (nuevoStock.length !== stock.length) {
+            currentUserData.inventory = nuevoStock;
+            updateDoc(doc(db, "users", currentUser.uid), { inventory: nuevoStock }).catch(e => console.error("Error limpiando stock al asignar matriz:", e));
+            if (typeof window.renderInventory === 'function') window.renderInventory();
+        }
     }
     // --- FIN NUEVA LÓGICA ---
 
     const btnAcc = document.getElementById('btnAccountData');
     if (btnAcc) {
-        btnAcc.innerText = `✅ Datos de Cuenta (1 ud)`; 
-        btnAcc.style.backgroundColor = "var(--mac-green)"; 
+        btnAcc.innerText = `✅ Datos de Cuenta (1 ud)`;
+        btnAcc.style.backgroundColor = "var(--mac-green)";
         btnAcc.style.color = "white";
     }
-    
+
     window.switchMainTab('clientes');
     document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
     window.showNotification("Completa el teléfono y el precio de venta para guardar.");
@@ -5566,7 +6557,7 @@ window.openLinkModal = async (clientId, clientPlatform) => {
         // 2. Obtenemos las Cuentas Matrices disponibles
         const qMat = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
         const snapMat = await getDocs(qMat);
-        
+
         let masterDataMap = {};
         let matricesPorPlataforma = {};
 
@@ -5582,19 +6573,19 @@ window.openLinkModal = async (clientId, clientPlatform) => {
         // 3. Crear el HTML dinámico para cada plataforma que tenga el cliente
         const plataformas = clientPlatform.split(',').map(p => p.trim());
         let htmlContenido = `<p style="font-size: 13px; color: var(--mac-text-secondary); text-align: left; margin-bottom: 15px;">Este cliente tiene <b>${plataformas.length}</b> plataforma(s). Puedes vincular cada una a su respectiva Cuenta Matriz.</p>`;
-        
+
         let hasAnyMatrix = false;
 
         plataformas.forEach((plat, index) => {
             const platKey = plat.toLowerCase();
             const matricesDisponibles = matricesPorPlataforma[platKey] || [];
-            
+
             htmlContenido += `<div style="background: var(--mac-gray); padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--mac-border); text-align: left;">`;
             htmlContenido += `<h4 style="margin: 0 0 10px 0; color: var(--mac-blue); font-size: 14px;"><i class='bx bx-tv'></i> ${plat}</h4>`;
 
             if (matricesDisponibles.length > 0) {
                 hasAnyMatrix = true;
-                
+
                 // Buscar si ya estaba vinculado previamente para dejarlo preseleccionado
                 let matrizActual = '';
                 let perfilActual = '';
@@ -5643,7 +6634,7 @@ window.openLinkModal = async (clientId, clientPlatform) => {
                 for (let i = 0; i < plataformas.length; i++) {
                     const matSelect = document.getElementById(`swal-matriz-${i}`);
                     const perfInput = document.getElementById(`swal-perfil-${i}`);
-                    
+
                     if (matSelect) {
                         const matrizId = matSelect.value;
                         const perfil = perfInput ? perfInput.value.trim() : '';
@@ -5652,7 +6643,7 @@ window.openLinkModal = async (clientId, clientPlatform) => {
                             Swal.showValidationMessage(`El perfil para ${plataformas[i]} debe contener al menos un NÚMERO (Ej: 3, J3).`);
                             return false;
                         }
-                        
+
                         resultados.push({
                             plataforma: matSelect.getAttribute('data-plat'),
                             matrizId: matrizId, // 🔥 Ahora reconoce cuando eliges "No vincular" ("")
@@ -5664,9 +6655,9 @@ window.openLinkModal = async (clientId, clientPlatform) => {
             }
         });
 
-        if (formValues && formValues.length > 0) { 
+        if (formValues && formValues.length > 0) {
             let multiAccounts = c.multiAccounts || {};
-            
+
             if (!c.multiAccounts) {
                 plataformas.forEach(p => {
                     multiAccounts[p] = {
@@ -5681,7 +6672,7 @@ window.openLinkModal = async (clientId, clientPlatform) => {
 
             formValues.forEach(vinculo => {
                 if (!multiAccounts[vinculo.plataforma]) multiAccounts[vinculo.plataforma] = window.getDefaultAccData();
-                
+
                 if (vinculo.matrizId === "") {
                     // 🔥 LÓGICA DE DESVINCULACIÓN (Mata al fantasma)
                     multiAccounts[vinculo.plataforma].masterAccountId = null;
@@ -5709,9 +6700,9 @@ window.openLinkModal = async (clientId, clientPlatform) => {
                 multiAccounts: multiAccounts,
                 ...rootUpdates
             });
-            
+
             window.showNotification("✅ Vínculos guardados y datos actualizados.");
-            loadUserClients(); 
+            loadUserClients();
         }
 
     } catch (e) {
@@ -5722,13 +6713,13 @@ window.openLinkModal = async (clientId, clientPlatform) => {
 window.editarClienteDesdeMatriz = (clientId) => {
     // 1. Cambiamos a la vista de "Mis Clientes"
     window.switchMainTab('clientes');
-    
+
     // 2. Ejecutamos tu función original de edición
     window.startEdit(clientId);
-    
+
     // 3. Hacemos scroll suave hacia el formulario
     document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
-    
+
     window.showNotification("✏️ Modo edición activado.");
 };
 
@@ -5746,7 +6737,7 @@ window.abrirModalAdminBot = () => {
 window.generarQrAdmin = async () => {
     const statusEl = document.getElementById('adminBotStatus');
     const qrImgEl = document.getElementById('adminBotQrImage');
-    
+
     statusEl.innerText = "⏳ Generando código QR...";
     statusEl.style.color = "var(--mac-orange)";
     qrImgEl.style.display = 'none';
@@ -5754,11 +6745,11 @@ window.generarQrAdmin = async () => {
     try {
         // 🔥 CORRECCIÓN: Ahora usa tu UID real para que el cron job de cobranza te reconozca
         const response = await fetch(`https://bot.panelagc.com/api/conectar/${currentUser.uid}`);
-        
+
         if (!response.ok) {
             throw new Error(`Error HTTP: ${response.status}`);
         }
-        
+
         const data = await response.json();
 
         if (data.status === 'qr') {
@@ -5771,8 +6762,8 @@ window.generarQrAdmin = async () => {
             statusEl.innerText = "✅ " + data.message;
             statusEl.style.color = "var(--mac-green)";
         } else {
-             statusEl.innerText = "⚠️ Respuesta inesperada del servidor.";
-             statusEl.style.color = "var(--mac-orange)";
+            statusEl.innerText = "⚠️ Respuesta inesperada del servidor.";
+            statusEl.style.color = "var(--mac-orange)";
         }
 
     } catch (error) {
@@ -5788,10 +6779,10 @@ window.sendFreeProfilesToInventory = async (masterId) => {
         const docSnap = await getDoc(doc(db, "masterAccounts", masterId));
         if (!docSnap.exists()) return;
         const mat = docSnap.data();
-        
+
         const qCli = query(collection(db, "clients"), where("userId", "==", currentUser.uid), where("linkedMasterId", "==", masterId));
         const snapCli = await getDocs(qCli);
-        
+
         const occupiedProfiles = snapCli.docs.map(d => {
             const p = d.data().accountProfile;
             const num = p ? String(p).match(/\d+/) : null;
@@ -5800,24 +6791,35 @@ window.sendFreeProfilesToInventory = async (masterId) => {
 
         let stock = currentUserData.inventory || [];
         let added = 0;
+        let profilesToMove = [];
 
         for (let i = 1; i <= mat.maxProfiles; i++) {
             if (!occupiedProfiles.includes(i)) {
-                stock.push({
+                const newAcc = {
                     id: 'acc_' + Date.now() + '_' + i,
                     platform: mat.platform,
                     type: 'Perfil',
+                    months: 1, // Asumimos 1 mes por defecto para matrices
                     email: mat.email,
                     pass: mat.pass,
                     profile: String(i),
                     pin: 'N/A',
                     status: 'libre'
-                });
+                };
+                stock.push(newAcc);
+                profilesToMove.push(newAcc);
                 added++;
             }
         }
 
         if (added > 0) {
+            // 🛑 INTERCEPCIÓN MASIVA DEL MOTOR DE MAPPING
+            const canSave = await window.checkAndLinkStockRules(profilesToMove);
+            if (!canSave) {
+                window.showNotification("Operación cancelada. Debes vincular el stock.");
+                return;
+            }
+
             await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
             currentUserData.inventory = stock;
             window.showNotification(`📦 ${added} perfiles enviados al inventario.`);
@@ -5837,21 +6839,25 @@ let platformChartInst = null;
 let funnelChartInst = null;
 
 window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion') => {
-    const textColor = '#888888';
-    const gridColor = '#222222';
-    
+    const isDark = document.body.classList.contains('dark-mode');
+    const textColor = isDark ? '#9CA3AF' : '#6B7280';
+    const textMainColor = isDark ? '#F9FAFB' : '#111827';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
+    const strokeColor = isDark ? '#1C1F26' : '#FFFFFF';
+    const commonOptions = { theme: { mode: isDark ? 'dark' : 'light' }, tooltip: { theme: isDark ? 'dark' : 'light' } };
+
     // --- 1. RADAR INTELIGENTE DE SECCIÓN ---
     const isFinance = document.getElementById('financeSection') && document.getElementById('financeSection').classList.contains('active-section');
-    
+
     const revChartId = isFinance ? '#revenueChartFin' : '#revenueChart';
     const platChartId = isFinance ? '#platformChartFin' : '#platformChart';
     const funChartId = isFinance ? '#funnelChartFin' : '#funnelChart';
-    
+
     const lblTitleId = isFinance ? 'chartHeaderLabelFin' : 'chartHeaderLabel';
     const lblTagId = isFinance ? 'chartHeaderTagFin' : 'chartHeaderTag';
     const lblTotalId = isFinance ? 'chartHeaderTotalFin' : 'chartHeaderTotal';
 
-    const today = new Date(); today.setHours(0,0,0,0);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
     let catLabels = [];
     let chartData = [];
     let labelTitle = '';
@@ -5861,12 +6867,12 @@ window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion
     if (filter === 'proyeccion') {
         labelTitle = 'Dinero por cobrar (Próx. 14 Días)';
         tagHtml = `+ Proyección <i class='bx bx-trending-up'></i>`;
-        for(let i=0; i<14; i++) {
+        for (let i = 0; i < 14; i++) {
             let d = new Date(today); d.setDate(today.getDate() + i);
             catLabels.push(d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }));
             let sum = 0;
             clients.forEach(c => {
-                const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+                const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0);
                 if (exp.getTime() === d.getTime()) sum += (c.price || 0) * (c.accountUnits || 1);
             });
             chartData.push(sum);
@@ -5878,7 +6884,7 @@ window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion
         let sumAyer = 0, sumHoy = 0;
         let ayer = new Date(today); ayer.setDate(today.getDate() - 1);
         clients.forEach(c => {
-            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0);
             const fechaPago = new Date(exp); fechaPago.setMonth(fechaPago.getMonth() - (c.accountMonths || 1));
             if (fechaPago.getTime() === today.getTime()) sumHoy += (c.price || 0) * (c.accountUnits || 1);
             if (fechaPago.getTime() === ayer.getTime()) sumAyer += (c.price || 0) * (c.accountUnits || 1);
@@ -5887,12 +6893,12 @@ window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion
     } else if (filter === 'semana') {
         labelTitle = 'Ingresos (Últimos 7 días)';
         tagHtml = `Esta Semana <i class='bx bx-calendar'></i>`;
-        for(let i=6; i>=0; i--) {
+        for (let i = 6; i >= 0; i--) {
             let d = new Date(today); d.setDate(today.getDate() - i);
-            catLabels.push(d.toLocaleDateString('es-ES', { weekday: 'short' })); 
+            catLabels.push(d.toLocaleDateString('es-ES', { weekday: 'short' }));
             let sum = 0;
             clients.forEach(c => {
-                const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+                const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0);
                 const fechaPago = new Date(exp); fechaPago.setMonth(fechaPago.getMonth() - (c.accountMonths || 1));
                 if (fechaPago.getTime() === d.getTime()) sum += (c.price || 0) * (c.accountUnits || 1);
             });
@@ -5904,7 +6910,7 @@ window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion
         catLabels = ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'];
         let weeks = [0, 0, 0, 0];
         clients.forEach(c => {
-            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0);
             const fechaPago = new Date(exp); fechaPago.setMonth(fechaPago.getMonth() - (c.accountMonths || 1));
             if (fechaPago.getMonth() === today.getMonth() && fechaPago.getFullYear() === today.getFullYear()) {
                 let w = Math.floor((fechaPago.getDate() - 1) / 7);
@@ -5919,7 +6925,7 @@ window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion
         catLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
         let months = new Array(12).fill(0);
         clients.forEach(c => {
-            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+            const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0);
             const fechaPago = new Date(exp); fechaPago.setMonth(fechaPago.getMonth() - (c.accountMonths || 1));
             if (fechaPago.getFullYear() === today.getFullYear()) {
                 months[fechaPago.getMonth()] += (c.price || 0) * (c.accountUnits || 1);
@@ -5929,43 +6935,41 @@ window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion
     }
 
     // Actualización de textos DOM usando las variables detectadas
-    if(document.getElementById(lblTitleId)) document.getElementById(lblTitleId).innerText = labelTitle;
-    if(document.getElementById(lblTagId)) document.getElementById(lblTagId).innerHTML = tagHtml;
-    let headerTotal = chartData.reduce((a,b) => a+b, 0);
-    if(document.getElementById(lblTotalId)) document.getElementById(lblTotalId).innerText = `${globalCurrency}${headerTotal.toFixed(2)}`;
+    if (document.getElementById(lblTitleId)) document.getElementById(lblTitleId).innerText = labelTitle;
+    if (document.getElementById(lblTagId)) document.getElementById(lblTagId).innerHTML = tagHtml;
+    let headerTotal = chartData.reduce((a, b) => a + b, 0);
+    if (document.getElementById(lblTotalId)) document.getElementById(lblTotalId).innerText = `${globalCurrency}${headerTotal.toFixed(2)}`;
 
     // DONUT PLATAFORMAS DINÁMICO
     let platCounts = {};
     clients.forEach(c => {
-        const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0,0,0,0);
+        const exp = new Date(c.date); exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset()); exp.setHours(0, 0, 0, 0);
         const fechaPago = new Date(exp); fechaPago.setMonth(fechaPago.getMonth() - (c.accountMonths || 1));
-        const dVenc = Math.ceil((exp-today)/86400000);
-        
+        const dVenc = Math.ceil((exp - today) / 86400000);
+
         let entra = false;
-        if (filter === 'proyeccion') { if(dVenc >= 0 && dVenc <= 14) entra = true; }
-        else if (filter === 'hoy') { if(fechaPago.getTime() === today.getTime()) entra = true; }
-        else if (filter === 'semana') { let w = new Date(today); w.setDate(w.getDate()-6); if(fechaPago>=w && fechaPago<=today) entra=true; }
-        else if (filter === 'mes') { if(fechaPago.getMonth()===today.getMonth() && fechaPago.getFullYear()===today.getFullYear()) entra=true; }
-        else if (filter === 'anio') { if(fechaPago.getFullYear()===today.getFullYear()) entra=true; }
+        if (filter === 'proyeccion') { if (dVenc >= 0 && dVenc <= 14) entra = true; }
+        else if (filter === 'hoy') { if (fechaPago.getTime() === today.getTime()) entra = true; }
+        else if (filter === 'semana') { let w = new Date(today); w.setDate(w.getDate() - 6); if (fechaPago >= w && fechaPago <= today) entra = true; }
+        else if (filter === 'mes') { if (fechaPago.getMonth() === today.getMonth() && fechaPago.getFullYear() === today.getFullYear()) entra = true; }
+        else if (filter === 'anio') { if (fechaPago.getFullYear() === today.getFullYear()) entra = true; }
 
         if (entra) {
             const u = c.accountUnits || 1;
             c.platform.split(', ').forEach(p => { platCounts[p] = (platCounts[p] || 0) + u; });
         }
     });
-    const sortedPlats = Object.entries(platCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
+    const sortedPlats = Object.entries(platCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
     const platLabels = sortedPlats.length ? sortedPlats.map(x => x[0]) : ['Sin Datos'];
     const platData = sortedPlats.length ? sortedPlats.map(x => x[1]) : [1];
 
-    const commonOptions = { theme: { mode: 'dark' }, tooltip: { theme: 'dark' } };
-
     // DIBUJAR CURVA
-    if(revenueChartInst) revenueChartInst.destroy();
+    if (revenueChartInst) revenueChartInst.destroy();
     revenueChartInst = new ApexCharts(document.querySelector(revChartId), {
         ...commonOptions,
         series: [{ name: `Monto (${globalCurrency})`, data: chartData }],
         chart: { type: 'area', height: 250, background: 'transparent', toolbar: { show: false }, animations: { enabled: true, easing: 'easeinout', speed: 800 } },
-        colors: ['#0a84ff'], dataLabels: { enabled: false }, stroke: { curve: 'smooth', width: 4 }, fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05, stops: [0, 100] } },
+        colors: ['#0066FF'], dataLabels: { enabled: false }, stroke: { curve: 'smooth', width: 3.5 }, fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.04, stops: [0, 100] } },
         xaxis: { categories: catLabels, labels: { style: { colors: textColor } }, axisBorder: { show: false }, axisTicks: { show: false } },
         yaxis: { labels: { style: { colors: textColor }, formatter: (val) => globalCurrency + val.toFixed(0) } },
         grid: { show: true, borderColor: gridColor, strokeDashArray: 0, xaxis: { lines: { show: false } }, yaxis: { lines: { show: true } } }
@@ -5973,23 +6977,23 @@ window.renderCharts = (totalIncome, totalCost, totalProfit, filter = 'proyeccion
     revenueChartInst.render();
 
     // DIBUJAR DONUT
-    if(platformChartInst) platformChartInst.destroy();
+    if (platformChartInst) platformChartInst.destroy();
     platformChartInst = new ApexCharts(document.querySelector(platChartId), {
         ...commonOptions, series: platData, labels: platLabels,
         chart: { type: 'donut', height: 260, background: 'transparent', animations: { enabled: true, easing: 'easeinout', speed: 800 } },
-        colors: ['#0a84ff', '#30d158', '#ff9f0a', '#bf5af2', '#ff453a'],
-        plotOptions: { pie: { donut: { size: '72%', labels: { show: true, name: { color: textColor }, value: { color: '#ffffff', fontSize: '20px', fontWeight: 'bold', formatter: (val) => val + " ud" }, total: { show: true, showAlways: true, label: 'Cuentas', color: textColor } } } } },
-        dataLabels: { enabled: false }, stroke: { show: true, colors: ['#0a0a0c'], width: 3 }, legend: { position: 'right', labels: { colors: '#ffffff' } }
+        colors: ['#0066FF', '#10B981', '#F59E0B', '#5856D6', '#EF4444'],
+        plotOptions: { pie: { donut: { size: '72%', labels: { show: true, name: { color: textColor }, value: { color: textMainColor, fontSize: '20px', fontWeight: 'bold', formatter: (val) => val + " ud" }, total: { show: true, showAlways: true, label: 'Cuentas', color: textColor } } } } },
+        dataLabels: { enabled: false }, stroke: { show: true, colors: [strokeColor], width: 3 }, legend: { position: 'right', labels: { colors: textMainColor } }
     });
     platformChartInst.render();
 
     // DIBUJAR EMBUDO
-    if(funnelChartInst) funnelChartInst.destroy();
+    if (funnelChartInst) funnelChartInst.destroy();
     funnelChartInst = new ApexCharts(document.querySelector(funChartId), {
         ...commonOptions, series: [{ name: 'Monto', data: [totalIncome, totalCost, totalProfit] }],
         chart: { type: 'bar', height: 180, background: 'transparent', toolbar: { show: false }, animations: { enabled: true, easing: 'easeinout', speed: 800 } },
         plotOptions: { bar: { borderRadius: 6, horizontal: true, distributed: true, dataLabels: { position: 'bottom' } } },
-        colors: ['#0a84ff', '#ff453a', '#30d158'],
+        colors: ['#0066FF', '#EF4444', '#10B981'],
         dataLabels: { enabled: true, textAnchor: 'start', style: { colors: ['#fff'], fontSize: '13px', fontWeight: 'bold' }, formatter: function (val, opt) { return opt.w.globals.labels[opt.dataPointIndex] + ": " + globalCurrency + val.toFixed(2); }, offsetX: 10, dropShadow: { enabled: true, top: 1, left: 1, blur: 1, opacity: 0.5 } },
         stroke: { width: 0 }, xaxis: { categories: ['1. Ingresos Brutos', '2. Inversión Total', '3. Ganancia Neta'], labels: { show: false }, axisBorder: { show: false }, axisTicks: { show: false } }, yaxis: { labels: { show: false } }, grid: { show: false }
     });
@@ -6002,17 +7006,17 @@ window.toggleSidebar = () => {
     const sidebar = document.getElementById('mainSidebar');
     if (sidebar) {
         sidebar.classList.toggle('collapsed');
-        
+
         // Guardamos su estado en la memoria local del navegador
         const isCollapsed = sidebar.classList.contains('collapsed');
         localStorage.setItem('agc_sidebar_collapsed', isCollapsed);
-        
+
         // 🪄 MAGIA: Disparamos un evento "falso" de redimensionamiento de ventana
         // Esto obliga a tus gráficos ApexCharts a recalcular su tamaño al instante
         // y adaptarse suavemente al nuevo espacio gigante que se liberó.
-        setTimeout(() => { 
-            window.dispatchEvent(new Event('resize')); 
-        }, 350); 
+        setTimeout(() => {
+            window.dispatchEvent(new Event('resize'));
+        }, 350);
     }
 };
 
@@ -6021,7 +7025,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const isCollapsed = localStorage.getItem('agc_sidebar_collapsed') === 'true';
     if (isCollapsed) {
         const sidebar = document.getElementById('mainSidebar');
-        if(sidebar) sidebar.classList.add('collapsed');
+        if (sidebar) sidebar.classList.add('collapsed');
     }
 });
 /* =========================================================
@@ -6047,9 +7051,9 @@ window.checkClientPortal = async () => {
     try {
         const q = query(collection(db, "users"), where("storeAlias", "==", portalId));
         const snap = await getDocs(q);
-        
-        if (!snap.empty) { 
-            portalStoreData = snap.docs[0].data(); 
+
+        if (!snap.empty) {
+            portalStoreData = snap.docs[0].data();
             portalStoreData.uid = snap.docs[0].id;
         } else {
             const docRef = await getDoc(doc(db, "users", portalId));
@@ -6065,7 +7069,7 @@ window.checkClientPortal = async () => {
         }
 
         document.getElementById('portalStoreName').innerText = portalStoreData.name || "Mi Portal";
-        
+
         const logo = document.getElementById('portalStoreLogo');
         if (logo) {
             if (portalStoreData.logoUrl) {
@@ -6086,21 +7090,21 @@ window.checkClientPortal = async () => {
             const clientDoc = await getDoc(doc(db, "clients", clientId));
             if (clientDoc.exists() && clientDoc.data().userId === portalStoreData.uid) {
                 const baseClient = clientDoc.data();
-                
+
                 // Buscar si tiene otros servicios con el mismo código y teléfono
                 const cleanInputPhone = baseClient.phone ? baseClient.phone.replace(/[^\d]/g, '') : '';
                 const codeInput = baseClient.portalCode;
-                
+
                 const qAll = query(collection(db, "clients"), where("userId", "==", portalStoreData.uid));
                 const snapAll = await getDocs(qAll);
-                
+
                 let matchedClients = [];
                 snapAll.forEach(d => {
                     const c = d.data();
                     c.id = d.id; // <-- FIX: Atrapa el ID secreto del cliente
                     const cleanDbPhone = c.phone ? c.phone.replace(/[^\d]/g, '') : '';
                     if ((cleanDbPhone === cleanInputPhone || cleanDbPhone.endsWith(cleanInputPhone)) && c.portalCode === codeInput) {
-                        matchedClients.push(c); 
+                        matchedClients.push(c);
                     }
                 });
 
@@ -6138,7 +7142,7 @@ window.searchPortalByPhone = async () => {
             const cleanDbPhone = c.phone ? c.phone.replace(/[^\d]/g, '') : '';
             // Validar teléfono y código para apilar todas sus compras
             if ((cleanDbPhone === cleanInputPhone || cleanDbPhone.endsWith(cleanInputPhone)) && c.portalCode === codeInput) {
-                matchedClients.push(c); 
+                matchedClients.push(c);
             }
         });
 
@@ -6148,7 +7152,7 @@ window.searchPortalByPhone = async () => {
         } else {
             window.showNotification("❌ Datos incorrectos. Revisa tu número y código.");
         }
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         window.showNotification("Error: " + e.message);
     } finally {
@@ -6176,7 +7180,7 @@ window.openPortalManagerModal = () => {
     const baseUrl = window.location.origin + window.location.pathname;
     const portalAlias = currentUserData.storeAlias || currentUser.uid;
     const globalUrl = `${baseUrl}?portal=${portalAlias}`;
-    
+
     document.getElementById('globalPortalUrlInput').value = globalUrl;
     document.getElementById('portalManagerModal').style.display = 'flex';
 };
@@ -6186,7 +7190,7 @@ window.copyGlobalPortalUrl = () => {
     window.copyToClipboard(url, "Enlace del Portal");
 };
 
-// Se actualizó para que le envíe el código automáticamente al cliente
+// Se actualizó para que le envíe el código automáticamente al cliente usando la plantilla personalizada
 window.sendClientPortalWa = (phone, clientId) => {
     const c = clients.find(x => x.id === clientId);
     if (!c) return window.showNotification("Cliente no encontrado.");
@@ -6195,16 +7199,30 @@ window.sendClientPortalWa = (phone, clientId) => {
     const portalAlias = currentUserData.storeAlias || currentUser.uid;
     const clientUrl = `${baseUrl}?portal=${portalAlias}`;
     const cleanPhone = phone.replace(/[^\d+]/g, '');
-    
-    const msg = `¡Hola, *${c.name}*! 👋\n\nPuedes consultar el estado de tus servicios y tus contraseñas en tiempo real desde tu portal web personal.\n\n🔗 *Link:* ${clientUrl}\n📱 *Usuario:* ${c.phone}\n🔑 *Código Web:* ${c.portalCode || 'N/A'}\n\n_Guarda este mensaje para ver tus accesos cuando quieras._`;
-    
+
+    let dateStr = c.date || '';
+    if (c.date) {
+        const exp = new Date(c.date);
+        exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
+        if (!isNaN(exp)) dateStr = exp.toLocaleDateString('es-ES');
+    }
+
+    const basePortalMsg = currentUserData.waPortalMessage || defaultPortal;
+    const msg = basePortalMsg
+        .replace(/{nombre}/g, c.name || 'Cliente')
+        .replace(/{plataforma}/g, c.platform || 'Streaming')
+        .replace(/{fecha}/g, dateStr)
+        .replace(/{link}/g, clientUrl)
+        .replace(/{numero}/g, c.phone || phone)
+        .replace(/{codigo}/g, c.portalCode || 'N/A');
+
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
 };
 
 window.renderClientPortalData = (clientsArray, storeUserData) => {
     const container = document.getElementById('portalClientResults');
     container.innerHTML = '';
-    
+
     if (!clientsArray || clientsArray.length === 0) return;
 
     let fullHtml = '';
@@ -6214,14 +7232,14 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
         const now = new Date();
         const exp = new Date(clientObj.date);
         exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
-        
+
         const diffTime = exp.getTime() - now.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
+
         let badgeClass = 'active';
         let badgeIcon = 'bx-check-circle';
         let badgeText = `Activo (${diffDays} días restantes)`;
-        
+
         if (diffDays <= 0) {
             badgeClass = 'expired';
             badgeIcon = 'bx-x-circle';
@@ -6241,8 +7259,8 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
 
         let accountsHtml = '';
         platformsList.forEach(platName => {
-            let acc = clientObj.multiAccounts && clientObj.multiAccounts[platName] 
-                ? clientObj.multiAccounts[platName] 
+            let acc = clientObj.multiAccounts && clientObj.multiAccounts[platName]
+                ? clientObj.multiAccounts[platName]
                 : {
                     email: clientObj.accountEmail || '-',
                     password: clientObj.accountPassword || '-',
@@ -6251,30 +7269,43 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
                 };
 
             accountsHtml += `
-                <div style="background: var(--mac-bg); padding: 15px; border-radius: 16px; border: 1px solid var(--mac-border); text-align: left; display: flex; flex-direction: column; height: 100%; box-sizing: border-box;">
-                    <div style="font-size: 14px; font-weight: 800; color: var(--mac-text-main); margin-bottom: 12px;">🎬 ${platName.toUpperCase()}</div>
+                <div style="background: var(--mac-surface); padding: 20px; border-radius: 20px; text-align: left; display: flex; flex-direction: column; box-sizing: border-box; width: 100%; max-width: 360px; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                    <div style="font-size: 15px; font-weight: 900; color: var(--mac-text-main); margin-bottom: 15px; text-align: center; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px;">🎬 ${platName.toUpperCase()}</div>
                     
-                    <div class="credential-card">
+                    <div class="credential-card" style="margin-bottom: 10px; padding: 10px 15px;">
                         <div class="credential-info"><span class="credential-label">Correo</span><span class="credential-value">${acc.email || '-'}</span></div>
-                        <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap;" onclick="window.copyToClipboard('${acc.email || ''}', 'Correo')"><i class='bx bx-copy'></i> Copiar</button>
+                        <button class="btn-copy-chip" style="white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.email || ''}', 'Correo')"><i class='bx bx-copy'></i></button>
                     </div>
                     
-                    <div class="credential-card">
+                    <div class="credential-card" style="margin-bottom: 15px; padding: 10px 15px;">
                         <div class="credential-info"><span class="credential-label">Contraseña</span><span class="credential-value">${acc.password || '-'}</span></div>
-                        <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap;" onclick="window.copyToClipboard('${acc.password || ''}', 'Clave')"><i class='bx bx-copy'></i> Copiar</button>
+                        <button class="btn-copy-chip" style="white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.password || ''}', 'Clave')"><i class='bx bx-copy'></i></button>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div class="credential-card" style="margin: 0; align-items: center;">
-                            <div class="credential-info"><span class="credential-label">Perfil N°</span><span class="credential-value">${acc.profile || '-'}</span></div>
-                            <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.profile || ''}', 'Perfil')"><i class='bx bx-copy'></i></button>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <div class="credential-card" style="margin: 0; padding: 10px; text-align: center; justify-content: center;">
+                            <div class="credential-info" style="padding: 0; align-items: center;"><span class="credential-label">Perfil</span><span class="credential-value" style="font-size: 16px; color: var(--mac-orange);">${acc.profile || '-'}</span></div>
                         </div>
-                        <div class="credential-card" style="margin: 0; align-items: center;">
-                            <div class="credential-info"><span class="credential-label">PIN Acceso</span><span class="credential-value">${acc.pin || '-'}</span></div>
-                            <button class="btn-copy-chip" style="width: max-content; flex-shrink: 0; white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.pin || ''}', 'PIN')"><i class='bx bx-copy'></i></button>
+                        <div class="credential-card" style="margin: 0; padding: 10px; text-align: center; justify-content: center;">
+                            <div class="credential-info" style="padding: 0; align-items: center;"><span class="credential-label">PIN</span><span class="credential-value" style="font-size: 16px; color: var(--mac-orange);">${acc.pin || '-'}</span></div>
                         </div>
                     </div>
-                    <button onclick="window.openReviewModal('${clientObj.id}', '${platName}', '${clientObj.name.replace(/'/g, "\\'")}', '${clientObj.phone || ''}')" class="btn-secondary" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; border: 1px solid var(--mac-orange); color: var(--mac-orange); background: rgba(255, 149, 0, 0.1); transition: 0.2s;"><i class='bx bxs-star'></i> Calificar Servicio</button>
+                    ${(() => {
+                    const connections = storeUserData.apiConnections || [];
+                    const connInfo = connections.find(c => c.platform === platName);
+
+                    if (connInfo && connInfo.email && connInfo.token) {
+                        const isFullAccount = connInfo.permission === 'Modificación y Alertas';
+                        const accessLevel = isFullAccount ? 'Cuenta Completa' : 'Perfil';
+
+                        return `
+                            <button onclick="window.requestAccessCode('${connInfo.email}', '${connInfo.token}', '${accessLevel}', '${acc.email || '-'}', '${platName}')" class="btn-primary" style="margin-top: auto; width: 100%; padding: 12px; border-radius: 12px; font-weight: bold; background: var(--mac-blue); border: none;">
+                                <i class='bx bx-mobile-landscape'></i> Solicitar Código
+                            </button>`;
+                    }
+                    return '';
+                })()}
+                    <button onclick="window.openReviewModal('${clientObj.id}', '${platName}', '${clientObj.name.replace(/'/g, "\\'")}', '${clientObj.phone || ''}')" class="btn-secondary" style="margin-top: 10px; width: 100%; padding: 12px; border-radius: 12px; font-weight: bold; border: 1px solid var(--mac-orange); color: var(--mac-orange); background: rgba(255, 149, 0, 0.1); transition: 0.2s;"><i class='bx bxs-star'></i> Calificar</button>
                 </div>
             `;
         });
@@ -6283,7 +7314,7 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
         const renewMsg = encodeURIComponent(`¡Hola! Quisiera renovar mi servicio de ${clientObj.platform}. Nombre: ${clientObj.name}`);
         const renewUrl = `https://wa.me/${vendorPhone}?text=${renewMsg}`;
 
-       fullHtml += `
+        fullHtml += `
             <div class="portal-hero-card" style="margin-bottom: 20px;">
                 <span class="portal-badge ${badgeClass}"><i class='bx ${badgeIcon}'></i> ${badgeText}</span>
                 <h2 style="margin: 0 0 5px 0; font-size: 22px; color: var(--mac-text-main);">${clientObj.name}</h2>
@@ -6304,7 +7335,7 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
 
 document.addEventListener('DOMContentLoaded', () => { window.checkClientPortal(); });
 
-        // 📱 CONTROLADOR DEL MENÚ LATERAL EN MÓVIL ESTILO SPOTIFY
+// 📱 CONTROLADOR DEL MENÚ LATERAL EN MÓVIL ESTILO SPOTIFY
 window.toggleMobileMenu = () => {
     const sidebar = document.getElementById('mainSidebar');
     const overlay = document.getElementById('mobileSidebarOverlay');
@@ -6366,18 +7397,18 @@ window.populateAllServiceSelects = () => {
             label.innerHTML = `<input type="checkbox" value="${s}"> ${s}`;
             chkDropdown.appendChild(label);
         });
-        document.querySelectorAll('#checkboxDropdown input').forEach(cb => { 
-            cb.addEventListener('change', () => { 
-                const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value); 
-                const el = document.getElementById('selectText'); 
-                if(checked.length) { el.textContent = checked.join(', '); el.classList.add('has-selection'); } 
-                else { el.textContent = 'Plataforma(s)...'; el.classList.remove('has-selection'); } 
-            }); 
+        document.querySelectorAll('#checkboxDropdown input').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value);
+                const el = document.getElementById('selectText');
+                if (checked.length) { el.textContent = checked.join(', '); el.classList.add('has-selection'); }
+                else { el.textContent = 'Plataforma(s)...'; el.classList.remove('has-selection'); }
+            });
         });
     }
 
     // B) Selects Simples (Inventario, Matrices, Reglas)
-    const selectIds = [{ id: 'invPlatform', defaultOpt: 'Plataforma...' }, { id: 'matPlatform', defaultOpt: null }, { id: 'rulePlatformSelect', defaultOpt: null }];
+    const selectIds = [{ id: 'invPlatform', defaultOpt: 'Plataforma...' }, { id: 'matPlatform', defaultOpt: null }, { id: 'rulePlatformSelect', defaultOpt: null }, { id: 'refPlatformSelect', defaultOpt: 'Selecciona Plataforma...' }, { id: 'campaignPlatformFilter', defaultOpt: 'Cualquier Plataforma' }];
     selectIds.forEach(item => {
         const select = document.getElementById(item.id);
         if (select) {
@@ -6471,7 +7502,7 @@ window.checkPlanesView = () => {
 window.startTutorial = () => {
     const driver = window.driver.js.driver;
     const isDark = document.body.classList.contains('dark-mode');
-    
+
     const driverObj = driver({
         showProgress: true,
         nextBtnText: 'Siguiente &rarr;',
@@ -6512,12 +7543,12 @@ window.updateStoreToggleUI = (labelEl, inputId) => {
         const chk = document.getElementById(inputId);
         const icon = labelEl.querySelector('.store-toggle-icon');
         if (!chk || !icon) return;
-        
+
         // Define colores: Azul para Inventario, Naranja para Invitación
         const isStock = inputId === 'storeAutoStock';
         const activeColor = isStock ? 'var(--mac-blue)' : 'var(--mac-orange)';
         const activeBg = isStock ? 'rgba(0, 122, 255, 0.15)' : 'rgba(255, 149, 0, 0.15)';
-        
+
         if (chk.checked) {
             labelEl.style.border = `1px solid ${activeColor}`;
             labelEl.style.background = activeBg;
@@ -6536,7 +7567,7 @@ window.currentClientNote = '';
 // --- VER NOTA DEL CLIENTE (TIPO PAPELITO) ---
 window.viewClientNote = (id) => {
     const c = clients.find(x => x.id === id);
-    if(c && c.notes) {
+    if (c && c.notes) {
         Swal.fire({
             title: '📝 Nota del Cliente',
             html: `
@@ -6564,7 +7595,7 @@ window.openNotesModal = async () => {
         background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
         color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
     });
-    
+
     if (text !== undefined) {
         window.currentClientNote = text;
         window.showNotification("Nota temporal guardada.");
@@ -6573,12 +7604,12 @@ window.openNotesModal = async () => {
 
 window.toggleClientMenu = (e, menuId) => {
     e.stopPropagation();
-    
+
     // 1. Cerramos otros menús y reseteamos la profundidad de TODAS las filas
     document.querySelectorAll('.client-action-menu').forEach(menu => {
-        if(menu.id !== menuId) menu.classList.remove('show');
+        if (menu.id !== menuId) menu.classList.remove('show');
     });
-    
+
     document.querySelectorAll('#tableBody tr').forEach(tr => {
         tr.style.zIndex = '1';
         tr.style.position = 'relative'; // Fundamental para que el z-index haga efecto
@@ -6600,7 +7631,7 @@ window.toggleClientMenu = (e, menuId) => {
 // Cierra el menú de opciones si el usuario hace clic fuera de la tabla
 document.addEventListener('click', () => {
     document.querySelectorAll('.client-action-menu').forEach(menu => menu.classList.remove('show'));
-    
+
     // También devolvemos todas las filas a su lugar normal al hacer clic fuera
     document.querySelectorAll('#tableBody tr').forEach(tr => {
         tr.style.zIndex = '1';
@@ -6608,61 +7639,194 @@ document.addEventListener('click', () => {
 });
 
 /* =========================================================
-   🤖 ASISTENTE INTELIGENTE CONTEXTUAL
+   🤖 ASISTENTE INTELIGENTE CONTEXTUAL + COPILOTO GEMINI IA
 ========================================================= */
+window.aiChatHistory = [];
+
+window.detectActiveAssistantSection = () => {
+    if (document.getElementById('adminView')?.style.display === 'block') return 'admin';
+    if (document.getElementById('inventoryModal')?.classList.contains('active-section') || document.getElementById('inventoryModal')?.style.display === 'flex') return 'inventory';
+    if (document.getElementById('storeModal')?.classList.contains('active-section') || document.getElementById('storeModal')?.style.display === 'flex') return 'store';
+    if (document.getElementById('pedidosModal')?.classList.contains('active-section') || document.getElementById('pedidosModal')?.style.display === 'flex') return 'pedidos';
+    if (document.getElementById('profileSection')?.classList.contains('active-section')) return 'profile';
+    if (document.getElementById('financeSection')?.classList.contains('active-section')) return 'finanzas';
+    if (document.getElementById('campaignsSection')?.classList.contains('active-section')) return 'campanas';
+    if (document.getElementById('accountsTableContainer')?.style.display === 'block') return 'matrices';
+    return 'clientes';
+};
+
 window.openAssistant = () => {
     const panel = document.getElementById('aiAssistantPanel');
     const msgEl = document.getElementById('aiContextMessage');
-    
-    // 🔥 NUEVO: Si el panel ya está abierto, lo cerramos y detenemos la función
-    if (panel.classList.contains('active')) {
+
+    if (panel?.classList.contains('active')) {
         window.closeAssistant();
         return;
     }
-    
-    // 1. Detectar en qué sección está el usuario
-    let activeSection = 'home'; // Por defecto
-    
-    if (document.getElementById('adminView').style.display === 'block') {
-        activeSection = 'admin';
-    } else if (document.getElementById('inventoryModal').classList.contains('active-section') || document.getElementById('inventoryModal').style.display === 'flex') {
-        activeSection = 'inventory';
-    } else if (document.getElementById('storeModal').classList.contains('active-section') || document.getElementById('storeModal').style.display === 'flex') {
-        activeSection = 'store';
-    } else if (document.getElementById('pedidosModal').classList.contains('active-section') || document.getElementById('pedidosModal').style.display === 'flex') {
-        activeSection = 'pedidos';
-    } else if (document.getElementById('profileSection').classList.contains('active-section')) {
-        activeSection = 'profile';
-    } else if (document.getElementById('accountsTableContainer').style.display === 'block') {
-        activeSection = 'matrices';
-    } else {
-        activeSection = 'clientes';
-    }
 
-    // 2. Base de conocimientos (Respuestas predeterminadas por sección)
+    const activeSection = window.detectActiveAssistantSection();
+
     const baseConocimientos = {
-        'clientes': `<b>📍 Estás en: Mis Clientes</b><br><br>Aquí administras a tus clientes finales.<br><br>💡 <b>Tip de uso:</b> Usa el botón <b>"⚙️ Opciones"</b> para renovar meses, copiar credenciales al instante, o enviarle a tu cliente su Link de Portal Web.`,
-        
-        'matrices': `<b>📍 Estás en: Cuentas Matrices</b><br><br>Aquí organizas el stock de tus pantallas.<br><br>💡 <b>Tip de uso:</b> Añade una cuenta completa aquí (ej: Netflix de 5 perfiles). El panel te mostrará cuántos espacios te quedan. Usa <b>"Asignar"</b> para vender un perfil libre directamente a un cliente.`,
-        
-        'inventory': `<b>📍 Estás en: Inventario</b><br><br>Esta es tu "bodega" de cuentas libres.<br><br>💡 <b>Tip de uso:</b> Usa el botón verde <i class="bx bx-send"></i> para entregar una cuenta; esto la enviará automáticamente al formulario de clientes para que solo pongas el nombre del comprador.`,
-        
-        'store': `<b>📍 Estás en: Mi Tiendita Web</b><br><br>Este es tu catálogo público para vender en automático.<br><br>💡 <b>Tip de uso:</b> Si marcas <b>"Conectar al Inventario"</b> al crear un producto, este se agotará en la tienda cuando te quedes sin stock en tu bodega.`,
-        
-        'pedidos': `<b>📍 Estás en: Ventas Pendientes</b><br><br>Aquí llegan los pagos que tus clientes hacen en la tiendita.<br><br>💡 <b>Tip de uso:</b> Revisa la captura de pago y presiona <b>"Aprobar"</b>. El sistema sacará una cuenta de tu inventario y se la mandará al WhatsApp del cliente por ti.`,
-        
-        'profile': `<b>📍 Estás en: Mi Perfil & Bot</b><br><br>Aquí configuras tu identidad visual.<br><br>💡 <b>Tip de uso:</b> Enlaza tu WhatsApp haciendo clic en <b>"Activar Mensajes Automáticos"</b> y escaneando el QR. Esto permitirá que tu teléfono cobre las renovaciones mientras duermes.`,
-        
-        'admin': `<b>📍 Estás en: Panel Global (Admin)</b><br><br>Control total de tu negocio SaaS.<br><br>💡 <b>Tip de uso:</b> Usa los filtros de arriba para encontrar clientes. Al editar la licencia de alguien, puedes darle una Demo de 3 horas o un plan Mensual. Si su tiempo se acaba, el sistema lo bloqueará automáticamente.`
+        'clientes': `<b>📍 Estás en: Mis Clientes</b><br><br>Aquí administras a tus clientes finales.<br><br>💡 <b>Tip:</b> Usa <b>"⚙️ Opciones"</b> para renovar meses, copiar credenciales o enviar su Link de Portal Web. ¡Pregúntame abajo sobre tus métricas o pídeme un mensaje de venta!`,
+        'matrices': `<b>📍 Estás en: Cuentas Matrices</b><br><br>Aquí organizas el stock de tus pantallas.<br><br>💡 <b>Tip:</b> Añade una cuenta completa (ej: Netflix de 5 perfiles) y usa <b>"Asignar"</b> para vincular un perfil libre directamente a un cliente.`,
+        'inventory': `<b>📍 Estás en: Inventario</b><br><br>Esta es tu bodega de cuentas libres.<br><br>💡 <b>Tip:</b> Usa el botón verde <i class="bx bx-send"></i> para enviar una cuenta al formulario de clientes automáticamente.`,
+        'store': `<b>📍 Estás en: Mi Tiendita Web</b><br><br>Tu catálogo público para vender en automático.<br><br>💡 <b>Tip:</b> Si marcas <b>"Conectar al Inventario"</b>, el producto mostrará su stock en vivo y se agotará solo.`,
+        'pedidos': `<b>📍 Estás en: Ventas Pendientes</b><br><br>Aquí llegan los pagos de tu Tiendita.<br><br>💡 <b>Tip:</b> Revisa el comprobante y presiona <b>"Aprobar"</b> para elegir si envías credenciales directas, acceso al Portal Web o ambos.`,
+        'profile': `<b>📍 Estás en: Mi Perfil & Bot</b><br><br>Configura tu marca blanca y tu Bot Anti-Ban.<br><br>💡 <b>Tip:</b> Enlaza tu WhatsApp escaneando el QR para cobrar renovaciones y entregar pedidos en piloto automático.`,
+        'finanzas': `<b>📍 Estás en: Finanzas</b><br><br>Analiza tu utilidad neta, ingresos y costos.<br><br>💡 <b>Tip:</b> Pregúntame aquí mismo cuánto llevas ganado o cómo optimizar tus márgenes.`,
+        'campanas': `<b>📍 Estás en: Campañas Masivas</b><br><br>Envía promociones con Spintax Anti-Ban.<br><br>💡 <b>Tip:</b> Pídeme que te redacte una promo con formato Spintax <code>{Hola|Qué tal}</code> lista para usar.`,
+        'admin': `<b>📍 Estás en: Panel Global (Admin)</b><br><br>Control total de tu negocio SaaS.<br><br>💡 <b>Tip:</b> Gestiona licencias, demos y publica novedades para todos los vendedores.`
     };
 
-    // 3. Inyectar el mensaje y abrir el panel
-    msgEl.innerHTML = baseConocimientos[activeSection];
-    panel.classList.add('active');
+    if (msgEl) {
+        msgEl.innerHTML = baseConocimientos[activeSection] || baseConocimientos['clientes'];
+    }
+    if (panel) {
+        panel.classList.add('active');
+        setTimeout(() => {
+            document.getElementById('aiUserPromptInput')?.focus();
+        }, 150);
+    }
 };
 
 window.closeAssistant = () => {
-    document.getElementById('aiAssistantPanel').classList.remove('active');
+    document.getElementById('aiAssistantPanel')?.classList.remove('active');
+};
+
+window.buildBusinessContextForAi = () => {
+    const activeClientsList = (clients || []).filter(c => !c.archived);
+    let activos = 0;
+    let porVencer = 0;
+    let vencidos = 0;
+    let ingresosBrutos = 0;
+    let costoTotal = 0;
+
+    activeClientsList.forEach(c => {
+        const days = typeof getDaysLeft === 'function' ? getDaysLeft(c.expirationDate) : 10;
+        if (days < 0) vencidos++;
+        else if (days <= 3) porVencer++;
+        else activos++;
+
+        ingresosBrutos += parseFloat(c.price) || 0;
+        costoTotal += parseFloat(c.cost) || 0;
+    });
+
+    const utilidadNeta = ingresosBrutos - costoTotal;
+    const moneda = typeof globalCurrency !== 'undefined' ? globalCurrency : (currentUserData?.currency || 'S/');
+
+    const stockLibre = ((currentUserData && currentUserData.inventory) || []).filter(i => i.status === 'libre');
+    const conteoPorPlat = {};
+    stockLibre.forEach(item => {
+        const p = item.platform || 'Otro';
+        conteoPorPlat[p] = (conteoPorPlat[p] || 0) + 1;
+    });
+    const detalleStock = Object.entries(conteoPorPlat).map(([k, v]) => `${k}: ${v}`).join(', ');
+
+    return {
+        nombreVendedor: currentUserData?.name || 'Vendedor',
+        planActual: currentUserData?.plan || 'basic',
+        moneda,
+        totalClientes: activeClientsList.length,
+        totalClientesRegistrados: activeClientsList.length,
+        activos,
+        clientesActivos: activos,
+        porVencer,
+        clientesPorVencer: porVencer,
+        vencidos,
+        clientesVencidos: vencidos,
+        stockLibre: stockLibre.length,
+        cuentasLibresEnStock: stockLibre.length,
+        resumenStock: detalleStock || 'Sin cuentas libres en inventario',
+        detalleStockLibre: detalleStock || 'Sin cuentas libres en inventario',
+        ingresos: ingresosBrutos.toFixed(2),
+        ingresosBrutos: `${moneda}${ingresosBrutos.toFixed(2)}`,
+        inversion: costoTotal.toFixed(2),
+        costoTotal: `${moneda}${costoTotal.toFixed(2)}`,
+        utilidadNeta: utilidadNeta.toFixed(2)
+    };
+};
+
+window.formatAiMarkdown = (text) => {
+    if (!text) return '';
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+        .replace(/\*(.*?)\*/g, '<i>$1</i>')
+        .replace(/`([^`]+)`/g, '<code style="background:rgba(0,122,255,0.12); padding:2px 5px; border-radius:4px; font-family:monospace;">$1</code>')
+        .replace(/\n/g, '<br>');
+};
+
+window.sendAiMessage = async () => {
+    const inputEl = document.getElementById('aiUserPromptInput');
+    const chatContainer = document.getElementById('aiChatMessages');
+    const sendBtn = document.getElementById('btnSendAiMessage');
+    if (!inputEl || !chatContainer) return;
+
+    const pregunta = inputEl.value.trim();
+    if (!pregunta) return;
+
+    inputEl.value = '';
+    if (sendBtn) sendBtn.disabled = true;
+
+    // 1. Agregar globo del usuario
+    const userBubble = document.createElement('div');
+    userBubble.className = 'ai-chat-bubble ai-bubble-user';
+    userBubble.textContent = pregunta;
+    chatContainer.appendChild(userBubble);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    // 2. Mostrar indicador "Escribiendo..."
+    const typingBubble = document.createElement('div');
+    typingBubble.className = 'ai-chat-bubble ai-bubble-bot ai-bubble-typing';
+    typingBubble.innerHTML = `<i class='bx bx-loader-alt bx-spin'></i> Escribiendo...`;
+    chatContainer.appendChild(typingBubble);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    try {
+        const seccionActual = window.detectActiveAssistantSection();
+        const contextoNegocio = window.buildBusinessContextForAi();
+
+        const response = await fetch('https://bot.panelagc.com/api/asistente-ia', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                pregunta,
+                seccionActual,
+                contextoNegocio,
+                historial: window.aiChatHistory.slice(-8)
+            })
+        });
+
+        const data = await response.json();
+        typingBubble.remove();
+
+        const botBubble = document.createElement('div');
+        botBubble.className = 'ai-chat-bubble ai-bubble-bot';
+
+        if (response.ok && data.status === 'success' && data.respuesta) {
+            botBubble.innerHTML = window.formatAiMarkdown(data.respuesta);
+            window.aiChatHistory.push({ role: 'user', text: pregunta });
+            window.aiChatHistory.push({ role: 'model', text: data.respuesta });
+        } else {
+            botBubble.innerHTML = `⚠️ ${data.message || 'No pude procesar tu consulta en este momento. Intenta de nuevo en unos segundos.'}`;
+        }
+
+        chatContainer.appendChild(botBubble);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    } catch (error) {
+        console.error('Error en sendAiMessage:', error);
+        typingBubble.remove();
+        const errBubble = document.createElement('div');
+        errBubble.className = 'ai-chat-bubble ai-bubble-bot';
+        errBubble.innerHTML = `⚠️ Error de conexión con el Copiloto IA. Verifica tu internet o intenta nuevamente.`;
+        chatContainer.appendChild(errBubble);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    } finally {
+        if (sendBtn) sendBtn.disabled = false;
+        inputEl.focus();
+    }
 };
 
 /* =========================================================
@@ -6675,9 +7839,9 @@ window.switchStoreAdminTab = (tabId, element) => {
     // Cambiar color de pestaña
     document.querySelectorAll('#storeModal .chrome-tab').forEach(tab => tab.classList.remove('active'));
     element.classList.add('active');
-    
+
     // Si entra a ajustes, cargar datos
-    if(tabId === 'tabDescuentos') {
+    if (tabId === 'tabDescuentos') {
         const d = currentUserData.storeDiscounts || { qty2: 0, qty3: 0, qty4: 0 };
         document.getElementById('descCombo2').value = d.qty2 || '';
         document.getElementById('descCombo3').value = d.qty3 || '';
@@ -6691,44 +7855,51 @@ window.saveStoreSettings = async () => {
         const qty2 = parseFloat(document.getElementById('descCombo2').value) || 0;
         const qty3 = parseFloat(document.getElementById('descCombo3').value) || 0;
         const qty4 = parseFloat(document.getElementById('descCombo4').value) || 0;
-        
+
         const storeDiscounts = { qty2, qty3, qty4 };
-        
+
         await updateDoc(doc(db, "users", currentUser.uid), { storeDiscounts });
         currentUserData.storeDiscounts = storeDiscounts;
         window.showNotification("✅ Descuentos guardados correctamente");
-    } catch(e) { window.showNotification("Error: " + e.message); }
+    } catch (e) { window.showNotification("Error: " + e.message); }
 };
 
 window.addStoreCoupon = async () => {
     const code = document.getElementById('newCouponCode').value.trim().toUpperCase();
     const percent = parseFloat(document.getElementById('newCouponPercent').value) || 0;
-    
+    const targetEl = document.getElementById('newCouponTarget');
+    const target = targetEl ? targetEl.value : 'global';
+
     if (!code || percent <= 0) return window.showNotification("⚠️ Ingresa un código y un descuento válido.");
-    
+
     let coupons = currentUserData.storeCoupons || [];
     if (coupons.some(c => c.code === code)) return window.showNotification("Ese código ya existe.");
-    
-    coupons.push({ code, percent });
+
+    coupons.push({ code, percent, target });
     try {
         await updateDoc(doc(db, "users", currentUser.uid), { storeCoupons: coupons });
         currentUserData.storeCoupons = coupons;
         document.getElementById('newCouponCode').value = '';
         document.getElementById('newCouponPercent').value = '';
+        if (targetEl) targetEl.value = 'global';
         window.renderStoreCoupons();
         window.showNotification("🎟️ Cupón creado");
-    } catch(e) {}
+    } catch (e) { }
 };
 
 window.renderStoreCoupons = () => {
     const list = document.getElementById('storeCouponsList');
     list.innerHTML = '';
     const coupons = currentUserData.storeCoupons || [];
-    
+
     coupons.forEach((c, index) => {
+        const targetText = (c.target && c.target !== 'global') ? `<span style="font-size: 10px; color: var(--mac-blue); display: block; margin-top: 2px;">Solo: ${c.target}</span>` : `<span style="font-size: 10px; color: var(--mac-text-secondary); display: block; margin-top: 2px;">Global</span>`;
         list.innerHTML += `
-            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mac-surface); border: 1px dashed var(--mac-green); padding: 10px 15px; border-radius: 8px;">
-                <span style="font-weight: 900; color: var(--mac-green); letter-spacing: 1px;">${c.code} <span style="font-size: 11px; color: var(--mac-text-secondary);">(-${c.percent}%)</span></span>
+            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mac-surface); border: 1px dashed var(--mac-green); padding: 10px 15px; border-radius: 8px; margin-bottom: 5px;">
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-weight: 900; color: var(--mac-green); letter-spacing: 1px;">${c.code} <span style="font-size: 11px; color: var(--mac-text-main);">(-${c.percent}%)</span></span>
+                    ${targetText}
+                </div>
                 <button class="action-btn btn-del" style="padding: 4px; font-size: 14px;" onclick="window.deleteStoreCoupon(${index})"><i class='bx bx-trash'></i></button>
             </div>
         `;
@@ -6753,14 +7924,14 @@ window.applyCoupon = () => {
     const code = document.getElementById('cartCouponInput').value.trim().toUpperCase();
     const feedback = document.getElementById('couponFeedbackMessage');
 
-    if(!code) {
+    if (!code) {
         if (feedback) feedback.style.display = 'none';
         return;
     }
-    
+
     const storeCoupons = window.publicStoreDataCache.storeCoupons || [];
     const validCoupon = storeCoupons.find(c => c.code === code);
-    
+
     if (validCoupon) {
         activeCoupon = validCoupon;
         if (feedback) {
@@ -6784,16 +7955,16 @@ window.renderCartItems = () => {
     const container = document.getElementById('cartItemsContainer');
     const data = window.publicStoreDataCache;
     container.innerHTML = '';
-    
+
     if (window.storeCart.length === 0) {
         container.innerHTML = '<div style="text-align: center; color: var(--mac-text-secondary); margin-top: 50px;"><i class="bx bx-shopping-bag" style="font-size: 64px; opacity: 0.3; margin-bottom: 15px;"></i><p style="font-weight: bold; font-size: 16px;">Tu carrito está vacío</p></div>';
-        document.getElementById('cartTotalPrice').innerText = `${data.currency || 'S/'}0.00`;
+        document.getElementById('cartTotalPrice').innerText = window.formatStorePrice(0);
         document.getElementById('floatingCartBtn').style.display = 'none';
         document.getElementById('cartComboDiscountRow').style.display = 'none';
         document.getElementById('cartCouponRow').style.display = 'none';
         return;
     }
-    
+
     let subtotal = 0;
     window.storeCart.forEach((item, index) => {
         subtotal += item.price;
@@ -6803,7 +7974,7 @@ window.renderCartItems = () => {
                 ${imgHTML}
                 <div class="cart-item-info">
                     <div class="cart-item-title">${item.platform}</div>
-                    <div class="cart-item-price">${data.currency || 'S/'}${item.price.toFixed(2)}</div>
+                    <div class="cart-item-price">${window.formatStorePrice(item.price)}</div>
                 </div>
                 <button class="cart-item-remove" onclick="window.removeFromCart(${index})" title="Quitar"><i class='bx bx-trash'></i></button>
             </div>
@@ -6814,46 +7985,91 @@ window.renderCartItems = () => {
     let qty = window.storeCart.length;
     let comboDiscountPercent = 0;
     const dynamicDisc = data.storeDiscounts || { qty2: 0, qty3: 0, qty4: 0 };
-    
+
     if (qty >= 4 && dynamicDisc.qty4) comboDiscountPercent = dynamicDisc.qty4;
     else if (qty === 3 && dynamicDisc.qty3) comboDiscountPercent = dynamicDisc.qty3;
     else if (qty === 2 && dynamicDisc.qty2) comboDiscountPercent = dynamicDisc.qty2;
 
     let comboDiscountAmount = subtotal * (comboDiscountPercent / 100);
     let afterComboPrice = subtotal - comboDiscountAmount;
-    
+
     // CÁLCULO DE CUPÓN
     let couponDiscountAmount = 0;
     if (activeCoupon) {
         couponDiscountAmount = afterComboPrice * (activeCoupon.percent / 100);
     }
-    
+
     let finalTotal = afterComboPrice - couponDiscountAmount;
 
     // ACTUALIZAR INTERFAZ DEL CARRITO
-    document.getElementById('cartSubtotalPrice').innerText = `${data.currency || 'S/'}${subtotal.toFixed(2)}`;
-    
+    document.getElementById('cartSubtotalPrice').innerText = window.formatStorePrice(subtotal);
+
     if (comboDiscountAmount > 0) {
         document.getElementById('cartComboDiscountRow').style.display = 'flex';
         document.getElementById('cartComboDiscountLabel').innerText = `Combo Armado (-${comboDiscountPercent}%):`;
-        document.getElementById('cartComboDiscountAmount').innerText = `- ${data.currency || 'S/'}${comboDiscountAmount.toFixed(2)}`;
+        document.getElementById('cartComboDiscountAmount').innerText = `- ${window.formatStorePrice(comboDiscountAmount)}`;
     } else {
         document.getElementById('cartComboDiscountRow').style.display = 'none';
     }
 
     if (couponDiscountAmount > 0) {
         document.getElementById('cartCouponRow').style.display = 'flex';
-        document.getElementById('cartCouponAmount').innerText = `- ${data.currency || 'S/'}${couponDiscountAmount.toFixed(2)} (-${activeCoupon.percent}%)`;
+        document.getElementById('cartCouponAmount').innerText = `- ${window.formatStorePrice(couponDiscountAmount)} (-${activeCoupon.percent}%)`;
     } else {
         document.getElementById('cartCouponRow').style.display = 'none';
     }
 
-    document.getElementById('cartTotalPrice').innerText = `${data.currency || 'S/'}${finalTotal.toFixed(2)}`;
-    
+    document.getElementById('cartTotalPrice').innerText = window.formatStorePrice(finalTotal);
+
     // Guardar el total en una variable global para el checkout
     window.currentCartFinalTotal = finalTotal;
 };
 
+// ==========================================
+// 🚀 MOTOR DE CONVERSIÓN DE MONEDA (LOCAL / USDT)
+// ==========================================
+window.storeDisplayCurrency = 'local'; // Por defecto muestra moneda local
+
+window.formatStorePrice = (priceLocal) => {
+    // Lee la data de la tienda o del portal
+    const data = window.publicStoreDataCache || (typeof portalStoreData !== 'undefined' ? portalStoreData : null);
+    if (!data) return `${priceLocal.toFixed(2)}`;
+
+    // Si el interruptor está en USDT y el vendedor configuró la tasa
+    if (window.storeDisplayCurrency === 'USDT' && data.binanceExchangeRate) {
+        const rate = parseFloat(data.binanceExchangeRate);
+        if (rate > 0) {
+            return `USDT ${(priceLocal / rate).toFixed(2)}`;
+        }
+    }
+    // Si no, muestra la moneda local normal
+    return `${data.currency || 'S/'}${priceLocal.toFixed(2)}`;
+};
+
+window.toggleStoreCurrency = () => {
+    const btn = document.getElementById('storeCurrencyToggleBtn');
+    const data = window.publicStoreDataCache || portalStoreData;
+
+    if (!data.binanceExchangeRate || parseFloat(data.binanceExchangeRate) <= 0) {
+        return window.showNotification("⚠️ El vendedor no ha configurado el tipo de cambio para USDT.");
+    }
+
+    // Intercambia el estado y cambia el texto del botón
+    if (window.storeDisplayCurrency === 'local') {
+        window.storeDisplayCurrency = 'USDT';
+        if (btn) btn.innerHTML = `<i class='bx bx-transfer-alt'></i> Mostrar en ${data.currency || 'S/'}`;
+    } else {
+        window.storeDisplayCurrency = 'local';
+        if (btn) btn.innerHTML = `<i class='bx bx-transfer-alt'></i> Mostrar en USDT`;
+    }
+
+    // Recarga las pantallas al instante para que se vea la magia
+    if (document.getElementById('publicStoreView').style.display === 'block') window.renderPublicCatalog();
+    if (document.getElementById('cartPanel').classList.contains('active')) window.renderCartItems();
+    if (document.getElementById('checkoutModal').style.display === 'flex' && typeof currentCheckoutItem !== 'undefined') {
+        document.getElementById('checkoutItemPrice').innerText = window.formatStorePrice(currentCheckoutItem.price);
+    }
+};
 
 /* =========================================================
    MÓDULO: RENDERIZADO DE TIENDA POR "VENTANAS" (SECCIONES)
@@ -6862,14 +8078,14 @@ window.renderPublicCatalog = () => {
     const catalogBox = document.getElementById('publicStoreCatalog');
     if (!catalogBox) return;
     catalogBox.innerHTML = '';
-    
+
     const catalog = window.publicCatalogCache || [];
     const data = window.publicStoreDataCache;
     if (!data) return;
 
-    const isStoreOpen = data.storeActive !== false; 
+    const isStoreOpen = data.storeActive !== false;
     const searchTerm = document.getElementById('publicStoreSearchInput') ? document.getElementById('publicStoreSearchInput').value.toLowerCase() : '';
-    
+
     // Valores por defecto seguros para evitar que se quede en blanco
     const typeF = window.currentStoreTypeFilter || 'Todos';
     const catF = window.currentStoreCatFilter || 'Todas';
@@ -6877,7 +8093,7 @@ window.renderPublicCatalog = () => {
     // 1. Extraemos las categorías ÚNICAS de todo el catálogo para dibujar los botones
     const allCategories = [...new Set(catalog.map(i => i.category).filter(c => c && c !== ''))];
     const catContainer = document.getElementById('publicStoreCategoryFilters');
-    
+
     if (allCategories.length > 0) {
         catContainer.style.display = 'flex';
         // Solo repintamos los botones si cambió la lista de categorías
@@ -6893,7 +8109,7 @@ window.renderPublicCatalog = () => {
             });
         }
     } else {
-        if(catContainer) catContainer.style.display = 'none';
+        if (catContainer) catContainer.style.display = 'none';
     }
 
     // 2. Generamos el Título Dinámico
@@ -6904,7 +8120,7 @@ window.renderPublicCatalog = () => {
         } else {
             let titlePrefix = typeF === 'Combo' ? 'COMBOS DE' : (typeF === 'Servicio' ? 'SERVICIOS DE' : 'EXPLORAR');
             let rawCat = catF === 'Todas' ? 'TODO EL CATÁLOGO' : catF;
-            
+
             const emojiRegex = /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g;
             let emojiMatch = rawCat.match(emojiRegex);
             let emoji = emojiMatch ? emojiMatch[0] : "<i class='bx bx-category'></i>";
@@ -6937,12 +8153,12 @@ window.renderPublicCatalog = () => {
             return matchCat && matchType && matchSearch;
         });
 
-        if (itemsEnCategoria.length === 0) return; 
+        if (itemsEnCategoria.length === 0) return;
         itemsMostrados += itemsEnCategoria.length;
 
         const sectionDiv = document.createElement('div');
         sectionDiv.style.cssText = "margin-bottom: 40px; background: rgba(255, 255, 255, 0.02); padding: 20px; border-radius: 24px; border: 1px solid var(--mac-border); box-shadow: 0 10px 30px rgba(0,0,0,0.1);";
-        
+
         sectionDiv.innerHTML = `
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px;">
                 <div style="background: var(--mac-blue); padding: 8px; border-radius: 10px; color: white;"><i class='bx bx-category' style="font-size: 20px; margin: 0;"></i></div>
@@ -6950,15 +8166,15 @@ window.renderPublicCatalog = () => {
             </div>
             <div class="category-items-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px;"></div>
         `;
-        
+
         const gridDiv = sectionDiv.querySelector('.category-items-grid');
 
         // Renderizar las tarjetas
         itemsEnCategoria.forEach(item => {
-            const priceStr = `${data.currency || 'S/'}${item.price.toFixed(2)}`;
+            const priceStr = window.formatStorePrice(item.price);
             let isAgotado = item.status === 'agotado';
             let stockHtml = '';
-            
+
             // Lógica de Etiquetas de Stock
             if (item.badgeOption === 'a_pedido') {
                 stockHtml = `<span style="font-size:10px; color:var(--mac-blue); display:block; margin-top:6px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><i class='bx bx-package'></i> Disponible a pedido</span>`;
@@ -6966,8 +8182,8 @@ window.renderPublicCatalog = () => {
                 const stock = data.inventory || [];
                 if (item.type === 'Combo') {
                     const counts = item.stockPlatforms.map(p => stock.filter(i => i.status === 'libre' && i.platform === p).length);
-                    const comboDisponible = Math.min(...counts); 
-                    if (comboDisponible === 0) isAgotado = true; 
+                    const comboDisponible = Math.min(...counts);
+                    if (comboDisponible === 0) isAgotado = true;
                     const colorStock = comboDisponible > 2 ? 'var(--mac-green)' : (comboDisponible > 0 ? 'var(--mac-orange)' : 'var(--mac-red)');
                     stockHtml = `<span style="font-size:10px; color:var(--mac-text-secondary); display:block; margin-top:6px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><i class='bx bx-box'></i> Stock Combo: <span style="color:${colorStock};">${comboDisponible} disp.</span></span>`;
                 } else {
@@ -6989,11 +8205,11 @@ window.renderPublicCatalog = () => {
             }
             // --- INICIO NUEVO BADGE DE RESEÑAS ---
             let ratingHtml = '';
-            const productReviews = (window.publicReviewsCache || []).filter(r => r.platform === item.platform);
+            const productReviews = (window.publicReviewsCache || []).filter(r => (r.platform || r.plataforma || r.originalPlatform) === item.platform);
             if (productReviews.length > 0) {
-                const sum = productReviews.reduce((acc, r) => acc + r.rating, 0);
+                const sum = productReviews.reduce((acc, r) => acc + (r.rating || 5), 0);
                 const avg = (sum / productReviews.length).toFixed(1);
-                ratingHtml = `<div style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 13px; color: #FFD700; font-weight: bold; margin-bottom: 8px;"><i class='bx bxs-star'></i> ${avg} <span style="color: var(--mac-text-secondary); font-size: 11px;">(${productReviews.length})</span></div>`;
+                ratingHtml = `<div style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 13px; color: #FFD700; font-weight: bold; margin-bottom: 12px;"><i class='bx bxs-star'></i> ${avg} <span style="color: var(--mac-text-secondary); font-size: 11px;">(${productReviews.length})</span></div>`;
             }
 
             const titleSafe = item.platform.replace(/'/g, "\\'").replace(/"/g, '&quot;');
@@ -7003,15 +8219,15 @@ window.renderPublicCatalog = () => {
             // --- INICIO GENERADOR DE PESTAÑAS PÚBLICAS ---
             let tabsData = item.storeTabs || [];
             if (tabsData.length === 0) { // Retrocompatibilidad para productos viejos
-                const opts = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{label: '1 Mes', price: item.price}];
+                const opts = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{ label: '1 Mes', price: item.price }];
                 tabsData = [{ name: 'General', options: opts }];
             }
 
             const showTabs = tabsData.length > 1 || (tabsData.length === 1 && tabsData[0].name !== 'General' && tabsData[0].name !== 'Opciones' && tabsData[0].name !== '');
             let tabsHtml = '';
-            
+
             if (showTabs) {
-                tabsHtml += `<div style="display:flex; overflow-x:auto; gap:8px; margin-bottom:12px; scrollbar-width:none; padding-bottom:4px;">`;
+                tabsHtml += `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; padding-bottom:4px;">`;
                 tabsData.forEach((t, i) => {
                     const isSelected = i === 0;
                     const bg = isSelected ? 'var(--mac-blue)' : 'var(--mac-surface)';
@@ -7022,30 +8238,30 @@ window.renderPublicCatalog = () => {
                 tabsHtml += `</div>`;
             }
 
-            let optionsHtml = `<div id="pub_options_${item.id}" style="display:flex; flex-direction:column; gap:8px; width:100%; margin-bottom:15px;">`;
+            let optionsHtml = `<div id="pub_options_${item.id}" style="display:flex; flex-direction:column; gap:8px; width:100%; margin-bottom:20px;">`;
             // Dibujamos las opciones de la Primera Pestaña por defecto
             tabsData[0].options.forEach((opt, i) => {
                 const isSelected = i === 0;
                 const borderColor = isSelected ? 'var(--mac-blue)' : 'var(--mac-border)';
                 const bg = isSelected ? 'rgba(0, 122, 255, 0.1)' : 'var(--mac-surface)';
                 optionsHtml += `
-                    <label id="opt_label_${item.id}_${i}" onclick="window.selectPubOption('${item.id}', 0, ${i}, ${opt.price}, '${opt.label.replace(/'/g,"\\'")}')" class="pub-opt-${item.id}" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-radius:12px; border:1px solid ${borderColor}; background:${bg}; cursor:pointer; transition:all 0.2s;">
+                    <label id="opt_label_${item.id}_${i}" onclick="window.selectPubOption('${item.id}', 0, ${i}, ${opt.price}, '${opt.label.replace(/'/g, "\\'")}')" class="pub-opt-${item.id}" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-radius:12px; border:1px solid ${borderColor}; background:${bg}; cursor:pointer; transition:all 0.2s;">
                         <span style="font-size:14px; font-weight:600; color:var(--mac-text-main);">${opt.label}</span>
-                        <span style="font-size:15px; font-weight:800; color:var(--mac-text-main);">${data.currency || 'S/'}${opt.price.toFixed(2)}</span>
+                        <span style="font-size:15px; font-weight:800; color:var(--mac-text-main);">${window.formatStorePrice(opt.price)}</span>
                     </label>
                 `;
             });
             optionsHtml += `</div>`;
 
-            if(!window.storeItemsTabsData) window.storeItemsTabsData = {};
+            if (!window.storeItemsTabsData) window.storeItemsTabsData = {};
             window.storeItemsTabsData[item.id] = tabsData;
-            window.storeSelectedOptions[item.id] = { price: tabsData[0].options[0].price, label: (tabsData[0].name !== 'General' && showTabs ? tabsData[0].name + ' - ' : '') + tabsData[0].options[0].label };
+            window.storeSelectedOptions[item.id] = { price: tabsData[0].options[0].price, label: (tabsData[0].name !== 'General' && showTabs ? tabsData[0].name + ' - ' : '') + tabsData[0].options[0].label, tabName: tabsData[0].name, variantName: tabsData[0].options[0].label };
 
             let pricingHtml = `
                 ${tabsHtml}
                 ${optionsHtml}
-                <div style="text-align: center; margin-top: 5px; margin-bottom: 15px; font-size: 24px; font-weight: 900; color: var(--mac-green);" id="priceDisplay_${item.id}">
-                    ${data.currency || 'S/'}${tabsData[0].options[0].price.toFixed(2)}
+                <div style="text-align: center; margin-top: 5px; margin-bottom: 22px; font-size: 24px; font-weight: 900; color: var(--mac-green);" id="priceDisplay_${item.id}">
+                    ${window.formatStorePrice(tabsData[0].options[0].price)}
                 </div>
             `;
             // --- FIN GENERADOR DE PESTAÑAS PÚBLICAS ---
@@ -7063,7 +8279,7 @@ window.renderPublicCatalog = () => {
 
             const card = document.createElement('div');
             card.className = `store-product-card ${isAgotado || !isStoreOpen ? 'is-agotado' : ''}`;
-            
+
             card.innerHTML = `
                 ${typeBadgeHtml}
                 <button class="store-share-btn" onclick="event.stopPropagation(); window.shareProduct('${item.id}')" title="Compartir Oferta"><i class='bx bx-share-alt'></i></button>
@@ -7073,8 +8289,8 @@ window.renderPublicCatalog = () => {
                 </div>
                 <div class="store-product-glass-footer" style="padding: 15px; display: flex; flex-direction: column;">
                 ${ratingHtml}
-                    <strong class="store-product-title" style="display:block; font-size:18px; line-height:1.3; color: var(--mac-text-main); word-break: break-word; text-align: center;">${item.platform}</strong>
-                    ${stockHtml ? `<div style="text-align:center; margin-top:5px;">${stockHtml}</div>` : ''}
+                    <strong class="store-product-title" style="display:block; font-size:18px; line-height:1.3; color: var(--mac-text-main); word-break: break-word; text-align: center; margin-bottom: 10px;">${item.platform}</strong>
+                    ${stockHtml ? `<div style="text-align:center; margin-top:0px; margin-bottom:22px;">${stockHtml}</div>` : ''}
                     
                     ${pricingHtml}
                     ${btnHTML}
@@ -7097,10 +8313,10 @@ window.openCheckoutFromCart = () => {
     originalOpenCheckout();
     const data = window.publicStoreDataCache;
     // Sobrescribir el precio con el total calculado
-    if(document.getElementById('checkoutItemPrice')) {
+    if (document.getElementById('checkoutItemPrice')) {
         document.getElementById('checkoutItemPrice').innerText = `${data.currency || 'S/'}${window.currentCartFinalTotal.toFixed(2)}`;
     }
-    if(currentCheckoutItem) currentCheckoutItem.price = window.currentCartFinalTotal; // Para que pase a la BD
+    if (currentCheckoutItem) currentCheckoutItem.price = window.currentCartFinalTotal; // Para que pase a la BD
 };
 /* =========================================================
    MÓDULO: EXPORTADOR DE CATÁLOGO A ESTADOS (IMÁGENES HD)
@@ -7155,9 +8371,9 @@ window.generateCatalogImages = async () => {
         // Referencias de la plantilla DOM
         const template = document.getElementById('statusExportTemplate');
         template.style.left = '0px'; // Lo traemos al frente visiblemente invisible (z-index negativo)
-        
+
         document.getElementById('statusBrandName').innerText = currentUserData.name || 'Mi Marca';
-        
+
         const logoEl = document.getElementById('statusLogo');
         if (safeLogoBase64) {
             logoEl.src = safeLogoBase64;
@@ -7188,11 +8404,6 @@ window.generateCatalogImages = async () => {
         // 3. Crear imágenes página por página
         let generatedImagesUrls = [];
         const itemsPerPage = 4; // Máximo 4 productos por estado para que se vea legible
-        window.showNotification("✅ Proceso completado internamente.");
-    } catch (e) {
-        window.showNotification("Error: " + e.message);
-    }
-};
 
         for (const cat in categories) {
             const items = categories[cat];
@@ -7200,7 +8411,7 @@ window.generateCatalogImages = async () => {
 
             for (let i = 0; i < items.length; i += itemsPerPage) {
                 const chunk = items.slice(i, i + itemsPerPage);
-                
+
                 // Llenar los productos en el contenedor
                 const itemsContainer = document.getElementById('statusItemsContainer');
                 itemsContainer.innerHTML = '';
@@ -7218,7 +8429,7 @@ window.generateCatalogImages = async () => {
                     // Armar los precios (máximo mostrar 2 para no romper el diseño)
                     let preciosHtml = '';
                     const opciones = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{ label: '1 Mes', price: item.price }];
-                    
+
                     opciones.slice(0, 2).forEach(opt => {
                         preciosHtml += `
                             <div style="background: rgba(255,255,255,0.1); padding: 12px 25px; border-radius: 20px; display: inline-flex; flex-direction: column; justify-content: center; border: 1px solid rgba(255,255,255,0.15);">
@@ -7251,7 +8462,7 @@ window.generateCatalogImages = async () => {
                 await new Promise(r => setTimeout(r, 200));
 
                 // Tomar la foto
-                const canvas = await html2canvas(template, { 
+                const canvas = await html2canvas(template, {
                     backgroundColor: '#1c1c1e',
                     scale: 1, // Escala 1 = 1080x1920 nativo
                     useCORS: true,
@@ -7260,7 +8471,7 @@ window.generateCatalogImages = async () => {
 
                 generatedImagesUrls.push({
                     url: canvas.toDataURL('image/png'),
-                    name: `Estado_${cat.replace(/\s+/g, '_')}_Parte_${(i/itemsPerPage)+1}.png`
+                    name: `Estado_${cat.replace(/\s+/g, '_')}_Parte_${(i / itemsPerPage) + 1}.png`
                 });
             }
         }
@@ -7307,8 +8518,8 @@ window.generateCatalogImages = async () => {
 ========================================================= */
 window.startContextTutorial = () => {
     // 1. Detectamos la sección exacta usando la misma lógica del Asistente
-    let activeSection = 'clientes'; 
-    
+    let activeSection = 'clientes';
+
     if (document.getElementById('adminView').style.display === 'block') {
         activeSection = 'admin';
     } else if (document.getElementById('inventoryModal').classList.contains('active-section') || document.getElementById('inventoryModal').style.display === 'flex') {
@@ -7380,7 +8591,7 @@ window.startContextTutorial = () => {
         // Seleccionamos los pasos de la sección activa (o por defecto, la de clientes)
         steps: tutorialSteps[activeSection] || tutorialSteps['clientes']
     });
-    
+
     driverObj.drive();
 };
 
@@ -7390,7 +8601,7 @@ window.updateCardPrice = (itemId, selectEl) => {
     const option = selectEl.options[selectEl.selectedIndex];
     const price = parseFloat(option.getAttribute('data-price'));
     const displayEl = document.getElementById('price_display_' + itemId);
-    if(displayEl) {
+    if (displayEl) {
         displayEl.innerText = `${window.publicStoreDataCache.currency || 'S/'}${price.toFixed(2)}`;
         // Pequeño efecto de latido para que el cliente note el cambio
         displayEl.style.transform = 'scale(1.1)';
@@ -7408,11 +8619,14 @@ window.addToCartConDuracion = (itemId) => {
     const meses = parseInt(selectElement.value) || 1;
     const option = selectElement.options[selectElement.selectedIndex];
     const finalPrice = parseFloat(option.getAttribute('data-price'));
-    
+
     // Clonamos para no alterar la BD original
-    const cartItem = { ...originalItem }; 
+    const cartItem = { ...originalItem };
     cartItem.price = finalPrice;
-    
+    cartItem.basePlatform = originalItem.platform;
+    cartItem.saleType = cartItem.type === 'Completa' ? 'Completa' : 'Perfil';
+    cartItem.months = meses;
+
     // Personalizamos el nombre en el carrito
     if (meses > 1) {
         cartItem.platform = `${originalItem.platform} (${meses} Meses)`;
@@ -7421,7 +8635,7 @@ window.addToCartConDuracion = (itemId) => {
     window.storeCart.push(cartItem);
     document.getElementById('cartBadge').innerText = window.storeCart.length;
     document.getElementById('floatingCartBtn').style.display = 'flex';
-    
+
     document.getElementById('cartPanelOverlay').classList.add('active');
     document.getElementById('cartPanel').classList.add('active');
     window.renderCartItems();
@@ -7449,7 +8663,7 @@ window.openStoreModal = () => {
     originalOpenStoreModal();
     const builder = document.getElementById('builder-crear');
     if (builder && builder.children.length === 0) {
-        window.addTabToBuilder('builder-crear', '1 Mes', [{label: 'Perfil', price: ''}]);
+        window.addTabToBuilder('builder-crear', '1 Mes', [{ label: 'Perfil', price: '' }]);
     }
 };
 
@@ -7460,8 +8674,8 @@ window.addToCartWithOptions = (itemId) => {
 
     // Recupera la opción seleccionada por la función de Pestañas
     const selectedOpt = window.storeSelectedOptions[itemId] || { price: originalItem.price, label: '' };
-    
-    const cartItem = { ...originalItem }; 
+
+    const cartItem = { ...originalItem };
     cartItem.price = selectedOpt.price;
     if (selectedOpt.label && selectedOpt.label !== '1 Mes' && selectedOpt.label !== 'General') {
         cartItem.platform = `${originalItem.platform} (${selectedOpt.label})`;
@@ -7482,7 +8696,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Atrapamos las dos barras horizontales de la tiendita
     const scrollContainers = [
         document.getElementById('publicStoreCategoryFilters'),
-        document.getElementById('publicStoreFilters') 
+        document.getElementById('publicStoreFilters')
     ];
 
     scrollContainers.forEach(container => {
@@ -7535,18 +8749,18 @@ window.switchFinanceTab = (tabId, element) => {
     document.querySelectorAll('.finance-tab').forEach(tab => {
         tab.style.display = 'none';
     });
-    
+
     // 2. Mostrar el contenido seleccionado
     document.getElementById(tabId).style.display = 'block';
-    
+
     // 3. Quitar el color azul a todas las pestañas y ponérselo a la cliqueada
     document.querySelectorAll('#financeSection .chrome-tab').forEach(tab => {
         tab.classList.remove('active');
     });
     element.classList.add('active');
-    
+
     // 4. Parche mágico para ApexCharts (Fuerza a redibujar los gráficos si estaban ocultos)
-    if(tabId === 'tabTendencias') {
+    if (tabId === 'tabTendencias') {
         window.dispatchEvent(new Event('resize'));
     }
 };
@@ -7557,7 +8771,7 @@ window.switchFinanceTab = (tabId, element) => {
 window.isDemoMode = false;
 
 window.checkDemo = () => {
-    if(window.isDemoMode) {
+    if (window.isDemoMode) {
         Swal.fire({
             icon: 'info',
             title: 'Modo Previsualización',
@@ -7569,7 +8783,7 @@ window.checkDemo = () => {
             background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
             color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
         }).then(r => {
-            if(r.isConfirmed) {
+            if (r.isConfirmed) {
                 window.location.reload(); // Quita la demo y lo regresa al registro
             }
         });
@@ -7594,7 +8808,7 @@ window.chooseDemoMode = async () => {
         background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
         color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
     });
-    
+
     if (planElegido) {
         window.startVisualDemo(planElegido);
     }
@@ -7602,7 +8816,7 @@ window.chooseDemoMode = async () => {
 
 window.startVisualDemo = (plan) => {
     window.isDemoMode = true;
-    
+
     // Inyectar datos falsos en memoria local (no toca Firebase)
     currentUser = { uid: 'demo_user' };
     currentUserData = {
@@ -7617,14 +8831,14 @@ window.startVisualDemo = (plan) => {
             { id: 'inv2', platform: 'Disney+', type: 'Completa', email: 'disney@demo.com', pass: 'demo123', profile: '', pin: '', status: 'libre' }
         ],
         storeCatalog: [
-            { id: 'item1', platform: 'Netflix (1 Mes)', price: 15, pricingOptions: [{label:'1 Mes', price:15}], category: 'Streaming', desc: 'Pantalla 4K Demo', imgUrl: '', type: 'Servicio', status: 'disponible', autoStock: false },
-            { id: 'item2', platform: 'Combo Premium', price: 25, pricingOptions: [{label:'1 Mes', price:25}], category: 'Combos', desc: 'Netflix + Disney', imgUrl: '', type: 'Combo', status: 'disponible', autoStock: false }
+            { id: 'item1', platform: 'Netflix (1 Mes)', price: 15, pricingOptions: [{ label: '1 Mes', price: 15 }], category: 'Streaming', desc: 'Pantalla 4K Demo', imgUrl: '', type: 'Servicio', status: 'disponible', autoStock: false },
+            { id: 'item2', platform: 'Combo Premium', price: 25, pricingOptions: [{ label: '1 Mes', price: 25 }], category: 'Combos', desc: 'Netflix + Disney', imgUrl: '', type: 'Combo', status: 'disponible', autoStock: false }
         ],
         storeCategories: ['Streaming', 'Combos'],
         customServices: ['Netflix', 'Disney+', 'HBO Max', 'Spotify Premium'],
         financialGoal: 1500
     };
-    
+
     clients = [
         { id: 'c1', name: 'Juan Pérez', platform: 'Netflix', phone: '+51999888777', date: new Date(Date.now() + 864000000).toISOString(), cost: 10, price: 15, accountUnits: 1, renovations: 2, statusCat: 'active' },
         { id: 'c2', name: 'María Gómez', platform: 'Disney+', phone: '+51999888666', date: new Date(Date.now() - 86400000).toISOString(), cost: 8, price: 12, accountUnits: 1, renovations: 0, statusCat: 'expired' }
@@ -7632,17 +8846,17 @@ window.startVisualDemo = (plan) => {
 
     // Interceptar silenciosamente las funciones de guardado para que no rompan
     const funcToBlock = [
-        'saveClientData', 'deleteClient', 'renewClient', 'saveWaMessage', 
-        'saveProfile', 'addStoreItem', 'deleteStoreItem', 'addInventoryAccount', 
-        'deleteInventoryAccount', 'saveStoreSettings', 'saveMasterAccount', 
+        'saveClientData', 'deleteClient', 'renewClient', 'saveWaMessage',
+        'saveProfile', 'addStoreItem', 'deleteStoreItem', 'addInventoryAccount',
+        'deleteInventoryAccount', 'saveStoreSettings', 'saveMasterAccount',
         'deleteMasterAccount', 'submitCheckout', 'toggleStoreActive'
     ];
-    
+
     funcToBlock.forEach(fn => {
         const originalFn = window[fn];
         if (originalFn) {
             window[fn] = (...args) => {
-                if(window.checkDemo()) return;
+                if (window.checkDemo()) return;
                 return originalFn(...args);
             };
         }
@@ -7650,27 +8864,27 @@ window.startVisualDemo = (plan) => {
 
     // Renderizar la Vista Principal
     showView('appView');
-    
+
     const brandName = document.getElementById('brandNameSidebar');
     if (brandName) brandName.innerText = 'Usuario Demo';
-    
+
     const mobileName = document.getElementById('mobileBrandName');
     if (mobileName) mobileName.innerText = 'Usuario Demo';
-    
+
     const planBadgeSide = document.getElementById('userPlanBadgeSidebar');
     if (planBadgeSide) {
         planBadgeSide.innerText = `Plan ${plan.toUpperCase()}`;
         planBadgeSide.className = plan === 'pro' ? 'badge-pro-animated' : '';
         planBadgeSide.style.display = 'inline-block';
     }
-    
+
     window.renderTable();
     window.renderInventory();
     window.syncStoreCategories();
     window.renderStoreItems();
     window.populateAllServiceSelects();
     if (document.getElementById('statsPanel')) window.toggleStats(true);
-    
+
     window.showNotification("¡Bienvenido al Modo Demo! Explora las herramientas.");
 };
 
@@ -7719,18 +8933,18 @@ window.addEventListener('popstate', (event) => {
     }
 
     // Capa B: Si hay modales emergentes (Opciones de WhatsApp, Checkout, etc.), cerrarlos
-    const openModals = Array.from(document.querySelectorAll('.modal-overlay')).filter(m => 
+    const openModals = Array.from(document.querySelectorAll('.modal-overlay')).filter(m =>
         m.style.display === 'flex' && !m.classList.contains('active-section')
     );
     if (openModals.length > 0) {
-        window.closeModals(false); 
+        window.closeModals(false);
         return;
     }
 
     // Capa C: Si estamos dentro de Tiendita, Inventario o Finanzas -> Volver al Dashboard Central
     const homeSection = document.getElementById('homeSection');
     if (homeSection && !homeSection.classList.contains('active-section')) {
-        window.closeModals(true); 
+        window.closeModals(true);
         return;
     }
 });
@@ -7759,10 +8973,10 @@ window.openReviewModal = (clientId, platform, clientName, clientPhone) => {
     window.currentReviewData = { clientId, platform, clientName, clientPhone };
     document.getElementById('reviewPlatformName').innerText = platform;
     document.getElementById('reviewComment').value = '';
-    
+
     window.currentStarRating = 5;
     document.querySelectorAll('.star-btn').forEach(s => s.style.color = '#FFD700');
-    
+
     document.getElementById('clientReviewModal').style.display = 'flex';
 };
 
@@ -7777,15 +8991,15 @@ window.submitReview = async () => {
         // 1. VALIDACIÓN ANTI-SPAM Y ACTUALIZACIÓN
         // Buscamos si ya existe una reseña de este teléfono para este vendedor
         const qCheck = query(
-            collection(db, "reviews"), 
+            collection(db, "reviews"),
             where("vendedorId", "==", portalStoreData.uid),
             where("clientPhone", "==", window.currentReviewData.clientPhone || '')
         );
         const snapCheck = await getDocs(qCheck);
-        
+
         let yaComento = false;
         let idResenaAnterior = null;
-        
+
         snapCheck.forEach(doc => {
             const data = doc.data();
             // Verificamos si la plataforma original base (ej: "Netflix") coincide
@@ -7809,12 +9023,12 @@ window.submitReview = async () => {
                 vendedorId: portalStoreData.uid,
                 clientId: window.currentReviewData.clientId,
                 clientName: window.currentReviewData.clientName,
-                clientPhone: window.currentReviewData.clientPhone || '', 
-                platform: window.currentReviewData.platform, 
+                clientPhone: window.currentReviewData.clientPhone || '',
+                platform: window.currentReviewData.platform,
                 originalPlatform: window.currentReviewData.platform, // <-- CLAVE: Guarda el nombre original intocable
                 rating: window.currentStarRating,
                 comment: comment,
-                status: 'pendiente', 
+                status: 'pendiente',
                 date: new Date().toISOString()
             });
         }
@@ -7841,31 +9055,31 @@ window.submitReview = async () => {
 window.loadAdminReviews = async () => {
     const list = document.getElementById('adminReviewsList');
     list.innerHTML = '<p style="text-align: center; color: var(--mac-text-secondary); font-size: 13px;">Cargando reseñas...</p>';
-    
+
     try {
         const qRev = query(collection(db, "reviews"), where("vendedorId", "==", currentUser.uid));
         const snap = await getDocs(qRev);
-        
+
         if (snap.empty) {
             list.innerHTML = '<p style="text-align: center; color: var(--mac-text-secondary); font-size: 13px; padding: 20px;">Tus clientes aún no han dejado reseñas.</p>';
             return;
         }
-        
+
         list.innerHTML = '';
         let reviews = [];
-        snap.forEach(d => reviews.push({id: d.id, ...d.data()}));
-        
+        snap.forEach(d => reviews.push({ id: d.id, ...d.data() }));
+
         // Soporte para fecha en inglés (date) o español (fecha)
-        reviews.sort((a,b) => new Date(b.fecha || b.date) - new Date(a.fecha || a.date)); 
+        reviews.sort((a, b) => new Date(b.fecha || b.date) - new Date(a.fecha || a.date));
 
         reviews.forEach(r => {
             let stars = '';
-            for(let i = 0; i < 5; i++) { 
-                stars += `<i class='bx bxs-star' style="color: ${i < r.rating ? '#FFD700' : 'var(--mac-text-secondary)'};"></i>`; 
+            for (let i = 0; i < 5; i++) {
+                stars += `<i class='bx bxs-star' style="color: ${i < r.rating ? '#FFD700' : 'var(--mac-text-secondary)'};"></i>`;
             }
-            
-            let statusBadge = r.status === 'aprobada' 
-                ? `<span style="color: var(--mac-green); font-size: 10px; font-weight: bold; padding: 3px 8px; background: rgba(52, 199, 89, 0.1); border-radius: 6px;">Aprobada (Pública)</span>` 
+
+            let statusBadge = r.status === 'aprobada'
+                ? `<span style="color: var(--mac-green); font-size: 10px; font-weight: bold; padding: 3px 8px; background: rgba(52, 199, 89, 0.1); border-radius: 6px;">Aprobada (Pública)</span>`
                 : `<span style="color: var(--mac-orange); font-size: 10px; font-weight: bold; padding: 3px 8px; background: rgba(255, 149, 0, 0.1); border-radius: 6px;">Pendiente (Oculta)</span>`;
 
             // 🔥 Variables seguras que evitan el error undefined
@@ -7887,16 +9101,16 @@ window.loadAdminReviews = async () => {
                     <p style="margin: 0 0 15px 0; font-size: 13px; color: var(--mac-text-secondary); font-style: italic;">"${comentarioSeguro}"</p>
                     
                     <div style="display: flex; gap: 8px;">
-                        ${r.status === 'pendiente' || r.status === 'oculta' 
-                            ? `<button class="btn-primary" style="width: max-content; padding: 6px 12px; font-size: 12px; background: var(--mac-green); border: none;" onclick="window.changeReviewStatus('${r.id}', 'aprobada', '${plataformaLimpia}')"><i class='bx bx-check'></i> Aprobar</button>` 
-                            : `<button class="btn-secondary" style="width: max-content; padding: 6px 12px; font-size: 12px;" onclick="window.changeReviewStatus('${r.id}', 'oculta', '')"><i class='bx bx-hide'></i> Ocultar</button>`}
+                        ${r.status === 'pendiente' || r.status === 'oculta'
+                    ? `<button class="btn-primary" style="width: max-content; padding: 6px 12px; font-size: 12px; background: var(--mac-green); border: none;" onclick="window.changeReviewStatus('${r.id}', 'aprobada', '${plataformaLimpia}')"><i class='bx bx-check'></i> Aprobar</button>`
+                    : `<button class="btn-secondary" style="width: max-content; padding: 6px 12px; font-size: 12px;" onclick="window.changeReviewStatus('${r.id}', 'oculta', '')"><i class='bx bx-hide'></i> Ocultar</button>`}
                         <button class="action-btn btn-del" style="padding: 6px 10px; font-size: 14px;" onclick="window.deleteReview('${r.id}')"><i class='bx bx-trash'></i></button>
                     </div>
                 </div>
             `;
         });
-    } catch(e) { 
-        console.error(e); 
+    } catch (e) {
+        console.error(e);
         list.innerHTML = '<p style="color: var(--mac-red);">Error al cargar reseñas.</p>';
     }
 };
@@ -7905,7 +9119,7 @@ window.changeReviewStatus = async (id, newStatus, currentPlatform) => {
     if (newStatus === 'aprobada') {
         // 1. Obtenemos el catálogo de la tiendita del usuario
         const catalog = currentUserData.storeCatalog || [];
-        
+
         if (catalog.length === 0) {
             return window.showNotification("⚠️ No tienes productos en tu tienda para asignar esta reseña.");
         }
@@ -7943,13 +9157,13 @@ window.changeReviewStatus = async (id, newStatus, currentPlatform) => {
         // 4. Si confirma, actualizamos el estado y renombramos la plataforma en la reseña
         if (isConfirmed && selectedProduct) {
             try {
-                await updateDoc(doc(db, "reviews", id), { 
+                await updateDoc(doc(db, "reviews", id), {
                     status: newStatus,
                     platform: selectedProduct // <-- AQUÍ SOBREESCRIBIMOS EL NOMBRE PARA QUE HAGA MATCH EXACTO EN LA TIENDITA
                 });
                 window.showNotification("Reseña aprobada y vinculada ✅");
                 window.loadAdminReviews();
-            } catch(e) { window.showNotification("Error cambiando estado."); }
+            } catch (e) { window.showNotification("Error cambiando estado."); }
         }
     } else {
         // Lógica para ocultar (se mantiene igual)
@@ -7957,17 +9171,17 @@ window.changeReviewStatus = async (id, newStatus, currentPlatform) => {
             await updateDoc(doc(db, "reviews", id), { status: newStatus });
             window.showNotification("Reseña ocultada 👁️‍🗨️");
             window.loadAdminReviews();
-        } catch(e) { window.showNotification("Error cambiando estado."); }
+        } catch (e) { window.showNotification("Error cambiando estado."); }
     }
 };
 
 window.deleteReview = async (id) => {
-    if(!confirm("¿Seguro que deseas eliminar esta reseña permanentemente?")) return;
+    if (!confirm("¿Seguro que deseas eliminar esta reseña permanentemente?")) return;
     try {
         await deleteDoc(doc(db, "reviews", id));
         window.showNotification("🗑️ Reseña eliminada.");
         window.loadAdminReviews();
-    } catch(e) { window.showNotification("Error al eliminar."); }
+    } catch (e) { window.showNotification("Error al eliminar."); }
 };
 
 // ---------------------------------------------------------
@@ -7976,24 +9190,24 @@ window.deleteReview = async (id) => {
 window.openProductDesc = (title, desc) => {
     document.getElementById('descModalTitle').innerText = title;
     document.getElementById('descModalText').innerText = desc;
-    
+
     // 1. Obtener el contenedor de reseñas
     const reviewsList = document.getElementById('publicReviewsList');
     if (reviewsList) {
         reviewsList.innerHTML = '';
-        
+
         // 2. Filtrar reseñas por la plataforma seleccionada
-        const productReviews = (window.publicReviewsCache || []).filter(r => 
+        const productReviews = (window.publicReviewsCache || []).filter(r =>
             (r.platform || r.plataforma || '').toLowerCase() === title.toLowerCase()
         );
-        
+
         if (productReviews.length === 0) {
             reviewsList.innerHTML = '<p style="font-size: 13px; color: var(--mac-text-secondary); text-align: center; margin: 0;">Aún no hay reseñas para este servicio.</p>';
         } else {
             productReviews.forEach(r => {
                 // A) Manejo Seguro del Nombre
                 const clientName = r.clienteNombre || r.clientName || r.nombre || 'Cliente';
-                
+
                 // B) Manejo Seguro de la Fecha (Evita "Invalid Date")
                 let dateStr = "Fecha reciente";
                 const dateVal = r.fechaIso || r.fecha || r.date || r.timestamp;
@@ -8006,21 +9220,21 @@ window.openProductDesc = (title, desc) => {
 
                 // C) Manejo Seguro del Comentario
                 const rawComment = r.comentario || r.comment || r.text || '';
-                const reviewText = rawComment.trim() !== '' 
-                    ? `"${rawComment}"` 
+                const reviewText = rawComment.trim() !== ''
+                    ? `"${rawComment}"`
                     : '<span style="font-style: italic; color: var(--mac-text-secondary);">(Dejó una calificación por estrellas)</span>';
 
                 // D) Manejo y Enmascaramiento del Número de Teléfono
                 let hiddenPhoneHtml = '';
                 const phoneRaw = r.clienteNumero || r.clientPhone || r.phone || r.numero || '';
-                
+
                 if (phoneRaw) {
                     // Quitamos espacios en blanco para evaluar
                     let num = phoneRaw.replace(/\s+/g, '');
                     // Separamos el código de país del resto del número (Ej: +51 y 999888777)
                     const match = num.match(/^(\+\d{2,3})(\d+)$/);
                     let maskedPhone = num;
-                    
+
                     if (match) {
                         const countryCode = match[1];
                         const localNum = match[2];
@@ -8037,7 +9251,7 @@ window.openProductDesc = (title, desc) => {
                         const masked = 'X'.repeat(num.length - 7);
                         maskedPhone = `${visibleStart}${masked}${visibleEnd}`;
                     }
-                    
+
                     hiddenPhoneHtml = `<span style="font-size: 11px; color: var(--mac-text-secondary); display: block; margin-top: 2px;"><i class='bx bxl-whatsapp'></i> ${maskedPhone}</span>`;
                 }
 
@@ -8092,132 +9306,103 @@ window.checkUrlRouting = () => {
 // --- FUNCIÓN PARA SINCRONIZAR COSTOS ANTIGUOS ---
 window.actualizarCostosAntiguos = async () => {
     const btn = document.getElementById('btnSyncCostos');
-    const origText = btn.innerHTML;
-    if(btn) btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Sync...";
-    
+    const origText = btn?.innerHTML || "<i class='bx bx-sync'></i> Sync Costos";
+
+    // Validación inicial: verificar si existen proveedores registrados y clientes en la lista
+    const providersList = currentUserData?.providers || [];
+    if (!clients || clients.length === 0 || (providersList.length === 0 && (!masterAccounts || masterAccounts.length === 0))) {
+        window.showNotification("ℹ️ No hay costos pendientes por actualizar.");
+        return;
+    }
+
+    if (btn) btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Sync...";
+
     try {
-        window.showNotification("⏳ Actualizando costos en la base de datos... no cierres la ventana.");
-        
+        // Asegurar que todos los clientes estén cargados antes de sincronizar
+        if (typeof window.ensureAllClientsLoaded === 'function' && !allClientsLoaded) {
+            await window.ensureAllClientsLoaded();
+        }
+
         // 1. Obtener todas las matrices del usuario
         const qMat = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
         const snapMat = await getDocs(qMat);
         let masterMap = {};
-        snapMat.forEach(doc => { masterMap[doc.id] = doc.data(); });
+        snapMat.forEach(d => { masterMap[d.id] = d.data(); });
+
+        if (providersList.length === 0 && Object.keys(masterMap).length === 0) {
+            window.showNotification("ℹ️ No hay costos pendientes por actualizar.");
+            return;
+        }
 
         let actualizados = 0;
 
         // 2. Revisar todos los clientes actuales en memoria
         for (let i = 0; i < clients.length; i++) {
             let c = clients[i];
-            let masterId = c.linkedMasterId; 
-            
+            let masterId = c.linkedMasterId;
+
             if (!masterId && c.multiAccounts) {
                 for (let platKey in c.multiAccounts) {
-                    if (c.multiAccounts[platKey].masterAccountId) {
+                    if (c.multiAccounts[platKey]?.masterAccountId) {
                         masterId = c.multiAccounts[platKey].masterAccountId;
                         break;
                     }
                 }
             }
 
-            // 3. Si pertenece a una matriz, calculamos la división
+            let nuevoCostoCalculado = null;
+
+            // 3A. Si pertenece a una matriz, calculamos la división
             if (masterId && masterMap[masterId]) {
                 let matriz = masterMap[masterId];
-                let costoCorrecto = matriz.maxProfiles > 0 ? (matriz.cost / matriz.maxProfiles) : 0;
-                
-                if (parseFloat(c.cost) !== parseFloat(costoCorrecto)) {
-                    await updateDoc(doc(db, "clients", c.id), { cost: costoCorrecto });
-                    c.cost = costoCorrecto; 
-                    actualizados++;
+                nuevoCostoCalculado = matriz.maxProfiles > 0 ? (parseFloat(matriz.cost || 0) / matriz.maxProfiles) : 0;
+            }
+            // 3B. Si tiene proveedor registrado en currentUserData.providers, sincronizar con el costo del proveedor
+            else if (providersList.length > 0) {
+                const provName = (c.providerName || '').trim().toLowerCase();
+                const platRaw = (c.platform || '').split(',')[0].replace(/\(.*?\)/g, '').trim().toLowerCase();
+                const matchedProv = providersList.find(p =>
+                    (provName && (p.name || '').trim().toLowerCase() === provName && (!platRaw || (p.platform || '').trim().toLowerCase() === platRaw)) ||
+                    (provName && (p.name || '').trim().toLowerCase() === provName) ||
+                    (!provName && platRaw && (p.platform || '').trim().toLowerCase() === platRaw && (parseFloat(c.cost) === 0 || isNaN(parseFloat(c.cost))))
+                );
+                if (matchedProv && matchedProv.cost !== undefined) {
+                    nuevoCostoCalculado = parseFloat(matchedProv.cost) || 0;
                 }
             }
+
+            if (nuevoCostoCalculado !== null && Math.abs((parseFloat(c.cost) || 0) - parseFloat(nuevoCostoCalculado)) > 0.001) {
+                await updateDoc(doc(db, "clients", c.id), { cost: nuevoCostoCalculado });
+                c.cost = nuevoCostoCalculado;
+                actualizados++;
+            }
         }
-        
+
+        if (actualizados === 0) {
+            window.showNotification("ℹ️ No hay costos pendientes por actualizar.");
+            return;
+        }
+
         window.showNotification(`✅ ¡Listo! Se actualizaron los costos de ${actualizados} clientes.`);
-        
-        // 4. Forzar el recálculo visual en las tablas y gráficos
+
+        // 4. Forzar el recálculo visual en las tablas y gráficos usando Optional Chaining (?.)
         window.renderTable();
-        if (document.getElementById('financeSection').classList.contains('active-section')) {
+        const financeSec = document.getElementById('financeSection');
+        const statsPnl = document.getElementById('statsPanel');
+        if (financeSec?.classList?.contains('active-section')) {
             window.loadFinanceData();
-        } else if (document.getElementById('statsPanel').style.display === 'grid') {
+        } else if (statsPnl?.style?.display === 'grid') {
             window.toggleStats(true);
         }
-        
+
     } catch (e) {
+        console.error("Error en actualizarCostosAntiguos:", e);
         window.showNotification("Error: " + e.message);
     } finally {
-        if(btn) btn.innerHTML = origText;
+        if (btn) btn.innerHTML = origText;
     }
 };
 
-window.currentReviewRating = 5; 
-window.currentReviewClient = null;
-window.currentReviewPlatform = null;
-
-// Lógica para pintar las estrellas al hacer clic
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.star-btn').forEach(star => {
-        star.addEventListener('click', function() {
-            window.currentReviewRating = parseInt(this.getAttribute('data-val'));
-            document.querySelectorAll('.star-btn').forEach(s => {
-                if (parseInt(s.getAttribute('data-val')) <= window.currentReviewRating) {
-                    s.style.color = '#FFD700'; // Estrella encendida
-                } else {
-                    s.style.color = 'var(--mac-gray)'; // Estrella apagada
-                }
-            });
-        });
-    });
-});
-
-window.openReviewModal = (clientId, platform, clientName, clientPhone) => {
-    window.currentReviewClient = { id: clientId, name: clientName, phone: clientPhone };
-    window.currentReviewPlatform = platform;
-    window.currentReviewRating = 5; 
-    
-    document.getElementById('reviewPlatformName').innerText = platform;
-    document.getElementById('reviewComment').value = '';
-    document.querySelectorAll('.star-btn').forEach(s => s.style.color = '#FFD700');
-    
-    document.getElementById('clientReviewModal').style.display = 'flex';
-};
-
-window.submitReview = async () => {
-    const comment = document.getElementById('reviewComment').value.trim();
-    const btn = document.getElementById('btnSubmitReview');
-    const origText = btn.innerText;
-    
-    btn.innerText = "Enviando..."; 
-    btn.disabled = true;
-
-    try {
-        // Se usa la variable global portalStoreData que tu código ya define al abrir el portal
-        const vendedorId = typeof portalStoreData !== 'undefined' ? portalStoreData.uid : null;
-        if(!vendedorId) throw new Error("ID del vendedor no encontrado.");
-
-        // Guardado nativo en Firestore
-        await addDoc(collection(db, "reviews"), {
-            vendedorId: vendedorId,
-            clienteId: window.currentReviewClient.id,
-            clienteNombre: window.currentReviewClient.name,
-            plataforma: window.currentReviewPlatform,
-            rating: window.currentReviewRating,
-            comentario: comment,
-            status: 'pendiente', // Para que la apruebes manualmente luego
-            fecha: new Date().toISOString()
-        });
-
-        window.showNotification("¡Reseña enviada con éxito! 🎉");
-        document.getElementById('clientReviewModal').style.display = 'none';
-
-    } catch (e) {
-        console.error("Error enviando reseña:", e);
-        window.showNotification("Error enviando reseña."); 
-    } finally {
-        btn.innerText = origText;
-        btn.disabled = false;
-    }
-};
 
 window.addPricingOptionField = (label = '', price = '') => {
     const container = document.getElementById('dynamicPricingOptionsContainer');
@@ -8242,7 +9427,7 @@ window.selectStoreTabPricing = (itemId, index, price, label) => {
         t.style.color = 'var(--mac-text-secondary)';
         t.style.borderColor = 'var(--mac-border)';
     });
-    
+
     const activeTab = document.getElementById(`tab_${itemId}_${index}`);
     if (activeTab) {
         activeTab.style.background = 'var(--mac-blue)';
@@ -8265,10 +9450,36 @@ window.addToCartWithOptions = (itemId) => {
     const originalItem = catalog.find(i => i.id === itemId);
     if (!originalItem) return;
 
-    const selectedOpt = window.storeSelectedOptions[itemId] || (originalItem.pricingOptions && originalItem.pricingOptions.length > 0 ? originalItem.pricingOptions[0] : { price: originalItem.price, label: '' });
-    
-    const cartItem = { ...originalItem }; 
+    const selectedOpt = window.storeSelectedOptions[itemId] || (originalItem.pricingOptions && originalItem.pricingOptions.length > 0 ? { price: originalItem.pricingOptions[0].price, label: originalItem.pricingOptions[0].label, tabName: 'General', variantName: originalItem.pricingOptions[0].label } : { price: originalItem.price, label: '', tabName: 'General', variantName: '' });
+
+    const tabName = selectedOpt.tabName || 'General';
+    const variantName = selectedOpt.variantName || selectedOpt.label || '';
+
+    const cartItem = { ...originalItem };
     cartItem.price = selectedOpt.price;
+
+    cartItem.basePlatform = originalItem.platform;
+    let t = 'Perfil';
+    if (cartItem.type === 'Completa' || cartItem.platform.toLowerCase().includes('completa') || (selectedOpt.label && selectedOpt.label.toLowerCase().includes('completa'))) t = 'Completa';
+    let m = 1;
+    const match = (selectedOpt.label || '').match(/(\d+)\s*mes/i);
+    if (match) m = parseInt(match[1]);
+    cartItem.saleType = t;
+    cartItem.months = m;
+
+    const rules = (window.currentUserData && window.currentUserData.storeStockRules) || (window.publicStoreDataCache && window.publicStoreDataCache.storeStockRules) || {};
+    for (const [key, rule] of Object.entries(rules)) {
+        if (rule && rule.productId === itemId && rule.tabName === tabName && rule.variantName === variantName) {
+            const parts = key.split('_');
+            if (parts.length >= 3) {
+                cartItem.basePlatform = parts[0];
+                cartItem.saleType = parts[1];
+                cartItem.months = parseInt(parts[2]) || 1;
+            }
+            break;
+        }
+    }
+
     if (selectedOpt.label && selectedOpt.label !== '1 Mes') {
         cartItem.platform = `${originalItem.platform} (${selectedOpt.label})`;
     }
@@ -8296,12 +9507,12 @@ window.saveProvider = async () => {
     const name = document.getElementById('newProvName').value.trim();
     const platform = document.getElementById('newProvPlatform').value;
     const cost = parseFloat(document.getElementById('newProvCost').value) || 0;
-    
-    if(!name) return window.showNotification("Escribe el nombre del proveedor.");
-    
+
+    if (!name) return window.showNotification("Escribe el nombre del proveedor.");
+
     let provs = currentUserData.providers || [];
     provs.push({ id: 'prov_' + Date.now(), name, platform, cost });
-    
+
     try {
         await updateDoc(doc(db, "users", currentUser.uid), { providers: provs });
         currentUserData.providers = provs;
@@ -8310,14 +9521,14 @@ window.saveProvider = async () => {
         window.renderProviders();
         window.updateProviderDropdown();
         window.showNotification("✅ Proveedor añadido.");
-    } catch(e) { window.showNotification("Error: " + e.message); }
+    } catch (e) { window.showNotification("Error: " + e.message); }
 };
 
 window.renderProviders = () => {
     const list = document.getElementById('providersListContainer');
     list.innerHTML = '';
     const provs = currentUserData.providers || [];
-    
+
     provs.forEach((p, idx) => {
         list.innerHTML += `
             <div style="background: var(--mac-surface); border: 1px solid var(--mac-border); padding: 10px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
@@ -8343,27 +9554,27 @@ window.deleteProvider = async (idx) => {
 window.updateProviderDropdown = () => {
     const checkedBoxes = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value);
     const select = document.getElementById('clientProviderSelect');
-    if(!select) return;
-    
+    if (!select) return;
+
     select.innerHTML = '<option value="">Seleccionar Proveedor...</option>';
     const provs = currentUserData.providers || [];
-    
+
     // Filtrar los que pertenezcan a la plataforma marcada
     const filtered = provs.filter(p => checkedBoxes.includes(p.platform));
-    
+
     filtered.forEach(p => {
         select.innerHTML += `<option value="${p.id}" data-cost="${p.cost}">${p.name} - ${p.platform} (${globalCurrency}${p.cost.toFixed(2)})</option>`;
     });
-    
+
     select.innerHTML += `<option value="custom">+ Escribir manual...</option>`;
 };
 
 // Escuchar cambios en los checks para disparar actualización del Select
-document.querySelectorAll('#checkboxDropdown input').forEach(cb => { 
-    cb.addEventListener('change', () => { 
+document.querySelectorAll('#checkboxDropdown input').forEach(cb => {
+    cb.addEventListener('change', () => {
         // Tu código anterior ya lo hace...
-        window.updateProviderDropdown(); 
-    }); 
+        window.updateProviderDropdown();
+    });
 });
 
 // Llenar auto-costo al seleccionar
@@ -8371,7 +9582,7 @@ window.onProviderSelected = () => {
     const select = document.getElementById('clientProviderSelect');
     const customInput = document.getElementById('clientProviderName');
     const costInput = document.getElementById('clientCost');
-    
+
     if (select.value === 'custom') {
         customInput.style.display = 'block';
         customInput.value = '';
@@ -8396,7 +9607,7 @@ window.onProviderSelected = () => {
 window.getTabTemplate = (tabName = '', options = []) => {
     let optsHtml = '';
     if (options.length === 0) options = [{ label: '', price: '' }];
-    
+
     options.forEach(o => {
         optsHtml += `
             <div class="builder-option-row" style="display: flex; gap: 8px; align-items: center; margin-top: 8px;">
@@ -8446,7 +9657,7 @@ window.extractBuilderData = (containerId) => {
     const container = document.getElementById(containerId);
     const tabGroups = container.querySelectorAll('.builder-tab-group');
     let result = [];
-    
+
     tabGroups.forEach(group => {
         const tabName = group.querySelector('.b-tab-name').value.trim() || 'General';
         let options = [];
@@ -8485,9 +9696,9 @@ window.selectPubTab = (itemId, tabIndex) => {
         const borderColor = isSelected ? 'var(--mac-blue)' : 'var(--mac-border)';
         const bg = isSelected ? 'rgba(0, 122, 255, 0.1)' : 'var(--mac-surface)';
         optionsHtml += `
-            <label id="opt_label_${itemId}_${i}" onclick="window.selectPubOption('${itemId}', ${tabIndex}, ${i}, ${opt.price}, '${opt.label.replace(/'/g,"\\'")}')" class="pub-opt-${itemId}" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-radius:12px; border:1px solid ${borderColor}; background:${bg}; cursor:pointer; transition:all 0.2s;">
+            <label id="opt_label_${itemId}_${i}" onclick="window.selectPubOption('${itemId}', ${tabIndex}, ${i}, ${opt.price}, '${opt.label.replace(/'/g, "\\'")}')" class="pub-opt-${itemId}" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-radius:12px; border:1px solid ${borderColor}; background:${bg}; cursor:pointer; transition:all 0.2s;">
                 <span style="font-size:14px; font-weight:600; color:var(--mac-text-main);">${opt.label}</span>
-                <span style="font-size:15px; font-weight:800; color:var(--mac-text-main);">${data.currency || 'S/'}${opt.price.toFixed(2)}</span>
+                <span style="font-size:15px; font-weight:800; color:var(--mac-text-main);">${window.formatStorePrice(opt.price)}</span>
             </label>
         `;
     });
@@ -8504,13 +9715,1733 @@ window.selectPubOption = (itemId, tabIndex, optIndex, price, optLabel) => {
     });
 
     const data = window.publicStoreDataCache;
-    document.getElementById(`priceDisplay_${itemId}`).innerText = `${data.currency || 'S/'}${price.toFixed(2)}`;
+    document.getElementById(`priceDisplay_${itemId}`).innerText = window.formatStorePrice(price);
 
     const tabsData = window.storeItemsTabsData[itemId];
     const tabName = tabsData[tabIndex].name;
     const showTabs = tabsData.length > 1 || (tabsData.length === 1 && tabsData[0].name !== 'General');
-    
+
     // El nombre a mostrar en el carrito será "Pestaña - Opción" (Ej: "1 Mes - Perfil")
     let finalLabel = showTabs && tabName ? `${tabName} - ${optLabel}` : optLabel;
-    window.storeSelectedOptions[itemId] = { price: price, label: finalLabel };
+    window.storeSelectedOptions[itemId] = { price: price, label: finalLabel, tabName: tabName, variantName: optLabel };
+};
+
+/* =========================================================
+   FUNCIONES REPARADAS DE FINANZAS Y EXPORTACIÓN
+========================================================= */
+
+window.switchFinanceTab = (tabId, element) => {
+    document.querySelectorAll('.finance-tab').forEach(tab => tab.style.display = 'none');
+    document.getElementById(tabId).style.display = 'block';
+    document.querySelectorAll('#financeSection .chrome-tab').forEach(btn => btn.classList.remove('active'));
+    element.classList.add('active');
+};
+
+window.generateCatalogImages = async () => {
+    const catalog = currentUserData.storeCatalog || [];
+    const availableItems = catalog.filter(i => i.status !== 'agotado');
+
+    if (availableItems.length === 0) {
+        return window.showNotification("⚠️ No tienes productos disponibles en el catálogo para exportar.");
+    }
+
+    // Modal de espera
+    Swal.fire({
+        title: '📸 Preparando Estudio Fotográfico',
+        html: '<p style="color:var(--mac-text-secondary); font-size:14px;">Estamos agrupando tus productos y generando las imágenes en alta calidad (1080x1920). Esto puede tomar unos segundos.</p>',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); },
+        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+    });
+
+    try {
+        const categories = {};
+        availableItems.forEach(item => {
+            const cat = item.category || 'VARIOS';
+            if (!categories[cat]) categories[cat] = [];
+            categories[cat].push(item);
+        });
+
+        const loadImgToBase64 = async (url) => {
+            if (!url) return null;
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.src = url + (url.includes('?') ? '&' : '?') + 'cb=' + new Date().getTime();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width; canvas.height = img.height;
+                    canvas.getContext('2d').drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                img.onerror = () => resolve(null);
+            });
+        };
+
+        const safeLogoBase64 = await loadImgToBase64(currentUserData.logoUrl);
+        const safeBannerBase64 = await loadImgToBase64(currentUserData.bannerUrl);
+
+        const template = document.getElementById('statusExportTemplate');
+        template.style.left = '0px';
+
+        document.getElementById('statusBrandName').innerText = currentUserData.name || 'Mi Marca';
+
+        const logoEl = document.getElementById('statusLogo');
+        if (safeLogoBase64) {
+            logoEl.src = safeLogoBase64;
+            logoEl.style.display = 'block';
+        } else {
+            logoEl.style.display = 'none';
+        }
+
+        const bannerEl = document.getElementById('statusBannerBg');
+        if (safeBannerBase64) {
+            bannerEl.style.backgroundImage = `url(${safeBannerBase64})`;
+        } else {
+            bannerEl.style.backgroundImage = 'none';
+        }
+
+        const pmContainer = document.getElementById('statusPaymentMethods');
+        pmContainer.innerHTML = '';
+        const methods = currentUserData.paymentMethods || [];
+        if (methods.length > 0) {
+            methods.forEach(m => {
+                pmContainer.innerHTML += `<span style="background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 15px; font-size: 20px; font-weight: bold;">🏦 ${m.bank}</span>`;
+            });
+        } else {
+            pmContainer.innerHTML = `<span style="background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 15px; font-size: 20px; font-weight: bold;">💳 Pregunta por nuestros medios de pago</span>`;
+        }
+
+        let generatedImagesUrls = [];
+        const itemsPerPage = 4;
+
+        for (const cat in categories) {
+            const items = categories[cat];
+            const totalPages = Math.ceil(items.length / itemsPerPage);
+
+            for (let page = 0; page < totalPages; page++) {
+                document.getElementById('statusCategoryTitle').innerText = cat.toUpperCase() + (totalPages > 1 ? ` (${page + 1}/${totalPages})` : '');
+
+                const container = document.getElementById('statusItemsContainer');
+                container.innerHTML = '';
+
+                const pageItems = items.slice(page * itemsPerPage, (page + 1) * itemsPerPage);
+
+                for (const item of pageItems) {
+                    const itemImgB64 = await loadImgToBase64(item.imgUrl);
+                    const finalImg = itemImgB64 ? `<img src="${itemImgB64}" style="width: 140px; height: 140px; border-radius: 30px; object-fit: cover; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 10px 20px rgba(0,0,0,0.5); flex-shrink: 0;">` : `<div style="width: 140px; height: 140px; border-radius: 30px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i class='bx bx-play-circle' style="font-size: 50px; color: rgba(255,255,255,0.3);"></i></div>`;
+
+                    let optsHtml = '';
+                    const opts = item.pricingOptions && item.pricingOptions.length > 0 ? item.pricingOptions : [{ label: 'Mensual', price: item.price }];
+
+                    opts.forEach(opt => {
+                        optsHtml += `<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; border-bottom: 1px dashed rgba(255,255,255,0.15); padding-bottom: 8px;">
+                            <span style="font-size: 24px; color: rgba(255,255,255,0.7);">${opt.label}</span>
+                            <span style="font-size: 28px; font-weight: 900; color: #30d158;">${globalCurrency}${opt.price.toFixed(2)}</span>
+                        </div>`;
+                    });
+
+                    container.innerHTML += `
+                        <div style="background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 35px; padding: 30px; display: flex; gap: 30px; align-items: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2);">
+                            ${finalImg}
+                            <div style="flex: 1;">
+                                <h3 style="margin: 0 0 15px 0; font-size: 38px; color: #ffffff; font-weight: 900; letter-spacing: 1px;">${item.platform}</h3>
+                                ${optsHtml}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                await new Promise(r => setTimeout(r, 300));
+
+                const canvas = await html2canvas(template, {
+                    backgroundColor: '#0a0a0c', scale: 1.5, useCORS: true
+                });
+
+                generatedImagesUrls.push({
+                    url: canvas.toDataURL('image/jpeg', 0.9),
+                    name: `Estado_${cat}_${page + 1}.jpg`
+                });
+            }
+        }
+
+        template.style.left = '-9999px';
+
+        if (generatedImagesUrls.length === 1) {
+            const link = document.createElement('a');
+            link.download = generatedImagesUrls[0].name;
+            link.href = generatedImagesUrls[0].url;
+            link.click();
+            Swal.fire({ icon: 'success', title: '¡Listo!', text: 'La imagen de tu estado se ha descargado.', background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff', color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000' });
+        } else {
+            let imagesHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 400px; overflow-y: auto;">';
+            generatedImagesUrls.forEach((img, idx) => {
+                imagesHtml += `
+                    <div style="background: rgba(0,0,0,0.05); padding: 10px; border-radius: 12px; text-align: center;">
+                        <img src="${img.url}" style="width: 100%; border-radius: 8px; margin-bottom: 8px;">
+                        <a href="${img.url}" download="${img.name}" style="background: var(--mac-blue); color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; text-decoration: none; font-weight: bold; display: inline-block;">Descargar</a>
+                    </div>
+                `;
+            });
+            imagesHtml += '</div>';
+
+            Swal.fire({
+                title: '📸 ¡Tus Estados están listos!',
+                html: imagesHtml,
+                width: 600,
+                confirmButtonText: 'Cerrar',
+                background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+                color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+            });
+        }
+
+    } catch (error) {
+        console.error("Error completo:", error);
+        Swal.fire({ icon: 'error', title: 'Oops...', text: 'Ocurrió un error al generar las imágenes. Revisa tu conexión a internet.' });
+    }
+};
+
+/* ==========================================================================
+   NUEVAS FUNCIONES: AUTOCOMPLETADO INTELIGENTE (DATALIST)
+   ========================================================================== */
+
+// --- 1. Lógica de Clientes Frecuentes (Híbrido) ---
+window.isClientSelectMode = false;
+
+window.toggleClientInputMode = () => {
+    window.isClientSelectMode = !window.isClientSelectMode;
+    const input = document.getElementById('clientName');
+    const text = document.getElementById('clientModeText');
+
+    if (window.isClientSelectMode) {
+        window.updateFrequentClientsList(); // ¡Forzamos que lea la tabla en este instante!
+
+        input.setAttribute('list', 'clientsDatalist');
+        input.placeholder = "🔍 Escribe para buscar cliente...";
+        input.value = '';
+        input.oninput = (e) => window.onFrequentClientSelected(e.target.value);
+
+        if (text) {
+            text.innerHTML = "Nuevo Cliente";
+            text.previousElementSibling.className = 'bx bx-user-plus';
+        }
+    } else {
+        input.removeAttribute('list');
+        input.placeholder = "Escribe el nombre...";
+        input.value = '';
+        input.oninput = null;
+        document.getElementById('phone').value = '';
+
+        if (text) {
+            text.innerHTML = "Clientes Frecuentes";
+            text.previousElementSibling.className = 'bx bx-search';
+        }
+    }
+};
+
+window.updateFrequentClientsList = () => {
+    const datalist = document.getElementById('clientsDatalist');
+    if (!datalist) return;
+    datalist.innerHTML = '';
+
+    const uniqueClients = {};
+    clients.forEach(c => {
+        if (c.phone && c.name) {
+            // EXTRAEMOS SOLO NÚMEROS (Quitamos el "+" temporalmente para limpiar)
+            const cleanPhone = c.phone.replace(/[^\d]/g, '');
+            if (!uniqueClients[cleanPhone]) {
+                uniqueClients[cleanPhone] = c.name;
+            }
+        }
+    });
+
+    Object.keys(uniqueClients).sort((a, b) => uniqueClients[a].localeCompare(uniqueClients[b])).forEach(phone => {
+        const name = uniqueClients[phone];
+        datalist.innerHTML += `<option value="${name} - +${phone}"></option>`;
+    });
+};
+
+window.onFrequentClientSelected = (val) => {
+    if (!val) return;
+
+    const parts = val.split(' - +');
+    if (parts.length === 2) {
+        const name = parts[0].trim();
+        const phone = '+' + parts[1].trim();
+
+        document.getElementById('clientName').value = name;
+
+        const phoneInput = document.getElementById('phone');
+        phoneInput.value = phone;
+
+        phoneInput.style.backgroundColor = "rgba(52, 199, 89, 0.1)";
+        phoneInput.style.borderColor = "var(--mac-green)";
+        setTimeout(() => {
+            phoneInput.style.backgroundColor = "var(--mac-surface)";
+            phoneInput.style.borderColor = "var(--mac-border)";
+        }, 800);
+    }
+};
+
+// --- 2. Lógica de Proveedores Inteligente ---
+window.updateProviderDropdown = () => {
+    const checkedBoxes = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value);
+    const datalist = document.getElementById('providersDatalist');
+    if (!datalist) return;
+
+    datalist.innerHTML = '';
+    const provs = currentUserData.providers || [];
+
+    // Filtramos solo los proveedores de la plataforma que marcaste arriba
+    const filtered = provs.filter(p => checkedBoxes.includes(p.platform));
+
+    filtered.forEach(p => {
+        // Guardamos el costo oculto en un data-attribute para extraerlo luego
+        datalist.innerHTML += `<option value="${p.name}" data-cost="${p.cost}">${p.platform} - ${globalCurrency}${p.cost.toFixed(2)}</option>`;
+    });
+};
+
+window.onProviderSelected = (val) => {
+    const datalist = document.getElementById('providersDatalist');
+    const costInput = document.getElementById('clientCost');
+    if (!val) return;
+
+    // Buscamos si lo que el usuario escribió coincide EXACTAMENTE con algo de la base de datos
+    const option = Array.from(datalist.options).find(opt => opt.value === val);
+
+    if (option) {
+        // ¡Lo encontró! Es un proveedor guardado. Extraemos su costo y lo pegamos.
+        const cost = option.getAttribute('data-cost');
+        if (cost) costInput.value = cost;
+
+        // Efecto visual verde brillante
+        costInput.style.backgroundColor = "rgba(52, 199, 89, 0.1)";
+        costInput.style.borderColor = "var(--mac-green)";
+        setTimeout(() => {
+            costInput.style.backgroundColor = "var(--mac-surface)";
+            costInput.style.borderColor = "var(--mac-border)";
+        }, 800);
+    }
+    // Si no coincide con nada, significa que estás escribiendo un nombre nuevo manualmente,
+    // así que el sistema simplemente te deja escribir sin interferir.
+};
+
+// --- 3. Lógica del Carrito (El Cerebro Matemático) ---
+
+window.applyCoupon = () => {
+    const code = document.getElementById('cartCouponInput').value.trim().toUpperCase();
+    const feedback = document.getElementById('couponFeedbackMessage');
+
+    if (!code) {
+        if (feedback) feedback.style.display = 'none';
+        return;
+    }
+
+    const storeCoupons = window.publicStoreDataCache.storeCoupons || [];
+    const validCoupon = storeCoupons.find(c => c.code === code);
+
+    if (validCoupon) {
+        // VALIDACIÓN DE CUPÓN ESPECÍFICO
+        if (validCoupon.target && validCoupon.target !== 'global') {
+            const hasTargetItem = window.storeCart.some(item => item.platform.startsWith(validCoupon.target));
+            if (!hasTargetItem) {
+                activeCoupon = null;
+                if (feedback) {
+                    feedback.innerHTML = `❌ El cupón aplica solo para: ${validCoupon.target}`;
+                    feedback.style.color = "var(--mac-orange)";
+                    feedback.style.display = "block";
+                }
+                window.renderCartItems();
+                return;
+            }
+        }
+
+        activeCoupon = validCoupon;
+        if (feedback) {
+            feedback.innerHTML = "✅ ¡Cupón aplicado!";
+            feedback.style.color = "var(--mac-green)";
+            feedback.style.display = "block";
+        }
+        window.renderCartItems();
+    } else {
+        activeCoupon = null;
+        if (feedback) {
+            feedback.innerHTML = "❌ Cupón inválido o expirado";
+            feedback.style.color = "var(--mac-red)";
+            feedback.style.display = "block";
+        }
+        window.renderCartItems();
+    }
+};
+
+window.renderCartItems = () => {
+    const container = document.getElementById('cartItemsContainer');
+    const totalEl = document.getElementById('cartTotalPrice');
+    const data = window.publicStoreDataCache;
+
+    container.innerHTML = '';
+
+    if (window.storeCart.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: var(--mac-text-secondary); margin-top: 50px;"><i class="bx bx-shopping-bag" style="font-size: 64px; opacity: 0.3; margin-bottom: 15px;"></i><p style="font-weight: bold; font-size: 16px;">Tu carrito está vacío</p></div>';
+        totalEl.innerText = `${data.currency || 'S/'}0.00`;
+        document.getElementById('floatingCartBtn').style.display = 'none';
+        document.getElementById('cartComboDiscountRow').style.display = 'none';
+        document.getElementById('cartCouponRow').style.display = 'none';
+        return;
+    }
+
+    let subtotal = 0;
+    window.storeCart.forEach((item, index) => {
+        subtotal += item.price;
+        const imgHTML = item.imgUrl ? `<img src="${item.imgUrl}">` : `<div style="width:65px; height:65px; border-radius:12px; background:var(--mac-gray); display:flex; align-items:center; justify-content:center; border: 1px solid var(--mac-border);"><i class="bx bx-play-circle" style="color:var(--mac-text-secondary); font-size:24px;"></i></div>`;
+        container.innerHTML += `
+            <div class="cart-item">
+                ${imgHTML}
+                <div class="cart-item-info">
+                    <div class="cart-item-title">${item.platform}</div>
+                    <div class="cart-item-price">${window.formatStorePrice(item.price)}</div>
+                </div>
+                <button class="cart-item-remove" onclick="window.removeFromCart(${index})" title="Quitar"><i class='bx bx-trash'></i></button>
+            </div>
+        `;
+    });
+
+    let qty = window.storeCart.length;
+    let comboDiscountPercent = 0;
+    const dynamicDisc = data.storeDiscounts || { qty2: 0, qty3: 0, qty4: 0 };
+
+    if (qty >= 4 && dynamicDisc.qty4) comboDiscountPercent = dynamicDisc.qty4;
+    else if (qty === 3 && dynamicDisc.qty3) comboDiscountPercent = dynamicDisc.qty3;
+    else if (qty === 2 && dynamicDisc.qty2) comboDiscountPercent = dynamicDisc.qty2;
+
+    let comboDiscountAmount = subtotal * (comboDiscountPercent / 100);
+    let afterComboPrice = subtotal - comboDiscountAmount;
+
+    // CÁLCULO INTELIGENTE DE CUPÓN
+    let couponDiscountAmount = 0;
+    if (activeCoupon) {
+        if (activeCoupon.target && activeCoupon.target !== 'global') {
+            // Buscamos los productos en el carrito que coinciden con la promoción
+            let targetItemsTotal = 0;
+            window.storeCart.forEach(item => {
+                if (item.platform.startsWith(activeCoupon.target)) {
+                    targetItemsTotal += item.price;
+                }
+            });
+            // El descuento aplica SOLO a la suma de los productos afectados
+            couponDiscountAmount = targetItemsTotal * (activeCoupon.percent / 100);
+        } else {
+            // El descuento es global, aplica a todo el carrito
+            couponDiscountAmount = afterComboPrice * (activeCoupon.percent / 100);
+        }
+    }
+
+    let finalTotal = afterComboPrice - couponDiscountAmount;
+
+    // ACTUALIZACIÓN DE LA UI DEL CARRITO
+    document.getElementById('cartSubtotalPrice').innerText = window.formatStorePrice(subtotal);
+
+    if (comboDiscountAmount > 0) {
+        document.getElementById('cartComboDiscountRow').style.display = 'flex';
+        document.getElementById('cartComboDiscountLabel').innerText = `Combo Armado (-${comboDiscountPercent}%):`;
+        document.getElementById('cartComboDiscountAmount').innerText = `- ${window.formatStorePrice(comboDiscountAmount)}`;
+    } else {
+        document.getElementById('cartComboDiscountRow').style.display = 'none';
+    }
+
+    if (couponDiscountAmount > 0) {
+        document.getElementById('cartCouponRow').style.display = 'flex';
+        document.getElementById('cartCouponAmount').innerText = `- ${window.formatStorePrice(couponDiscountAmount)} (-${activeCoupon.percent}%)`;
+    } else {
+        document.getElementById('cartCouponRow').style.display = 'none';
+    }
+
+    document.getElementById('cartTotalPrice').innerText = window.formatStorePrice(finalTotal);
+    window.currentCartFinalTotal = finalTotal;
+};
+
+/* ==========================================================================
+   SISTEMA AVANZADO DE PROVEEDORES MULTI-PLATAFORMA
+   ========================================================================== */
+
+// 1. Generar múltiples cajas según las plataformas seleccionadas
+window.updateProviderDropdown = () => {
+    const checkedBoxes = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value);
+    const container = document.getElementById('dynamicProvidersList');
+    if (!container) return;
+
+    // Si no hay nada marcado, mostramos el cuadro bloqueado
+    if (checkedBoxes.length === 0) {
+        container.innerHTML = '<input type="text" placeholder="Selecciona plataforma..." disabled style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-secondary); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">';
+        return;
+    }
+
+    // Guardamos lo que ya habías escrito para que no se borre si marcas otra casilla
+    const existingInputs = {};
+    document.querySelectorAll('.dyn-prov-input').forEach(inp => {
+        existingInputs[inp.dataset.platform] = inp.value;
+    });
+
+    container.innerHTML = '';
+    const provs = currentUserData.providers || [];
+
+    // Creamos un buscador (Datalist) por CADA plataforma marcada
+    checkedBoxes.forEach(plat => {
+        const platProvs = provs.filter(p => p.platform === plat);
+        let optionsHtml = '';
+        platProvs.forEach(p => {
+            optionsHtml += `<option value="${p.name}" data-cost="${p.cost}">${p.platform} - ${globalCurrency}${p.cost.toFixed(2)}</option>`;
+        });
+
+        const prevValue = existingInputs[plat] || '';
+        const safePlatId = plat.replace(/[^a-zA-Z0-9]/g, ''); // Para que el ID no tenga símbolos raros
+
+        container.innerHTML += `
+            <div style="position:relative; width: 100%;">
+                <input type="text" class="dyn-prov-input" data-platform="${plat}" list="provList_${safePlatId}" placeholder="Prov. de ${plat}..." value="${prevValue}" oninput="window.onDynamicProviderSelected(this)" style="width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-surface); color: var(--mac-text-main); font-size: 14px; box-sizing: border-box; outline: none; height: 46px;">
+                <datalist id="provList_${safePlatId}">
+                    ${optionsHtml}
+                </datalist>
+            </div>
+        `;
+    });
+};
+
+// 2. Extraer el costo cuando seleccionas uno de la lista
+window.onDynamicProviderSelected = (inputEl) => {
+    const val = inputEl.value;
+    const listId = inputEl.getAttribute('list');
+    const datalist = document.getElementById(listId);
+
+    let foundCost = 0;
+    if (datalist) {
+        // Busca si lo que escribiste coincide exactamente con una opción
+        const option = Array.from(datalist.options).find(opt => opt.value === val);
+        if (option) foundCost = parseFloat(option.getAttribute('data-cost')) || 0;
+    }
+
+    inputEl.dataset.cost = foundCost;
+    window.sumTotalCost();
+};
+
+// 3. Sumar el costo de TODOS los proveedores al campo principal
+window.sumTotalCost = () => {
+    let total = 0;
+    let anyAutoFilled = false;
+
+    document.querySelectorAll('.dyn-prov-input').forEach(inp => {
+        const cost = parseFloat(inp.dataset.cost) || 0;
+        total += cost;
+        if (cost > 0) anyAutoFilled = true;
+    });
+
+    if (anyAutoFilled || total > 0) {
+        const costInput = document.getElementById('clientCost');
+        costInput.value = total;
+        // Brillo verde de éxito
+        costInput.style.backgroundColor = "rgba(52, 199, 89, 0.1)";
+        costInput.style.borderColor = "var(--mac-green)";
+        setTimeout(() => {
+            costInput.style.backgroundColor = "var(--mac-surface)";
+            costInput.style.borderColor = "var(--mac-border)";
+        }, 800);
+    }
+};
+
+// 4. Asegurarnos de que el menú de plataformas active esta función
+const originalPopulate = window.populateAllServiceSelects;
+window.populateAllServiceSelects = () => {
+    const services = currentUserData.customServices || ["Netflix", "Disney+", "Spotify Premium", "HBO Max", "Paramount", "Amazon Prime", "YouTube Premium", "Crunchyroll", "IPTV", "Flujo TV", "Apple TV", "Gemini Pro", "ChatGPT", "Canva Pro", "CapCut Pro", "Directv GO", "Movistar"];
+
+    const chkDropdown = document.getElementById('checkboxDropdown');
+    if (chkDropdown) {
+        chkDropdown.innerHTML = '';
+        services.forEach(s => {
+            const label = document.createElement('label');
+            label.innerHTML = `<input type="checkbox" value="${s}"> ${s}`;
+            chkDropdown.appendChild(label);
+        });
+
+        // LA MAGIA: Cada vez que tocas un check, reconstruimos los proveedores
+        document.querySelectorAll('#checkboxDropdown input').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const checked = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value);
+                const el = document.getElementById('selectText');
+                if (checked.length) { el.textContent = checked.join(', '); el.classList.add('has-selection'); }
+                else { el.textContent = 'Plataforma(s)...'; el.classList.remove('has-selection'); }
+
+                window.updateProviderDropdown(); // 👈 Llama a nuestro nuevo sistema
+            });
+        });
+    }
+
+    const selectIds = [{ id: 'invPlatform', defaultOpt: 'Plataforma...' }, { id: 'matPlatform', defaultOpt: null }, { id: 'rulePlatformSelect', defaultOpt: null }, { id: 'refPlatformSelect', defaultOpt: 'Selecciona Plataforma...' }, { id: 'campaignPlatformFilter', defaultOpt: 'Cualquier Plataforma' }];
+    selectIds.forEach(item => {
+        const select = document.getElementById(item.id);
+        if (select) {
+            select.innerHTML = item.defaultOpt ? `<option value="">${item.defaultOpt}</option>` : '';
+            services.forEach(s => { select.innerHTML += `<option value="${s}">${s}</option>`; });
+        }
+    });
+};
+
+// 5. Reescribir StartEdit para que llene múltiples proveedores al editar un cliente (async + Firestore fallback)
+window.startEdit = async (id) => {
+    editingClientId = id;
+    let c = clients.find(x => x.id === id);
+    if (!c) {
+        try {
+            const docSnap = await getDoc(doc(db, "clients", id));
+            if (docSnap.exists()) {
+                c = { id: docSnap.id, ...docSnap.data() };
+                if (!clients.some(x => x.id === c.id)) clients.unshift(c);
+            }
+        } catch (err) {
+            console.error("Error buscando cliente en Firestore:", err);
+        }
+    }
+    if (!c) return window.showNotification("Cliente no encontrado.");
+
+    window.currentClientNote = c.notes || '';
+    document.getElementById('clientName').value = c.name || '';
+    document.getElementById('phone').value = c.phone || '';
+    document.getElementById('expirationDate').value = c.date || '';
+    document.getElementById('clientCost').value = c.cost !== undefined && c.cost !== null ? c.cost : '';
+    document.getElementById('clientPrice').value = c.price !== undefined && c.price !== null ? c.price : '';
+
+    if (c.multiAccounts && Object.keys(c.multiAccounts).length > 0) {
+        multiAccData = c.multiAccounts;
+    } else {
+        const platforms = (c.platform || '').split(', ').filter(Boolean);
+        multiAccData = {};
+        platforms.forEach(p => {
+            multiAccData[p] = {
+                email: c.accountEmail || '',
+                password: c.accountPassword || '',
+                profile: c.accountProfile || '',
+                pin: c.accountPin || '',
+                saleType: c.accountSaleType || 'Perfil',
+                units: c.accountUnits || 1,
+                months: c.accountMonths || 1,
+                deviceName: c.accountDeviceName || '',
+                deviceType: c.accountDeviceType || ''
+            };
+        });
+    }
+
+    if (typeof variablesEnlaceMatriz !== 'undefined') {
+        variablesEnlaceMatriz.masterId = c.linkedMasterId || null;
+        variablesEnlaceMatriz.profileNum = c.accountProfile || null;
+        variablesEnlaceMatriz.originalEmail = c.accountEmail || '';
+        variablesEnlaceMatriz.originalPass = c.accountPassword || '';
+    }
+
+    const totalUnits = Object.values(multiAccData).reduce((sum, acc) => sum + (parseInt(acc.units) || 1), 0);
+    const btn = document.getElementById('btnAccountData');
+    if (btn) {
+        btn.innerText = `✅ Datos de Cuenta (${totalUnits} ud)`;
+        btn.style.backgroundColor = "var(--mac-green)";
+        btn.style.color = "white";
+    }
+
+    const cbs = document.querySelectorAll('#checkboxDropdown input');
+    cbs.forEach(cb => cb.checked = false);
+    (c.platform || '').split(', ').forEach(p => { cbs.forEach(cb => { if (cb.value === p) cb.checked = true; }); });
+    document.getElementById('selectText').textContent = c.platform || 'Plataforma(s)...';
+    document.getElementById('selectText').classList.add('has-selection');
+    document.getElementById('actionButtonsContainer').innerHTML = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button type="button" class="btn-primary" onclick="window.saveClientData()">Guardar</button><button type="button" class="btn-secondary" onclick="window.cancelEdit()">Cancelar</button></div>`;
+
+    // --- Llenar los proveedores en las cajitas generadas ---
+    window.updateProviderDropdown();
+    setTimeout(() => {
+        if (c.multiAccounts) {
+            Object.keys(c.multiAccounts).forEach(plat => {
+                const inp = document.querySelector(`.dyn-prov-input[data-platform="${plat}"]`);
+                if (inp && c.multiAccounts[plat].provider) inp.value = c.multiAccounts[plat].provider;
+            });
+        } else {
+            // Soporte para clientes viejos
+            const provs = c.providerName ? c.providerName.split(' | ') : [];
+            if (provs.length === 1 && !provs[0].includes(':')) {
+                const inp = document.querySelector('.dyn-prov-input');
+                if (inp) inp.value = provs[0];
+            } else {
+                provs.forEach(p => {
+                    const parts = p.split(': ');
+                    if (parts.length === 2) {
+                        const inp = document.querySelector(`.dyn-prov-input[data-platform="${parts[0]}"]`);
+                        if (inp) inp.value = parts[1];
+                    }
+                });
+            }
+        }
+    }, 50);
+
+    document.getElementById('clientForm')?.scrollIntoView({ behavior: 'smooth' });
+};
+
+// 6. Reescribir GuardarCliente para que lea todos los proveedores
+const originalSaveClientData = window.saveClientData;
+window.saveClientData = async () => {
+    // Recopilamos todos los proveedores antes de llamar a la lógica de guardado
+    let provNamesArray = [];
+    document.querySelectorAll('.dyn-prov-input').forEach(inp => {
+        const val = inp.value.trim();
+        if (val) {
+            provNamesArray.push(`${inp.dataset.platform}: ${val}`);
+            if (multiAccData[inp.dataset.platform]) {
+                multiAccData[inp.dataset.platform].provider = val;
+            }
+        }
+    });
+
+    // Inyectamos el string consolidado (Ej: "Netflix: Carlos | Disney+: Maria") en un campo oculto 
+    // para que la función original lo recoja de forma invisible
+    let hiddenProvider = document.getElementById('clientProviderName');
+    if (!hiddenProvider) {
+        hiddenProvider = document.createElement('input');
+        hiddenProvider.type = 'hidden';
+        hiddenProvider.id = 'clientProviderName';
+        document.body.appendChild(hiddenProvider);
+    }
+    hiddenProvider.value = provNamesArray.join(' | ');
+
+    // Llamamos a tu guardado normal
+    await originalSaveClientData();
+};
+
+// 7. Resetear al cancelar
+const originalCancelEdit = window.cancelEdit;
+window.cancelEdit = () => {
+    originalCancelEdit();
+    window.updateProviderDropdown();
+};
+
+window.saveGateways = async () => {
+    const mpTokenRaw = document.getElementById('mpAccessTokenInput') ? document.getElementById('mpAccessTokenInput').value.trim() : '';
+    const binApiKeyRaw = document.getElementById('binanceApiKeyInput') ? document.getElementById('binanceApiKeyInput').value.trim() : '';
+    const binSecretRaw = document.getElementById('binanceSecretKeyInput') ? document.getElementById('binanceSecretKeyInput').value.trim() : '';
+
+    const mpToken = mpTokenRaw.includes('***') ? (currentUserData.gateways?.mercadoPago?.accessToken || currentUserData.mpAccessToken || '') : mpTokenRaw;
+    const binApiKey = binApiKeyRaw.includes('***') ? (currentUserData.gateways?.binance?.apiKey || currentUserData.binanceApiKey || '') : binApiKeyRaw;
+    const binSecret = binSecretRaw.includes('***') ? (currentUserData.gateways?.binance?.secretKey || currentUserData.binanceSecretKey || '') : binSecretRaw;
+
+    try {
+        const gateways = {
+            mercadoPago: { accessToken: mpToken, active: !!mpToken },
+            binance: { apiKey: binApiKey, secretKey: binSecret, active: !!binApiKey }
+        };
+
+        const updateData = {
+            gateways: gateways,
+            mpAccessToken: mpToken || null,
+            binanceApiKey: binApiKey || null,
+            binanceSecretKey: binSecret || null
+        };
+
+        // ADVERTENCIA DE SEGURIDAD: En producción, estos datos deben ir en una subcolección protegida
+        await updateDoc(doc(db, "users", currentUser.uid), updateData);
+        currentUserData.gateways = gateways;
+        currentUserData.mpAccessToken = mpToken || null;
+        currentUserData.binanceApiKey = binApiKey || null;
+        currentUserData.binanceSecretKey = binSecret || null;
+
+        window.showNotification("✅ Credenciales de pago guardadas");
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
+    }
+};
+
+/* =========================================================
+   MOTOR DE VINCULACIÓN INTELIGENTE (STOCK MAPPING)
+========================================================= */
+window.checkAndLinkStockRules = async (stockItemsArray) => {
+    if (!currentUserData.storeStockRules) currentUserData.storeStockRules = {};
+    const rules = currentUserData.storeStockRules;
+    const catalog = currentUserData.storeCatalog || [];
+
+    // Extraer configuraciones únicas del array entrante
+    const uniqueConfigs = [];
+    stockItemsArray.forEach(item => {
+        const key = `${item.platform}_${item.type}_${item.months}`;
+        if (!uniqueConfigs.find(c => c.key === key)) {
+            uniqueConfigs.push({ key, platform: item.platform, type: item.type, months: item.months });
+        }
+    });
+
+    for (const config of uniqueConfigs) {
+        if (!rules[config.key]) {
+            // Pausar ejecución y resolver el modal
+            const ruleObj = await window.promptStockLinkModal(config, catalog);
+            if (!ruleObj) return false; // Usuario canceló o cerró forzosamente
+            if (ruleObj === 'skip' || ruleObj === true) continue; // El usuario saltó la configuración actual
+
+            // Guardar regla en Firebase y memoria
+            rules[config.key] = ruleObj;
+            await updateDoc(doc(db, "users", currentUser.uid), { storeStockRules: rules });
+        }
+    }
+    return true;
+};
+
+// Promesa que controla el Modal UI
+window.promptStockLinkModal = (config, catalog) => {
+    return new Promise((resolve) => {
+        window.stockLinkResolve = resolve;
+        const modal = document.getElementById('stockLinkModal');
+        const msg = document.getElementById('stockLinkMessage');
+        const prodSelect = document.getElementById('linkProductSelect');
+        const tabSelect = document.getElementById('linkTabSelect');
+        const varSelect = document.getElementById('linkVariantSelect');
+        let btnSave = document.getElementById('btnSaveStockLink');
+
+        if (!modal || !msg || !prodSelect || !tabSelect || !varSelect || !btnSave) {
+            console.error("Missing stockLinkModal elements in DOM.");
+            return resolve(null);
+        }
+
+        msg.innerHTML = `Detectamos una nueva configuración: <b>${config.platform} - ${config.type} - ${config.months || 1} Mes(es)</b>.<br>¿A qué producto de tu tienda corresponde?`;
+
+        // Llenar Productos
+        prodSelect.innerHTML = '<option value="">Selecciona un Producto...</option>';
+        catalog.forEach(p => {
+            if (p.status !== 'agotado') prodSelect.innerHTML += `<option value="${p.id}">${p.platform}</option>`;
+        });
+
+        tabSelect.innerHTML = '<option value="">Selecciona una Pestaña...</option>';
+        varSelect.innerHTML = '<option value="">Selecciona una Variante...</option>';
+        tabSelect.disabled = true;
+        varSelect.disabled = true;
+
+        // Limpiar eventos previos
+        btnSave.replaceWith(btnSave.cloneNode(true));
+        const newBtnSave = document.getElementById('btnSaveStockLink');
+
+        // Eventos UI dinámicos
+        window.onLinkProductChange = () => {
+            const selectedProd = catalog.find(p => p.id === prodSelect.value);
+            tabSelect.innerHTML = '<option value="">Selecciona una Pestaña...</option>';
+            varSelect.innerHTML = '<option value="">Selecciona una Variante...</option>';
+            varSelect.disabled = true;
+            if (selectedProd && selectedProd.storeTabs) {
+                selectedProd.storeTabs.forEach((tab, index) => {
+                    tabSelect.innerHTML += `<option value="${index}">${tab.name}</option>`;
+                });
+                tabSelect.disabled = false;
+            } else {
+                tabSelect.disabled = true;
+            }
+        };
+
+        window.onLinkTabChange = () => {
+            const selectedProd = catalog.find(p => p.id === prodSelect.value);
+            const tabIndex = tabSelect.value;
+            varSelect.innerHTML = '<option value="">Selecciona una Variante...</option>';
+            if (selectedProd && tabIndex !== '') {
+                const options = selectedProd.storeTabs[tabIndex].options || [];
+                options.forEach((opt, index) => {
+                    varSelect.innerHTML += `<option value="${index}">${opt.label} - ${window.publicStoreDataCache?.currency || 'S/'}${opt.price}</option>`;
+                });
+                varSelect.disabled = false;
+            } else {
+                varSelect.disabled = true;
+            }
+        };
+
+        // Resolución del Modal
+        newBtnSave.onclick = () => {
+            if (!prodSelect.value || tabSelect.value === '' || varSelect.value === '') {
+                return window.showNotification("⚠️ Debes seleccionar Producto, Pestaña y Variante.");
+            }
+            const selectedProd = catalog.find(p => p.id === prodSelect.value);
+            const tabName = selectedProd.storeTabs[tabSelect.value].name;
+            const variantName = selectedProd.storeTabs[tabSelect.value].options[varSelect.value].label;
+
+            modal.style.display = 'none';
+            resolve({
+                productId: selectedProd.id,
+                tabName: tabName,
+                variantName: variantName
+            });
+        };
+
+        modal.style.display = 'flex';
+    });
+};
+
+window.skipStockLink = () => {
+    const modal = document.getElementById('stockLinkModal');
+    if (modal) modal.style.display = 'none';
+
+    // Libera la promesa para que el inventario se guarde sin reglas
+    if (typeof window.stockLinkResolve === 'function') {
+        window.stockLinkResolve(true);
+    }
+};
+
+// Herramienta de Migración Manual
+window.syncOldStockRules = async () => {
+    const stock = currentUserData.inventory || [];
+    if (stock.length === 0) return window.showNotification("Tu inventario está vacío.");
+
+    window.showNotification("🔄 Analizando configuraciones huérfanas...");
+    const success = await window.checkAndLinkStockRules(stock);
+    if (success) window.showNotification("✅ Todo tu stock está correctamente vinculado a la tienda.");
+};
+
+window.promptStoreReference = (plataformaPrevia = "") => {
+    Swal.fire({
+        title: '¡Venta Exitosa!',
+        text: '¿Tu cliente te confirmó la entrega? Sube la captura de pantalla para que sirva de referencia en tu Tiendita Web.',
+        icon: 'success',
+        showCancelButton: true,
+        confirmButtonColor: '#34C759',
+        cancelButtonColor: '#555',
+        confirmButtonText: '📸 Subir Referencia',
+        cancelButtonText: 'Lo haré después'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.closeModals(true);
+            window.openStoreModal();
+            window.switchDashboardSection('storeModal');
+            setTimeout(() => {
+                const tabBtn = document.querySelector('.chrome-tab[onclick*="tabGaleriaRef"]');
+                if (tabBtn) tabBtn.click();
+
+                // Cargar plataformas disponibles
+                const selectPlat = document.getElementById('refPlatformSelect');
+                if (selectPlat) {
+                    selectPlat.innerHTML = '<option value="">Selecciona Plataforma...</option>';
+                    const uniquePlats = [...new Set(clients.map(c => c.platform.split(',')[0].trim()).filter(Boolean))];
+                    uniquePlats.forEach(p => {
+                        selectPlat.innerHTML += `<option value="${p}">${p}</option>`;
+                    });
+
+                    if (plataformaPrevia) {
+                        for (let i = 0; i < selectPlat.options.length; i++) {
+                            if (selectPlat.options[i].text.toLowerCase().includes(plataformaPrevia.toLowerCase())) {
+                                selectPlat.selectedIndex = i;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }, 500);
+        }
+    });
+};
+
+window.uploadStoreReference = async () => {
+    const platform = document.getElementById('refPlatformSelect').value;
+    const desc = document.getElementById('refDescInput').value.trim();
+    const fileInput = document.getElementById('refImageInput');
+
+    if (!platform || !fileInput.files.length) {
+        return window.showNotification("⚠️ Selecciona una plataforma y una imagen.");
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = async () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Resize max width 800
+            const MAX_WIDTH = 800;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > MAX_WIDTH) {
+                height = Math.round((height * MAX_WIDTH) / width);
+                width = MAX_WIDTH;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Watermark
+            const watermarkText = currentUserData.storeAlias || currentUserData.name || 'A.G.C.';
+            ctx.font = `bold ${Math.max(20, width / 15)}px Arial`;
+            ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            ctx.translate(width / 2, height / 2);
+            ctx.rotate(-Math.PI / 4);
+            ctx.fillText(watermarkText, 0, 0);
+            ctx.rotate(Math.PI / 4);
+            ctx.translate(-width / 2, -height / 2);
+
+            canvas.toBlob(async (blob) => {
+                try {
+                    window.showNotification("⏳ Subiendo referencia...");
+                    const storageRefObj = ref(storage, `references/${currentUser.uid}_${Date.now()}.webp`);
+                    await uploadBytes(storageRefObj, blob);
+                    const downloadUrl = await getDownloadURL(storageRefObj);
+
+                    const refs = currentUserData.storeReferences || [];
+                    refs.push({
+                        url: downloadUrl,
+                        platform: platform,
+                        description: desc,
+                        date: new Date().toISOString()
+                    });
+
+                    await updateDoc(doc(db, "users", currentUser.uid), { storeReferences: refs });
+                    currentUserData.storeReferences = refs;
+
+                    window.showNotification("✅ Referencia subida con éxito.");
+                    document.getElementById('refDescInput').value = '';
+                    document.getElementById('refImageInput').value = '';
+                    window.renderStoreReferences();
+                } catch (err) {
+                    console.error(err);
+                    window.showNotification("Error al subir la imagen.");
+                }
+            }, 'image/webp', 0.7);
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+};
+
+window.renderStoreReferences = () => {
+    const list = document.getElementById('storeReferencesList');
+    if (!list) return;
+
+    const refs = currentUserData.storeReferences || [];
+    if (refs.length === 0) {
+        list.innerHTML = '<p style="color: var(--mac-text-secondary); grid-column: 1 / -1;">No has subido referencias aún.</p>';
+        return;
+    }
+
+    // Llenar select si está vacío en este momento (al abrir tab manualmente)
+    const selectPlat = document.getElementById('refPlatformSelect');
+    if (selectPlat && selectPlat.options.length <= 1) {
+        const uniquePlats = [...new Set(clients.map(c => c.platform.split(',')[0].trim()).filter(Boolean))];
+        uniquePlats.forEach(p => {
+            selectPlat.innerHTML += `<option value="${p}">${p}</option>`;
+        });
+    }
+
+    list.innerHTML = '';
+    refs.forEach((r, index) => {
+        list.innerHTML += `
+            <div style="background: var(--mac-surface); border-radius: 12px; border: 1px solid var(--mac-border); overflow: hidden; position: relative;">
+                <img src="${r.url}" style="width: 100%; height: 150px; object-fit: cover;">
+                <div style="padding: 10px;">
+                    <p style="margin: 0; font-weight: bold; font-size: 13px; color: var(--mac-blue);">${r.platform}</p>
+                    <p style="margin: 5px 0 0 0; font-size: 11px; color: var(--mac-text-secondary);">${r.description}</p>
+                </div>
+                <button onclick="window.deleteStoreReference(${index})" style="position: absolute; top: 5px; right: 5px; background: rgba(255,0,0,0.8); color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center;"><i class='bx bx-trash'></i></button>
+            </div>
+        `;
+    });
+};
+
+window.deleteStoreReference = async (index) => {
+    if (!confirm("¿Eliminar esta referencia?")) return;
+    const refs = currentUserData.storeReferences || [];
+    refs.splice(index, 1);
+    await updateDoc(doc(db, "users", currentUser.uid), { storeReferences: refs });
+    currentUserData.storeReferences = refs;
+    window.renderStoreReferences();
+};
+
+window.openPublicReferences = () => {
+    // Llenar el select dinámicamente
+    const refs = window.publicStoreDataCache.storeReferences || [];
+    const filterSelect = document.getElementById('publicRefFilter');
+    const uniquePlats = [...new Set(refs.map(r => r.platform))];
+
+    filterSelect.innerHTML = '<option value="all">Todas las plataformas</option>';
+    uniquePlats.forEach(p => {
+        filterSelect.innerHTML += `<option value="${p}">${p}</option>`;
+    });
+
+    // Ocultar tienda y mostrar referencias
+    document.getElementById('publicStoreView').style.display = 'none';
+    document.getElementById('publicReferencesSection').style.display = 'block';
+
+    window.scrollTo(0, 0); // Subir al inicio de la página
+    window.filterPublicReferences('all');
+};
+
+window.closePublicReferences = () => {
+    document.getElementById('publicReferencesSection').style.display = 'none';
+    document.getElementById('publicStoreView').style.display = 'block';
+    window.scrollTo(0, 0);
+};
+
+window.filterPublicReferences = (platform) => {
+    const grid = document.getElementById('publicRefGrid');
+    const refs = publicStoreDataCache.storeReferences || [];
+    grid.innerHTML = '';
+
+    const platformSalesObj = publicStoreDataCache.platformSalesCount || {};
+    const totalSales = publicStoreDataCache.storeSalesCount || 0;
+
+    let filtered = [];
+    const pElement = document.querySelector('#publicReferencesSection p');
+
+    if (platform === 'all') {
+        filtered = refs;
+        if (pElement) {
+            pElement.innerHTML = `Total: <b style="color: var(--mac-orange);">${refs.length}</b> referencias respaldadas por <b style="color: var(--mac-green);">${totalSales}</b> ventas totales.`;
+        }
+    } else {
+        filtered = refs.filter(r => r.platform === platform);
+        const pSales = platformSalesObj[platform] || 0;
+        if (pElement) {
+            pElement.innerHTML = `Plataforma: <b style="color: var(--mac-orange);">${filtered.length}</b> referencias respaldadas por <b style="color: var(--mac-green);">${pSales}</b> ventas históricas de esta plataforma.`;
+        }
+    }
+
+    filtered.forEach(r => {
+        grid.innerHTML += `
+            <div style="background: var(--mac-surface); border-radius: 12px; border: 1px solid var(--mac-border); overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <img src="${r.url}" style="width: 100%; height: 180px; object-fit: cover; border-radius: 12px 12px 0 0; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'" onclick="window.viewFullReference('${r.url}')">
+                <div style="padding: 15px;">
+                    <span style="background: var(--mac-blue); color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">${r.platform}</span>
+                    <p style="margin: 10px 0 0 0; font-size: 13px; color: var(--mac-text-main); font-weight: bold;">${r.description}</p>
+                </div>
+            </div>
+        `;
+    });
+};
+
+window.populateCouponTargets = () => {
+    const select = document.getElementById('newCouponTarget');
+    if (!select) return;
+
+    select.innerHTML = '<option value="global">Todo el Catálogo</option>';
+    const catalog = currentUserData.storeCatalog || [];
+
+    catalog.forEach(item => {
+        select.innerHTML += `<option value="${item.platform}">Solo: ${item.platform}</option>`;
+    });
+};
+
+window.viewFullReference = (imgUrl) => {
+    Swal.fire({
+        html: `<img src="${imgUrl}" style="max-width: 100%; max-height: 85vh; width: auto; object-fit: contain; border-radius: 8px; display: block; margin: 0 auto;">`,
+        width: 'auto',
+        background: 'transparent',
+        showConfirmButton: false,
+        showCloseButton: true,
+        backdrop: 'rgba(0,0,0,0.95)',
+        customClass: { popup: 'swal-fullscreen-popup' } // Clase opcional para quitar padding interno de Swal
+    });
+};
+
+window.toggleArchiveClient = async (id, isArchived) => {
+    try {
+        await updateDoc(doc(db, "clients", id), { archived: isArchived });
+        window.showNotification("📁 Cliente archivado correctamente");
+        loadUserClients();
+    } catch (e) {
+        window.showNotification("Error al archivar: " + e.message);
+    }
+};
+
+window.unarchiveAndEdit = (id) => {
+    window.startEdit(id);
+    document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
+    window.showNotification("Modifica los datos y presiona Guardar para reactivarlo.");
+};
+
+window.toggleEditStoreStockFields = () => {
+    const isChecked = document.getElementById('editProdAutoStock').checked;
+    const configDiv = document.getElementById('editStoreStockConfig');
+    const index = document.getElementById('editProdIndex').value;
+    const item = currentUserData.storeCatalog[index];
+    const type = item ? (item.type || 'Servicio') : 'Servicio';
+    const label = document.getElementById('editStoreStockLabel');
+
+    if (isChecked) {
+        configDiv.style.display = 'flex';
+        const listContainer = document.getElementById('editStoreStockPlatformsList');
+        listContainer.innerHTML = '';
+        if (type === 'Combo') {
+            label.innerText = 'Selecciona las plataformas del inventario que integran este Combo:';
+            window.addEditStoreStockSelectRow();
+            window.addEditStoreStockSelectRow();
+        } else {
+            label.innerText = 'Selecciona la plataforma del inventario vinculada a este servicio:';
+            window.addEditStoreStockSelectRow();
+        }
+    } else {
+        configDiv.style.display = 'none';
+        document.getElementById('editStoreStockPlatformsList').innerHTML = '';
+        window.updateEditStoreStockCount();
+    }
+};
+
+window.addEditStoreStockSelectRow = (preselectedValue = "") => {
+    const listContainer = document.getElementById('editStoreStockPlatformsList');
+    const stock = currentUserData.inventory || [];
+    const platformsEnStock = [...new Set(stock.filter(i => i.status === 'libre').map(i => i.platform))];
+
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'edit-store-stock-row';
+    rowDiv.style.cssText = 'display: flex; gap: 8px; align-items: center;';
+
+    let selectHTML = `<select class="edit-store-stock-select" onchange="window.updateEditStoreStockCount()" style="flex: 1; padding: 6px; border-radius: 6px; background: var(--mac-surface); border: 1px solid var(--mac-border); font-size: 12px; color: var(--mac-text-main);">`;
+    selectHTML += `<option value="">Selecciona plataforma...</option>`;
+    platformsEnStock.forEach(p => {
+        const countLibres = stock.filter(i => i.status === 'libre' && i.platform === p).length;
+        const selected = preselectedValue === p ? 'selected' : '';
+        selectHTML += `<option value="${p}" ${selected}>${p} (${countLibres} en stock)</option>`;
+    });
+    selectHTML += `</select>`;
+
+    const removeBtnHTML = listContainer.children.length > 0 ?
+        `<button type="button" class="action-btn btn-del" style="padding: 4px 8px; font-size: 11px;" onclick="this.parentElement.remove(); window.updateEditStoreStockCount();"><i class='bx bx-trash'></i></button>` : '';
+
+    rowDiv.innerHTML = selectHTML + removeBtnHTML;
+    listContainer.appendChild(rowDiv);
+    window.updateEditStoreStockCount();
+};
+
+window.updateEditStoreStockCount = () => {
+    const countText = document.getElementById('editStoreStockCountText');
+    const selects = document.querySelectorAll('.edit-store-stock-select');
+    const selectedPlatforms = Array.from(selects).map(s => s.value).filter(val => val !== '');
+
+    if (selectedPlatforms.length === 0) {
+        countText.innerText = '0 disp.'; countText.style.color = 'var(--mac-text-secondary)'; return;
+    }
+
+    const stock = currentUserData.inventory || [];
+    const index = document.getElementById('editProdIndex').value;
+    const item = currentUserData.storeCatalog[index];
+    const type = item ? (item.type || 'Servicio') : 'Servicio';
+
+    if (type === 'Combo') {
+        const counts = selectedPlatforms.map(plat => stock.filter(i => i.status === 'libre' && i.platform === plat).length);
+        const minStock = Math.min(...counts);
+        countText.innerText = `${minStock} Combos disp.`; countText.style.color = minStock > 0 ? 'var(--mac-green)' : 'var(--mac-red)';
+    } else {
+        const count = stock.filter(i => i.status === 'libre' && i.platform === selectedPlatforms[0]).length;
+        countText.innerText = `${count} disp.`; countText.style.color = count > 0 ? 'var(--mac-green)' : 'var(--mac-red)';
+    }
+};
+
+// --- SOLICITAR CÓDIGO AL VPS DESDE EL PORTAL ---
+window.requestAccessCode = async (masterEmail, appToken, accessLevel, targetEmail = '-', platformName = '') => {
+
+    let defaultSearchTerm = (targetEmail && targetEmail !== '-') ? targetEmail : '';
+
+    // 🔥 SIEMPRE mostramos la ventana para confirmar o editar el término de búsqueda
+    const { value: searchKeyword } = await Swal.fire({
+        title: '🔎 Confirmar Búsqueda',
+        html: `
+            <p style="font-size: 13px; color: var(--mac-text-secondary); margin-bottom: 15px;">
+                Se escaneará la bandeja maestra en busca de este correo/alias:<br>
+                <span style="font-size: 11px; color: var(--mac-orange);">* Puedes editarlo si usas un correo redireccionado.</span>
+            </p>
+            <input id="swal-search-input" class="swal2-input" value="${defaultSearchTerm}" placeholder="Ej: cuenta@dominio.com" style="width: 85%; max-width: 100%; box-sizing: border-box; margin: 0 auto; display: block; font-size: 15px;">
+        `,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Buscar Código',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: 'var(--mac-blue)',
+        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000',
+        preConfirm: () => {
+            return document.getElementById('swal-search-input').value.trim();
+        }
+    });
+
+    if (!searchKeyword) return; // Si cancela la ventana
+
+    Swal.fire({
+        title: 'Buscando código...',
+        html: `Escaneando últimos 10 minutos para <b>${searchKeyword}</b>...`,
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    try {
+        const response = await fetch('https://bot.panelagc.com/api/get-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: masterEmail,
+                appPassword: appToken,
+                saleType: accessLevel,
+                targetEmail: searchKeyword, // Enviamos lo que el usuario confirmó en la ventana
+                platformName: platformName
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Código Recibido',
+                html: `
+                    <div style="background: var(--mac-gray); border-radius: 12px; padding: 20px; margin: 15px 0; text-align: center;">
+                        <p style="font-size: 13px; color: var(--mac-text-secondary); margin: 0 0 10px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Código de Verificación</p>
+                        <div style="font-size: 38px; font-weight: 900; color: var(--mac-text-main); letter-spacing: 6px;">${data.code}</div>
+                    </div>
+                    <div style="background: transparent; padding: 15px; max-height: 140px; overflow-y: auto; text-align: left; font-size: 12px; color: var(--mac-text-secondary); white-space: pre-wrap; line-height: 1.5;">${data.fullText}</div>
+                    <p style="font-size: 11px; color: var(--mac-text-secondary); opacity: 0.7; margin-top: 15px;">Remitente: ${data.sender}</p>
+                `,
+                confirmButtonText: 'Cerrar',
+                confirmButtonColor: 'var(--mac-blue)',
+                width: 450,
+                customClass: {
+                    htmlContainer: 'swal-html-clean'
+                }
+            });
+        } else {
+            Swal.fire('Atención', data.message, 'warning');
+        }
+    } catch (error) {
+        Swal.fire('Error', 'No se pudo contactar al servidor de lectura IMAP.', 'error');
+    }
+};
+
+// --- FUNCIONES CRM: ARCHIVAR / REACTIVAR (Faltantes) ---
+window.toggleArchiveClient = async (id, isArchived) => {
+    try {
+        await updateDoc(doc(db, "clients", id), { archived: isArchived });
+        window.showNotification(isArchived ? "📁 Cliente archivado" : "📁 Cliente reactivado");
+        loadUserClients();
+    } catch (e) {
+        window.showNotification("Error: " + e.message);
+    }
+};
+
+window.unarchiveAndEdit = (id) => {
+    window.startEdit(id);
+    document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
+    window.showNotification("Modifica los datos y presiona Guardar para reactivarlo.");
+};
+
+// ============================================================================
+// GESTOR DE CONEXIONES API
+// ============================================================================
+let tempApiConnections = [];
+
+window.loadApiConnections = () => {
+    tempApiConnections = [];
+    if (currentUserData && currentUserData.apiConnections) {
+        // Hacemos una copia profunda
+        tempApiConnections = JSON.parse(JSON.stringify(currentUserData.apiConnections));
+    }
+    window.renderApiConnections();
+};
+
+window.addApiConnection = () => {
+    tempApiConnections.push({
+        platform: '',
+        email: '',
+        token: '',
+        permissions: 'A'
+    });
+    window.renderApiConnections();
+};
+
+window.deleteApiConnection = (index) => {
+    tempApiConnections.splice(index, 1);
+    window.renderApiConnections();
+};
+
+window.renderApiConnections = () => {
+    const list = document.getElementById('apiConnectionsList');
+    if (!list) return;
+
+    list.innerHTML = '';
+
+    if (tempApiConnections.length === 0) {
+        list.innerHTML = '<div style="color:var(--mac-text-secondary); padding: 20px; text-align: center; width: 100%;">No hay conexiones registradas.</div>';
+        return;
+    }
+
+    // Opciones para el select de plataforma basado en customServices o un default
+    let platformOptions = '<option value="">Selecciona Plataforma</option>';
+    if (currentUserData && currentUserData.customServices && currentUserData.customServices.length > 0) {
+        currentUserData.customServices.forEach(srv => {
+            let srvName = typeof srv === 'string' ? srv : srv.name;
+            platformOptions += `<option value="${srvName}">${srvName}</option>`;
+        });
+        platformOptions += `<option value="Otra">Otra...</option>`;
+    } else {
+        platformOptions += `
+            <option value="Netflix">Netflix</option>
+            <option value="Disney+">Disney+</option>
+            <option value="Max">Max</option>
+            <option value="Prime Video">Prime Video</option>
+            <option value="Otra">Otra...</option>
+        `;
+    }
+
+    tempApiConnections.forEach((conn, index) => {
+        const card = document.createElement('div');
+        card.style.cssText = 'background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 12px; padding: 15px; position: relative; display: flex; flex-direction: column; gap: 10px;';
+
+        card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="margin:0; color:var(--mac-text-main); font-size: 16px;"><i class='bx bx-link'></i> Conexión #${index + 1}</h4>
+                <button onclick="window.deleteApiConnection(${index})" style="background:transparent; border:none; color:var(--mac-red); font-size: 20px; cursor: pointer;" title="Eliminar Conexión"><i class='bx bx-trash'></i></button>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 12px; color:var(--mac-text-secondary); font-weight: bold;">Plataforma Vinculada</label>
+                <select class="form-input platform-select" style="width:100%;" onchange="window.updateTempConn(${index}, 'platform', this.value)">
+                    ${platformOptions}
+                </select>
+                <input type="text" class="form-input platform-other" placeholder="Escribe la plataforma" style="display: none; margin-top: 5px; width: 100%;" oninput="window.updateTempConn(${index}, 'platform', this.value)">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 12px; color:var(--mac-text-secondary); font-weight: bold;">Correo de Origen</label>
+                <input type="email" class="form-input" placeholder="ejemplo@correo.com" value="${conn.email || ''}" oninput="window.updateTempConn(${index}, 'email', this.value)" style="width: 100%;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 12px; color:var(--mac-text-secondary); font-weight: bold;">Token de Aplicación (16 dígitos)</label>
+                <input type="password" class="form-input" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" value="${conn.token || ''}" oninput="window.updateTempConn(${index}, 'token', this.value)" style="width: 100%;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 12px; color:var(--mac-text-secondary); font-weight: bold;">Nivel de Permisos Autorizados</label>
+                <select class="form-input" style="width:100%;" onchange="window.updateTempConn(${index}, 'permissions', this.value)">
+                    <option value="A" ${conn.permissions === 'A' ? 'selected' : ''}>Solo Lectura de Alertas</option>
+                    <option value="B" ${conn.permissions === 'B' ? 'selected' : ''}>Modificación y Alertas</option>
+                </select>
+            </div>
+        `;
+        list.appendChild(card);
+
+        // Set select value after appending
+        const selectEl = card.querySelector('.platform-select');
+        const otherEl = card.querySelector('.platform-other');
+
+        let isListed = Array.from(selectEl.options).some(opt => opt.value === conn.platform);
+        if (conn.platform && !isListed && conn.platform !== 'Otra') {
+            selectEl.value = 'Otra';
+            otherEl.style.display = 'block';
+            otherEl.value = conn.platform;
+        } else if (conn.platform) {
+            selectEl.value = conn.platform;
+        }
+
+        selectEl.addEventListener('change', (e) => {
+            if (e.target.value === 'Otra') {
+                otherEl.style.display = 'block';
+                window.updateTempConn(index, 'platform', otherEl.value);
+            } else {
+                otherEl.style.display = 'none';
+                window.updateTempConn(index, 'platform', e.target.value);
+            }
+        });
+    });
+};
+
+window.updateTempConn = (index, field, value) => {
+    if (tempApiConnections[index]) {
+        tempApiConnections[index][field] = value;
+    }
+};
+
+window.saveApiConnections = async () => {
+    if (!currentUser) {
+        Swal.fire('Error', 'No hay sesión activa.', 'error');
+        return;
+    }
+
+    // 1. Validación básica de 16 caracteres para el token
+    for (let i = 0; i < tempApiConnections.length; i++) {
+        const conn = tempApiConnections[i];
+        if (!conn.platform || !conn.email || !conn.token) {
+            Swal.fire('Atención', `Completa todos los campos de la Conexión #${i + 1}.`, 'warning');
+            return;
+        }
+        let cleanToken = conn.token.replace(/\s/g, '');
+        if (cleanToken.length < 16) {
+            Swal.fire('Atención', `El token de la Conexión #${i + 1} debe tener al menos 16 dígitos.`, 'warning');
+            return;
+        }
+        // Guardamos el token limpio (sin espacios) por si el usuario lo pegó mal
+        conn.token = cleanToken;
+    }
+
+    // 2. Efecto visual de carga
+    Swal.fire({
+        title: 'Guardando...',
+        text: 'Actualizando conexiones de lectura...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    try {
+        // 3. Ejecución directa a Firebase (Ya tienes db, doc y updateDoc globales)
+        const userRef = doc(db, "users", currentUser.uid);
+        await updateDoc(userRef, {
+            apiConnections: tempApiConnections
+        });
+
+        // 4. Actualizar la memoria local para no tener que recargar la página
+        if (currentUserData) {
+            currentUserData.apiConnections = tempApiConnections;
+        }
+
+        Swal.fire('Guardado', 'Las conexiones se han guardado exitosamente.', 'success');
+
+    } catch (error) {
+        console.error("Error al guardar conexiones: ", error);
+        Swal.fire('Error', 'Hubo un problema de conexión con la base de datos.', 'error');
+    }
+};
+
+// ============================================================================
+// GESTOR DE SUB-USUARIOS EXTERNOS Y PORTAL DE CONSULTAS
+// ============================================================================
+let tempExternalSubUsers = [];
+
+window.loadExternalSubUsers = () => {
+    tempExternalSubUsers = [];
+    if (currentUserData && currentUserData.externalSubUsers) {
+        tempExternalSubUsers = JSON.parse(JSON.stringify(currentUserData.externalSubUsers));
+    }
+    window.renderExternalSubUsers();
+};
+
+window.addExternalSubUser = () => {
+    tempExternalSubUsers.push({
+        username: '',
+        platform: '',
+        email: ''
+    });
+    window.renderExternalSubUsers();
+};
+
+window.deleteExternalSubUser = (index) => {
+    tempExternalSubUsers.splice(index, 1);
+    window.renderExternalSubUsers();
+};
+
+window.renderExternalSubUsers = () => {
+    const list = document.getElementById('subUsersList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    if (tempExternalSubUsers.length === 0) {
+        list.innerHTML = '<div style="color:var(--mac-text-secondary); padding: 20px; text-align: center; width: 100%; grid-column: 1 / -1;">No hay sub-usuarios registrados.</div>';
+        return;
+    }
+
+    const apiConns = currentUserData.apiConnections || [];
+    let platformOptions = '<option value="">Selecciona Plataforma</option>';
+    apiConns.forEach(c => {
+        if (c.platform) {
+            platformOptions += `<option value="${c.platform}">${c.platform}</option>`;
+        }
+    });
+
+    tempExternalSubUsers.forEach((user, index) => {
+        const selectedOptions = platformOptions.replace(`value="${user.platform}"`, `value="${user.platform}" selected`);
+
+        list.innerHTML += `
+            <div style="background: var(--mac-surface); border: 1px solid var(--mac-border); border-radius: 12px; padding: 15px; position: relative; display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4 style="margin:0; color:var(--mac-text-main); font-size: 16px;"><i class='bx bx-user'></i> Sub-Usuario #${index + 1}</h4>
+                    <button onclick="window.deleteExternalSubUser(${index})" style="background:transparent; border:none; color:var(--mac-red); font-size: 20px; cursor: pointer;"><i class='bx bx-trash'></i></button>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label style="font-size: 12px; color:var(--mac-text-secondary); font-weight: bold;">Nombre de Usuario Único</label>
+                    <input type="text" class="form-input" placeholder="Ej: user_netflix_01" value="${user.username || ''}" oninput="window.updateTempSubUser(${index}, 'username', this.value)" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label style="font-size: 12px; color:var(--mac-text-secondary); font-weight: bold;">Plataforma Autorizada</label>
+                    <select class="form-input" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box;" onchange="window.updateTempSubUser(${index}, 'platform', this.value)">
+                        ${selectedOptions}
+                    </select>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label style="font-size: 12px; color:var(--mac-text-secondary); font-weight: bold;">Correos Autorizados (Separados por coma)</label>
+                    <textarea class="form-input" placeholder="ejemplo1@correo.com, ejemplo2@correo.com" oninput="window.updateTempSubUser(${index}, 'email', this.value)" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); box-sizing: border-box; resize: vertical; min-height: 60px;">${user.email || ''}</textarea>
+                </div>
+            </div>
+        `;
+    });
+};
+
+window.updateTempSubUser = (index, field, value) => {
+    if (tempExternalSubUsers[index]) {
+        tempExternalSubUsers[index][field] = value;
+    }
+};
+
+window.saveExternalSubUsers = async () => {
+    if (!currentUser) return;
+
+    for (let i = 0; i < tempExternalSubUsers.length; i++) {
+        const u = tempExternalSubUsers[i];
+        if (!u.username || !u.platform || !u.email) {
+            return Swal.fire('Atención', `Completa todos los campos del Sub-Usuario #${i + 1}.`, 'warning');
+        }
+    }
+
+    Swal.fire({
+        title: 'Guardando...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    try {
+        await updateDoc(doc(db, "users", currentUser.uid), {
+            externalSubUsers: tempExternalSubUsers
+        });
+        if (currentUserData) currentUserData.externalSubUsers = tempExternalSubUsers;
+        Swal.fire('Guardado', 'Los sub-usuarios se han guardado exitosamente.', 'success');
+    } catch (error) {
+        console.error(error);
+        Swal.fire('Error', 'Hubo un problema al guardar en la base de datos.', 'error');
+    }
+};
+
+window.checkExternalQueryPortal = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const alias = urlParams.get('consulta');
+    if (!alias) return;
+
+    if (document.getElementById('authView')) document.getElementById('authView').style.display = 'none';
+    if (document.getElementById('appView')) document.getElementById('appView').style.display = 'none';
+    if (document.getElementById('adminView')) document.getElementById('adminView').style.display = 'none';
+
+    const portal = document.getElementById('externalQueryPortal');
+    if (portal) portal.style.display = 'flex';
+
+    try {
+        const q = query(collection(db, "users"), where("storeAlias", "==", alias));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+            const sellerDoc = querySnapshot.docs[0];
+            window.externalSellerData = sellerDoc.data();
+            window.externalSellerId = sellerDoc.id;
+
+            if (window.externalSellerData.logoUrl) {
+                const logoEl = document.getElementById('externalPortalLogo');
+                if (logoEl) logoEl.src = window.externalSellerData.logoUrl;
+            }
+            if (window.externalSellerData.name) {
+                const nameEl = document.getElementById('externalPortalSellerName');
+                if (nameEl) nameEl.innerText = "Vendedor: " + window.externalSellerData.name;
+            }
+        } else {
+            Swal.fire('Error', 'El portal de consultas no existe o el alias es incorrecto.', 'error');
+        }
+    } catch (e) {
+        console.error(e);
+        Swal.fire('Error', 'Error al cargar el portal.', 'error');
+    }
+};
+
+window.verifyExternalUser = () => {
+    const usernameEl = document.getElementById('externalUsername');
+    if (!usernameEl) return;
+    const username = usernameEl.value.trim();
+    if (!username) return Swal.fire('Atención', 'Ingresa un nombre de usuario.', 'warning');
+
+    if (!window.externalSellerData || !window.externalSellerData.externalSubUsers) {
+        return Swal.fire('Error', 'No hay sub-usuarios registrados.', 'error');
+    }
+
+    const subUser = window.externalSellerData.externalSubUsers.find(u => u.username === username);
+    if (!subUser) {
+        return Swal.fire('Error', 'Usuario no encontrado o no autorizado.', 'error');
+    }
+
+    const loginForm = document.getElementById('externalLoginForm');
+    if (loginForm) loginForm.style.display = 'none';
+
+    const container = document.getElementById('externalActionContainer');
+    if (container) {
+        container.style.display = 'flex';
+        
+        let emails = subUser.email ? subUser.email.split(',').map(e => e.trim()).filter(e => e) : [];
+        let selectHtml = '';
+        
+        if (emails.length > 1) {
+            selectHtml = `
+                <p style="margin: 0 0 5px 0; color: var(--mac-text-secondary); font-size: 13px;">Selecciona el correo:</p>
+                <select id="externalEmailSelect" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--mac-border); background: var(--mac-bg); color: var(--mac-text-main); margin-bottom: 5px;">
+                    ${emails.map(e => `<option value="${e}">${e}</option>`).join('')}
+                </select>
+            `;
+        } else if (emails.length === 1) {
+            selectHtml = `
+                <p style="margin: 0 0 5px 0; color: var(--mac-text-secondary); font-size: 13px;">Correo Autorizado:</p>
+                <h4 style="margin: 0 0 5px 0; color: var(--mac-text-main); font-size: 15px;">${emails[0]}</h4>
+                <input type="hidden" id="externalEmailSelect" value="${emails[0]}">
+            `;
+        } else {
+             selectHtml = `
+                <p style="margin: 0 0 5px 0; color: var(--mac-red); font-size: 13px;">No hay correos autorizados.</p>
+                <input type="hidden" id="externalEmailSelect" value="">
+            `;
+        }
+
+        container.innerHTML = `
+            <div style="background: rgba(255,255,255,0.05); border: 1px solid var(--mac-border); padding: 20px; border-radius: 16px; text-align: left;">
+                <p style="margin: 0 0 5px 0; color: var(--mac-text-secondary); font-size: 13px;">Plataforma Autorizada:</p>
+                <h3 style="margin: 0 0 15px 0; color: var(--mac-blue);">${subUser.platform}</h3>
+                
+                ${selectHtml}
+            </div>
+            <button class="btn-primary" style="width: 100%; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: bold; background: var(--mac-green); border: none; margin-top: 10px; color: white;" onclick="
+                const selectedEmail = document.getElementById('externalEmailSelect') ? document.getElementById('externalEmailSelect').value : '';
+                if(!selectedEmail) return Swal.fire('Atención', 'No hay correo disponible.', 'warning');
+                window.executeExternalQuery('${subUser.platform}', selectedEmail);
+            ">Ejecutar Consulta</button>
+        `;
+    }
+};
+
+window.executeExternalQuery = (platform, authorizedEmail) => {
+    if (!window.externalSellerData) return;
+    const apiConns = window.externalSellerData.apiConnections || [];
+    const conn = apiConns.find(c => c.platform === platform);
+
+    if (!conn || !conn.token) {
+        return Swal.fire('Error', 'El vendedor no tiene una conexión API válida para esta plataforma.', 'error');
+    }
+
+    window.requestAccessCode(conn.email, conn.token, 'Perfil', authorizedEmail, platform);
+};
+
+window.logoutExternalUser = () => {
+    const loginForm = document.getElementById('externalLoginForm');
+    const actionContainer = document.getElementById('externalActionContainer');
+    const usernameEl = document.getElementById('externalUsername');
+    
+    if(usernameEl) usernameEl.value = '';
+    
+    if(actionContainer) {
+        actionContainer.style.display = 'none';
+        actionContainer.innerHTML = '';
+    }
+    
+    if(loginForm) loginForm.style.display = 'block';
+};
+window.switchAccessTab = (tabId, element) => {
+    document.querySelectorAll('.access-tab-content').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.access-tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).style.display = 'block';
+    element.classList.add('active');
 };
