@@ -6278,7 +6278,6 @@ window.renderMasterAccounts = async () => {
         container.parentNode.insertBefore(alertsContainer, container);
     }
     alertsContainer.style.display = 'none';
-    alertsContainer.innerHTML = '';
 
     try {
         const qMat = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
@@ -6294,6 +6293,7 @@ window.renderMasterAccounts = async () => {
         }
 
         container.innerHTML = '';
+        alertsContainer.innerHTML = '';
         let alertasVencimiento = [];
         let alertasUnicas = new Set();
 
