@@ -5973,6 +5973,7 @@ window.openNewMasterAccountModal = () => {
     document.getElementById('matProvider').value = 'Propia';
     document.getElementById('matExpiryDate').value = '';
     document.getElementById('matProviderName').value = '';
+    if (document.getElementById('matIsInvite')) document.getElementById('matIsInvite').value = 'false';
 
     window.toggleMatProviderFields();
     document.querySelector('#masterAccountModal h3').innerHTML = "<i class='bx bx-plus-circle'></i> Nueva Cuenta Matriz";
@@ -5980,7 +5981,7 @@ window.openNewMasterAccountModal = () => {
 };
 
 // 2. ABRIR MODAL PARA EDITAR
-window.editMasterAccount = (id, platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName) => {
+window.editMasterAccount = (id, platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName, isInvite = false) => {
     editingMasterId = id;
 
     document.getElementById('matPlatform').value = platform;
@@ -5991,6 +5992,9 @@ window.editMasterAccount = (id, platform, email, pass, maxProfiles, cost, provid
     document.getElementById('matProvider').value = provider;
     document.getElementById('matExpiryDate').value = expiryDate || '';
     document.getElementById('matProviderName').value = providerName || '';
+    if (document.getElementById('matIsInvite')) {
+        document.getElementById('matIsInvite').value = (isInvite === true || isInvite === 'true') ? 'true' : 'false';
+    }
 
     window.toggleMatProviderFields();
     document.querySelector('#masterAccountModal h3').innerHTML = "<i class='bx bx-edit'></i> Editar Cuenta Matriz";
@@ -6055,6 +6059,7 @@ window.saveMasterAccount = async () => {
     const provider = document.getElementById('matProvider').value;
     const expiryDate = provider === 'Proveedor Externo' ? document.getElementById('matExpiryDate').value : '';
     const providerName = provider === 'Proveedor Externo' ? document.getElementById('matProviderName').value.trim() : '';
+    const isInvite = document.getElementById('matIsInvite') ? (document.getElementById('matIsInvite').value === 'true') : false;
 
     if (!email || !pass) return window.showNotification("⚠️ Escribe el correo y clave de la cuenta.");
 
@@ -6183,7 +6188,7 @@ window.saveMasterAccount = async () => {
             // 3. AHORA PROCEDEMOS A GUARDAR EN LA BD (Haya notificación o no)
             window.showNotification("⏳ Guardando datos...");
 
-            await updateDoc(doc(db, "masterAccounts", editingMasterId), { platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName });
+            await updateDoc(doc(db, "masterAccounts", editingMasterId), { platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName, isInvite });
 
             const updatePromises = [];
             clientesAfectados.forEach(clientObj => {
@@ -6249,7 +6254,7 @@ window.saveMasterAccount = async () => {
 
         } else {
             // MODO CREACIÓN
-            await addDoc(collection(db, "masterAccounts"), { userId: currentUser.uid, platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName, timestamp: Date.now() });
+            await addDoc(collection(db, "masterAccounts"), { userId: currentUser.uid, platform, email, pass, maxProfiles, cost, provider, expiryDate, providerName, isInvite, timestamp: Date.now() });
             window.showNotification("✅ Cuenta Matriz registrada con éxito");
         }
 
@@ -6372,7 +6377,10 @@ window.renderMasterAccounts = async () => {
             let headerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--mac-border); padding-bottom: 12px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                     <div>
-                        <span style="background: var(--mac-blue); color: white; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 20px; display: inline-block; margin-bottom: 5px;">${acc.platform}</span>
+                        <div style="display: inline-flex; align-items: center; gap: 6px; margin-bottom: 5px;">
+                            <span style="background: var(--mac-blue); color: white; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 20px; display: inline-block;">${acc.platform}</span>
+                            ${acc.isInvite ? `<span style="background: rgba(16, 185, 129, 0.14); color: var(--mac-green); border: 1px solid rgba(16, 185, 129, 0.3); font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 20px; display: inline-block;">📩 Por Invitación / Cupos</span>` : ''}
+                        </div>
                         <h4 style="margin: 0; color: var(--mac-text-main); font-size: 16px;">📧 ${acc.email} <span style="font-weight:normal; color:var(--mac-text-secondary); font-size:13px;">(Clave: ${acc.pass})</span></h4>
                         ${infoVencimientoHTML}
                     </div>
@@ -6381,70 +6389,135 @@ window.renderMasterAccounts = async () => {
                         <span style="color: var(--mac-green); font-weight: 900; font-size: 13px;">Ganancia Neta: ${globalCurrency}${gananciaNeta.toFixed(2)}</span>
                         
                         <div style="margin-top: 10px; display: flex; gap: 6px; justify-content: flex-end;">
-                            <button onclick="window.editMasterAccount('${accId}', '${pPlat}', '${pMail}', '${pPass}', ${acc.maxProfiles}, ${acc.cost}, '${pProv}', '${pExp}', '${pPName}')" style="background: var(--mac-gray); border: 1px solid var(--mac-border); color: var(--mac-text-main); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s;"><i class='bx bx-edit'></i></button>
+                            <button onclick="window.editMasterAccount('${accId}', '${pPlat}', '${pMail}', '${pPass}', ${acc.maxProfiles}, ${acc.cost}, '${pProv}', '${pExp}', '${pPName}', ${Boolean(acc.isInvite)})" style="background: var(--mac-gray); border: 1px solid var(--mac-border); color: var(--mac-text-main); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s;"><i class='bx bx-edit'></i></button>
                             <button onclick="window.deleteMasterAccount('${accId}')" style="background: rgba(255, 59, 48, 0.1); border: 1px solid var(--mac-red); color: var(--mac-red); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s;"><i class='bx bx-trash'></i></button>
-                            <button onclick="window.sendFreeProfilesToInventory('${accId}')" style="background: rgba(52, 199, 89, 0.1); border: 1px solid var(--mac-green); color: var(--mac-green); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s;" title="Enviar perfiles libres al inventario"><i class='bx bx-archive-in'></i></button>
+                            ${!acc.isInvite ? `<button onclick="window.sendFreeProfilesToInventory('${accId}')" style="background: rgba(52, 199, 89, 0.1); border: 1px solid var(--mac-green); color: var(--mac-green); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s;" title="Enviar perfiles libres al inventario"><i class='bx bx-archive-in'></i></button>` : ''}
                         </div>
                     </div>
                 </div>
             `;
 
-            let perfilesHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;">`;
+            let perfilesHTML = '';
 
-            for (let i = 1; i <= acc.maxProfiles; i++) {
-                // NUEVA LÓGICA MULTI-PLATAFORMA Y MULTI-PERFIL CORREGIDA
-                const clienteEnPerfil = clientesDeEstaCuenta.find(c => {
-                    let pName = null;
-                    if (c.multiAccounts) {
-                        // 🔥 Búsqueda exacta: Solo mirar la cuenta vinculada a ESTA matriz
-                        const linkedAcc = Object.values(c.multiAccounts).find(a => a.masterAccountId === accId);
+            if (acc.isInvite) {
+                const totalCupos = Math.max(1, parseInt(acc.maxProfiles) || 1);
+                const libresSeguros = Math.max(0, cuposDisponibles);
+                const porcentajeOcupado = Math.min(100, Math.round((cuposOcupados / totalCupos) * 100));
 
-                        if (linkedAcc) {
-                            pName = linkedAcc.profile;
-                        } else if (c.linkedMasterId === accId && c.multiAccounts[acc.platform]) {
-                            // Fallback de seguridad para clientes antiguos
-                            pName = c.multiAccounts[acc.platform].profile;
-                        }
-                    } else {
-                        pName = c.accountProfile;
-                    }
-
-                    if (!pName) return false;
-
-                    // Extrae todos los números (Soporta múltiples perfiles separados por comas)
-                    const numerosEncontrados = String(pName).match(/\d+/g);
-                    if (!numerosEncontrados) return false;
-
-                    // Verifica si la ranura actual (i) coincide
-                    return numerosEncontrados.some(num => parseInt(num) === i);
-                });
-                if (clienteEnPerfil) {
-                    perfilesHTML += `
-                        <div style="background: var(--mac-surface-elevated); border: 1px solid var(--mac-border); border-left: 3px solid var(--mac-blue); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; min-height: 88px; gap: 6px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span style="background: rgba(0, 122, 255, 0.12); color: var(--mac-blue); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px;">Perfil ${i}</span>
-                                <button class="action-btn" onclick="window.editarClienteDesdeMatriz('${clienteEnPerfil.id}')" title="Editar cliente" style="background:none; border:none; padding:2px 4px; cursor:pointer; color:var(--mac-text-secondary); font-size:13px; width:auto; margin:0;"><i class='bx bx-edit-alt'></i></button>
-                            </div>
-                            <span style="font-weight: 700; font-size: 13.5px; color: var(--mac-text-main); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${clienteEnPerfil.name}</span>
-                            <small style="color: var(--mac-text-secondary); font-size: 11.5px; display: flex; align-items: center; gap: 4px;"><i class='bx bx-calendar' style="font-size: 13px; color: var(--mac-blue);"></i> ${clienteEnPerfil.date}</small>
+                let listaOcupadosHTML = '';
+                if (clientesDeEstaCuenta.length === 0) {
+                    listaOcupadosHTML = `
+                        <div style="padding: 14px; text-align: center; color: var(--mac-text-secondary); font-size: 12.5px; background: var(--mac-bg); border-radius: 10px; border: 1px dashed var(--mac-border);">
+                            Aún no hay clientes ocupando cupos en esta matriz.
                         </div>
                     `;
                 } else {
-                    perfilesHTML += `
-                        <div style="background: rgba(16, 185, 129, 0.04); border: 1px solid rgba(16, 185, 129, 0.18); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; min-height: 88px; gap: 8px;">
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--mac-green); display: inline-block; flex-shrink: 0;"></span>
-                                <span style="color: var(--mac-text-main); font-size: 12px; font-weight: 600;">Perfil ${i} • Disponible</span>
-                            </div>
-                            <button type="button" style="font-size: 12px; padding: 6px 10px; width: 100%; margin: 0; text-align: center; background: rgba(16, 185, 129, 0.12); color: var(--mac-green); border: none; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onclick="window.vincularClienteAMatriz('${accId}', '${pPlat}', '${pMail}', '${pPass}', ${i}, ${acc.cost}, ${acc.maxProfiles})">
-                                + Asignar
-                            </button>
+                    listaOcupadosHTML = `
+                        <div style="display: flex; flex-direction: column; gap: 6px; max-height: 240px; overflow-y: auto; padding-right: 4px;">
+                            ${clientesDeEstaCuenta.map(c => {
+                                let destEmail = c.accountEmail || acc.email || '-';
+                                if (c.multiAccounts) {
+                                    const linkedAcc = Object.values(c.multiAccounts).find(a => a.masterAccountId === accId);
+                                    if (linkedAcc && linkedAcc.email) destEmail = linkedAcc.email;
+                                    else if (c.multiAccounts[acc.platform]?.email) destEmail = c.multiAccounts[acc.platform].email;
+                                }
+                                return `
+                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; background: var(--mac-surface-elevated); border: 1px solid var(--mac-border); border-left: 3px solid var(--mac-blue); border-radius: 8px; flex-wrap: wrap;">
+                                        <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
+                                            <span style="font-weight: 700; font-size: 13px; color: var(--mac-text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">👤 ${c.name}</span>
+                                            <span style="font-size: 12px; color: var(--mac-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">📧 ${destEmail}</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                                            <small style="color: var(--mac-text-secondary); font-size: 11.5px; display: inline-flex; align-items: center; gap: 4px;"><i class='bx bx-calendar' style="color: var(--mac-blue);"></i> ${c.date || '-'}</small>
+                                            <button class="action-btn" onclick="window.editarClienteDesdeMatriz('${c.id}')" title="Editar cliente" style="background: var(--mac-gray); border: 1px solid var(--mac-border); border-radius: 6px; padding: 4px 8px; cursor: pointer; color: var(--mac-text-main); font-size: 13px; width: auto; margin: 0;"><i class='bx bx-edit-alt'></i></button>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
                         </div>
                     `;
                 }
+
+                perfilesHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="background: var(--mac-bg); border: 1px solid var(--mac-border); border-radius: 10px; padding: 12px 14px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                                <span style="font-size: 13px; font-weight: 700; color: var(--mac-text-main);">Cupos Disponibles: <span style="color: ${libresSeguros > 0 ? 'var(--mac-green)' : 'var(--mac-orange)'};">${libresSeguros} de ${acc.maxProfiles}</span></span>
+                                <span style="font-size: 12px; color: var(--mac-text-secondary); font-weight: 600;">Ocupados: ${cuposOcupados} (${porcentajeOcupado}%)</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: rgba(142, 142, 147, 0.2); border-radius: 999px; overflow: hidden;">
+                                <div style="width: ${porcentajeOcupado}%; height: 100%; background: ${libresSeguros > 0 ? 'linear-gradient(90deg, var(--mac-blue), var(--mac-green))' : 'var(--mac-orange)'}; border-radius: 999px; transition: width 0.3s ease;"></div>
+                            </div>
+                        </div>
+
+                        ${listaOcupadosHTML}
+
+                        <div style="display: flex; justify-content: flex-end; margin-top: 2px;">
+                            <button type="button" style="font-size: 13px; padding: 10px 16px; width: 100%; margin: 0; text-align: center; background: rgba(16, 185, 129, 0.14); color: var(--mac-green); border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 700; border-radius: 10px; cursor: pointer; transition: all 0.2s;" onclick="window.vincularClienteAMatriz('${accId}', '${pPlat}', '${pMail}', '${pPass}', 'Invitación', ${acc.cost}, ${acc.maxProfiles})">
+                                + Asignar Cupo Libre
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                perfilesHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;">`;
+
+                for (let i = 1; i <= acc.maxProfiles; i++) {
+                    // NUEVA LÓGICA MULTI-PLATAFORMA Y MULTI-PERFIL CORREGIDA
+                    const clienteEnPerfil = clientesDeEstaCuenta.find(c => {
+                        let pName = null;
+                        if (c.multiAccounts) {
+                            // 🔥 Búsqueda exacta: Solo mirar la cuenta vinculada a ESTA matriz
+                            const linkedAcc = Object.values(c.multiAccounts).find(a => a.masterAccountId === accId);
+
+                            if (linkedAcc) {
+                                pName = linkedAcc.profile;
+                            } else if (c.linkedMasterId === accId && c.multiAccounts[acc.platform]) {
+                                // Fallback de seguridad para clientes antiguos
+                                pName = c.multiAccounts[acc.platform].profile;
+                            }
+                        } else {
+                            pName = c.accountProfile;
+                        }
+
+                        if (!pName) return false;
+
+                        // Extrae todos los números (Soporta múltiples perfiles separados por comas)
+                        const numerosEncontrados = String(pName).match(/\d+/g);
+                        if (!numerosEncontrados) return false;
+
+                        // Verifica si la ranura actual (i) coincide
+                        return numerosEncontrados.some(num => parseInt(num) === i);
+                    });
+                    if (clienteEnPerfil) {
+                        perfilesHTML += `
+                            <div style="background: var(--mac-surface-elevated); border: 1px solid var(--mac-border); border-left: 3px solid var(--mac-blue); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; min-height: 88px; gap: 6px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span style="background: rgba(0, 122, 255, 0.12); color: var(--mac-blue); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px;">Perfil ${i}</span>
+                                    <button class="action-btn" onclick="window.editarClienteDesdeMatriz('${clienteEnPerfil.id}')" title="Editar cliente" style="background:none; border:none; padding:2px 4px; cursor:pointer; color:var(--mac-text-secondary); font-size:13px; width:auto; margin:0;"><i class='bx bx-edit-alt'></i></button>
+                                </div>
+                                <span style="font-weight: 700; font-size: 13.5px; color: var(--mac-text-main); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${clienteEnPerfil.name}</span>
+                                <small style="color: var(--mac-text-secondary); font-size: 11.5px; display: flex; align-items: center; gap: 4px;"><i class='bx bx-calendar' style="font-size: 13px; color: var(--mac-blue);"></i> ${clienteEnPerfil.date}</small>
+                            </div>
+                        `;
+                    } else {
+                        perfilesHTML += `
+                            <div style="background: rgba(16, 185, 129, 0.04); border: 1px solid rgba(16, 185, 129, 0.18); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; min-height: 88px; gap: 8px;">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--mac-green); display: inline-block; flex-shrink: 0;"></span>
+                                    <span style="color: var(--mac-text-main); font-size: 12px; font-weight: 600;">Perfil ${i} • Disponible</span>
+                                </div>
+                                <button type="button" style="font-size: 12px; padding: 6px 10px; width: 100%; margin: 0; text-align: center; background: rgba(16, 185, 129, 0.12); color: var(--mac-green); border: none; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onclick="window.vincularClienteAMatriz('${accId}', '${pPlat}', '${pMail}', '${pPass}', ${i}, ${acc.cost}, ${acc.maxProfiles})">
+                                    + Asignar
+                                </button>
+                            </div>
+                        `;
+                    }
+                }
+
+                perfilesHTML += `</div>`;
             }
 
-            perfilesHTML += `</div>`;
             card.innerHTML = headerHTML + perfilesHTML;
             container.appendChild(card);
         });
@@ -6490,7 +6563,7 @@ window.vincularClienteAMatriz = async (masterId, platform, email, pass, profileN
     editingClientId = null;
     document.getElementById('clientForm').reset();
     window.setDefaultYear2026(true);
-    document.getElementById('clientName').value = "Perfil " + profileNum;
+    document.getElementById('clientName').value = (profileNum === 'Invitación' || profileNum === 'N/A') ? "Cliente Invitación" : ("Perfil " + profileNum);
 
     // --- LÓGICA NUEVA: CÁLCULO DE INVERSIÓN AUTOMÁTICA ---
     const costInput = document.getElementById('clientCost');
@@ -6652,9 +6725,12 @@ window.openLinkModal = async (clientId, clientPlatform) => {
 
                     if (matSelect) {
                         const matrizId = matSelect.value;
-                        const perfil = perfInput ? perfInput.value.trim() : '';
+                        const isInviteMat = matrizId && masterDataMap[matrizId]?.isInvite;
+                        let perfil = perfInput ? perfInput.value.trim() : '';
 
-                        if (matrizId !== "" && (!perfil || !/\d/.test(perfil))) {
+                        if (matrizId !== "" && isInviteMat && !perfil) {
+                            perfil = 'Invitación';
+                        } else if (matrizId !== "" && !isInviteMat && (!perfil || !/\d/.test(perfil))) {
                             Swal.showValidationMessage(`El perfil para ${plataformas[i]} debe contener al menos un NÚMERO (Ej: 3, J3).`);
                             return false;
                         }
@@ -11453,10 +11529,10 @@ window.verifyExternalUser = () => {
     const container = document.getElementById('externalActionContainer');
     if (container) {
         container.style.display = 'flex';
-        
+
         let emails = subUser.email ? subUser.email.split(',').map(e => e.trim()).filter(e => e) : [];
         let selectHtml = '';
-        
+
         if (emails.length > 1) {
             selectHtml = `
                 <p style="margin: 0 0 5px 0; color: var(--mac-text-secondary); font-size: 13px;">Selecciona el correo:</p>
@@ -11471,7 +11547,7 @@ window.verifyExternalUser = () => {
                 <input type="hidden" id="externalEmailSelect" value="${emails[0]}">
             `;
         } else {
-             selectHtml = `
+            selectHtml = `
                 <p style="margin: 0 0 5px 0; color: var(--mac-red); font-size: 13px;">No hay correos autorizados.</p>
                 <input type="hidden" id="externalEmailSelect" value="">
             `;
@@ -11509,15 +11585,15 @@ window.logoutExternalUser = () => {
     const loginForm = document.getElementById('externalLoginForm');
     const actionContainer = document.getElementById('externalActionContainer');
     const usernameEl = document.getElementById('externalUsername');
-    
-    if(usernameEl) usernameEl.value = '';
-    
-    if(actionContainer) {
+
+    if (usernameEl) usernameEl.value = '';
+
+    if (actionContainer) {
         actionContainer.style.display = 'none';
         actionContainer.innerHTML = '';
     }
-    
-    if(loginForm) loginForm.style.display = 'block';
+
+    if (loginForm) loginForm.style.display = 'block';
 };
 window.switchAccessTab = (tabId, element) => {
     document.querySelectorAll('.access-tab-content').forEach(el => el.style.display = 'none');
