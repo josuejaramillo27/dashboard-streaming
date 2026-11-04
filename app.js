@@ -5300,7 +5300,7 @@ window.openPedidosModal = async () => {
                             <select class="select_matriz_${pId}" style="width:100%; margin-bottom:5px; padding:8px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border);">
                                 ${opcionesMatricesGlobal}
                             </select>
-                            <input type="text" id="input_perfil_${pId}" placeholder="N° Perfil / Espacio (Opcional)" style="width:100%; padding:8px; border-radius:6px; background:var(--mac-surface); color:var(--mac-text-main); border:1px solid var(--mac-border); margin-bottom:10px;">
+                            <input type="hidden" id="input_perfil_${pId}" value="Invitación">
                         </div>
                     `;
                     btnAction = `<button class="btn-primary" style="width:100%; background:var(--mac-green); border:none; padding:14px; font-size:14px; font-weight:bold;" onclick="window.aprobarVenta('${pId}', '${pedido.clienteNumero}', true, '${pedido.clienteCorreo || ''}', '${pedido.plataforma}', '${nombreCli.replace(/'/g, "\\'")}')">
@@ -5963,6 +5963,12 @@ window.toggleMatProviderFields = () => {
     }
 };
 
+window.toggleMatInviteFields = () => {
+    const isInv = document.getElementById('matIsInvite')?.value === 'true';
+    const passWrapper = document.getElementById('matPassWrapper');
+    if (passWrapper) passWrapper.style.display = isInv ? 'none' : 'block';
+};
+
 // 1. ABRIR MODAL PARA NUEVA CUENTA
 window.openNewMasterAccountModal = () => {
     editingMasterId = null;
@@ -5976,6 +5982,7 @@ window.openNewMasterAccountModal = () => {
     if (document.getElementById('matIsInvite')) document.getElementById('matIsInvite').value = 'false';
 
     window.toggleMatProviderFields();
+    window.toggleMatInviteFields();
     document.querySelector('#masterAccountModal h3').innerHTML = "<i class='bx bx-plus-circle'></i> Nueva Cuenta Matriz";
     document.getElementById('masterAccountModal').style.display = 'flex';
 };
@@ -5997,6 +6004,7 @@ window.editMasterAccount = (id, platform, email, pass, maxProfiles, cost, provid
     }
 
     window.toggleMatProviderFields();
+    window.toggleMatInviteFields();
     document.querySelector('#masterAccountModal h3').innerHTML = "<i class='bx bx-edit'></i> Editar Cuenta Matriz";
     document.getElementById('masterAccountModal').style.display = 'flex';
 };
@@ -6053,13 +6061,14 @@ window.deleteMasterAccount = async (id) => {
 window.saveMasterAccount = async () => {
     const platform = document.getElementById('matPlatform').value;
     const email = document.getElementById('matEmail').value.trim();
-    const pass = document.getElementById('matPass').value.trim();
+    const isInvite = document.getElementById('matIsInvite') ? (document.getElementById('matIsInvite').value === 'true') : false;
+    let pass = document.getElementById('matPass').value.trim();
+    if (isInvite && !pass) pass = 'N/A';
     const maxProfiles = parseInt(document.getElementById('matProfiles').value) || 5;
     const cost = parseFloat(document.getElementById('matCost').value) || 0;
     const provider = document.getElementById('matProvider').value;
     const expiryDate = provider === 'Proveedor Externo' ? document.getElementById('matExpiryDate').value : '';
     const providerName = provider === 'Proveedor Externo' ? document.getElementById('matProviderName').value.trim() : '';
-    const isInvite = document.getElementById('matIsInvite') ? (document.getElementById('matIsInvite').value === 'true') : false;
 
     if (!email || !pass) return window.showNotification("⚠️ Escribe el correo y clave de la cuenta.");
 
