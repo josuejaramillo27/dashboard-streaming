@@ -1794,7 +1794,7 @@ window.setDefaultYear2026 = (resetValue = false) => {
     const enforceYear2026 = () => {
         if (!expInput.value) return;
         const parts = expInput.value.split('-');
-        if (parts.length === 3 && parts[0] !== '2026') {
+        if (parts.length === 3 && parseInt(parts[0]) < 2000) {
             expInput.value = `2026-${parts[1]}-${parts[2]}`;
         }
     };
@@ -5424,6 +5424,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
 
     const precioTotal = parseFloat(document.getElementById(`precio_venta_${pedidoId}`).value) || 0;
     window._selectedDeliveryMode = 'credenciales';
+    const displayCreds = requiereInvitacion ? 'none' : 'flex';
 
     // 🔥 VENTANA UNIFICADA CON MODO DE ENTREGA (CREDENCIALES / PORTAL WEB / AMBOS)
     const confirmacion = await Swal.fire({
@@ -5470,19 +5471,19 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
                             <i class='bx bx-check-circle' style="color: var(--mac-green); font-size: 18px;"></i>
                         </label>
                         
-                        <label onclick="window.toggleSwalChk(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); transition: all 0.2s;">
+                        <label onclick="window.toggleSwalChk(this)" style="display:${displayCreds}; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); transition: all 0.2s;">
                             <span style="font-size: 13px; color: var(--mac-text-main); font-weight: bold;">🔑 Clave</span>
                             <input type="checkbox" id="chk-pass" checked style="display:none;">
                             <i class='bx bx-check-circle' style="color: var(--mac-green); font-size: 18px;"></i>
                         </label>
                         
-                        <label onclick="window.toggleSwalChk(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); transition: all 0.2s;">
+                        <label onclick="window.toggleSwalChk(this)" style="display:${displayCreds}; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); transition: all 0.2s;">
                             <span style="font-size: 13px; color: var(--mac-text-main); font-weight: bold;">👤 N° Perfil</span>
                             <input type="checkbox" id="chk-perfil" checked style="display:none;">
                             <i class='bx bx-check-circle' style="color: var(--mac-green); font-size: 18px;"></i>
                         </label>
                         
-                        <label onclick="window.toggleSwalChk(this)" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); transition: all 0.2s;">
+                        <label onclick="window.toggleSwalChk(this)" style="display:${displayCreds}; align-items:center; justify-content:space-between; cursor:pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--mac-green); background: rgba(52, 199, 89, 0.15); transition: all 0.2s;">
                             <span style="font-size: 13px; color: var(--mac-text-main); font-weight: bold;">📌 PIN</span>
                             <input type="checkbox" id="chk-pin" checked style="display:none;">
                             <i class='bx bx-check-circle' style="color: var(--mac-green); font-size: 18px;"></i>
@@ -5510,10 +5511,10 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
             return {
                 meses: parseInt(document.getElementById('swal-meses-venta').value) || 1,
                 deliveryMode: window._selectedDeliveryMode || 'credenciales',
-                sendCorreo: document.getElementById('chk-correo').checked,
-                sendPass: document.getElementById('chk-pass').checked,
-                sendPerfil: document.getElementById('chk-perfil').checked,
-                sendPin: document.getElementById('chk-pin').checked
+                sendCorreo: document.getElementById('chk-correo')?.checked || false,
+                sendPass: requiereInvitacion ? false : (document.getElementById('chk-pass')?.checked || false),
+                sendPerfil: requiereInvitacion ? false : (document.getElementById('chk-perfil')?.checked || false),
+                sendPin: requiereInvitacion ? false : (document.getElementById('chk-pin')?.checked || false)
             };
         }
     });
