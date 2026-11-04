@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, setDoc, getDoc, limit, startAfter, getCountFromServer, arrayUnion } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-storage.js";
 import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-messaging.js";
@@ -15,6 +15,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+setPersistence(auth, browserLocalPersistence).catch(console.error);
 const db = getFirestore(app);
 const storage = getStorage(app);
 const messaging = getMessaging(app);
@@ -367,25 +368,32 @@ onAuthStateChanged(auth, async (user) => {
 
                 // 🔥 MEJORA DE RENDIMIENTO Y AUTO-BLOQUEO
                 const now = new Date(); let needsUpdate = false;
+                const planActualNorm = (currentUserData.plan_actual || 'demo').toLowerCase();
                 if (currentUserData.active === true && currentUserData.activeUntil) {
-                    if (now > new Date(currentUserData.activeUntil)) {
-                        // --- CIERRE AUTOMÁTICO DE DEMO CON ALERTA ---
-                        await updateDoc(doc(db, "users", user.uid), { active: false, activeUntil: null });
+                    if (planActualNorm === 'demo') {
+                        if (now > new Date(currentUserData.activeUntil)) {
+                            // --- CIERRE AUTOMÁTICO DE DEMO CON ALERTA ---
+                            await updateDoc(doc(db, "users", user.uid), { active: false, activeUntil: null });
 
-                        Swal.fire({
-                            icon: 'warning',
-                            title: '⏳ ¡Tu Demo ha expirado!',
-                            text: `Esperamos que te haya encantado el Plan ${currentUserData.plan_actual.toUpperCase()}. ¡Adquiérelo ahora para seguir dominando el mercado!`,
-                            confirmButtonText: '<i class="bx bxl-whatsapp"></i> Adquirir Plan Oficial',
-                            allowOutsideClick: false,
-                            background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
-                            color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
-                        }).then(() => {
-                            // Cambia este número por tu WhatsApp
-                            window.open(`https://wa.me/51961341323?text=Hola,%20mi%20demo%20ha%20terminado.%20Deseo%20comprar%20el%20Plan%20${currentUserData.plan_actual.toUpperCase()}%20del%20Panel%20A.G.C.`, '_blank');
-                            window.doLogout();
-                        });
-                        return; // Detiene la carga del Dashboard
+                            Swal.fire({
+                                icon: 'warning',
+                                title: '⏳ ¡Tu Demo ha expirado!',
+                                text: `Esperamos que te haya encantado el Plan ${(currentUserData.plan_actual || 'DEMO').toUpperCase()}. ¡Adquiérelo ahora para seguir dominando el mercado!`,
+                                confirmButtonText: '<i class="bx bxl-whatsapp"></i> Adquirir Plan Oficial',
+                                allowOutsideClick: false,
+                                background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+                                color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+                            }).then(() => {
+                                // Cambia este número por tu WhatsApp
+                                window.open(`https://wa.me/51961341323?text=Hola,%20mi%20demo%20ha%20terminado.%20Deseo%20comprar%20el%20Plan%20${(currentUserData.plan_actual || 'DEMO').toUpperCase()}%20del%20Panel%20A.G.C.`, '_blank');
+                                window.doLogout();
+                            });
+                            return; // Detiene la carga del Dashboard
+                        }
+                    } else {
+                        // Usuario con plan basico, pro o elite que tenía un activeUntil residual de demo: limpiar sin cerrar sesión
+                        currentUserData.activeUntil = null;
+                        updateDoc(doc(db, "users", user.uid), { activeUntil: null }).catch(console.warn);
                     }
                 } else if (currentUserData.active === false && currentUserData.suspendedUntil) {
                     if (now > new Date(currentUserData.suspendedUntil)) { currentUserData.active = true; currentUserData.suspendedUntil = null; needsUpdate = true; }
@@ -432,9 +440,13 @@ onAuthStateChanged(auth, async (user) => {
             } else { await signOut(auth); showView('authView'); window.showLogin(); }
         } catch (e) {
             console.error(e);
-            window.showNotification("ERROR DB: " + e.message);
-            showView('authView');
-            window.showLogin();
+            if (currentUserData && document.body.classList.contains('logged-in')) {
+                console.warn("Micro-corte de red detectado al despertar la pestaña; manteniendo sesión activa.");
+            } else {
+                window.showNotification("ERROR DB: " + e.message);
+                showView('authView');
+                window.showLogin();
+            }
         }
     } else {
         currentUser = null; currentUserData = null;
@@ -1509,11 +1521,16 @@ window.savePlan = async () => {
     fechaVencimiento.setDate(fechaActual.getDate() + dias);
 
     try {
-        await updateDoc(doc(db, "users", currentPlanUserId), {
+        const planUpdateData = {
             plan_actual: nuevoPlan,
             limite_clientes: limite,
             vencimiento_plan: fechaVencimiento.toISOString()
-        });
+        };
+        if (nuevoPlan === 'basico' || nuevoPlan === 'pro' || nuevoPlan === 'elite') {
+            planUpdateData.active = true;
+            planUpdateData.activeUntil = null;
+        }
+        await updateDoc(doc(db, "users", currentPlanUserId), planUpdateData);
 
         window.showNotification(`Plan ${nuevoPlan.toUpperCase()} activado con éxito 💎`);
         window.closeModals();
@@ -3372,28 +3389,26 @@ window.openMobileClientModal = (id) => {
 /* --- SISTEMA DE NOTIFICACIONES PUSH (FCM) --- */
 window.requestNotificationPermission = async () => {
     try {
-        console.log("Solicitando permiso de notificaciones...");
+        if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+
         const permission = await Notification.requestPermission();
+        if (permission !== 'granted') return;
 
-        if (permission === 'granted') {
-            console.log("Permiso concedido. Obteniendo token...");
-            const currentToken = await getToken(messaging, { vapidKey: 'BKBlbQcgMzLg-oCuFXjhn_2ekkAcrsGRS49RP3mKBvJDB-fPLzovUeYnNfmFi96ib5RtjJzta5nMlm7VsmSJC7k' });
+        const swReg = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+        const activeSwReg = await navigator.serviceWorker.ready;
 
-            if (currentToken) {
-                // MODIFICACIÓN: En lugar de fcmToken (texto), usamos fcmTokens (Lista/Array)
-                // arrayUnion asegura que si el token ya existe, no lo duplique.
-                await updateDoc(doc(db, "users", currentUser.uid), {
-                    fcmTokens: arrayUnion(currentToken)
-                });
-                console.log("Token de notificaciones agregado a la lista con éxito.");
-            } else {
-                console.log("No se pudo generar el token de registro.");
-            }
-        } else {
-            console.log("El usuario bloqueó las notificaciones.");
+        const currentToken = await getToken(messaging, {
+            vapidKey: 'BKBlbQcgMzLg-oCuFXjhn_2ekkAcrsGRS49RP3mKBvJDB-fPLzovUeYnNfmFi96ib5RtjJzta5nMlm7VsmSJC7k',
+            serviceWorkerRegistration: activeSwReg || swReg
+        });
+
+        if (currentToken && currentUser?.uid) {
+            await updateDoc(doc(db, "users", currentUser.uid), {
+                fcmTokens: arrayUnion(currentToken)
+            });
         }
     } catch (error) {
-        console.error("Error al solicitar permiso de notificaciones:", error);
+        // Silencioso para evitar errores en navegadores sin soporte o modo incógnito
     }
 };
 
@@ -7219,6 +7234,23 @@ window.sendClientPortalWa = (phone, clientId) => {
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
 };
 
+window.openPlatformRulesPortalModal = (platName, ruleText) => {
+    const isDark = document.body.classList.contains('dark-mode');
+    const safePlat = String(platName || 'Plataforma').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const safeRules = String(ruleText || 'Uso personal exclusivo en el perfil asignado. No modificar los datos de la cuenta.')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+    Swal.fire({
+        title: `📜 Reglas de Uso (${safePlat})`,
+        html: `<div style="text-align: left; font-size: 13.5px; line-height: 1.6; color: ${isDark ? '#e5e5ea' : '#1c1c1e'}; background: ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'}; border: 1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}; border-radius: 14px; padding: 16px; white-space: pre-wrap; max-height: 55vh; overflow-y: auto;">${safeRules}</div>`,
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: '#007AFF',
+        background: isDark ? '#1c1c1e' : '#ffffff',
+        color: isDark ? '#ffffff' : '#000000'
+    });
+};
+
 window.renderClientPortalData = (clientsArray, storeUserData) => {
     const container = document.getElementById('portalClientResults');
     container.innerHTML = '';
@@ -7226,12 +7258,15 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
     if (!clientsArray || clientsArray.length === 0) return;
 
     let fullHtml = '';
+    window._portalPlatformRulesMap = {};
 
     // Dibujamos una tarjeta completa por cada registro encontrado
-    clientsArray.forEach(clientObj => {
+    clientsArray.forEach((clientObj, clientIdx) => {
         const now = new Date();
+        now.setHours(0, 0, 0, 0);
         const exp = new Date(clientObj.date);
         exp.setMinutes(exp.getMinutes() + exp.getTimezoneOffset());
+        exp.setHours(0, 0, 0, 0);
 
         const diffTime = exp.getTime() - now.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -7240,10 +7275,14 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
         let badgeIcon = 'bx-check-circle';
         let badgeText = `Activo (${diffDays} días restantes)`;
 
-        if (diffDays <= 0) {
+        if (diffDays < 0) {
             badgeClass = 'expired';
             badgeIcon = 'bx-x-circle';
             badgeText = '¡SERVICIO VENCIDO!';
+        } else if (diffDays === 0) {
+            badgeClass = 'warning';
+            badgeIcon = 'bx-time-five';
+            badgeText = '⚠️ Por vencer (Vence hoy)';
         } else if (diffDays <= 3) {
             badgeClass = 'warning';
             badgeIcon = 'bx-time-five';
@@ -7257,8 +7296,10 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
             platformsList = clientObj.platform ? clientObj.platform.split(',').map(p => p.trim()) : ['Servicio'];
         }
 
+        const rulesDB = (storeUserData && storeUserData.platformRules) ? storeUserData.platformRules : {};
+
         let accountsHtml = '';
-        platformsList.forEach(platName => {
+        platformsList.forEach((platName, platIdx) => {
             let acc = clientObj.multiAccounts && clientObj.multiAccounts[platName]
                 ? clientObj.multiAccounts[platName]
                 : {
@@ -7268,63 +7309,101 @@ window.renderClientPortalData = (clientsArray, storeUserData) => {
                     pin: clientObj.accountPin || '-'
                 };
 
-            accountsHtml += `
-                <div style="background: var(--mac-surface); padding: 20px; border-radius: 20px; text-align: left; display: flex; flex-direction: column; box-sizing: border-box; width: 100%; max-width: 360px; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                    <div style="font-size: 15px; font-weight: 900; color: var(--mac-text-main); margin-bottom: 15px; text-align: center; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px;">🎬 ${platName.toUpperCase()}</div>
-                    
-                    <div class="credential-card" style="margin-bottom: 10px; padding: 10px 15px;">
-                        <div class="credential-info"><span class="credential-label">Correo</span><span class="credential-value">${acc.email || '-'}</span></div>
-                        <button class="btn-copy-chip" style="white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.email || ''}', 'Correo')"><i class='bx bx-copy'></i></button>
-                    </div>
-                    
-                    <div class="credential-card" style="margin-bottom: 15px; padding: 10px 15px;">
-                        <div class="credential-info"><span class="credential-label">Contraseña</span><span class="credential-value">${acc.password || '-'}</span></div>
-                        <button class="btn-copy-chip" style="white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.password || ''}', 'Clave')"><i class='bx bx-copy'></i></button>
-                    </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                        <div class="credential-card" style="margin: 0; padding: 10px; text-align: center; justify-content: center;">
-                            <div class="credential-info" style="padding: 0; align-items: center;"><span class="credential-label">Perfil</span><span class="credential-value" style="font-size: 16px; color: var(--mac-orange);">${acc.profile || '-'}</span></div>
-                        </div>
-                        <div class="credential-card" style="margin: 0; padding: 10px; text-align: center; justify-content: center;">
-                            <div class="credential-info" style="padding: 0; align-items: center;"><span class="credential-label">PIN</span><span class="credential-value" style="font-size: 16px; color: var(--mac-orange);">${acc.pin || '-'}</span></div>
-                        </div>
-                    </div>
-                    ${(() => {
-                    const connections = storeUserData.apiConnections || [];
-                    const connInfo = connections.find(c => c.platform === platName);
+            const cleanPlatSearch = platName.replace(/\(.*?\)/g, '').trim().toLowerCase();
+            const ruleKey = Object.keys(rulesDB).find(k => {
+                const kNorm = k.trim().toLowerCase();
+                return kNorm === platName.trim().toLowerCase() || kNorm === cleanPlatSearch;
+            });
+            const platformRuleText = (ruleKey && rulesDB[ruleKey] && String(rulesDB[ruleKey]).trim())
+                ? String(rulesDB[ruleKey]).trim()
+                : "Uso personal exclusivo en el perfil asignado. No modificar los datos de la cuenta.";
 
-                    if (connInfo && connInfo.email && connInfo.token) {
-                        const isFullAccount = connInfo.permission === 'Modificación y Alertas';
-                        const accessLevel = isFullAccount ? 'Cuenta Completa' : 'Perfil';
+            const ruleMapKey = `rule_${clientIdx}_${platIdx}`;
+            window._portalPlatformRulesMap[ruleMapKey] = { platName, ruleText: platformRuleText };
+            const safeRulePreview = platformRuleText.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-                        return `
-                            <button onclick="window.requestAccessCode('${connInfo.email}', '${connInfo.token}', '${accessLevel}', '${acc.email || '-'}', '${platName}')" class="btn-primary" style="margin-top: auto; width: 100%; padding: 12px; border-radius: 12px; font-weight: bold; background: var(--mac-blue); border: none;">
-                                <i class='bx bx-mobile-landscape'></i> Solicitar Código
-                            </button>`;
-                    }
-                    return '';
-                })()}
-                    <button onclick="window.openReviewModal('${clientObj.id}', '${platName}', '${clientObj.name.replace(/'/g, "\\'")}', '${clientObj.phone || ''}')" class="btn-secondary" style="margin-top: 10px; width: 100%; padding: 12px; border-radius: 12px; font-weight: bold; border: 1px solid var(--mac-orange); color: var(--mac-orange); background: rgba(255, 149, 0, 0.1); transition: 0.2s;"><i class='bx bxs-star'></i> Calificar</button>
-                </div>
-            `;
+            if (diffDays < 0) {
+                accountsHtml += `
+                    <div style="background: var(--mac-surface); padding: 20px; border-radius: 20px; text-align: left; display: flex; flex-direction: column; box-sizing: border-box; flex: 1 1 320px; max-width: 380px; width: 100%; margin: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                        <div style="font-size: 15px; font-weight: 900; color: var(--mac-text-main); margin-bottom: 15px; text-align: center; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px;">🎬 ${platName.toUpperCase()}</div>
+                        <div style="background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 14px; padding: 22px 16px; text-align: center; margin: 10px 0;">
+                            <i class='bx bxs-lock-alt' style="font-size: 36px; color: var(--mac-red); margin-bottom: 8px; display: block;"></i>
+                            <strong style="color: var(--mac-text-main); font-size: 14px; display: block; margin-bottom: 6px;">Acceso Temporalmente Bloqueado</strong>
+                            <p style="color: var(--mac-text-secondary); font-size: 12.5px; line-height: 1.5; margin: 0;">Tu suscripción ha vencido. Renueva tu servicio para desbloquear y visualizar nuevamente tus credenciales de acceso.</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                accountsHtml += `
+                    <div style="background: var(--mac-surface); padding: 20px; border-radius: 20px; text-align: left; display: flex; flex-direction: column; box-sizing: border-box; flex: 1 1 320px; max-width: 380px; width: 100%; margin: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                        <div style="font-size: 15px; font-weight: 900; color: var(--mac-text-main); margin-bottom: 15px; text-align: center; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px;">🎬 ${platName.toUpperCase()}</div>
+                        
+                        <div class="credential-card" style="margin-bottom: 10px; padding: 10px 15px;">
+                            <div class="credential-info"><span class="credential-label">Correo</span><span class="credential-value">${acc.email || '-'}</span></div>
+                            <button class="btn-copy-chip" style="white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.email || ''}', 'Correo')"><i class='bx bx-copy'></i></button>
+                        </div>
+                        
+                        <div class="credential-card" style="margin-bottom: 15px; padding: 10px 15px;">
+                            <div class="credential-info"><span class="credential-label">Contraseña</span><span class="credential-value">${acc.password || '-'}</span></div>
+                            <button class="btn-copy-chip" style="white-space: nowrap; padding: 6px 10px;" onclick="window.copyToClipboard('${acc.password || ''}', 'Clave')"><i class='bx bx-copy'></i></button>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                            <div class="credential-card" style="margin: 0; padding: 10px; text-align: center; justify-content: center;">
+                                <div class="credential-info" style="padding: 0; align-items: center;"><span class="credential-label">Perfil</span><span class="credential-value" style="font-size: 16px; color: var(--mac-orange);">${acc.profile || '-'}</span></div>
+                            </div>
+                            <div class="credential-card" style="margin: 0; padding: 10px; text-align: center; justify-content: center;">
+                                <div class="credential-info" style="padding: 0; align-items: center;"><span class="credential-label">PIN</span><span class="credential-value" style="font-size: 16px; color: var(--mac-orange);">${acc.pin || '-'}</span></div>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; text-align: left;">
+                            <div style="font-size: 10.5px; font-weight: 800; color: var(--mac-orange); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+                                <i class='bx bx-error-circle'></i> Reglas de Uso (${platName})
+                            </div>
+                            <div style="font-size: 12px; color: var(--mac-text-main); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                ${safeRulePreview}
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="window.openPlatformRulesPortalModal(window._portalPlatformRulesMap['${ruleMapKey}'].platName, window._portalPlatformRulesMap['${ruleMapKey}'].ruleText)" class="btn-secondary" style="margin-top: 0; margin-bottom: 10px; width: 100%; padding: 9px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; border: 1px solid var(--mac-border); color: var(--mac-text-main); background: var(--mac-bg); cursor: pointer;">
+                            📜 Ver Términos y Condiciones de Uso
+                        </button>
+
+                        ${(() => {
+                        const connections = storeUserData.apiConnections || [];
+                        const connInfo = connections.find(c => c.platform === platName);
+
+                        if (connInfo && connInfo.email && connInfo.token) {
+                            const isFullAccount = connInfo.permission === 'Modificación y Alertas';
+                            const accessLevel = isFullAccount ? 'Cuenta Completa' : 'Perfil';
+
+                            return `
+                                <button onclick="window.requestAccessCode('${connInfo.email}', '${connInfo.token}', '${accessLevel}', '${acc.email || '-'}', '${platName}')" class="btn-primary" style="margin-top: auto; width: 100%; padding: 12px; border-radius: 12px; font-weight: bold; background: var(--mac-blue); border: none;">
+                                    <i class='bx bx-mobile-landscape'></i> Solicitar Código
+                                </button>`;
+                        }
+                        return '';
+                    })()}
+                        <button onclick="window.openReviewModal('${clientObj.id}', '${platName}', '${clientObj.name.replace(/'/g, "\\'")}', '${clientObj.phone || ''}')" class="btn-secondary" style="margin-top: 10px; width: 100%; padding: 12px; border-radius: 12px; font-weight: bold; border: 1px solid var(--mac-orange); color: var(--mac-orange); background: rgba(255, 149, 0, 0.1); transition: 0.2s;"><i class='bx bxs-star'></i> Calificar</button>
+                    </div>
+                `;
+            }
         });
 
-        const vendorPhone = storeUserData.phone ? storeUserData.phone.replace(/[^\d+]/g, '') : '';
-        const renewMsg = encodeURIComponent(`¡Hola! Quisiera renovar mi servicio de ${clientObj.platform}. Nombre: ${clientObj.name}`);
-        const renewUrl = `https://wa.me/${vendorPhone}?text=${renewMsg}`;
-
         fullHtml += `
-            <div class="portal-hero-card" style="margin-bottom: 20px;">
-                <span class="portal-badge ${badgeClass}"><i class='bx ${badgeIcon}'></i> ${badgeText}</span>
-                <h2 style="margin: 0 0 5px 0; font-size: 22px; color: var(--mac-text-main);">${clientObj.name}</h2>
-                <p style="font-size: 13px; color: var(--mac-text-secondary); margin-top: 0; margin-bottom: 20px;">Vencimiento: <b>${exp.toLocaleDateString('es-ES')}</b></p>
+            <div class="portal-hero-card" style="margin-bottom: 24px; text-align: center; display: flex; flex-direction: column; align-items: center;">
+                <span class="portal-badge ${badgeClass}" style="margin: 0 auto 10px auto;"><i class='bx ${badgeIcon}'></i> ${badgeText}</span>
+                <h2 style="margin: 0 0 6px 0; font-size: 22px; font-weight: 800; text-align: center; color: var(--mac-text-main);">${clientObj.name}</h2>
+                <p style="font-size: 13px; color: var(--mac-text-secondary); margin: 0 auto 20px auto; display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
+                    <i class='bx bx-calendar' style="color: var(--mac-blue); font-size: 15px;"></i> Vencimiento: <b>${exp.toLocaleDateString('es-ES')}</b>
+                </p>
                 
                 <div class="portal-platforms-grid">
                     ${accountsHtml}
                 </div>
 
-                ${diffDays <= 3 ? `<button onclick="window.openRenewFromPortal('${clientObj.id}', '${clientObj.platform}', ${clientObj.price})" class="btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); color: white; border: none; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 14px; cursor: pointer; width: 100%;"><i class='bx bx-refresh' style="font-size: 20px;"></i> Solicitar Renovación</button>` : ''}
+                ${diffDays <= 3 ? `<button onclick="window.openRenewFromPortal('${clientObj.id}', '${clientObj.platform}', ${clientObj.price})" class="btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); color: white; border: none; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 14px; cursor: pointer; max-width: 380px; width: 100%; margin: 20px auto 0 auto;"><i class='bx bx-refresh' style="font-size: 20px;"></i> Solicitar Renovación</button>` : ''}
             </div>
         `;
     });
@@ -9306,11 +9385,9 @@ window.checkUrlRouting = () => {
 // --- FUNCIÓN PARA SINCRONIZAR COSTOS ANTIGUOS ---
 window.actualizarCostosAntiguos = async () => {
     const btn = document.getElementById('btnSyncCostos');
-    const origText = btn?.innerHTML || "<i class='bx bx-sync'></i> Sync Costos";
+    const origText = btn?.innerHTML || "<i class='bx bx-sync' style='color: var(--mac-orange);'></i> Sync Costos";
 
-    // Validación inicial: verificar si existen proveedores registrados y clientes en la lista
-    const providersList = currentUserData?.providers || [];
-    if (!clients || clients.length === 0 || (providersList.length === 0 && (!masterAccounts || masterAccounts.length === 0))) {
+    if (!currentUser?.uid) {
         window.showNotification("ℹ️ No hay costos pendientes por actualizar.");
         return;
     }
@@ -9323,16 +9400,19 @@ window.actualizarCostosAntiguos = async () => {
             await window.ensureAllClientsLoaded();
         }
 
-        // 1. Obtener todas las matrices del usuario
+        // 1. Obtener todas las matrices del usuario desde Firestore
         const qMat = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid));
         const snapMat = await getDocs(qMat);
-        let masterMap = {};
-        snapMat.forEach(d => { masterMap[d.id] = d.data(); });
+        const listaMatrices = snapMat.docs.map(d => ({ id: d.id, ...d.data() }));
 
-        if (providersList.length === 0 && Object.keys(masterMap).length === 0) {
+        const providersList = currentUserData?.providers || [];
+        if (!clients || clients.length === 0 || (providersList.length === 0 && listaMatrices.length === 0)) {
             window.showNotification("ℹ️ No hay costos pendientes por actualizar.");
             return;
         }
+
+        let masterMap = {};
+        listaMatrices.forEach(m => { masterMap[m.id] = m; });
 
         let actualizados = 0;
 

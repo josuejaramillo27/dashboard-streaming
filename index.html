@@ -1556,6 +1556,10 @@
                                 oninput="if(document.getElementById('btnTabClientes').style.background !== 'transparent') { window.renderTable(); } else { window.renderMasterAccounts(); }">
                             <i class='bx bx-search'></i>
                         </div>
+                        <button type="button" class="btn-secondary" id="btnSyncCostos" onclick="window.actualizarCostosAntiguos()"
+                            style="width: auto; margin: 0; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; cursor: pointer;">
+                            <i class='bx bx-sync' style="color: var(--mac-orange); font-size: 16px;"></i> Sync Costos
+                        </button>
                     </div>
 
                     <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-left: auto;">
@@ -4201,10 +4205,6 @@
                 style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--mac-border); padding-bottom: 10px; margin-bottom: 15px; gap: 10px;">
                 <h3 style="margin: 0; font-size: 18px; color: var(--mac-text-main); flex: 1; line-height: 1.3;"><i
                         class='bx bx-buildings'></i> Mis Proveedores</h3>
-                <button class="action-btn" id="btnSyncCostos" onclick="window.actualizarCostosAntiguos()"
-                    style="background: rgba(255, 149, 0, 0.1); color: var(--mac-orange); border: 1px solid var(--mac-orange); font-weight: 600; padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; width: auto; margin: 0; flex-shrink: 0;">
-                    <i class='bx bx-sync'></i> Sync Costos
-                </button>
                 <button onclick="document.getElementById('providersModal').style.display='none'"
                     style="background: transparent; border: none; font-size: 28px; color: var(--mac-text-secondary); cursor: pointer; padding: 0; margin: 0; line-height: 1; width: 24px; text-align: right; flex-shrink: 0;">&times;</button>
             </div>
