@@ -83,8 +83,15 @@ function showView(viewId) {
 
     if (viewId === 'appView') {
         document.body.classList.add('logged-in');
+        if (typeof window.initDashboardArcadeCompanion === 'function') {
+            window.initDashboardArcadeCompanion();
+        }
     } else {
         document.body.classList.remove('logged-in');
+        if (viewId === 'authView') {
+            const comp = document.getElementById('arcadeCompanion');
+            if (comp) comp.classList.remove('active', 'show');
+        }
     }
 
     const bottomNav = document.querySelector('.bottom-nav');
@@ -11662,8 +11669,15 @@ window.corregirVisitasTienda = async () => {
 };
 
 /* =========================================================
-   SENSEI ARCADE COMPANION (MÁQUINA DE ESCRIBIR & FRASES)
+   SENSEI ARCADE (GUILE COMPANION - MÁQUINA DE ESCRIBIR & FRASES)
 ========================================================= */
+const arcadeDashboardPhrases = [
+    "¡Sonic Boom! Mantén tus clientes y cuentas al día.",
+    "Revisa las alertas de vencimientos de hoy.",
+    "¡Perfect! Recuerda verificar tus renovaciones pendientes.",
+    "¡A la carga! Administra tus ventas como un campeón."
+];
+
 const arcadeStorePhrases = [
     "¡Combo Breaker! Lleva más de 2 servicios y ahorra.",
     "Nuestras cuentas están garantizadas. ¡Compra seguro!",
@@ -11678,11 +11692,31 @@ const arcadePortalPhrases = [
 
 let arcadeTypewriterInterval = null;
 let arcadeHideTimeout = null;
+let dashboardArcadeTimer = null;
+
+window.initDashboardArcadeCompanion = () => {
+    const companion = document.getElementById('arcadeCompanion');
+    if (companion) companion.classList.add('active');
+    if (dashboardArcadeTimer) return;
+    setTimeout(() => {
+        window.triggerArcadeCompanion('dashboard');
+        dashboardArcadeTimer = setInterval(() => {
+            if (document.body.classList.contains('logged-in')) {
+                window.triggerArcadeCompanion('dashboard');
+            }
+        }, 45000);
+    }, 4000);
+};
 
 window.triggerArcadeCompanion = (mode) => {
     const companion = document.getElementById('arcadeCompanion');
     const textEl = document.getElementById('arcadeText');
+    const avatar = document.getElementById('arcadeAvatar');
     if (!companion || !textEl) return;
+
+    if (avatar && (!avatar.getAttribute('src') || avatar.getAttribute('src').includes('postimg'))) {
+        avatar.src = './guile-stance.gif';
+    }
 
     if (arcadeTypewriterInterval) {
         clearInterval(arcadeTypewriterInterval);
@@ -11693,12 +11727,15 @@ window.triggerArcadeCompanion = (mode) => {
         arcadeHideTimeout = null;
     }
 
-    const phrases = mode === 'store' ? arcadeStorePhrases : arcadePortalPhrases;
+    let phrases = arcadeStorePhrases;
+    if (mode === 'portal') phrases = arcadePortalPhrases;
+    else if (mode === 'dashboard' || mode === 'admin') phrases = arcadeDashboardPhrases;
+
     if (!phrases || phrases.length === 0) return;
 
     const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
     textEl.textContent = '';
-    companion.classList.add('show');
+    companion.classList.add('active', 'show');
 
     let charIndex = 0;
     arcadeTypewriterInterval = setInterval(() => {

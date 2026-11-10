@@ -1,20 +1,32 @@
 // sw.js - Service Worker Mejorado para auto-actualización y limpieza
-const VERSION = 'v3'; // Subimos a v3 para forzar la actualización global
+const CACHE_NAME = 'agc-cache-v4';
+const ASSETS_TO_CACHE = [
+    './',
+    './index.html',
+    './style.css',
+    './app.js',
+    './guile-stance.gif'
+];
 
 self.addEventListener('install', (e) => {
-    console.log('[Service Worker] Instalado versión:', VERSION);
-    // Obliga al celular a usar el nuevo código de inmediato
+    console.log('[Service Worker] Instalado versión:', CACHE_NAME);
+    e.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.addAll(ASSETS_TO_CACHE);
+        })
+    );
+    // Obliga al celular y navegadores a usar el nuevo código de inmediato
     self.skipWaiting(); 
 });
 
 self.addEventListener('activate', (e) => {
-    console.log('[Service Worker] Activado versión:', VERSION);
-    // Destruye cualquier caché antigua y corrupta que haya quedado en los celulares
+    console.log('[Service Worker] Activado versión:', CACHE_NAME);
+    // Destruye cualquier caché antigua y corrupta que haya quedado
     e.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cache) => {
-                    if (cache !== VERSION) {
+                    if (cache !== CACHE_NAME) {
                         console.log('[Service Worker] Borrando caché antigua:', cache);
                         return caches.delete(cache);
                     }
@@ -25,7 +37,7 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-    // Obliga a que siempre descargue la versión más reciente de internet
+    // Intenta red primero, fallback a caché
     e.respondWith(
         fetch(e.request).catch(() => caches.match(e.request))
     );
