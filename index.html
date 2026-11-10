@@ -3982,10 +3982,10 @@
                 onclick="window.closeModals()">Cerrar</button>
         </div>
     </div>
-    <!-- 🤖 BOTÓN FLOTANTE DEL ASISTENTE -->
-    <div id="aiFloatingBtn" class="ai-floating-btn" onclick="window.openAssistant()" style="display: none;">
+    <!-- 🤖 BOTÓN FLOTANTE DEL ASISTENTE ANTIGUO (OCULTO - REEMPLAZADO POR GUILE) -->
+    <!-- <div id="aiFloatingBtn" class="ai-floating-btn" onclick="window.openAssistant()" style="display: none;">
         <i class='bx bx-bot bx-tada'></i>
-    </div>
+    </div> -->
 
     <!-- 🤖 PANEL DEL ASISTENTE CONTEXTUAL IA -->
     <div id="aiAssistantPanel" class="ai-assistant-panel">
@@ -4435,7 +4435,7 @@
             <span id="arcadeText"></span><span class="arcade-cursor">_</span>
         </div>
         <!-- Avatar Retro Guile Idle Stance -->
-        <img src="./guile-stance.gif" alt="Guile" class="arcade-avatar" id="arcadeAvatar">
+        <img src="./guile-stance.gif" alt="Guile" class="arcade-avatar" id="arcadeAvatar" title="Asistente Virtual Guile" onclick="if(document.body.classList.contains('logged-in') && typeof window.openAssistant === 'function') window.openAssistant();">
     </div>
 </body>
 

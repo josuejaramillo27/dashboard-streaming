@@ -3176,32 +3176,13 @@ body.dark-mode .settings-dropdown {
 }
 
 /* =========================================================
-   🤖 ASISTENTE INTELIGENTE CONTEXTUAL
+   🤖 ASISTENTE INTELIGENTE CONTEXTUAL (BOTÓN FLOTANTE OCULTO)
 ========================================================= */
 .ai-floating-btn {
-    position: fixed;
-    bottom: 25px;
-    right: 25px;
-    /* Lo ponemos a la derecha */
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    /* Verde Esmeralda */
-    color: white;
-    width: 55px;
-    height: 55px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    cursor: pointer;
-    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
-    z-index: 999995;
-    /* Justo debajo de alertas */
-    transition: transform 0.3s;
-}
-
-.ai-floating-btn:hover {
-    transform: scale(1.1) translateY(-5px);
+    display: none !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
 }
 
 /* Panel Deslizable del Asistente IA */
@@ -3900,11 +3881,15 @@ body {
 .arcade-companion-container {
     position: fixed;
     bottom: 25px;
-    left: 20px;
     display: none; /* Oculto en login */
     align-items: flex-end;
     gap: 12px;
     z-index: 999999;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
     pointer-events: none; /* Para no interferir con clics del sistema */
 }
 
@@ -3914,11 +3899,30 @@ body.logged-in .arcade-companion-container {
     display: flex;
 }
 
+/* === MODO IZQUIERDA (Tienda y Portal de Clientes) ===
+   Guile anclado a la izquierda, Globo a su derecha.
+   HTML: [.arcade-bubble, .arcade-avatar] -> row-reverse pone avatar a la izq y burbuja a la der */
+.arcade-companion-container.assistant-left {
+    left: 20px;
+    right: auto;
+    flex-direction: row-reverse;
+}
+
+/* === MODO DERECHA (Panel Principal / Admin Dashboard) ===
+   Guile anclado a la derecha, Globo a su izquierda.
+   HTML: [.arcade-bubble, .arcade-avatar] -> row pone burbuja a la izq y avatar a la der */
+.arcade-companion-container.assistant-right {
+    right: 25px;
+    left: auto;
+    flex-direction: row;
+}
+
 .arcade-avatar {
     width: 80px;
     height: 90px;
     object-fit: contain;
     background: transparent !important;
+    background-color: transparent !important;
     border: none !important;
     outline: none !important;
     box-shadow: none !important;
@@ -3927,19 +3931,26 @@ body.logged-in .arcade-companion-container {
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.45));
+    pointer-events: auto; /* Permite clic en Guile */
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.arcade-avatar:hover {
+    transform: scale(1.06);
 }
 
 .arcade-bubble {
-    background: #ffffff;
-    border: 4px solid #000000;
+    background: #ffffff !important;
+    border: 4px solid #000000 !important;
     border-radius: 12px;
     padding: 12px 18px;
     color: #000000;
     font-family: "Courier New", Courier, monospace;
     font-size: 13px;
     font-weight: 800;
-    max-width: 220px;
-    box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+    max-width: 230px;
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
     position: relative;
     margin-bottom: 10px;
     opacity: 0;
@@ -3955,17 +3966,33 @@ body.logged-in .arcade-companion-container {
     transform: scale(1) translateY(0);
 }
 
-/* El "Pico" del globo de diálogo estilo pixel */
+/* Base común para el "Pico" del globo de diálogo estilo pixel */
 .arcade-bubble::after {
     content: '';
     position: absolute;
     bottom: 10px;
-    right: -12px;
     width: 0;
     height: 0;
+}
+
+/* Flecha apuntando a la IZQUIERDA (hacia Guile cuando Guile está a la izquierda) */
+.arcade-companion-container.assistant-left .arcade-bubble::after {
+    left: -12px;
+    right: auto;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 12px solid #000000;
+    border-left: none;
+}
+
+/* Flecha apuntando a la DERECHA (hacia Guile cuando Guile está a la derecha) */
+.arcade-companion-container.assistant-right .arcade-bubble::after {
+    right: -12px;
+    left: auto;
     border-top: 8px solid transparent;
     border-bottom: 8px solid transparent;
     border-left: 12px solid #000000;
+    border-right: none;
 }
 
 .arcade-cursor {
@@ -3980,13 +4007,17 @@ body.logged-in .arcade-companion-container {
 }
 
 @media (max-width: 768px) {
-    .arcade-companion-container {
+    .arcade-companion-container.assistant-left {
         left: 10px;
+        right: auto;
         bottom: 20px;
         gap: 8px;
     }
-    body.logged-in .arcade-companion-container {
-        bottom: 70px; /* Evita superponerse con la barra inferior en móvil */
+    .arcade-companion-container.assistant-right {
+        right: 12px;
+        left: auto;
+        bottom: 75px; /* Evita superponerse con la barra inferior en móvil */
+        gap: 8px;
     }
     .arcade-avatar {
         width: 65px;

@@ -81,8 +81,13 @@ function showView(viewId) {
     document.getElementById('adminView').style.display = 'none';
     document.getElementById(viewId).style.display = 'block';
 
-    if (viewId === 'appView') {
+    if (viewId === 'appView' || viewId === 'adminView') {
         document.body.classList.add('logged-in');
+        const comp = document.getElementById('arcadeCompanion');
+        if (comp) {
+            comp.classList.remove('assistant-left');
+            comp.classList.add('assistant-right', 'active');
+        }
         if (typeof window.initDashboardArcadeCompanion === 'function') {
             window.initDashboardArcadeCompanion();
         }
@@ -90,7 +95,7 @@ function showView(viewId) {
         document.body.classList.remove('logged-in');
         if (viewId === 'authView') {
             const comp = document.getElementById('arcadeCompanion');
-            if (comp) comp.classList.remove('active', 'show');
+            if (comp) comp.classList.remove('active', 'show', 'assistant-right', 'assistant-left');
         }
     }
 
@@ -4434,7 +4439,12 @@ const checkPublicStore = async () => {
             // Primer renderizado general automático
             window.renderPublicCatalog('Todos');
 
-            // Sensei Arcade Companion para Tienda
+            // Sensei Arcade Companion para Tienda (Izquierda)
+            const compStore = document.getElementById('arcadeCompanion');
+            if (compStore) {
+                compStore.classList.remove('assistant-right');
+                compStore.classList.add('assistant-left', 'active');
+            }
             setTimeout(() => {
                 window.triggerArcadeCompanion('store');
                 setInterval(() => window.triggerArcadeCompanion('store'), 45000);
@@ -7233,7 +7243,12 @@ window.checkClientPortal = async () => {
             }
         }
 
-        // Sensei Arcade Companion para Portal
+        // Sensei Arcade Companion para Portal (Izquierda)
+        const compPortal = document.getElementById('arcadeCompanion');
+        if (compPortal) {
+            compPortal.classList.remove('assistant-right');
+            compPortal.classList.add('assistant-left', 'active');
+        }
         setTimeout(() => {
             window.triggerArcadeCompanion('portal');
             setInterval(() => window.triggerArcadeCompanion('portal'), 45000);
@@ -11696,7 +11711,10 @@ let dashboardArcadeTimer = null;
 
 window.initDashboardArcadeCompanion = () => {
     const companion = document.getElementById('arcadeCompanion');
-    if (companion) companion.classList.add('active');
+    if (companion) {
+        companion.classList.remove('assistant-left');
+        companion.classList.add('assistant-right', 'active');
+    }
     if (dashboardArcadeTimer) return;
     setTimeout(() => {
         window.triggerArcadeCompanion('dashboard');
@@ -11728,8 +11746,19 @@ window.triggerArcadeCompanion = (mode) => {
     }
 
     let phrases = arcadeStorePhrases;
-    if (mode === 'portal') phrases = arcadePortalPhrases;
-    else if (mode === 'dashboard' || mode === 'admin') phrases = arcadeDashboardPhrases;
+    if (mode === 'portal') {
+        phrases = arcadePortalPhrases;
+        companion.classList.remove('assistant-right');
+        companion.classList.add('assistant-left');
+    } else if (mode === 'dashboard' || mode === 'admin') {
+        phrases = arcadeDashboardPhrases;
+        companion.classList.remove('assistant-left');
+        companion.classList.add('assistant-right');
+    } else {
+        // modo store (tienda)
+        companion.classList.remove('assistant-right');
+        companion.classList.add('assistant-left');
+    }
 
     if (!phrases || phrases.length === 0) return;
 
