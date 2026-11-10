@@ -77,35 +77,43 @@ window.toggleTheme = () => {
 window.showNotification = (msg) => { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 5000); }
 
 /* --- VALIDACIÓN Y DETECCIÓN ROBUSTA DE ROL ADMINISTRADOR --- */
-window.isUserAdmin = (userData = currentUserData, userAuth = currentUser || auth?.currentUser) => {
-    // 👑 1. Identificación prioritaria por correo maestro de administración
-    const email = (userAuth?.email || userData?.email || '').trim().toLowerCase();
-    if (email === 'admin@akaza.com' || email.startsWith('admin@')) {
+window.isUserAdmin = (userData = null, userAuth = null) => {
+    // Si no se pasa userData explícitamente, usar currentUserData
+    const targetData = userData || currentUserData;
+    // Si no se pasa userAuth explícitamente y tampoco se pasó userData, usar currentUser
+    const targetAuth = userAuth || (!userData ? (currentUser || auth?.currentUser) : null);
+
+    const email = (targetData?.email || targetAuth?.email || '').trim().toLowerCase();
+    if (email === 'admin@akaza.com') {
         return true;
     }
 
-    if (!userData) {
-        const cachedRole = localStorage.getItem('agc_user_role') || sessionStorage.getItem('agc_user_role');
-        const cachedIsAdmin = localStorage.getItem('agc_is_admin') || sessionStorage.getItem('agc_is_admin');
-        if (cachedIsAdmin === 'true' || (cachedRole && String(cachedRole).trim().toLowerCase() === 'admin')) {
+    if (targetData) {
+        // Flags booleanos
+        if (targetData.isAdmin === true || targetData.admin === true || targetData.is_admin === true) return true;
+
+        // Rol en documento
+        const rawRole = targetData.role || targetData.rol || targetData.userRole || targetData.type || targetData.tipo || '';
+        const normRole = String(rawRole).trim().toLowerCase();
+        if (
+            normRole === 'admin' ||
+            normRole === 'administrador' ||
+            normRole === 'superadmin' ||
+            normRole === 'administrator'
+        ) {
             return true;
         }
         return false;
     }
 
-    // 👑 2. Comprobar flags booleanos de admin
-    if (userData.isAdmin === true || userData.admin === true || userData.is_admin === true) return true;
+    // Si no hay datos de usuario cargados en memoria, consultar almacenamiento de sesión
+    const cachedRole = localStorage.getItem('agc_user_role') || sessionStorage.getItem('agc_user_role');
+    const cachedIsAdmin = localStorage.getItem('agc_is_admin') || sessionStorage.getItem('agc_is_admin');
+    if (cachedIsAdmin === 'true' || (cachedRole && String(cachedRole).trim().toLowerCase() === 'admin')) {
+        return true;
+    }
 
-    // 👑 3. Comprobar campos de texto de rol
-    const rawRole = userData.role || userData.rol || userData.userRole || userData.type || userData.tipo || '';
-    const normRole = String(rawRole).trim().toLowerCase();
-
-    return (
-        normRole === 'admin' ||
-        normRole === 'administrador' ||
-        normRole === 'superadmin' ||
-        normRole === 'administrator'
-    );
+    return false;
 };
 
 function showView(viewId) {
@@ -120,21 +128,18 @@ function showView(viewId) {
     document.getElementById('adminView').style.display = 'none';
     document.getElementById(viewId).style.display = 'block';
 
+    const comp = document.getElementById('arcadeCompanion');
+
     if (viewId === 'appView' || viewId === 'adminView') {
         document.body.classList.add('logged-in');
-        const comp = document.getElementById('arcadeCompanion');
+        // Guile debe permanecer oculto en el panel principal y en el panel admin
         if (comp) {
-            comp.classList.remove('assistant-left');
-            comp.classList.add('assistant-right', 'active');
-        }
-        if (typeof window.initDashboardArcadeCompanion === 'function') {
-            window.initDashboardArcadeCompanion();
+            comp.classList.remove('active', 'show', 'in-public-view', 'assistant-right', 'assistant-left');
         }
     } else {
         document.body.classList.remove('logged-in');
-        if (viewId === 'authView') {
-            const comp = document.getElementById('arcadeCompanion');
-            if (comp) comp.classList.remove('active', 'show', 'assistant-right', 'assistant-left');
+        if (comp) {
+            comp.classList.remove('active', 'show', 'in-public-view', 'assistant-right', 'assistant-left');
         }
     }
 
@@ -389,6 +394,25 @@ onAuthStateChanged(auth, async (user) => {
                             limite_clientes: 9999
                         }).catch(console.warn);
                     }
+
+                    // Persistencia local para seguridad, sesión y navegación
+                    localStorage.setItem('agc_owner_uid', user.uid);
+                    localStorage.setItem('agc_user_role', 'admin');
+                    localStorage.setItem('agc_is_admin', 'true');
+                    sessionStorage.setItem('agc_user_role', 'admin');
+                    sessionStorage.setItem('agc_is_admin', 'true');
+
+                    if (document.getElementById('brandName')) document.getElementById('brandName').innerText = currentUserData.name || 'Panel Global A.G.C.';
+                    if (document.getElementById('brandNameSidebar')) document.getElementById('brandNameSidebar').innerText = currentUserData.name || 'Panel Global A.G.C.';
+                    if (document.getElementById('mobileBrandName')) document.getElementById('mobileBrandName').innerText = currentUserData.name || 'Panel Global A.G.C.';
+
+                    const loginBtn = document.querySelector('#loginForm .btn-primary');
+                    if (loginBtn) { loginBtn.innerText = "Ingresar"; loginBtn.disabled = false; }
+
+                    showView('adminView');
+                    await loadAdminData();
+                    window.requestNotificationPermission();
+                    return; // 🛑 Salida limpia e inmediata para evitar carga de cliente/dashboard
                 } else {
                     const normalizedRole = String(currentUserData.role || currentUserData.rol || 'user').trim().toLowerCase();
                     currentUserData.role = normalizedRole;
@@ -1682,99 +1706,151 @@ window.toggleAdminPlanFilter = () => {
 
 window.renderAdminUsers = () => {
     const tbody = document.getElementById('adminTableBody');
+    if (!tbody) return;
     tbody.innerHTML = '';
-    const statusFilter = document.getElementById('adminFilterStatus').value;
-    const planFilter = document.getElementById('adminFilterPlan').value;
+    const statusFilter = document.getElementById('adminFilterStatus')?.value || 'all';
+    const planFilter = document.getElementById('adminFilterPlan')?.value || 'all';
 
+    let count = 0;
     adminUsersCache.forEach((data) => {
-        // Filtrado
-        if (statusFilter === 'active' && !data.active) return;
-        if (statusFilter === 'inactive' && data.active) return;
-        if (statusFilter === 'active' && planFilter !== 'all' && (data.plan_actual || 'demo').toLowerCase() !== planFilter) return;
+        const isActive = data.active !== false; // Activo por defecto salvo false explícito
+        // Filtrado por estado
+        if (statusFilter === 'active' && !isActive) return;
+        if (statusFilter === 'inactive' && isActive) return;
 
+        // Filtrado por plan
+        const userPlan = (data.plan_actual || 'demo').toLowerCase();
+        if (statusFilter === 'active' && planFilter !== 'all' && userPlan !== planFilter) return;
+
+        count++;
         const id = data.id;
-        const statusHtml = data.active ? `<span class="status active">Activado</span>` : `<span class="status expired">Suspendido</span>`;
+        const statusHtml = isActive ? `<span class="status active">Activado</span>` : `<span class="status expired">Suspendido</span>`;
         let expText = "";
-        if (data.active && data.activeUntil) { expText = `<br><span style="font-size:11px; color:var(--mac-text-secondary);">Vence: ${new Date(data.activeUntil).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })}</span>`; } else if (!data.active && data.suspendedUntil) { expText = `<br><span style="font-size:11px; color:var(--mac-text-secondary);">Hasta: ${new Date(data.suspendedUntil).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })}</span>`; }
+        if (isActive && data.activeUntil) {
+            expText = `<br><span style="font-size:11px; color:var(--mac-text-secondary);">Vence: ${new Date(data.activeUntil).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })}</span>`;
+        } else if (!isActive && data.suspendedUntil) {
+            expText = `<br><span style="font-size:11px; color:var(--mac-text-secondary);">Hasta: ${new Date(data.suspendedUntil).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })}</span>`;
+        }
 
-        const planDisplay = (data.plan_actual || 'demo').toUpperCase();
-        const planColor = planDisplay === 'PRO' ? 'var(--mac-blue)' : (planDisplay === 'BASICO' ? 'var(--mac-green)' : 'var(--mac-text-secondary)');
+        const planDisplay = userPlan.toUpperCase();
+        const planColor = (planDisplay === 'PRO' || planDisplay === 'ELITE') ? 'var(--mac-blue)' : (planDisplay === 'BASICO' ? 'var(--mac-green)' : 'var(--mac-text-secondary)');
         const safeName = (data.name || 'Usuario').replace(/'/g, "\\'");
+        const displayName = data.name || 'Sin nombre';
+        const displayEmail = data.email || '-';
+        const displayPhone = data.phone || '-';
+        const displayCountry = data.country || '-';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td data-label="Nombre"><strong>${data.name}</strong></td>
-            <td data-label="País">${data.country || '-'}</td>
-            <td data-label="Correo">${data.email}</td>
-            <td data-label="Teléfono">${data.phone || '-'}</td>
+            <td data-label="Nombre"><strong>${displayName}</strong></td>
+            <td data-label="País">${displayCountry}</td>
+            <td data-label="Correo">${displayEmail}</td>
+            <td data-label="Teléfono">${displayPhone}</td>
             <td data-label="Plan"><strong style="color: ${planColor};">${planDisplay}</strong></td>
             <td data-label="Estado">${statusHtml}${expText}</td>
             <td data-label="Acción" class="actions-cell" style="display: flex; gap: 5px;">
-                <button class="action-btn" style="border: 1px solid var(--mac-border); background: transparent;" onclick="window.openManageModal('${id}', '${safeName}', ${data.active}, '${data.plan_actual}')">⚙️ Estado</button>
+                <button class="action-btn" style="border: 1px solid var(--mac-border); background: transparent;" onclick="window.openManageModal('${id}', '${safeName}', ${isActive}, '${data.plan_actual || 'demo'}')">⚙️ Estado</button>
                 <button class="action-btn" style="border: 1px solid var(--mac-blue); color: var(--mac-blue); background: transparent;" onclick="window.openPlanModal('${id}', '${safeName}', '${data.plan_actual || 'demo'}')">💎 Plan</button>
             </td>`;
         tbody.appendChild(tr);
     });
+
+    if (count === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 25px; color: var(--mac-text-secondary);">No hay distribuidores que coincidan con los filtros seleccionados.</td></tr>`;
+    }
 };
 
 async function loadAdminData() {
-    const [qUsers, qSuggestions, qNews] = await Promise.all([
-        getDocs(collection(db, "users")),
-        getDocs(collection(db, "suggestions")),
-        getDocs(collection(db, "news"))
-    ]);
+    const tbody = document.getElementById('adminTableBody');
+    if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 25px; color: var(--mac-text-secondary);"><i class='bx bx-loader-alt bx-spin' style="font-size:22px; vertical-align:middle; margin-right:8px;"></i> Cargando distribuidores...</td></tr>`;
+    }
 
-    // Llenar la caché y renderizar
-    adminUsersCache = [];
-    qUsers.forEach((d) => {
-        if (!window.isUserAdmin(d.data())) adminUsersCache.push({ id: d.id, ...d.data() });
-    });
-    window.toggleAdminPlanFilter();
+    // 1. Cargar Usuarios de forma independiente y segura
+    try {
+        const qUsers = await getDocs(collection(db, "users"));
+        adminUsersCache = [];
+        const currentUid = currentUser?.uid || localStorage.getItem('agc_owner_uid');
+        qUsers.forEach((d) => {
+            const uData = d.data() || {};
+            const uEmail = String(uData.email || '').trim().toLowerCase();
+            // Descartar al administrador maestro o usuario admin actual
+            if (d.id === currentUid || uEmail === 'admin@akaza.com' || (uData.role === 'admin' && !uData.plan_actual)) {
+                return;
+            }
+            adminUsersCache.push({ id: d.id, ...uData });
+        });
+        window.toggleAdminPlanFilter();
+    } catch (errUsers) {
+        console.error("Error al cargar usuarios de Firestore:", errUsers);
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px; color: var(--mac-red, #ff3b30);">Error al cargar distribuidores: ${errUsers.message}</td></tr>`;
+        }
+    }
 
-    // 2. Cargar Sugerencias
-    const sBody = document.getElementById('adminSuggestionsBody'); sBody.innerHTML = '';
-    let arrS = []; qSuggestions.forEach(d => arrS.push({ id: d.id, ...d.data() }));
-    arrS.sort((a, b) => new Date(b.date) - new Date(a.date));
+    // 2. Cargar Sugerencias de forma aislada
+    try {
+        const sBody = document.getElementById('adminSuggestionsBody');
+        if (sBody) {
+            const qSuggestions = await getDocs(collection(db, "suggestions"));
+            sBody.innerHTML = '';
+            let arrS = [];
+            qSuggestions.forEach(d => arrS.push({ id: d.id, ...d.data() }));
+            arrS.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    arrS.forEach(s => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${new Date(s.date).toLocaleDateString('es-ES')}</td><td><strong>${s.userName}</strong></td><td style="color:var(--mac-text-secondary);">${s.text}</td><td>${s.approved ? '<span style="color:var(--mac-green);font-weight:bold;">✅ Aprobada</span>' : '<span style="color:var(--mac-orange);font-weight:bold;">⏳ Pendiente</span>'}</td><td class="actions-cell">${s.approved ? '' : `<button class="action-btn btn-wa" onclick="window.approveSuggestion('${s.id}')">✔️ Aprobar</button>`} <button class="action-btn btn-del" onclick="window.deleteSuggestion('${s.id}')">🗑️</button></td>`;
-        sBody.appendChild(tr);
-    });
+            arrS.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${new Date(s.date).toLocaleDateString('es-ES')}</td><td><strong>${s.userName || 'Anónimo'}</strong></td><td style="color:var(--mac-text-secondary);">${s.text || ''}</td><td>${s.approved ? '<span style="color:var(--mac-green);font-weight:bold;">✅ Aprobada</span>' : '<span style="color:var(--mac-orange);font-weight:bold;">⏳ Pendiente</span>'}</td><td class="actions-cell">${s.approved ? '' : `<button class="action-btn btn-wa" onclick="window.approveSuggestion('${s.id}')">✔️ Aprobar</button>`} <button class="action-btn btn-del" onclick="window.deleteSuggestion('${s.id}')">🗑️</button></td>`;
+                sBody.appendChild(tr);
+            });
+        }
+    } catch (errSug) {
+        console.warn("Error al cargar sugerencias:", errSug);
+    }
 
-    // 3. Cargar Noticias
-    const nBody = document.getElementById('adminNewsBody'); nBody.innerHTML = '';
-    let arrN = []; qNews.forEach(d => arrN.push({ id: d.id, ...d.data() }));
+    // 3. Cargar Noticias de forma aislada
+    try {
+        const nBody = document.getElementById('adminNewsBody');
+        if (nBody) {
+            const qNews = await getDocs(collection(db, "news"));
+            nBody.innerHTML = '';
+            let arrN = [];
+            qNews.forEach(d => arrN.push({ id: d.id, ...d.data() }));
 
-    arrN.sort((a, b) => {
-        if (a.isPinned && !b.isPinned) return -1;
-        if (!a.isPinned && b.isPinned) return 1;
-        return new Date(b.fechaIso) - new Date(a.fechaIso);
-    });
+            arrN.sort((a, b) => {
+                if (a.isPinned && !b.isPinned) return -1;
+                if (!a.isPinned && b.isPinned) return 1;
+                return new Date(b.fechaIso) - new Date(a.fechaIso);
+            });
 
-    arrN.forEach(n => {
-        const dateStr = new Date(n.fechaIso).toLocaleDateString('es-ES');
-        const imgHtml = n.img ? `<a href="${n.img}" target="_blank" style="color:var(--mac-blue); font-size:12px;">Ver Foto</a>` : '<span style="font-size:12px; color:var(--mac-text-secondary);">Sin foto</span>';
+            arrN.forEach(n => {
+                const dateStr = n.fechaIso ? new Date(n.fechaIso).toLocaleDateString('es-ES') : '-';
+                const imgHtml = n.img ? `<a href="${n.img}" target="_blank" style="color:var(--mac-blue); font-size:12px;">Ver Foto</a>` : '<span style="font-size:12px; color:var(--mac-text-secondary);">Sin foto</span>';
 
-        const titleSafe = n.titulo ? n.titulo.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
-        const descSafe = n.desc ? n.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : '';
+                const titleSafe = n.titulo ? n.titulo.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
+                const descSafe = n.desc ? n.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : '';
 
-        const pinnedIcon = n.isPinned ? '<i class="bx bxs-pin" style="color: var(--mac-orange); margin-right: 5px;" title="Noticia Fijada"></i>' : '';
-        const pinBtnColor = n.isPinned ? 'var(--mac-orange)' : 'var(--mac-text-secondary)';
+                const pinnedIcon = n.isPinned ? '<i class="bx bxs-pin" style="color: var(--mac-orange); margin-right: 5px;" title="Noticia Fijada"></i>' : '';
+                const pinBtnColor = n.isPinned ? 'var(--mac-orange)' : 'var(--mac-text-secondary)';
 
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${dateStr}</td>
-            <td>${pinnedIcon}<strong>${n.titulo}</strong></td>
-            <td>${imgHtml}</td>
-            <td class="actions-cell" style="display: flex; gap: 5px;">
-                <button class="action-btn" style="border: 1px solid ${pinBtnColor}; color: ${pinBtnColor}; background: transparent;" onclick="window.togglePinNews('${n.id}', ${!!n.isPinned})" title="Fijar / Desfijar"><i class='bx bx-pin'></i></button>
-                <button class="action-btn" style="border: 1px solid var(--mac-blue); color: var(--mac-blue); background: transparent;" onclick="window.startEditNews('${n.id}', '${titleSafe}', '${descSafe}', '${n.img || ''}')"><i class='bx bx-edit-alt'></i></button>
-                <button class="action-btn btn-del" onclick="window.deleteNews('${n.id}')"><i class='bx bx-trash'></i></button>
-            </td>`;
-        nBody.appendChild(tr);
-    });
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${dateStr}</td>
+                    <td>${pinnedIcon}<strong>${n.titulo || ''}</strong></td>
+                    <td>${imgHtml}</td>
+                    <td class="actions-cell" style="display: flex; gap: 5px;">
+                        <button class="action-btn" style="border: 1px solid ${pinBtnColor}; color: ${pinBtnColor}; background: transparent;" onclick="window.togglePinNews('${n.id}', ${!!n.isPinned})" title="Fijar / Desfijar"><i class='bx bx-pin'></i></button>
+                        <button class="action-btn" style="border: 1px solid var(--mac-blue); color: var(--mac-blue); background: transparent;" onclick="window.startEditNews('${n.id}', '${titleSafe}', '${descSafe}', '${n.img || ''}')"><i class='bx bx-edit-alt'></i></button>
+                        <button class="action-btn btn-del" onclick="window.deleteNews('${n.id}')"><i class='bx bx-trash'></i></button>
+                    </td>`;
+                nBody.appendChild(tr);
+            });
+        }
+    } catch (errNews) {
+        console.warn("Error al cargar noticias:", errNews);
+    }
 }
+window.loadAdminData = loadAdminData;
 
 /* --- FUNCIONES DE ADMINISTRAR NOTICIAS --- */
 window.startEditNews = (id, title, desc, img) => {
@@ -4560,7 +4636,7 @@ const checkPublicStore = async () => {
             const compStore = document.getElementById('arcadeCompanion');
             if (compStore) {
                 compStore.classList.remove('assistant-right');
-                compStore.classList.add('assistant-left', 'active');
+                compStore.classList.add('assistant-left', 'active', 'in-public-view');
             }
             setTimeout(() => {
                 window.triggerArcadeCompanion('store');
@@ -7364,7 +7440,7 @@ window.checkClientPortal = async () => {
         const compPortal = document.getElementById('arcadeCompanion');
         if (compPortal) {
             compPortal.classList.remove('assistant-right');
-            compPortal.classList.add('assistant-left', 'active');
+            compPortal.classList.add('assistant-left', 'active', 'in-public-view');
         }
         setTimeout(() => {
             window.triggerArcadeCompanion('portal');
@@ -11830,21 +11906,18 @@ let dashboardArcadeTimer = null;
 window.initDashboardArcadeCompanion = () => {
     const companion = document.getElementById('arcadeCompanion');
     if (companion) {
-        companion.classList.remove('assistant-left');
-        companion.classList.add('assistant-right', 'active');
+        companion.classList.remove('active', 'show', 'in-public-view', 'assistant-right', 'assistant-left');
     }
-    if (dashboardArcadeTimer) return;
-    setTimeout(() => {
-        window.triggerArcadeCompanion('dashboard');
-        dashboardArcadeTimer = setInterval(() => {
-            if (document.body.classList.contains('logged-in')) {
-                window.triggerArcadeCompanion('dashboard');
-            }
-        }, 45000);
-    }, 4000);
+    if (dashboardArcadeTimer) {
+        clearInterval(dashboardArcadeTimer);
+        dashboardArcadeTimer = null;
+    }
 };
 
 window.triggerArcadeCompanion = (mode) => {
+    // Guile solo debe estar activo en Tienda y Portal de Clientes
+    if (mode === 'admin' || mode === 'dashboard') return;
+
     const companion = document.getElementById('arcadeCompanion');
     const textEl = document.getElementById('arcadeText');
     const avatar = document.getElementById('arcadeAvatar');
@@ -11868,10 +11941,6 @@ window.triggerArcadeCompanion = (mode) => {
         phrases = arcadePortalPhrases;
         companion.classList.remove('assistant-right');
         companion.classList.add('assistant-left');
-    } else if (mode === 'dashboard' || mode === 'admin') {
-        phrases = arcadeDashboardPhrases;
-        companion.classList.remove('assistant-left');
-        companion.classList.add('assistant-right');
     } else {
         // modo store (tienda)
         companion.classList.remove('assistant-right');

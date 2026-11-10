@@ -3881,7 +3881,7 @@ body {
 .arcade-companion-container {
     position: fixed;
     bottom: 25px;
-    display: none; /* Oculto en login */
+    display: none !important; /* Oculto estrictamente en login, panel admin y dashboard */
     align-items: flex-end;
     gap: 12px;
     z-index: 999999;
@@ -3893,10 +3893,9 @@ body {
     pointer-events: none; /* Para no interferir con clics del sistema */
 }
 
-/* Persistente y visible en el panel principal logueado o en vistas activadas */
-.arcade-companion-container.active,
-body.logged-in .arcade-companion-container {
-    display: flex;
+/* Solo activo y visible en vistas públicas autorizadas (Tienda Virtual y Portal de Clientes) */
+.arcade-companion-container.in-public-view {
+    display: flex !important;
 }
 
 /* === MODO IZQUIERDA (Tienda y Portal de Clientes) ===
