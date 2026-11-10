@@ -75,7 +75,38 @@ window.toggleTheme = () => {
     }
 };
 window.showNotification = (msg) => { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 5000); }
+
+/* --- VALIDACIÓN Y DETECCIÓN ROBUSTA DE ROL ADMINISTRADOR --- */
+window.isUserAdmin = (userData = currentUserData) => {
+    if (!userData) {
+        const cachedRole = localStorage.getItem('agc_user_role') || sessionStorage.getItem('agc_user_role');
+        const cachedIsAdmin = localStorage.getItem('agc_is_admin') || sessionStorage.getItem('agc_is_admin');
+        if (cachedIsAdmin === 'true' || (cachedRole && String(cachedRole).trim().toLowerCase() === 'admin')) {
+            return true;
+        }
+        return false;
+    }
+
+    if (userData.isAdmin === true || userData.admin === true || userData.is_admin === true) return true;
+
+    const rawRole = userData.role || userData.rol || userData.userRole || userData.type || userData.tipo || '';
+    const normRole = String(rawRole).trim().toLowerCase();
+
+    return (
+        normRole === 'admin' ||
+        normRole === 'administrador' ||
+        normRole === 'superadmin' ||
+        normRole === 'administrator'
+    );
+};
+
 function showView(viewId) {
+    // 🛡️ Salvaguarda de sesión: si el usuario es admin y se intenta cargar la vista de cliente, forzar adminView
+    if (viewId === 'appView' && window.isUserAdmin()) {
+        console.warn("🛡️ Redirección corregida: Usuario administrador detectado, mostrando adminView.");
+        viewId = 'adminView';
+    }
+
     document.getElementById('authView').style.display = 'none';
     document.getElementById('appView').style.display = 'none';
     document.getElementById('adminView').style.display = 'none';
@@ -284,6 +315,11 @@ window.forceAppUpdate = async () => {
 };
 window.doLogout = async () => {
     localStorage.removeItem('agc_owner_uid');
+    localStorage.removeItem('agc_user_role');
+    localStorage.removeItem('agc_is_admin');
+    sessionStorage.removeItem('agc_user_role');
+    sessionStorage.removeItem('agc_is_admin');
+    sessionStorage.removeItem('agc_user_data');
     if (document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'none';
     clients = []; currentUser = null; currentUserData = null; document.getElementById('tableBody').innerHTML = ''; showView('authView'); window.showLogin();
     try { await signOut(auth); window.showNotification("Sesión cerrada"); } catch (e) { console.error(e); }
@@ -316,13 +352,26 @@ onAuthStateChanged(auth, async (user) => {
             const docSnap = await getDoc(doc(db, "users", user.uid));
             if (docSnap.exists()) {
                 currentUserData = docSnap.data();
+                currentUserData.uid = user.uid;
                 globalCurrency = currentUserData.currency || "S/";
+
+                // 👑 VALIDACIÓN Y NORMALIZACIÓN ROBUSTA DE ROL ADMINISTRADOR
+                const isAdmin = window.isUserAdmin(currentUserData);
+                const normalizedRole = isAdmin ? 'admin' : String(currentUserData.role || currentUserData.rol || 'user').trim().toLowerCase();
+                currentUserData.role = normalizedRole;
+
+                // Persistencia local para seguridad, sesión y navegación
+                localStorage.setItem('agc_owner_uid', user.uid);
+                localStorage.setItem('agc_user_role', normalizedRole);
+                localStorage.setItem('agc_is_admin', isAdmin ? 'true' : 'false');
+                sessionStorage.setItem('agc_user_role', normalizedRole);
+                sessionStorage.setItem('agc_is_admin', isAdmin ? 'true' : 'false');
 
                 if (document.getElementById('brandName')) document.getElementById('brandName').innerText = currentUserData.name || 'Mi Panel';
 
                 // --- 1. LÓGICA DE LA INSIGNIA ORIGINAL (MÓVIL / CABECERA) ---
                 const planBadge = document.getElementById('userPlanBadge');
-                if (planBadge && currentUserData.role !== 'admin') {
+                if (planBadge && !isAdmin) {
                     const planActual = (currentUserData.plan_actual || 'demo').toLowerCase();
                     planBadge.style.display = 'inline-block';
                     planBadge.innerText = `Plan ${planActual}`;
@@ -343,7 +392,7 @@ onAuthStateChanged(auth, async (user) => {
                 if (document.getElementById('mobileBrandName')) document.getElementById('mobileBrandName').innerText = currentUserData.name || 'Mi Panel';
 
                 const planBadgeSide = document.getElementById('userPlanBadgeSidebar');
-                if (planBadgeSide && currentUserData.role !== 'admin') {
+                if (planBadgeSide && !isAdmin) {
                     const planActual = (currentUserData.plan_actual || 'demo').toLowerCase();
                     planBadgeSide.innerText = `Plan ${planActual}`;
 
@@ -418,12 +467,11 @@ onAuthStateChanged(auth, async (user) => {
                 const loginBtn = document.querySelector('#loginForm .btn-primary');
                 if (loginBtn) { loginBtn.innerText = "Ingresar"; loginBtn.disabled = false; }
 
-                // Carga de vistas
-                if (currentUserData.role === 'admin') {
+                // Carga de vistas según rol validado
+                if (isAdmin) {
                     showView('adminView');
                     loadAdminData();
                     window.requestNotificationPermission();
-                    if (document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'flex'; // 👈 MOSTRAR ASISTENTE
                 } else {
                     if (currentUserData.active === true) {
                         showView('appView');
@@ -433,7 +481,6 @@ onAuthStateChanged(auth, async (user) => {
                         window.requestNotificationPermission();
                         window.renderInventory();
                         window.syncUserServices();
-                        if (document.getElementById('aiFloatingBtn')) document.getElementById('aiFloatingBtn').style.display = 'flex'; // 👈 MOSTRAR ASISTENTE
                         setTimeout(() => window.checkUrlRouting(), 300);
 
                         // --- LANZADOR DEL TUTORIAL ---
@@ -449,7 +496,15 @@ onAuthStateChanged(auth, async (user) => {
                         }
                     }
                 } // <--- AÑADE ESTA LLAVE AQUÍ PARA CERRAR EL BLOQUE ANTERIOR
-            } else { await signOut(auth); showView('authView'); window.showLogin(); }
+            } else {
+                localStorage.removeItem('agc_user_role');
+                localStorage.removeItem('agc_is_admin');
+                sessionStorage.removeItem('agc_user_role');
+                sessionStorage.removeItem('agc_is_admin');
+                await signOut(auth);
+                showView('authView');
+                window.showLogin();
+            }
         } catch (e) {
             console.error(e);
             if (currentUserData && document.body.classList.contains('logged-in')) {
@@ -1610,7 +1665,7 @@ async function loadAdminData() {
     // Llenar la caché y renderizar
     adminUsersCache = [];
     qUsers.forEach((d) => {
-        if (d.data().role !== 'admin') adminUsersCache.push({ id: d.id, ...d.data() });
+        if (!window.isUserAdmin(d.data())) adminUsersCache.push({ id: d.id, ...d.data() });
     });
     window.toggleAdminPlanFilter();
 
