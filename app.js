@@ -3615,7 +3615,10 @@ window.openStoreModal = () => {
                 <div style="background: var(--mac-surface); padding: 15px; border-radius: 12px; border: 1px solid var(--mac-border); text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
                     <i class='bx bx-show' style="font-size: 24px; color: var(--mac-blue); margin-bottom: 5px;"></i>
                     <h4 style="margin: 0 0 5px 0; color: var(--mac-text-main); font-size: 20px;">${vistas}</h4>
-                    <span style="font-size: 10px; color: var(--mac-text-secondary); text-transform: uppercase; font-weight: bold;">Visitas Únicas</span>
+                    <span style="font-size: 10px; color: var(--mac-text-secondary); text-transform: uppercase; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                        Visitas Únicas 
+                        <i class='bx bx-edit' style="cursor: pointer; color: var(--mac-blue); font-size: 14px;" onclick="window.corregirVisitasTienda()" title="Corregir Visitas"></i>
+                    </span>
                 </div>
                 <div style="background: var(--mac-surface); padding: 15px; border-radius: 12px; border: 1px solid var(--mac-border); text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
                     <i class='bx bx-shopping-bag' style="font-size: 24px; color: var(--mac-green); margin-bottom: 5px;"></i>
@@ -4391,8 +4394,8 @@ const checkPublicStore = async () => {
             const viewerUid = localStorage.getItem('agc_owner_uid');
             if (viewerUid !== data.uid) { // No cuenta si el dueño está mirando
                 const visitKey = 'visited_store_' + data.uid;
-                if (!localStorage.getItem(visitKey)) {
-                    localStorage.setItem(visitKey, 'true'); // Evita contar al mismo cliente si recarga la página
+                if (!sessionStorage.getItem(visitKey)) {
+                    sessionStorage.setItem(visitKey, 'true'); // Evita contar al mismo cliente si recarga la página
                     const currentViews = data.storeViews || 0;
                     await updateDoc(doc(db, "users", data.uid), { storeViews: currentViews + 1 });
                     data.storeViews = currentViews + 1;
@@ -4423,8 +4426,12 @@ const checkPublicStore = async () => {
             }
             // Primer renderizado general automático
             window.renderPublicCatalog('Todos');
-            // Primer renderizado general automático
-            window.renderPublicCatalog('Todos');
+
+            // Sensei Arcade Companion para Tienda
+            setTimeout(() => {
+                window.triggerArcadeCompanion('store');
+                setInterval(() => window.triggerArcadeCompanion('store'), 45000);
+            }, 5000);
 
         } catch (e) {
             console.error("Error cargando la tienda pública:", e);
@@ -5908,8 +5915,13 @@ window.aprobarRenovacionPedido = async (pedidoId, clientId, plataforma, precioVe
 
             // 3. Sumar ganancias a las estadísticas
             const precioTotalValidado = parseFloat(document.getElementById(`precio_venta_${pedidoId}`).value) || precioVenta;
+            const newSalesCount = (currentUserData.storeSalesCount || 0) + 1; // NUEVO
             const newRevenue = (currentUserData.storeRevenue || 0) + precioTotalValidado;
-            await updateDoc(doc(db, "users", currentUser.uid), { storeRevenue: newRevenue });
+            await updateDoc(doc(db, "users", currentUser.uid), { 
+                storeSalesCount: newSalesCount, // NUEVO
+                storeRevenue: newRevenue 
+            });
+            currentUserData.storeSalesCount = newSalesCount; // NUEVO
             currentUserData.storeRevenue = newRevenue;
 
             // 4. Preparamos el Mensaje
@@ -7213,6 +7225,13 @@ window.checkClientPortal = async () => {
                 window.renderClientPortalData(matchedClients, portalStoreData);
             }
         }
+
+        // Sensei Arcade Companion para Portal
+        setTimeout(() => {
+            window.triggerArcadeCompanion('portal');
+            setInterval(() => window.triggerArcadeCompanion('portal'), 45000);
+        }, 5000);
+
         return true;
     } catch (e) {
         console.error("Error cargando portal:", e);
@@ -11610,4 +11629,89 @@ window.switchAccessTab = (tabId, element) => {
     document.querySelectorAll('.access-tab-btn').forEach(el => el.classList.remove('active'));
     document.getElementById(tabId).style.display = 'block';
     element.classList.add('active');
+};
+
+/* =========================================================
+   EDICIÓN MANUAL DE VISITAS DE LA TIENDA
+========================================================= */
+window.corregirVisitasTienda = async () => {
+    const { value: nuevasVisitas } = await Swal.fire({
+        title: '📊 Corregir Visitas',
+        input: 'number',
+        inputLabel: 'Ingresa la cantidad de visitas históricas totales:',
+        inputValue: currentUserData.storeViews || 0,
+        showCancelButton: true,
+        confirmButtonText: 'Guardar Visitas',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#007AFF',
+        background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+        color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+    });
+
+    if (nuevasVisitas !== undefined && nuevasVisitas !== null) {
+        const parseadas = parseInt(nuevasVisitas) || 0;
+        try {
+            await updateDoc(doc(db, "users", currentUser.uid), { storeViews: parseadas });
+            currentUserData.storeViews = parseadas;
+            window.showNotification(`✅ Visitas actualizadas a ${parseadas}`);
+            window.openStoreModal(); // Refresca las estadísticas en pantalla
+        } catch (e) {
+            window.showNotification("Error al actualizar: " + e.message);
+        }
+    }
+};
+
+/* =========================================================
+   SENSEI ARCADE COMPANION (MÁQUINA DE ESCRIBIR & FRASES)
+========================================================= */
+const arcadeStorePhrases = [
+    "¡Combo Breaker! Lleva más de 2 servicios y ahorra.",
+    "Nuestras cuentas están garantizadas. ¡Compra seguro!",
+    "Revisa las ofertas de hoy. ¡No te quedes sin stock!"
+];
+
+const arcadePortalPhrases = [
+    "¡Hey! No olvides calificar nuestro servicio con 5 estrellas.",
+    "Revisa siempre tu fecha de vencimiento.",
+    "Si tu cuenta está por vencer, ¡solicita la renovación aquí abajo!"
+];
+
+let arcadeTypewriterInterval = null;
+let arcadeHideTimeout = null;
+
+window.triggerArcadeCompanion = (mode) => {
+    const companion = document.getElementById('arcadeCompanion');
+    const textEl = document.getElementById('arcadeText');
+    if (!companion || !textEl) return;
+
+    if (arcadeTypewriterInterval) {
+        clearInterval(arcadeTypewriterInterval);
+        arcadeTypewriterInterval = null;
+    }
+    if (arcadeHideTimeout) {
+        clearTimeout(arcadeHideTimeout);
+        arcadeHideTimeout = null;
+    }
+
+    const phrases = mode === 'store' ? arcadeStorePhrases : arcadePortalPhrases;
+    if (!phrases || phrases.length === 0) return;
+
+    const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+    textEl.textContent = '';
+    companion.classList.add('show');
+
+    let charIndex = 0;
+    arcadeTypewriterInterval = setInterval(() => {
+        if (charIndex < randomPhrase.length) {
+            textEl.textContent += randomPhrase.charAt(charIndex);
+            charIndex++;
+        } else {
+            clearInterval(arcadeTypewriterInterval);
+            arcadeTypewriterInterval = null;
+            arcadeHideTimeout = setTimeout(() => {
+                companion.classList.remove('show');
+                arcadeHideTimeout = null;
+            }, 6000);
+        }
+    }, 40);
 };
