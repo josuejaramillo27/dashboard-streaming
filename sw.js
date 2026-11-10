@@ -1,5 +1,5 @@
 // sw.js - Service Worker Mejorado con Network-First y Exclusión de Autenticación
-const CACHE_NAME = 'agc-cache-v5';
+const CACHE_NAME = 'agc-cache-v6';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',

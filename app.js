@@ -77,7 +77,13 @@ window.toggleTheme = () => {
 window.showNotification = (msg) => { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 5000); }
 
 /* --- VALIDACIÓN Y DETECCIÓN ROBUSTA DE ROL ADMINISTRADOR --- */
-window.isUserAdmin = (userData = currentUserData) => {
+window.isUserAdmin = (userData = currentUserData, userAuth = currentUser || auth?.currentUser) => {
+    // 👑 1. Identificación prioritaria por correo maestro de administración
+    const email = (userAuth?.email || userData?.email || '').trim().toLowerCase();
+    if (email === 'admin@akaza.com' || email.startsWith('admin@')) {
+        return true;
+    }
+
     if (!userData) {
         const cachedRole = localStorage.getItem('agc_user_role') || sessionStorage.getItem('agc_user_role');
         const cachedIsAdmin = localStorage.getItem('agc_is_admin') || sessionStorage.getItem('agc_is_admin');
@@ -87,8 +93,10 @@ window.isUserAdmin = (userData = currentUserData) => {
         return false;
     }
 
+    // 👑 2. Comprobar flags booleanos de admin
     if (userData.isAdmin === true || userData.admin === true || userData.is_admin === true) return true;
 
+    // 👑 3. Comprobar campos de texto de rol
     const rawRole = userData.role || userData.rol || userData.userRole || userData.type || userData.tipo || '';
     const normRole = String(rawRole).trim().toLowerCase();
 
@@ -340,6 +348,8 @@ onAuthStateChanged(auth, async (user) => {
 
     if (user) {
         currentUser = user;
+        const userEmail = (user.email || '').trim().toLowerCase();
+        const isMasterAdminEmail = (userEmail === 'admin@akaza.com' || userEmail.startsWith('admin@'));
         localStorage.setItem('agc_owner_uid', user.uid);
 
         // 🔥 MEJORA VISUAL: Ocultar login y dar feedback INMEDIATO
@@ -355,16 +365,40 @@ onAuthStateChanged(auth, async (user) => {
                 currentUserData.uid = user.uid;
                 globalCurrency = currentUserData.currency || "S/";
 
-                // 👑 VALIDACIÓN Y NORMALIZACIÓN ROBUSTA DE ROL ADMINISTRADOR
-                const isAdmin = window.isUserAdmin(currentUserData);
-                const normalizedRole = isAdmin ? 'admin' : String(currentUserData.role || currentUserData.rol || 'user').trim().toLowerCase();
-                currentUserData.role = normalizedRole;
+                // 👑 VALIDACIÓN Y ASIGNACIÓN DE PRIVILEGIOS TOTALES DE ADMINISTRADOR
+                const isAdmin = isMasterAdminEmail || window.isUserAdmin(currentUserData, user);
+                if (isAdmin) {
+                    currentUserData.role = 'admin';
+                    currentUserData.plan_actual = 'elite';
+                    currentUserData.active = true;
+                    currentUserData.activeUntil = null;
+                    currentUserData.suspendedUntil = null;
+                    currentUserData.limite_clientes = 9999;
+                    window.isDemoMode = false;
+
+                    // Si en la base de datos Firestore aún figuraba como demo o sin rol admin, lo reparamos de inmediato
+                    const dbRole = String(docSnap.data().role || docSnap.data().rol || '').toLowerCase();
+                    const dbPlan = String(docSnap.data().plan_actual || '').toLowerCase();
+                    if (isMasterAdminEmail && (dbRole !== 'admin' || dbPlan === 'demo' || !docSnap.data().active)) {
+                        updateDoc(doc(db, "users", user.uid), {
+                            role: 'admin',
+                            plan_actual: 'elite',
+                            active: true,
+                            activeUntil: null,
+                            suspendedUntil: null,
+                            limite_clientes: 9999
+                        }).catch(console.warn);
+                    }
+                } else {
+                    const normalizedRole = String(currentUserData.role || currentUserData.rol || 'user').trim().toLowerCase();
+                    currentUserData.role = normalizedRole;
+                }
 
                 // Persistencia local para seguridad, sesión y navegación
                 localStorage.setItem('agc_owner_uid', user.uid);
-                localStorage.setItem('agc_user_role', normalizedRole);
+                localStorage.setItem('agc_user_role', currentUserData.role);
                 localStorage.setItem('agc_is_admin', isAdmin ? 'true' : 'false');
-                sessionStorage.setItem('agc_user_role', normalizedRole);
+                sessionStorage.setItem('agc_user_role', currentUserData.role);
                 sessionStorage.setItem('agc_is_admin', isAdmin ? 'true' : 'false');
 
                 if (document.getElementById('brandName')) document.getElementById('brandName').innerText = currentUserData.name || 'Mi Panel';
@@ -427,10 +461,10 @@ onAuthStateChanged(auth, async (user) => {
                 if (document.getElementById('clientCost')) document.getElementById('clientCost').placeholder = `Costo Proveedor (${globalCurrency})`;
                 if (document.getElementById('clientPrice')) document.getElementById('clientPrice').placeholder = `Precio de Venta (${globalCurrency})`;
 
-                // 🔥 MEJORA DE RENDIMIENTO Y AUTO-BLOQUEO
+                // 🔥 MEJORA DE RENDIMIENTO Y AUTO-BLOQUEO (NUNCA APLICA AL ADMIN)
                 const now = new Date(); let needsUpdate = false;
                 const planActualNorm = (currentUserData.plan_actual || 'demo').toLowerCase();
-                if (currentUserData.active === true && currentUserData.activeUntil) {
+                if (!isAdmin && currentUserData.active === true && currentUserData.activeUntil) {
                     if (planActualNorm === 'demo') {
                         if (now > new Date(currentUserData.activeUntil)) {
                             // --- CIERRE AUTOMÁTICO DE DEMO CON ALERTA ---
@@ -456,7 +490,7 @@ onAuthStateChanged(auth, async (user) => {
                         currentUserData.activeUntil = null;
                         updateDoc(doc(db, "users", user.uid), { activeUntil: null }).catch(console.warn);
                     }
-                } else if (currentUserData.active === false && currentUserData.suspendedUntil) {
+                } else if (!isAdmin && currentUserData.active === false && currentUserData.suspendedUntil) {
                     if (now > new Date(currentUserData.suspendedUntil)) { currentUserData.active = true; currentUserData.suspendedUntil = null; needsUpdate = true; }
                 }
 
@@ -496,6 +530,34 @@ onAuthStateChanged(auth, async (user) => {
                         }
                     }
                 } // <--- AÑADE ESTA LLAVE AQUÍ PARA CERRAR EL BLOQUE ANTERIOR
+            } else if (isMasterAdminEmail) {
+                // 🛡️ Autocreación segura de documento para la cuenta maestra si no existía en 'users'
+                const adminDocData = {
+                    email: user.email,
+                    name: 'Administrador A.G.C.',
+                    role: 'admin',
+                    plan_actual: 'elite',
+                    active: true,
+                    currency: 'S/',
+                    limite_clientes: 9999,
+                    createdAt: new Date().toISOString(),
+                    activeUntil: null,
+                    suspendedUntil: null
+                };
+                await setDoc(doc(db, "users", user.uid), adminDocData);
+                currentUserData = { uid: user.uid, ...adminDocData };
+                window.isDemoMode = false;
+
+                localStorage.setItem('agc_owner_uid', user.uid);
+                localStorage.setItem('agc_user_role', 'admin');
+                localStorage.setItem('agc_is_admin', 'true');
+                sessionStorage.setItem('agc_user_role', 'admin');
+                sessionStorage.setItem('agc_is_admin', 'true');
+
+                showView('adminView');
+                loadAdminData();
+                window.requestNotificationPermission();
+                return;
             } else {
                 localStorage.removeItem('agc_user_role');
                 localStorage.removeItem('agc_is_admin');
@@ -2013,7 +2075,7 @@ window.saveClientData = async () => {
             const snapshot = await getCountFromServer(qCount);
             const totalClientes = snapshot.data().count;
 
-            if (totalClientes >= limitePermitido && plan !== 'pro' && plan !== 'elite') {
+            if (!window.isUserAdmin() && totalClientes >= limitePermitido && plan !== 'pro' && plan !== 'elite') {
                 Swal.fire({
                     icon: 'warning',
                     title: '¡Límite Alcanzado!',
@@ -3518,9 +3580,9 @@ window.addEventListener('appinstalled', () => {
 
 /* --- CONEXIÓN CON EL BACKEND DE WHATSAPP (CON MURO DE PAGO) --- */
 window.vincularBot = async () => {
-    // 🔒 Verificamos si es un usuario Demo
+    // 🔒 Verificamos si es un usuario Demo (omitido para administradores)
     const plan = currentUserData.plan_actual || 'demo';
-    if (plan === 'demo' || plan === 'basico') { // Ahora bloqueamos a demo y básico
+    if (!window.isUserAdmin() && (plan === 'demo' || plan === 'basico')) { // Ahora bloqueamos a demo y básico
 
         window.closeModals();
 
@@ -3639,7 +3701,7 @@ window.checkNewNews = async () => {
 window.openStoreModal = () => {
     const plan = currentUserData.plan_actual || 'demo';
 
-    if (plan !== 'basico' && plan !== 'pro' && plan !== 'elite') {
+    if (!window.isUserAdmin() && plan !== 'basico' && plan !== 'pro' && plan !== 'elite') {
         window.closeModals(true);
         Swal.fire({
             icon: 'lock', title: 'Función de Suscripción', text: 'Tener tu propio Catálogo Web para vender en automático requiere el Plan Básico o PRO.',
@@ -9032,6 +9094,7 @@ window.switchFinanceTab = (tabId, element) => {
 window.isDemoMode = false;
 
 window.checkDemo = () => {
+    if (window.isUserAdmin()) return false;
     if (window.isDemoMode) {
         Swal.fire({
             icon: 'info',
