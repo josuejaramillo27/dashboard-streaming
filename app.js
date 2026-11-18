@@ -2237,22 +2237,43 @@ window.saveClientData = async () => {
             const idx = clients.findIndex(c => c.id === editingClientId);
             if (idx !== -1) {
                 clients[idx] = { id: editingClientId, ...data };
-            } else {
-                clients.unshift({ id: editingClientId, ...data });
             }
             window.showNotification("Actualizado");
         }
         else {
-            const clienteExistente = clients.find(c => c.name.trim().toLowerCase() === data.name.trim().toLowerCase() && c.phone === data.phone);
-            if (clienteExistente && clienteExistente.color) {
-                data.color = clienteExistente.color;
+            // 🔥 BUSCAMOS SI EL CLIENTE YA EXISTE POR SU NÚMERO DE TELÉFONO
+            const cleanPhoneToSave = phone.replace(/[^\d]/g, '');
+            const clienteExistente = clients.find(c => (c.phone ? c.phone.replace(/[^\d]/g, '') : '') === cleanPhoneToSave);
+
+            if (clienteExistente) {
+                // Si ya existe (ej: compró Netflix y ahora le sumas HBO en un combo), unimos las plataformas
+                const plataformasCombinadas = Array.from(new Set([...clienteExistente.platform.split(', '), ...checked])).join(', ');
+                
+                // Fusionamos los diccionarios de multiAccounts para que mantenga ambas cuentas
+                const multiAccsCombinadas = { ...(clienteExistente.multiAccounts || {}), ...multiAccData };
+
+                const updateData = {
+                    platform: plataformasCombinadas,
+                    multiAccounts: multiAccsCombinadas,
+                    date: document.getElementById('expirationDate').value, // Actualizamos vencimiento si corresponde
+                    price: (clienteExistente.price || 0) + price,
+                    cost: (clienteExistente.cost || 0) + cost
+                };
+
+                await updateDoc(doc(db, "clients", clienteExistente.id), updateData);
+                
+                // Actualizamos la lista local
+                const idx = clients.findIndex(c => c.id === clienteExistente.id);
+                if (idx !== -1) {
+                    clients[idx] = { ...clients[idx], ...updateData };
+                }
+                window.showNotification("✨ Combo añadido al cliente existente (sin duplicar perfil)");
             } else {
-                data.color = macPalette[Math.floor(Math.random() * macPalette.length)];
+                // Si es totalmente nuevo, procede normal
+                const docRef = await addDoc(collection(db, "clients"), data);
+                clients.unshift({ id: docRef.id, ...data });
+                window.showNotification("Agregado");
             }
-            const docRef = await addDoc(collection(db, "clients"), data);
-            // Incluir de inmediato en el arreglo local clients
-            clients.unshift({ id: docRef.id, ...data });
-            window.showNotification("Agregado");
         }
 
         // 🗑️ MAGIA AUTOMÁTICA: Eliminamos del stock lo que haya coincidido (Cero Stock Fantasma)
