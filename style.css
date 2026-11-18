@@ -4028,3 +4028,70 @@ body {
         padding: 8px 12px;
     }
 }
+
+/* ==========================================================================
+   CAMBIOS PARA PC: PORTAL DE CLIENTES Y LOGIN
+   ========================================================================== */
+@media (min-width: 769px) {
+
+    /* 1. DISTRIBUCIÓN DINÁMICA DE TARJETAS (1, 2 o 3 plataformas) */
+    .portal-platforms-grid {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        justify-content: center !important;
+        align-items: stretch !important;
+        gap: 24px !important;
+        max-width: 900px !important;
+        margin: 0 auto !important;
+    }
+
+    .portal-platforms-grid > div {
+        flex: 1 1 0 !important;
+        max-width: 320px !important;
+    }
+
+    /* 2. LOGO Y NOMBRE EN UNA SOLA FILA + TEXTO ABAJITO (Portal e Inicio de Sesión) */
+    #clientPortalView div[style*="text-align: center; margin-bottom: 20px;"],
+    .login-container div[style*="text-align: center; margin-bottom: 20px;"] {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+
+    /* Forzamos que el logo y el título se pongan horizontalmente en una sola línea */
+    #clientPortalView h2#portalStoreName,
+    .login-container h1 {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 12px !important;
+        order: 1 !important;
+    }
+
+    /* El logo al costado del nombre */
+    #clientPortalView img#portalStoreLogo,
+    .login-container img[alt="A.G.C. Logo"] {
+        display: inline-block !important;
+        height: 42px !important;
+        width: 42px !important;
+        margin: 0 !important;
+        border-radius: 10px !important;
+    }
+
+    /* El texto descriptivo abajito */
+    #clientPortalView p,
+    .login-container h3#authSubtitle {
+        order: 2 !important;
+        margin-top: 6px !important;
+    }
+
+    /* 3. BOTÓN DE WHATSAPP FLOTANTE EN LA ESQUINA INFERIOR DERECHA (PC) */
+    #portalSupportWaBtn,
+    .store-floating-support {
+        position: fixed !important;
+        bottom: 30px !important;
+        right: 30px !important;
+        left: auto !important;
+        z-index: 99999 !important;
+    }
+}
