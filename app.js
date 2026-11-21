@@ -1574,7 +1574,7 @@ window.viewAccountData = (id) => {
         activePlatforms.forEach(p => {
             multiAccData[p] = c.multiAccounts[p] || { email: c.accountEmail, password: c.accountPassword, profile: c.accountProfile, pin: c.accountPin, saleType: c.accountSaleType, units: c.accountUnits, deviceName: c.accountDeviceName, deviceType: c.accountDeviceType };
         });
-    } else { else {
+    } else {
         const platforms = c.platform.split(', ');
         multiAccData = {};
         platforms.forEach(p => {
