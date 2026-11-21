@@ -1568,9 +1568,13 @@ window.viewAccountData = (id) => {
     const c = clients.find(x => x.id === id);
 
     // Adaptabilidad para leer clientes con pestañas o clientes viejos sin pestañas
+    const activePlatforms = (c.platform || '').split(',').map(p => p.trim()).filter(Boolean);
     if (c.multiAccounts) {
-        multiAccData = c.multiAccounts;
-    } else {
+        multiAccData = {};
+        activePlatforms.forEach(p => {
+            multiAccData[p] = c.multiAccounts[p] || { email: c.accountEmail, password: c.accountPassword, profile: c.accountProfile, pin: c.accountPin, saleType: c.accountSaleType, units: c.accountUnits, deviceName: c.accountDeviceName, deviceType: c.accountDeviceType };
+        });
+    } else { else {
         const platforms = c.platform.split(', ');
         multiAccData = {};
         platforms.forEach(p => {
@@ -2173,6 +2177,13 @@ window.saveClientData = async () => {
             }
         }
 
+        // 🔥 LIMPIEZA: Dejar en multiAccData SOLO las plataformas marcadas actualmente
+        const cleanedMultiAccData = {};
+        checked.forEach(plat => {
+            cleanedMultiAccData[plat] = multiAccData[plat] || window.getDefaultAccData();
+        });
+        multiAccData = cleanedMultiAccData;
+
         // Sacamos la data principal de la primera plataforma seleccionada
         let primaryData = multiAccData[checked[0]] || window.getDefaultAccData();
 
@@ -2748,12 +2759,9 @@ window.openWaSendModal = (id) => {
     if (container) {
         container.innerHTML = '';
 
-        let platformsList = [];
-        if (c.multiAccounts && Object.keys(c.multiAccounts).length > 0) {
-            platformsList = Object.keys(c.multiAccounts);
-        } else {
-            platformsList = c.platform ? c.platform.split(',').map(p => p.trim()) : ['Servicio'];
-        }
+        let platformsList = c.platform
+            ? c.platform.split(',').map(p => p.trim()).filter(Boolean)
+            : (c.multiAccounts ? Object.keys(c.multiAccounts) : ['Servicio']);
 
         platformsList.forEach(platName => {
             const options = [
@@ -10733,7 +10741,7 @@ window.startEdit = async (id) => {
     document.getElementById('clientPrice').value = c.price !== undefined && c.price !== null ? c.price : '';
 
     if (c.multiAccounts && Object.keys(c.multiAccounts).length > 0) {
-        multiAccData = c.multiAccounts;
+        multiAccData = JSON.parse(JSON.stringify(c.multiAccounts));
     } else {
         const platforms = (c.platform || '').split(', ').filter(Boolean);
         multiAccData = {};
