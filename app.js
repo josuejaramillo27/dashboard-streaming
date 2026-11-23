@@ -1513,6 +1513,10 @@ window.renderAccTabs = (platforms, modalType) => {
     });
 
     if (platforms.length > 0) window.switchAccTab(platforms[0], modalType);
+    if (modalType === 'accountModal') {
+        const btnDelPlat = document.getElementById('btnRemovePlatformTab');
+        if (btnDelPlat) btnDelPlat.style.display = platforms.length > 1 ? 'inline-flex' : 'none';
+    }
 };
 
 // 🪄 Cambiador de Pestañas
@@ -1563,7 +1567,30 @@ window.confirmAccountData = () => {
     btn.innerText = `✅ Datos Ingresados (${totalUnits} ud)`;
     btn.style.backgroundColor = "var(--mac-green)"; btn.style.color = "white";
 };
+window.removeCurrentPlatformFromCombo = () => {
+    if (!currentActiveTab) return;
+    const platToRemove = currentActiveTab;
 
+    // 1. Quitar de multiAccData
+    delete multiAccData[platToRemove];
+
+    // 2. Desmarcar el checkbox en el formulario principal
+    document.querySelectorAll('#checkboxDropdown input').forEach(cb => {
+        if (cb.value === platToRemove) cb.checked = false;
+    });
+
+    // 3. Actualizar el texto del selector de plataformas
+    const remaining = Array.from(document.querySelectorAll('#checkboxDropdown input:checked')).map(c => c.value);
+    const selectEl = document.getElementById('selectText');
+    if (selectEl) {
+        selectEl.textContent = remaining.length ? remaining.join(', ') : 'Plataforma(s)...';
+        selectEl.classList.toggle('has-selection', remaining.length > 0);
+    }
+
+    // 4. Redibujar las pestañas del modal
+    window.renderAccTabs(remaining, 'accountModal');
+    window.showNotification(`🗑️ ${platToRemove} quitada del combo. Recuerda presionar Guardar.`);
+};
 window.viewAccountData = (id) => {
     const c = clients.find(x => x.id === id);
 
@@ -2252,38 +2279,57 @@ window.saveClientData = async () => {
             window.showNotification("Actualizado");
         }
         else {
-            // 🔥 BUSCAMOS SI EL CLIENTE YA EXISTE POR SU NÚMERO DE TELÉFONO
             const cleanPhoneToSave = phone.replace(/[^\d]/g, '');
             const clienteExistente = clients.find(c => (c.phone ? c.phone.replace(/[^\d]/g, '') : '') === cleanPhoneToSave);
 
+            let unirAlExistente = false;
+
             if (clienteExistente) {
-                // Si ya existe (ej: compró Netflix y ahora le sumas HBO en un combo), unimos las plataformas
-                const plataformasCombinadas = Array.from(new Set([...clienteExistente.platform.split(', '), ...checked])).join(', ');
-                
-                // Fusionamos los diccionarios de multiAccounts para que mantenga ambas cuentas
+                const decision = await Swal.fire({
+                    title: 'Cliente ya registrado',
+                    html: `Este número ya tiene <b>${clienteExistente.platform}</b> (vence el <b>${clienteExistente.date}</b>).<br><br>¿Cómo deseas guardar esta nueva plataforma?`,
+                    icon: 'question',
+                    showDenyButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: '📅 Registro aparte (Otra fecha)',
+                    denyButtonText: '🔗 Unir al combo existente',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#007AFF',
+                    denyButtonColor: '#34C759',
+                    background: document.body.classList.contains('dark-mode') ? '#1c1c1e' : '#ffffff',
+                    color: document.body.classList.contains('dark-mode') ? '#ffffff' : '#000000'
+                });
+
+                if (decision.isDismissed) {
+                    btn.innerText = origBtnText;
+                    btn.disabled = false;
+                    return;
+                }
+                unirAlExistente = decision.isDenied;
+            }
+
+            if (clienteExistente && unirAlExistente) {
+                const plataformasCombinadas = Array.from(new Set([...clienteExistente.platform.split(',').map(p => p.trim()).filter(Boolean), ...checked])).join(', ');
                 const multiAccsCombinadas = { ...(clienteExistente.multiAccounts || {}), ...multiAccData };
 
                 const updateData = {
                     platform: plataformasCombinadas,
                     multiAccounts: multiAccsCombinadas,
-                    date: document.getElementById('expirationDate').value, // Actualizamos vencimiento si corresponde
+                    date: document.getElementById('expirationDate').value,
                     price: (clienteExistente.price || 0) + price,
                     cost: (clienteExistente.cost || 0) + cost
                 };
 
                 await updateDoc(doc(db, "clients", clienteExistente.id), updateData);
-                
-                // Actualizamos la lista local
                 const idx = clients.findIndex(c => c.id === clienteExistente.id);
-                if (idx !== -1) {
-                    clients[idx] = { ...clients[idx], ...updateData };
-                }
-                window.showNotification("✨ Combo añadido al cliente existente (sin duplicar perfil)");
+                if (idx !== -1) clients[idx] = { ...clients[idx], ...updateData };
+                window.showNotification("✨ Plataformas unidas al combo existente");
             } else {
-                // Si es totalmente nuevo, procede normal
+                // Registro aparte con su propia fecha y precio (mantiene mismo color y código de portal)
+                data.color = clienteExistente?.color || macPalette[Math.floor(Math.random() * macPalette.length)];
                 const docRef = await addDoc(collection(db, "clients"), data);
                 clients.unshift({ id: docRef.id, ...data });
-                window.showNotification("Agregado");
+                window.showNotification("✅ Servicio registrado aparte");
             }
         }
 
@@ -5852,20 +5898,21 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
             }
 
             plataformasEntregadasStr = cuentasEntregar.map(c => c.platform).join(', ');
-            const precioDividido = precioTotal / cuentasIds.length;
+            const multiAccCombo = {};
+            let primeraMatrizId = null;
 
             for (let cuenta of cuentasEntregar) {
                 let matrizAsignada = null;
                 const qMatriz = query(collection(db, "masterAccounts"), where("userId", "==", currentUser.uid), where("email", "==", cuenta.email));
                 const snapMatriz = await getDocs(qMatriz);
                 if (!snapMatriz.empty) matrizAsignada = snapMatriz.docs[0].id;
+                if (!primeraMatrizId && matrizAsignada) primeraMatrizId = matrizAsignada;
 
                 const saleTypeVal = cuenta.type === 'Completa' ? 'Cuenta Completa' : 'Perfil';
                 const profileVal = cuenta.profile || "1";
                 const pinVal = cuenta.pin || "N/A";
 
-                const multiAcc = {};
-                multiAcc[cuenta.platform] = {
+                multiAccCombo[cuenta.platform] = {
                     ...window.getDefaultAccData(),
                     email: cuenta.email || '',
                     password: cuenta.pass || '',
@@ -5878,32 +5925,56 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
                     inventoryId: cuenta.id
                 };
 
-                const nuevoClienteObj = {
-                    userId: currentUser.uid,
-                    name: finalClientName,
-                    phone: numeroBonito,
-                    platform: cuenta.platform,
-                    accountSaleType: saleTypeVal,
-                    accountEmail: cuenta.email,
-                    accountPassword: cuenta.pass,
-                    accountPin: pinVal,
-                    accountProfile: profileVal,
-                    accountUnits: 1,
-                    accountMonths: mesesContratados,
-                    cost: 0,
-                    price: precioDividido,
-                    date: dateFirebase,
-                    linkedMasterId: matrizAsignada,
-                    multiAccounts: multiAcc,
-                    portalCode: generatedPortalCode,
-                    archived: false,
-                    color: macPalette[Math.floor(Math.random() * macPalette.length)]
-                };
+                cuenta.rules = rulesDB[cuenta.platform] || "Uso personal, no modificar los datos de acceso.";
 
-                const docRef = await addDoc(collection(db, "clients"), nuevoClienteObj);
-                if (!primerClienteId) primerClienteId = docRef.id;
-                clients.unshift({ id: docRef.id, ...nuevoClienteObj });
+                const cuentaEmailNorm = (cuenta.email || '').trim().toLowerCase();
+                const cuentaPlatNorm = (cuenta.platform || '').trim().toLowerCase();
+                const cuentaProfNorm = window.normalizeProfileNumber(cuenta.profile);
+                const isCuentaCompleta = cuenta.type === 'Completa';
 
+                stock = stock.filter(item => {
+                    if (item.id === cuenta.id) return false;
+                    const itemEmailNorm = (item.email || '').trim().toLowerCase();
+                    const itemPlatNorm = (item.platform || '').trim().toLowerCase();
+                    const itemProfNorm = window.normalizeProfileNumber(item.profile);
+                    const isItemCompleta = item.type === 'Completa';
+
+                    if (itemEmailNorm && cuentaEmailNorm && itemEmailNorm === cuentaEmailNorm && itemPlatNorm === cuentaPlatNorm) {
+                        if (isCuentaCompleta || isItemCompleta || itemProfNorm === cuentaProfNorm) {
+                            return false;
+                        }
+                    }
+                    return true;
+                });
+            }
+
+            // Creamos UN SOLO cliente con todas las plataformas del combo
+            const cuentaPrincipal = cuentasEntregar[0];
+            const nuevoClienteObj = {
+                userId: currentUser.uid,
+                name: finalClientName,
+                phone: numeroBonito,
+                platform: plataformasEntregadasStr,
+                accountSaleType: cuentaPrincipal.type === 'Completa' ? 'Cuenta Completa' : 'Perfil',
+                accountEmail: cuentaPrincipal.email,
+                accountPassword: cuentaPrincipal.pass,
+                accountPin: cuentaPrincipal.pin || "N/A",
+                accountProfile: cuentaPrincipal.profile || "1",
+                accountUnits: 1,
+                accountMonths: mesesContratados,
+                cost: 0,
+                price: precioTotal,
+                date: dateFirebase,
+                linkedMasterId: primeraMatrizId,
+                multiAccounts: multiAccCombo,
+                portalCode: generatedPortalCode,
+                archived: false,
+                color: macPalette[Math.floor(Math.random() * macPalette.length)]
+            };
+
+            const docRef = await addDoc(collection(db, "clients"), nuevoClienteObj);
+            primerClienteId = docRef.id;
+            clients.unshift({ id: docRef.id, ...nuevoClienteObj });
                 cuenta.rules = rulesDB[cuenta.platform] || "Uso personal, no modificar los datos de acceso.";
 
                 // TAREA 3.3: Filtrar tanto por id como por coincidencia exacta de email + platform + profile normalizados
