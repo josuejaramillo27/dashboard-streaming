@@ -5975,29 +5975,7 @@ window.aprobarVenta = async (pedidoId, numeroCliente, requiereInvitacion, client
             const docRef = await addDoc(collection(db, "clients"), nuevoClienteObj);
             primerClienteId = docRef.id;
             clients.unshift({ id: docRef.id, ...nuevoClienteObj });
-                cuenta.rules = rulesDB[cuenta.platform] || "Uso personal, no modificar los datos de acceso.";
 
-                // TAREA 3.3: Filtrar tanto por id como por coincidencia exacta de email + platform + profile normalizados
-                const cuentaEmailNorm = (cuenta.email || '').trim().toLowerCase();
-                const cuentaPlatNorm = (cuenta.platform || '').trim().toLowerCase();
-                const cuentaProfNorm = window.normalizeProfileNumber(cuenta.profile);
-                const isCuentaCompleta = cuenta.type === 'Completa';
-
-                stock = stock.filter(item => {
-                    if (item.id === cuenta.id) return false;
-                    const itemEmailNorm = (item.email || '').trim().toLowerCase();
-                    const itemPlatNorm = (item.platform || '').trim().toLowerCase();
-                    const itemProfNorm = window.normalizeProfileNumber(item.profile);
-                    const isItemCompleta = item.type === 'Completa';
-
-                    if (itemEmailNorm && cuentaEmailNorm && itemEmailNorm === cuentaEmailNorm && itemPlatNorm === cuentaPlatNorm) {
-                        if (isCuentaCompleta || isItemCompleta || itemProfNorm === cuentaProfNorm) {
-                            return false;
-                        }
-                    }
-                    return true;
-                });
-            }
             await updateDoc(doc(db, "users", currentUser.uid), { inventory: stock });
             currentUserData.inventory = stock;
             window.renderInventory();
