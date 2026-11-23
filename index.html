@@ -2971,6 +2971,11 @@
 
             <!-- CONTENEDOR DE PESTAÑAS TIPO CHROME -->
             <div id="accTabsContainer" class="chrome-tabs-container" style="display: none;"></div>
+            <button type="button" id="btnRemovePlatformTab" class="btn-del"
+                style="display: none; width: 100%; margin-bottom: 12px; padding: 8px; border-radius: 8px; font-size: 12px; font-weight: bold;"
+                onclick="window.removeCurrentPlatformFromCombo()">
+                <i class='bx bx-trash'></i> Eliminar esta plataforma del combo
+            </button>
 
             <div style="display: flex; flex-direction: column; gap: 12px;">
                 <input type="email" id="accEmail" placeholder="Correo de la cuenta"
