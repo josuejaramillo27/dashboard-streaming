@@ -2092,22 +2092,12 @@ async function loadUserClients() {
     document.getElementById('mainTable').style.display = 'none';
     if (document.getElementById('loadMoreContainer')) document.getElementById('loadMoreContainer').style.display = 'none';
     clients = [];
-    allClientsLoaded = false;
+    allClientsLoaded = true;
 
     try {
-        const q = query(collection(db, "clients"), where("userId", "==", currentUser.uid), limit(30));
+        // Sin limit(30): carga todos tus clientes para ordenarlos correctamente desde el inicio
+        const q = query(collection(db, "clients"), where("userId", "==", currentUser.uid));
         const snapshot = await getDocs(q);
-
-        if (!snapshot.empty) {
-            lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
-            if (snapshot.docs.length === 30 && document.getElementById('loadMoreContainer')) {
-                document.getElementById('loadMoreContainer').style.display = 'block';
-            } else {
-                allClientsLoaded = true;
-            }
-        } else {
-            allClientsLoaded = true;
-        }
 
         snapshot.forEach((d) => { clients.push({ id: d.id, ...d.data() }); });
         window.renderTable();
